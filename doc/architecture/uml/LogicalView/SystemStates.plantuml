@@ -1,0 +1,50 @@
+@startuml
+
+title System States
+
+state StartupState
+state CalibrationState
+state ErrorState
+state DrivingState
+state ReadyState
+state ReleaseTrackState
+
+[*] --> StartupState: Power up
+StartupState --> CalibrationState: [Pushbutton A triggered]
+CalibrationState --> ReadyState: [Calibration finished]
+CalibrationState --> ErrorState: [Calibration failed]
+ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
+ReleaseTrackState --> DrivingState: [After 5s]
+ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
+DrivingState --> ReadyState: [End line detected] or\n[Track lost] or\n[End line not found after 5 min.]
+ErrorState --> CalibrationState: [Pushbutton A triggered]
+
+note right of StartupState
+    Initialize the system and wait till
+    the operator is ready for calibration.
+end note
+
+note right of CalibrationState
+    Calibrates the system on the playfield.
+end note
+
+note left of ErrorState
+    Shows error to the operator.
+end note
+
+note right of ReadyState
+    Waits for the operator to start the competition.
+end note
+
+note left of ReleaseTrackState
+    The operator can select the parameter set
+    and releases the track after a certain time.
+end note
+
+note right of DrivingState
+    The system drives autonomous on track, detects
+    start and end line. Additional it handels a
+    detected gap as well.
+end note
+
+@enduml

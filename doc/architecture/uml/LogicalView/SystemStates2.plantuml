@@ -1,0 +1,39 @@
+@startuml
+
+title System States
+
+state StartupState: /entry Initialize HAL.
+state StartupState: /entry Show operator info on LCD.
+state StartupState: /do Wait for pushbutton A is triggered.
+
+state CalibrationState: /entry Show operator info on LCD.
+state CalibrationState: /do Perform calibration.
+
+state ErrorState: /entry Show error info on LCD.
+state ErrorState: /do Wait for pushbutton A is triggered.
+
+state ReadyState: /entry Show operator info on LCD.
+state ReadyState: /do Wait for pushbutton A is triggered.
+
+state ReleaseTrackState: /entry Choose parameter set 1
+state ReleaseTrackState: /entry Show parameter set on LCD.
+state ReleaseTrackState: /entry Start release timer.
+state ReleaseTrackState: /do If pushbutton A is triggered, choose next parameter set and update LCD.
+state ReleaseTrackState: /do If pushbutton A is triggered, restart release timer.
+state ReleaseTrackState: /exit Stop release timer.
+
+state DrivingState: /entry Start observation timer.
+state DrivingState: /do Perform driving.
+state DrivingState: /exit Stop observation timer.
+
+[*] --> StartupState: Power up
+StartupState --> CalibrationState: [Pushbutton A triggered]
+CalibrationState --> ReadyState: [Calibration finished]
+CalibrationState --> ErrorState: [Calibration failed]
+ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
+ReleaseTrackState --> DrivingState: [Release timer timeout]
+ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
+DrivingState --> ReadyState: [End line detected] or\n[Track lost] or\n[Observation timer timeout]
+ErrorState --> CalibrationState: [Pushbutton A triggered]
+
+@enduml

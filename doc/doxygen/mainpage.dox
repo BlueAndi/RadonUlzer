@@ -1,0 +1,26 @@
+@mainpage Manual of Line Follower
+
+@defgroup Application Application
+The main application.
+@{
+@}
+
+@defgroup HALInterfaces Hardware abstraction interfaces
+The HAL interface abstraction, which every kind of HAL needs to provide.
+@{
+@}
+
+@defgroup HALTarget Hardware abstraction on the Zumo32U4
+Abstracts the the physical hardware of the Zumo32U4.
+@{
+@}
+
+@defgroup HALSim Hardware abstraction in Webots simulation
+Abstracts the the hardware in the Webots simulation.
+@{
+@}
+
+@defgroup Service Service
+The services which are widely used by the application.
+@{
+@}

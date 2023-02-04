@@ -1,0 +1,45 @@
+@startuml
+
+title Service
+
+package "Service" as serviceLayer {
+
+    class Sound <<service>>
+
+    note top of Sound
+        Dedicated functions supporting the
+        standard beep and the alarm tone.
+    end note
+
+    class SimpleTimer <<service>>
+
+    note top of SimpleTimer
+        Provides an easy interface for
+        timer handling on the base of
+        the Arduino millis().
+    end note
+
+    class Mileage <<service>>
+
+    note top of Mileage
+        Provides a mileage counter, used
+        in case of a lost track. Must be
+        driven in the main loop.
+    end note
+
+    class PIDController <<service>>
+
+    note top of PIDController
+        A PID controller used for driving
+        on the track.
+    end note
+
+    class MovAvg < T, length > <<service>>
+
+    note top of MovAvg
+        Moving average filter which can be
+        configured at compile time.
+    end note
+}
+
+@enduml

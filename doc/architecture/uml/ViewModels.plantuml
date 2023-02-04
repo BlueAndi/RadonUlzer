@@ -1,0 +1,59 @@
+@startuml
+
+title View Models of Software Architecture
+
+legend top
+    [[https://en.wikipedia.org/wiki/4%2B1_architectural_view_model 4+1 architectural view model]]
+endlegend
+
+component "Logical View" as logicalView
+component "Development View" as developmentView
+component "Physical View" as physicalView
+component "Process View" as processView
+component "Scenarios" as scenarios
+
+logicalView -> developmentView
+logicalView --> processView
+developmentView --> physicalView
+processView -> physicalView
+
+note left of logicalView
+    **The Object-Oriented Decomposition**
+    The logical architecture primarily supports
+    the functional requirements—what the system
+    should provide in terms of services to its users.
+end note
+
+note right of developmentView
+    **Subsystem decomposition**
+    The development architecture focuses on the
+    actual software module organization on the
+    software development environment.
+end note
+
+note right of physicalView
+    **Mapping the software to the hardware**
+    The physical architecture takes into account
+    primarily the non-functional requirements of
+    the system such as availability, reliability
+    (fault-tolerance), performance (throughput)
+    and scalability.
+end note
+
+note left of processView
+    **The Process Decomposition**
+    The process architecture takes into account
+    some non-functional requirements, such as
+    performance and availability.
+end note
+
+processView -[hidden]-- scenarios
+
+note right of scenarios
+    **Putting it all together**
+    The elements in the four views are shown to
+    work together seamlessly by the use of a small
+    set of important scenarios.
+end note
+
+@enduml

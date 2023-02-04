@@ -1,0 +1,111 @@
+@startuml
+
+title Application
+
+package "Application" as appLayer {
+
+    class App <<main>> {
+        + setup() : void
+        + loop() : void
+    }
+
+    note left of App
+        The program entry point.
+    end note
+
+    class StateMachine <<control>> {
+        + setState(state : IState*) : void
+        + getState() : IState*
+        + process() : void
+    }
+
+    note left of StateMachine
+        The state machine executes always one
+        state exclusive. It is responsible to
+        enter/leave/process a state.
+    end note
+
+    interface IState {
+        + {abstract} entry() : void
+        + {abstract} process(sm : StateMachine&) : void
+        + {abstract} exit() : void
+    }
+
+    note left of IState
+        Defines the abstract state interface,
+        which forces every inherited class
+        to realize it.
+    end note
+
+    class StartupState <<control>>
+    class CalibrationState <<control>>
+    class ErrorState <<control>>
+    class DrivingState <<control>>
+    class ReadyState <<control>>
+    class ReleaseTrackState <<control>>
+
+    class ParameterSets <<entity>>
+
+    note bottom of ParameterSets
+        One of several provided parameter sets
+        can be selected. The selected one is
+        used during the competiton.
+    end note
+
+    note bottom of StartupState
+        The system starts up and shows
+        the team name on the display.
+    end note
+
+    note bottom of CalibrationState
+        The robot turns several times the
+        line sensors over the track for
+        calibration.
+    end note
+
+    note bottom of ErrorState
+        Error information is shown on display.
+        Confirmation from operator is requested.
+    end note
+
+    note bottom of DrivingState
+        The robot follows the line and handles
+        any detected gap.
+    end note
+
+    note bottom of ReadyState
+        The robot is stopped and waits for
+        operator input.
+    end note
+
+    note bottom of ReleaseTrackState
+        Operator selects parameter set and
+        starts the competition after a
+        defined time.
+    end note
+}
+
+note top of  appLayer
+    Hint: See the application state behaviour
+    in the corresponding state diagram.
+
+    The ParameterSets supports several parameters,
+    e.g. to initialize the PID controller and the
+    top speed.
+end note
+
+App *--> StateMachine
+
+StateMachine o--> "0..1" IState
+
+IState <|.. StartupState: <<realize>>
+IState <|.. CalibrationState: <<realize>>
+IState <|.. ErrorState: <<realize>>
+IState <|.. ReadyState: <<realize>>
+IState <|.. ReleaseTrackState: <<realize>>
+IState <|.. DrivingState: <<realize>>
+
+ReleaseTrackState ..> ParameterSets: <<use>>
+DrivingState ..> ParameterSets: <<use>>
+
+@enduml

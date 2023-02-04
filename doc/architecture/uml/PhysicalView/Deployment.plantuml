@@ -1,0 +1,50 @@
+@startuml
+
+title Deployment
+
+node "PC" as pc
+
+node "Pololu Zumo32U4" as zumo32u4 {
+
+    node "Main Board" as mainBoard {
+
+        component "MCU\nAVR32U4" as mcu {
+            component "Software" as software
+        }
+
+        component "Buttons" as buttons
+        
+        component "Buzzer" as buzzer
+        component "Motors" as motors
+        component "Encoders" as encoders
+        component "LEDs" as leds
+
+        software -u- buttons
+        software -u- leds
+        software -- buzzer
+        software -- motors
+        software -- encoders
+    }
+
+    node "Front Sensor Array" {
+        component "Line sensors" as lineSensors
+    }
+
+    node "LCD" {
+        component "LCD" as lcd
+    }
+
+    software - lcd
+    software -- lineSensors    
+}
+
+interface "USB" as usb
+
+zumo32u4 -l- usb
+usb )-l- pc
+
+note top of zumo32u4
+    Only the used actors and sensors are shown.
+end note
+
+@enduml
