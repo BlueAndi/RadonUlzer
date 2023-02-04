@@ -68,6 +68,25 @@ const uint16_t* LineSensors::getSensorValues()
     return m_sensorValuesU16;
 }
 
+void LineSensors::calibrate() final
+{
+    getSensorValues();
+    
+    for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+    {
+        if (m_sensorValuesU16[sensorIndex] < m_sensorMinValues[sensorIndex])
+        {
+            m_sensorMinValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
+        }
+        if (m_sensorValuesU16[sensorIndex] > m_sensorMaxValues[sensorIndex])
+        {
+            m_sensorMaxValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
+        }
+    }
+    
+    m_sensorCalibStarted = true;
+}
+
 int16_t LineSensors::readLine()
 {
     float numerator = (0 * m_sensorValuesU16[0] + 1000 * m_sensorValuesU16[1] + 
@@ -83,6 +102,45 @@ int16_t LineSensors::readLine()
     }
 
     return static_cast<int16_t>(numerator/denominator);
+}
+
+bool LineSensors::isCalibrationSuccessful() final
+{
+    bool isSuccessful = false;
+
+    m_calibErrorInfo = CALIB_ERROR_NOT_CALIBRATED;
+    
+    if (true == m_sensorCalibStarted)
+    {
+        uint8_t index = 0;
+
+        isSuccessful = true;
+        while((MAX_SENSORS > index) && (true == isSuccessful))
+        {
+            uint16_t distance = 0;
+            
+            /* Check whether the max. value is really greater than the min. value.
+                * It can happen that someone try to calibrate over a blank surface.
+                */
+            if (m_sensorMaxValues[index] > m_sensorMinValues[index])
+            {
+                distance = m_sensorMaxValues[index] - m_sensorMinValues[index];
+            }
+
+            /* The assumption here is, that the distance (max. value - min. value) must be
+                * higher than a quarter of the max. measure duration.
+                */
+            if ((SENSOR_MAX_VALUE / 4) > distance)
+            {
+                m_calibErrorInfo = index;
+                isSuccessful = false;
+            }
+
+            ++index;
+        }
+    }
+
+    return isSuccessful;
 }
 
 /******************************************************************************

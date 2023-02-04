@@ -68,7 +68,8 @@ public:
     m_encoderLeft(encoderLeft),
     m_encoderRight(encoderRight),
     m_lastResetValueLeft(0.0),
-    m_lastResetValueRight(0.0)
+    m_lastResetValueRight(0.0),
+    m_stepsPerMM((10UL * RESOLUTION * m_gearRatio) / m_wheelSize)
     {
     }
 
@@ -155,7 +156,10 @@ private:
     /**
      * Encoder resolution in counts per revolution of the motor shaft.
      */
-    static const uint16_t RESOLUTION = 12;
+    static const uint16_t   RESOLUTION = 12;
+
+    /* Conversion factor from mm to m. */
+    static const uint16_t   MILLIMETER = 1000;
 
     /* The gear ratio of the motor. */
     uint16_t m_gearRatio;
@@ -175,11 +179,8 @@ private:
     /* Reset value needed to calculate the steps. */
     double m_lastResetValueRight;
 
-    /* Value of meter in millimeter, needed for calculationa. */
-    static const uint16_t MILLIMETER = 1000;
-
     /* The encoder steps the real robot makes per mm driven. */
-    uint8_t m_stepsPerMM = ((10UL * RESOLUTION * m_gearRatio) / m_wheelSize);
+    uint8_t m_stepsPerMM;
 };
 
 /******************************************************************************

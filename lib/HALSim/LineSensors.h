@@ -92,7 +92,9 @@ public:
         m_lightSensor4(lightSensor4),
         m_sensorCalibSuccessfull(false),
         m_sensorCalibStarted(false),
-        m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED)
+        m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED),
+        m_sensorMinValues(),
+        m_sensorMaxValues()
     {
         for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
@@ -123,24 +125,7 @@ public:
      *
      * The calibration factors are stored internally.
      */
-    void calibrate() final
-    {
-        getSensorValues();
-        
-        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
-        {
-            if (m_sensorValuesU16[sensorIndex] < m_sensorMinValues[sensorIndex])
-            {
-                m_sensorMinValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
-            }
-            if (m_sensorValuesU16[sensorIndex] > m_sensorMaxValues[sensorIndex])
-            {
-                m_sensorMaxValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
-            }
-        }
-        
-        m_sensorCalibStarted = true;
-    }
+    void calibrate() final;
 
     /**
      * Determines the deviation and returns an estimated position of the robot
@@ -173,44 +158,7 @@ public:
      *
      * @return If successful, it will return true otherwise false.
      */
-    bool isCalibrationSuccessful() final
-    {
-        bool isSuccessful = false;
-
-        m_calibErrorInfo = CALIB_ERROR_NOT_CALIBRATED;
-        
-        if (true == m_sensorCalibStarted)
-        {
-            uint8_t index = 0;
-
-            isSuccessful = true;
-            while((MAX_SENSORS > index) && (true == isSuccessful))
-            {
-                uint16_t distance = 0;
-                
-                /* Check whether the max. value is really greater than the min. value.
-                * It can happen that someone try to calibrate over a blank surface.
-                */
-                if (m_sensorMaxValues[index] > m_sensorMinValues[index])
-                {
-                    distance = m_sensorMaxValues[index] - m_sensorMinValues[index];
-                }
-
-                /* The assumption here is, that the distance (max. value - min. value) must be
-                * higher than a quarter of the max. measure duration.
-                */
-                if ((SENSOR_MAX_VALUE / 4) > distance)
-                {
-                    m_calibErrorInfo = index;
-                    isSuccessful = false;
-                }
-
-                ++index;
-            }
-        }
-
-        return isSuccessful;
-    }
+    bool isCalibrationSuccessful() final;
 
     /**
      * It will return the index of the sensor, which caused to fail the calibration.
