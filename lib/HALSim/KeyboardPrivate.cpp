@@ -66,6 +66,21 @@
  * Private Methods
  *****************************************************************************/
 
+bool KeyboardPrivate::arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase)
+{
+    bool elementFound = false;
+
+    for (uint8_t arrayIndex = 0; arrayIndex < (arraySize / sizeof(*array)); ++arrayIndex)
+    {
+        if((array[arrayIndex] == static_cast<uint8_t>(elemLowerCase)) || (array[arrayIndex] == static_cast<uint8_t>(elemUppercase)))
+        {
+            elementFound = true;;
+        }
+    }
+
+    return elementFound;
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/

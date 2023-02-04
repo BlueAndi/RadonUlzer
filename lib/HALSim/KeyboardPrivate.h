@@ -89,7 +89,8 @@ public:
         }
         
         /* Getting the new values. Currently the limit of the simulation is seven
-           keypresses that can be detected simultaniously. */
+         * keypresses that can be detected simultaniously.
+         */
         for (uint8_t keyIndex = 0; keyIndex < (sizeof(m_oldKeys) / sizeof(*m_oldKeys)); ++keyIndex)
         {
             m_newKeys[keyIndex] = m_keyboard->getKey();
@@ -106,9 +107,10 @@ public:
         bool buttonPressed = false;
 
         /* Checks if button A is existing in the new values, but not the old ones.
-           If so, it's newly pressed and true is returned. */
-        if ((!arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
-            (arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
+         * If so, it's newly pressed and true is returned.
+         */
+        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
+            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
         {
             buttonPressed = true;
         }
@@ -126,9 +128,10 @@ public:
         bool buttonReleased = false;
 
         /* Checks if button A is existing in the new values, but not the old ones.
-           If so, it's newly released and true is returned. */
-        if ((!arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
-            (arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
+         * If so, it's newly released and true is returned.
+         */
+        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
+            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
         {
             buttonReleased = true;
         }
@@ -146,9 +149,10 @@ public:
         bool buttonPressed = false;
 
         /* Checks if button B is existing in the new values, but not the old ones.
-           If so, it's newly pressed and true is returned. */
-        if ((!arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
-            (arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
+         * If so, it's newly pressed and true is returned.
+         */
+        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
+            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
         {
             buttonPressed = true;
         }
@@ -166,9 +170,10 @@ public:
         bool buttonReleased = false;
 
         /* Checks if button B is existing in the new values, but not the old ones.
-           If so, it's newly released and true is returned. */
-        if ((!arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
-            (arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
+         * If so, it's newly released and true is returned.
+         */
+        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
+            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
         {
             buttonReleased = true;
         }
@@ -186,9 +191,10 @@ public:
         bool buttonPressed = false;
 
         /* Checks if button C is existing in the new values, but not the old ones.
-           If so, it's newly pressed and true is returned. */
-        if ((!arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
-            (arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
+         * If so, it's newly pressed and true is returned.
+         */
+        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
+            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
         {
             buttonPressed = true;
         }
@@ -206,9 +212,10 @@ public:
         bool buttonReleased = false;
 
         /* Checks if button C is existing in the new values, but not the old ones.
-           If so, it's newly released and true is returned. */
-        if ((!arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
-            (arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
+         * If so, it's newly released and true is returned.
+         */
+        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
+            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
         {
             buttonReleased = true;
         }
@@ -263,20 +270,6 @@ public:
 
 private:
 
-    bool arrayContains(uint16_t array[], uint16_t arraySize, uint8_t elemLowerCase, uint8_t elemUppercase)
-    {
-        bool elementFound = false;
-        for (uint8_t arrayIndex = 0; arrayIndex < (arraySize / sizeof(*array)); ++arrayIndex)
-        {
-            if((array[arrayIndex] == elemLowerCase) || (array[arrayIndex] == elemUppercase))
-            {
-                elementFound = true;;
-            }
-        }
-        return elementFound;
-    } 
-
-
     /** The key code of the lower case a character, which simulates the button. */
     static const char KEY_CODE_A_LOWER_CASE = 'a';
 
@@ -307,6 +300,18 @@ private:
     webots::Keyboard* m_keyboard; /**< Robot keyboard */
 
     webots::Robot* m_robot; /**< Robot */
+
+    /**
+     * Checks whether the given array contains a element.
+     * 
+     * @param[in]   array           The array where to search for the element.
+     * @param[in]   arraySize       Number of array elements.
+     * @param[in]   elemLowerCase   Lower case character
+     * @param[in]   elemUppercase   Upper case character
+     * 
+     * @return If found, it will return true otherwise false.
+     */
+    bool arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase) const;
 };
 
 /******************************************************************************

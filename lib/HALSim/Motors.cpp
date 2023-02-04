@@ -58,6 +58,50 @@
  * Public Methods
  *****************************************************************************/
 
+void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
+{
+    if (nullptr != m_leftMotor)
+    {
+        /* 400 digits respond to 0.5m/s, which is set as maximum velocity inside the simulation. */
+        const double MAX_SIM_VELOCITY = m_leftMotor->getMaxVelocity();
+
+        if (leftSpeed > MAX_SPEED)
+        {
+            m_leftMotor->setVelocity(MAX_SIM_VELOCITY);
+        }
+        else if (leftSpeed < (-MAX_SPEED))
+        {
+            m_leftMotor->setVelocity(-MAX_SIM_VELOCITY);
+        }
+        else
+        {
+            m_leftMotor->setVelocity((MAX_SIM_VELOCITY * leftSpeed) / MAX_SPEED);
+        }
+    }
+
+    if (nullptr != m_rightMotor)
+    {
+        /* 400 digits respond to 0.5m/s, which is set as maximum velocity inside the simulation. */
+        const double MAX_SIM_VELOCITY = m_rightMotor->getMaxVelocity();
+
+        if (rightSpeed > MAX_SPEED)
+        {
+            m_rightMotor->setVelocity(MAX_SIM_VELOCITY);
+        }
+        else if (rightSpeed < (-MAX_SPEED))
+        {
+            m_rightMotor->setVelocity(-MAX_SIM_VELOCITY);
+        }
+        else
+        {
+            m_rightMotor->setVelocity((MAX_SIM_VELOCITY * rightSpeed) / MAX_SPEED);
+        }
+    }
+
+    m_leftSpeed  = leftSpeed;
+    m_rightSpeed = rightSpeed;
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
