@@ -1,5 +1,5 @@
 {
-    "name": "HALSim",
+    "name": "HALInterfaces",
     "version": "0.1.0",
     "description": "...",
     "authors": [{
@@ -9,11 +9,7 @@
         "maintainer": true
     }],
     "license": "MIT",
-    "dependencies": [{
-        "name": "HALInterfaces"
-    }, {
-        "name": "Webots"
-    }],
+    "dependencies": [],
     "frameworks": "arduino",
     "platforms": "*"
 }

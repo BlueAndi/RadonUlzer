@@ -1,5 +1,5 @@
 {
-    "name": "HALSim",
+    "name": "Service",
     "version": "0.1.0",
     "description": "...",
     "authors": [{
@@ -11,8 +11,6 @@
     "license": "MIT",
     "dependencies": [{
         "name": "HALInterfaces"
-    }, {
-        "name": "Webots"
     }],
     "frameworks": "arduino",
     "platforms": "*"
