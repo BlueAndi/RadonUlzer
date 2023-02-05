@@ -3,7 +3,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Release](https://img.shields.io/github/release/BlueAndi/RadonAlcer.svg)](https://github.com/BlueAndi/RadonAlcer/releases)
-[![Build Status](https://github.com/BlueAndi/RadonAlcer/workflows/PlatformIO%20CI/badge.svg?branch=master)](https://github.com/github/docs/actions/workflows/main.yml/badge.svg)
+[![Build Status](https://github.com/BlueAndi/RadonAlcer/actions/workflows/main.yml/badge.svg?branch=main](https://github.com/BlueAndi/RadonAlcer/actions/workflows/main.yml)
 
 A line follower robot as fast as the famous Radon Alcer pod racer driven by Anakin Skywalker. :-)
 
