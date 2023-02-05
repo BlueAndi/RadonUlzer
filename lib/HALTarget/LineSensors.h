@@ -61,7 +61,7 @@ public:
     /**
      * Constructs the line sensors adapter.
      */
-    LineSensors() : ILineSensors(), m_lineSensors(), m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED)
+    LineSensors() : ILineSensors(), m_sensorValues(), m_sensorValuesU16(), m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED)
     {
     }
 
