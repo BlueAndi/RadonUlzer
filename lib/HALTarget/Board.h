@@ -272,7 +272,7 @@ private:
     static const uint32_t WHEEL_DIAMETER = 36;
 
     /** Wheel circumference in um. */
-    static const uint32_t WHEEL_CIRCUMFERENCE = WHEEL_DIAMETER * PI * 1000;
+    static const uint32_t WHEEL_CIRCUMFERENCE = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
     /**
      * Constructs the concrete board.

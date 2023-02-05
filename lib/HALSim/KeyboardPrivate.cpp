@@ -66,7 +66,7 @@
  * Private Methods
  *****************************************************************************/
 
-bool KeyboardPrivate::arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase)
+bool KeyboardPrivate::arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase) const
 {
     bool elementFound = false;
 

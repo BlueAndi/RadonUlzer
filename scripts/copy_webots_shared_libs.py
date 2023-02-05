@@ -32,9 +32,11 @@ import os
 # Variables
 ################################################################################
 
-files = [
+SHARED_FILES_LIST = [
     '/lib/controller/Controller.dll',
     '/lib/controller/CppController.dll']
+
+PIO_ENV_NAME = "WebotsSim"
 
 ################################################################################
 # Classes
@@ -48,6 +50,6 @@ files = [
 # Main
 ################################################################################
 
-for filePath in files:
+for filePath in SHARED_FILES_LIST:
     fullPath = os.getenv('WEBOTS_HOME') + filePath
-    shutil.copy(fullPath, './.pio/build/native')
+    shutil.copy(fullPath, './.pio/build/' + PIO_ENV_NAME)

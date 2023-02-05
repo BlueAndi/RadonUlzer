@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 
+#include <math.h>
 #include <webots/Robot.hpp>
 #include <KeyboardPrivate.h>
 
@@ -221,13 +222,13 @@ public:
     }
 
     /**
-     * Get the wheel size.
-     *
-     * @return Wheel size in mm.
+     * Get the wheel circumference.
+     * 
+     * @return Wheel circumference in mm.
      */
-    uint32_t getWheelSize() const
+    uint32_t getWheelCircumference() const
     {
-        return WHEEL_SIZE;
+        return WHEEL_CIRCUMFERENCE;
     }
 
 protected:
@@ -338,8 +339,8 @@ private:
      */
     static const uint32_t WHEEL_DIAMETER = 36;
 
-    /** Wheel size in um. */
-    static const uint32_t WHEEL_SIZE = WHEEL_DIAMETER * PI * 1000;
+    /** Wheel circumference in um. */
+    static const uint32_t WHEEL_CIRCUMFERENCE = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
     /**
      * Constructs the concrete board.
@@ -354,7 +355,7 @@ private:
         m_buttonC(m_keyboard),
         m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(getGearRatio(), WHEEL_SIZE, m_robot.getPositionSensor(ENCODER_LEFT_NAME),
+        m_encoders(getGearRatio(), WHEEL_CIRCUMFERENCE, m_robot.getPositionSensor(ENCODER_LEFT_NAME),
                    m_robot.getPositionSensor(ENCODER_RIGHT_NAME)),
         m_lineSensors(m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                       m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),

@@ -12,6 +12,6 @@
     "dependencies": [{
         "name": "HALInterfaces"
     }],
-    "frameworks": "arduino",
+    "frameworks": "*",
     "platforms": "*"
 }

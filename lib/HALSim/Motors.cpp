@@ -32,7 +32,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "LineSensors.h"
+#include "Motors.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -58,7 +58,7 @@
  * Public Methods
  *****************************************************************************/
 
-void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
+void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
 {
     if (nullptr != m_leftMotor)
     {

@@ -68,7 +68,7 @@ const uint16_t* LineSensors::getSensorValues()
     return m_sensorValuesU16;
 }
 
-void LineSensors::calibrate() final
+void LineSensors::calibrate()
 {
     getSensorValues();
     
@@ -104,7 +104,7 @@ int16_t LineSensors::readLine()
     return static_cast<int16_t>(numerator/denominator);
 }
 
-bool LineSensors::isCalibrationSuccessful() final
+bool LineSensors::isCalibrationSuccessful()
 {
     bool isSuccessful = false;
 
