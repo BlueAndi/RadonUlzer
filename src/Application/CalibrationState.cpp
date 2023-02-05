@@ -33,7 +33,6 @@
  * Includes
  *****************************************************************************/
 #include "CalibrationState.h"
-#include <string.h>
 #include <Board.h>
 #include "StateMachine.h"
 #include "ReadyState.h"

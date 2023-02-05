@@ -79,7 +79,11 @@ public:
      */
     static ParameterSets& getInstance()
     {
-        return m_instance;
+        static ParameterSets instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
@@ -115,8 +119,6 @@ public:
 
 protected:
 private:
-    static ParameterSets m_instance; /**< Parameter set instance. */
-
     uint8_t      m_currentSetId;      /**< Set id of current selected set. */
     ParameterSet m_parSets[MAX_SETS]; /**< All parameter sets */
 
