@@ -73,23 +73,8 @@ public:
         m_leftSpeed(0),
         m_rightSpeed(0)
     {
-        if (nullptr != m_leftMotor)
-        {
-            /* Endless linear motion */
-            m_leftMotor->setPosition(std::numeric_limits<double>::infinity());
-
-            /* Stop motor, note velocity in m/s */
-            m_leftMotor->setVelocity(0.0f);
-        }
-
-        if (nullptr != m_rightMotor)
-        {
-            /* Endless rotational linear motion */
-            m_rightMotor->setPosition(std::numeric_limits<double>::infinity());
-
-            /* Stop motor, note velocity in m/s */
-            m_rightMotor->setVelocity(0.0f);
-        }
+        initMotor(m_leftMotor);
+        initMotor(m_rightMotor);
     }
 
     /**
@@ -154,6 +139,14 @@ private:
 
     /* Default constructor not allowed. */
     Motors();
+
+    /**
+     * Initialize the simulated motor.
+     * Shall be done once.
+     * 
+     * @param[in] motor Moto which to initialize
+     */
+    void initMotor(webots::Motor* motor);
 };
 
 /******************************************************************************

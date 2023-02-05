@@ -80,16 +80,8 @@ public:
                 webots::DistanceSensor* lightSensor4) :
         ILineSensors(),
         m_sensorValuesU16(),
-        m_emitter0(emitter0),
-        m_emitter1(emitter1),
-        m_emitter2(emitter2),
-        m_emitter3(emitter3),
-        m_emitter4(emitter4),
-        m_lightSensor0(lightSensor0),
-        m_lightSensor1(lightSensor1),
-        m_lightSensor2(lightSensor2),
-        m_lightSensor3(lightSensor3),
-        m_lightSensor4(lightSensor4),
+        m_emitters{emitter0, emitter1, emitter2, emitter3, emitter4},
+        m_lightSensors{lightSensor0, lightSensor1, lightSensor2, lightSensor3, lightSensor4},
         m_sensorCalibSuccessfull(false),
         m_sensorCalibStarted(false),
         m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED),
@@ -98,6 +90,7 @@ public:
     {
         for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
+            m_sensorValuesU16[sensorIndex] = 0;
             m_sensorMaxValues[sensorIndex] = 0;
             m_sensorMinValues[sensorIndex] = SENSOR_MAX_VALUE;
         }
@@ -115,7 +108,7 @@ public:
      */
     void init() final
     {
-        /* TODO */
+        /* Nothing to do. */
     }
 
     /**
@@ -205,26 +198,14 @@ private:
      */
     static const int16_t SENSOR_MAX_VALUE = 1000;
 
-    uint16_t m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
-
-    webots::Emitter*     m_emitter0;     /**< The infrared emitter 0 (most left) */
-    webots::Emitter*     m_emitter1;     /**< The infrared emitter 1 */
-    webots::Emitter*     m_emitter2;     /**< The infrared emitter 2 */
-    webots::Emitter*     m_emitter3;     /**< The infrared emitter 3 */
-    webots::Emitter*     m_emitter4;     /**< The infrared emitter 4 (most right) */
-
-    webots::DistanceSensor* m_lightSensor0; /**< The light sensor 0 (most left) */
-    webots::DistanceSensor* m_lightSensor1; /**< The light sensor 1 */
-    webots::DistanceSensor* m_lightSensor2; /**< The light sensor 2 */
-    webots::DistanceSensor* m_lightSensor3; /**< The light sensor 3 */
-    webots::DistanceSensor* m_lightSensor4; /**< The light sensor 4 (most right) */
-
-    bool m_sensorCalibSuccessfull;  /**< Indicates weather the calibration was successfull or not. */
-    bool m_sensorCalibStarted;      /**< Indicates weather the calibration has started or not. */
-    uint8_t m_calibErrorInfo;       /**< Indicates which sensor failed the calibration, if the calibration failed. */
-
-    uint16_t m_sensorMinValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
-    uint16_t m_sensorMaxValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
+    uint16_t                m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
+    webots::Emitter*        m_emitters[MAX_SENSORS];        /**< The infrared emitters (0: most left) */
+    webots::DistanceSensor* m_lightSensors[MAX_SENSORS];    /**< The light sensors (0: most left) */
+    bool                    m_sensorCalibSuccessfull;       /**< Indicates weather the calibration was successfull or not. */
+    bool                    m_sensorCalibStarted;           /**< Indicates weather the calibration has started or not. */
+    uint8_t                 m_calibErrorInfo;               /**< Indicates which sensor failed the calibration, if the calibration failed. */
+    uint16_t                m_sensorMinValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
+    uint16_t                m_sensorMaxValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
 
     /* Default constructor not allowed. */
     LineSensors();

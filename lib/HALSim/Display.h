@@ -94,8 +94,12 @@ public:
      */
     void clear() final
     {
-        m_display->setColor(BLACK);
-        m_display->fillRectangle(0, 0, m_width, m_height);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(BLACK);
+            m_display->fillRectangle(0, 0, m_width, m_height);
+        }
+
         gotoXY(0, 0);
     }
 
@@ -127,8 +131,11 @@ public:
         std::string text;
         text = str;
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -147,8 +154,11 @@ public:
         std::string text;
         text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -167,8 +177,11 @@ public:
         std::string text;
         text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -185,10 +198,13 @@ public:
     size_t print(uint32_t value) final
     {
         std::string text;
-        text = std::to_string(value);;
+        text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -205,10 +221,13 @@ public:
     size_t print(int8_t value) final
     {
         std::string text;
-        text = std::to_string(value);;
+        text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -225,10 +244,13 @@ public:
     size_t print(int16_t value) final
     {
         std::string text;
-        text = std::to_string(value);;
+        text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
 
@@ -245,10 +267,13 @@ public:
     size_t print(int32_t value) final
     {
         std::string text;
-        text = std::to_string(value);;
+        text = std::to_string(value);
 
-        m_display->setColor(WHITE);
-        m_display->drawText(text, m_currX, m_currY);
+        if (nullptr != m_display)
+        {
+            m_display->setColor(WHITE);
+            m_display->drawText(text, m_currX, m_currY);
+        }
 
         gotoXY((m_lastX + text.length()), m_lastY);
         

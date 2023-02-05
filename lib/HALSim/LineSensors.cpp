@@ -60,11 +60,14 @@
 
 const uint16_t* LineSensors::getSensorValues()
 {
-    m_sensorValuesU16[0] = static_cast<uint16_t>(m_lightSensor0->getValue());
-    m_sensorValuesU16[1] = static_cast<uint16_t>(m_lightSensor1->getValue());
-    m_sensorValuesU16[2] = static_cast<uint16_t>(m_lightSensor2->getValue());
-    m_sensorValuesU16[3] = static_cast<uint16_t>(m_lightSensor3->getValue());
-    m_sensorValuesU16[4] = static_cast<uint16_t>(m_lightSensor4->getValue());
+    for(uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+    {
+        if (nullptr != m_lightSensors[sensorIndex])
+        {
+            m_sensorValuesU16[sensorIndex] = static_cast<uint16_t>(m_lightSensors[sensorIndex]->getValue());
+        }
+    }
+
     return m_sensorValuesU16;
 }
 
@@ -78,6 +81,7 @@ void LineSensors::calibrate()
         {
             m_sensorMinValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
         }
+
         if (m_sensorValuesU16[sensorIndex] > m_sensorMaxValues[sensorIndex])
         {
             m_sensorMaxValues[sensorIndex] = m_sensorValuesU16[sensorIndex];
@@ -89,19 +93,29 @@ void LineSensors::calibrate()
 
 int16_t LineSensors::readLine()
 {
-    float numerator = (0 * m_sensorValuesU16[0] + 1000 * m_sensorValuesU16[1] + 
-                       2000 * m_sensorValuesU16[2] + 3000 * m_sensorValuesU16[3] + 
-                       4000 * m_sensorValuesU16[4]);
-    float denominator = (m_sensorValuesU16[0] + m_sensorValuesU16[1] + m_sensorValuesU16[2] + 
-                         m_sensorValuesU16[3] + m_sensorValuesU16[4]);
+    const uint32_t  WEIGHT0      = 0;
+    const uint32_t  WEIGHT1      = 1000;
+    const uint32_t  WEIGHT2      = 2000;
+    const uint32_t  WEIGHT3      = 3000;
+    const uint32_t  WEIGHT4      = 4000;
+    uint32_t        numerator    = (WEIGHT0 * m_sensorValuesU16[0] +
+                                   WEIGHT1 * m_sensorValuesU16[1] +
+                                   WEIGHT2 * m_sensorValuesU16[2] +
+                                   WEIGHT3 * m_sensorValuesU16[3] +
+                                   WEIGHT4 * m_sensorValuesU16[4]);
+    uint32_t        denominator  = (m_sensorValuesU16[0] +
+                                   m_sensorValuesU16[1] +
+                                   m_sensorValuesU16[2] +
+                                   m_sensorValuesU16[3] +
+                                   m_sensorValuesU16[4]);
 
     /* Check to avoid division by zero. */
-    if(denominator <= 0.0f)
+    if (0 == denominator)
     {
-        denominator = 1.0f;
+        denominator = 1;
     }
 
-    return static_cast<int16_t>(numerator/denominator);
+    return static_cast<int16_t>(numerator / denominator);
 }
 
 bool LineSensors::isCalibrationSuccessful()
@@ -120,16 +134,16 @@ bool LineSensors::isCalibrationSuccessful()
             uint16_t distance = 0;
             
             /* Check whether the max. value is really greater than the min. value.
-                * It can happen that someone try to calibrate over a blank surface.
-                */
+             * It can happen that someone try to calibrate over a blank surface.
+             */
             if (m_sensorMaxValues[index] > m_sensorMinValues[index])
             {
                 distance = m_sensorMaxValues[index] - m_sensorMinValues[index];
             }
 
             /* The assumption here is, that the distance (max. value - min. value) must be
-                * higher than a quarter of the max. measure duration.
-                */
+             * higher than a quarter of the max. measured duration.
+             */
             if ((SENSOR_MAX_VALUE / 4) > distance)
             {
                 m_calibErrorInfo = index;

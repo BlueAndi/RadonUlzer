@@ -60,9 +60,10 @@
 
 void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
 {
+    const double _MAX_SPEED = static_cast<double>(MAX_SPEED);
+
     if (nullptr != m_leftMotor)
     {
-        /* 400 digits respond to 0.5m/s, which is set as maximum velocity inside the simulation. */
         const double MAX_SIM_VELOCITY = m_leftMotor->getMaxVelocity();
 
         if (leftSpeed > MAX_SPEED)
@@ -75,13 +76,14 @@ void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
         }
         else
         {
-            m_leftMotor->setVelocity((MAX_SIM_VELOCITY * leftSpeed) / MAX_SPEED);
+            double _leftSpeed = static_cast<double>(leftSpeed);
+
+            m_leftMotor->setVelocity((MAX_SIM_VELOCITY * _leftSpeed) / _MAX_SPEED);
         }
     }
 
     if (nullptr != m_rightMotor)
     {
-        /* 400 digits respond to 0.5m/s, which is set as maximum velocity inside the simulation. */
         const double MAX_SIM_VELOCITY = m_rightMotor->getMaxVelocity();
 
         if (rightSpeed > MAX_SPEED)
@@ -94,7 +96,9 @@ void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
         }
         else
         {
-            m_rightMotor->setVelocity((MAX_SIM_VELOCITY * rightSpeed) / MAX_SPEED);
+            double _rightSpeed = static_cast<double>(rightSpeed);
+
+            m_rightMotor->setVelocity((MAX_SIM_VELOCITY * _rightSpeed) / _MAX_SPEED);
         }
     }
 
@@ -109,6 +113,18 @@ void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void Motors::initMotor(webots::Motor* motor)
+{
+    if (nullptr != motor)
+    {
+        /* Endless linear motion */
+        motor->setPosition(std::numeric_limits<double>::infinity());
+
+        /* Stop motor, note velocity in m/s */
+        motor->setVelocity(0.0f);
+    }
+}
 
 /******************************************************************************
  * External Functions
