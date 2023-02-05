@@ -98,7 +98,7 @@ public:
      * 
      * @param[in] sequence Melody sequence in RAM
      */
-    void playMelody(const char* sequence)
+    void playMelody(const char* sequence) final
     {
         m_buzzer.play(sequence);
     }
@@ -108,7 +108,7 @@ public:
      * 
      * @param[in] sequence Melody sequence in program space
      */
-    void playMelodyPGM(const char* sequence)
+    void playMelodyPGM(const char* sequence) final
     {
         m_buzzer.playFromProgramSpace(sequence);
     }

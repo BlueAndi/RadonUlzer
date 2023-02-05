@@ -105,7 +105,7 @@ public:
      *
      * @return The left motor speed in digits.
      */
-    int16_t getLeftSpeed()
+    int16_t getLeftSpeed() final
     {
         return m_leftSpeed;
     }
@@ -115,7 +115,7 @@ public:
      *
      * @return The right motor speed in digits.
      */
-    int16_t getRightSpeed()
+    int16_t getRightSpeed() final
     {
         return m_rightSpeed;
     }
