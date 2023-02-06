@@ -33,6 +33,7 @@
  * Includes
  *****************************************************************************/
 #include "Encoders.h"
+#include "RobotConstants.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -63,11 +64,11 @@ int16_t Encoders::getCountsLeft()
     int16_t steps = 0;
 
     /* The position sensor provides the driven distance in m. 
-        * The encoder steps are dervied from it.
-        */
+     * The encoder steps are dervied from it.
+     */
     if (nullptr != m_posSensorLeft)
     {
-        steps = static_cast<int16_t>((m_posSensorLeft->getValue() - m_lastResetValueLeft) * MILLIMETER * m_stepsPerMM);
+        steps = static_cast<int16_t>((m_posSensorLeft->getValue() - m_lastResetValueLeft) * 1000 * RobotConstants::ENCODER_STEPS_PER_MM);
     }
 
     return steps;
@@ -78,11 +79,11 @@ int16_t Encoders::getCountsRight()
     int16_t steps = 0;
 
     /* The position sensor provides the driven distance in m. 
-        * The encoder steps are dervied from it.
-        */
+     * The encoder steps are dervied from it.
+     */
     if (nullptr != m_posSensorRight)
     {
-        steps = static_cast<int16_t>((m_posSensorRight->getValue() - m_lastResetValueLeft) * MILLIMETER * m_stepsPerMM);
+        steps = static_cast<int16_t>((m_posSensorRight->getValue() - m_lastResetValueLeft) * 1000 * RobotConstants::ENCODER_STEPS_PER_MM);
     }
 
     return steps;

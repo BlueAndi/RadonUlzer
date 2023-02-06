@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Board interface, which abstracts the physical board
+ * @brief  Robot specific constants
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup HALInterfaces
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef IBOARD_H
-#define IBOARD_H
+#ifndef ROBOTCONSTANTS_H
+#define ROBOTCONSTANTS_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,14 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <Arduino.h>
 #include <stdint.h>
-#include <IButton.h>
-#include <IBuzzer.h>
-#include <IDisplay.h>
-#include <IEncoders.h>
-#include <ILineSensors.h>
-#include <IMotors.h>
-#include <ILed.h>
 
 /******************************************************************************
  * Macros
@@ -61,116 +55,39 @@
  *****************************************************************************/
 
 /**
- * Abstracts the physical board interface.
+ * Abstracts the physical robot constants.
  */
-class IBoard
+namespace RobotConstants
 {
-public:
+    /**
+     * Gear ratio multiplied with 1000.
+     */
+    static const uint32_t   GEAR_RATIO              = 75810;
 
     /**
-     * Destroys the board interface.
+     * Encoder resolution in counts per revolution of the motor shaft.
      */
-    virtual ~IBoard()
-    {
-    }
+    static const uint16_t   ENCODER_RESOLUTION      = 12;
 
     /**
-     * Initialize the hardware.
+     * Calibrated wheel diameter in mm.
+     * This means the real wheel diameter was adapted after calibration drive.
      */
-    virtual void init() = 0;
+    static const uint32_t   WHEEL_DIAMETER          = 36;
 
     /**
-     * Get button A driver.
-     *
-     * @return Button A driver.
+     * Wheel circumference in um.
      */
-    virtual IButton& getButtonA() = 0;
+    static const uint32_t   WHEEL_CIRCUMFERENCE     = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
     /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
+     * Number of encoder steps per mm.
      */
-    virtual IButton& getButtonB() = 0;
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    virtual IButton& getButtonC() = 0;
-
-    /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    virtual IBuzzer& getBuzzer() = 0;
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    virtual IDisplay& getDisplay() = 0;
-
-    /**
-     * Get encoders driver.
-     * 
-     * @return Encoders driver.
-     */
-    virtual IEncoders& getEncoders() = 0;
-
-    /**
-     * Get line sensors driver.
-     *
-     * @return Line sensor driver.
-     */
-    virtual ILineSensors& getLineSensors() = 0;
-
-    /**
-     * Get motor driver.
-     *
-     * @return Motor driver.
-     */
-    virtual IMotors& getMotors() = 0;
-
-    /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    virtual ILed& getRedLed() = 0;
-
-    /**
-     * Get yellow LED driver.
-     *
-     * @return Yellow LED driver.
-     */
-    virtual ILed& getYellowLed() = 0;
-
-    /**
-     * Get green LED driver.
-     *
-     * @return Green LED driver.
-     */
-    virtual ILed& getGreenLed() = 0;
-
-protected:
-
-    /**
-     * Constructs the board interface.
-     */
-    IBoard()
-    {
-    }
-
-private:
-
+    static const uint32_t   ENCODER_STEPS_PER_MM    = (ENCODER_RESOLUTION * GEAR_RATIO) / WHEEL_CIRCUMFERENCE;
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* IBOARD_H */
+#endif /* ROBOTCONSTANTS_H */

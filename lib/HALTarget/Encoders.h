@@ -130,21 +130,7 @@ public:
         return m_encoders.getCountsAndResetRight();
     }
 
-    /**
-     * Get encoder resolution.
-     *
-     * @return Encoder resolution in counts per revolution of the motor shaft.
-     */
-    uint16_t getResolution() const final
-    {
-        return RESOLUTION;
-    }
-
 private:
-    /**
-     * Encoder resolution in counts per revolution of the motor shaft.
-     */
-    static const uint16_t RESOLUTION = 12;
 
     Zumo32U4Encoders m_encoders; /**< Zumo encoders driver from Pololu */
 };

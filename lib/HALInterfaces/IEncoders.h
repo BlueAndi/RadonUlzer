@@ -109,13 +109,6 @@ public:
      */
     virtual int16_t getCountsAndResetRight() = 0;
 
-    /**
-     * Get encoder resolution.
-     *
-     * @return Encoder resolution in counts per revolution of the motor shaft.
-     */
-    virtual uint16_t getResolution() const = 0;
-
 protected:
     /**
      * Constructs the interface.

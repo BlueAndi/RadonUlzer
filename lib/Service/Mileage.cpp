@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include <Mileage.h>
 #include <Board.h>
+#include <RobotConstants.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -60,6 +61,7 @@ Mileage Mileage::m_instance;
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
+
 void Mileage::clear()
 {
     (void)m_encoders.getCountsAndResetLeft();
@@ -106,7 +108,7 @@ uint32_t Mileage::getMileageCenter() const
 {
     uint32_t encoderSteps = (m_encoderStepsLeft + m_encoderStepsRight) / 2;
 
-    return encoderSteps / getStepsPerMM();
+    return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
 }
 
 int16_t Mileage::getSpeedCenter() const
@@ -124,21 +126,18 @@ int16_t Mileage::getSpeedRight() const
     return m_speedRight;
 }
 
-/* PROTECTED METHODES *****************************************************************************/
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
 
-/* PRIVATE METHODES *******************************************************************************/
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
 
-/**************************************************************************************************/
-uint32_t Mileage::getStepsPerMM() const
-{
-    /* Number of encoder steps per mm:
-     * length = wheel size * ( (steps / encoder resolution) / gear ratio )
-     * length = (wheel size * steps ) / (encoder resolution * gear ratio)
-     * steps = length * (encoder resolution * gear ratio) / wheel size
-     */
-    return (10UL * m_encoders.getResolution() * Board::getInstance().getGearRatio()) / Board::getInstance().getWheelCircumference();
-}
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
 
-/* EXTERNAL FUNCTIONS *****************************************************************************/
-
-/* INTERNAL FUNCTIONS *****************************************************************************/
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

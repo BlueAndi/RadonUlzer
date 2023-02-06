@@ -156,13 +156,6 @@ private:
 
     Mileage(const Mileage& value);
     Mileage& operator=(const Mileage& value);
-
-    /**
-     * Get number of encoder steps per mm.
-     *
-     * @return Number of encoder steps per mm.
-     */
-    uint32_t getStepsPerMM() const;
 };
 
 /******************************************************************************

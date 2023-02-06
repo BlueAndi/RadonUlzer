@@ -224,16 +224,6 @@ public:
         return ret;
     }
 
-    /**
-     * Get encoder resolution.
-     *
-     * @return Encoder resolution in counts per revolution of the motor shaft.
-     */
-    uint16_t getResolution() const
-    {
-        return m_encoders.getResolution();
-    }
-
 private:
 
     IEncoders& m_encoders;          /**< Encoder implementation that provides continuous count. */

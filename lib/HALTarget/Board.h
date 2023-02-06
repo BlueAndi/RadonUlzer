@@ -198,36 +198,6 @@ public:
         return m_ledGreen;
     }
 
-    /**
-     * Get gearbox gear ratio.
-     * 
-     * @return Gear ratio multiplied with 100. 
-     */
-    uint16_t getGearRatio() const final
-    {
-        return 7581;
-    }
-
-    /**
-     * Get the wheel diameter.
-     * 
-     * @return Wheel diameter in mm.
-     */
-    uint32_t getWheelDiameter() const
-    {
-        return WHEEL_DIAMETER;
-    }
-
-    /**
-     * Get the wheel circumference.
-     * 
-     * @return Wheel circumference in mm.
-     */
-    uint32_t getWheelCircumference() const
-    {
-        return WHEEL_CIRCUMFERENCE;
-    }
-
 protected:
 
 private:
@@ -264,15 +234,6 @@ private:
 
     /** Red LED driver */
     LedGreen m_ledGreen;
-
-    /**
-     * Calibrated wheel diameter in mm.
-     * This means the real wheel diameter was adapted after calibration drive.
-     */
-    static const uint32_t WHEEL_DIAMETER = 36;
-
-    /** Wheel circumference in um. */
-    static const uint32_t WHEEL_CIRCUMFERENCE = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
     /**
      * Constructs the concrete board.

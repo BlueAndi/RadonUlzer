@@ -71,20 +71,13 @@ package "HAL" as hal {
         + getMotors() : IMotors&
     }
 
-    class Setup << namespace >> {
-        + registerButtonA(button : IButton&) : void
-        + registerButtonB(button : IButton&) : void
-        + registerButtonC(button : IButton&) : void
-        + registerDisplay(display : IDisplay&) : void
-        + registerEncoders(encoders : IEncoders&) : void
-        + registerLedRed(led : ILed&) : void
-        + registerLedYellow(led : ILed&) : void
-        + registerLedGreen(led : ILed&) : void
-        + registerLineSensors(lineSensors : ILineSensors&) : void
-        + registerMotors(motors : IMotors&) : void
+    class RobotConstants {
+        + GEAR_RATIO : uint32_t
+        + ENCODER_RESOLUTION : uint16_t
+        + WHEEL_DIAMETER : uint32_t
+        + WHEEL_CIRCUMFERENCE : uint32_t
+        + ENCODER_STEPS_PER_MM : uint32_t
     }
-
-    Board +-- Setup
 
     note top of Board
         Defines the physical board with all actor
@@ -92,8 +85,9 @@ package "HAL" as hal {
         every driver via the board.
     end note
 
-    note right of Setup
-        Mocks for the test can be registered on demand.
+    note top of RobotConstants
+        Provides robot specific constants, e.g. given by
+        mechanic parts.
     end note
 
     package "Target" as target {

@@ -61,18 +61,16 @@ public:
     /**
      * Constructs the encoders adapter.
      * 
-     * @param[in] gearRatio             Gear ratio
      * @param[in] wheelCircumference    Wheel circumference in mm
      * @param[in] posSensorLeft         The left position sensor
      * @param[in] posSensorRight        The right position sensor
      */
-    Encoders(uint16_t gearRatio, uint32_t wheelCircumference, webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) : 
+    Encoders(webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) : 
         IEncoders(), 
         m_posSensorLeft(posSensorLeft),
         m_posSensorRight(posSensorRight),
         m_lastResetValueLeft(0.0f),
-        m_lastResetValueRight(0.0f),
-        m_stepsPerMM((10UL * RESOLUTION * gearRatio) / wheelCircumference)
+        m_lastResetValueRight(0.0f)
     {
     }
 
@@ -121,24 +119,7 @@ public:
      */
     int16_t getCountsAndResetRight() final;
 
-    /**
-     * Get encoder resolution.
-     *
-     * @return Encoder resolution in counts per revolution of the motor shaft.
-     */
-    uint16_t getResolution() const final
-    {
-        return RESOLUTION;
-    }
-
 private:
-    /**
-     * Encoder resolution in counts per revolution of the motor shaft.
-     */
-    static const uint16_t   RESOLUTION = 12;
-
-    /* Conversion factor from mm to m. */
-    static const uint16_t   MILLIMETER = 1000;
 
     /* The position sensor of the left motor in the robot simulation. */
     webots::PositionSensor* m_posSensorLeft;
@@ -151,9 +132,6 @@ private:
 
     /* Reset value needed to calculate the steps. */
     double m_lastResetValueRight;
-
-    /* The encoder steps the real robot makes per mm driven. */
-    uint8_t m_stepsPerMM;
 };
 
 /******************************************************************************

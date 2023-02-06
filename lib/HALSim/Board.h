@@ -201,36 +201,6 @@ public:
         return m_ledGreen;
     }
 
-    /**
-     * Get gearbox gear ratio.
-     *
-     * @return Gear ratio multiplied with 100.
-     */
-    uint16_t getGearRatio() const final
-    {
-        return 7581;
-    }
-
-    /**
-     * Get the wheel diameter.
-     *
-     * @return Wheel diameter in mm.
-     */
-    uint32_t getWheelDiameter() const
-    {
-        return WHEEL_DIAMETER;
-    }
-
-    /**
-     * Get the wheel circumference.
-     * 
-     * @return Wheel circumference in mm.
-     */
-    uint32_t getWheelCircumference() const
-    {
-        return WHEEL_CIRCUMFERENCE;
-    }
-
 protected:
 
 private:
@@ -355,7 +325,7 @@ private:
         m_buttonC(m_keyboard),
         m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(getGearRatio(), WHEEL_CIRCUMFERENCE, m_robot.getPositionSensor(ENCODER_LEFT_NAME),
+        m_encoders(m_robot.getPositionSensor(ENCODER_LEFT_NAME),
                    m_robot.getPositionSensor(ENCODER_RIGHT_NAME)),
         m_lineSensors(m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                       m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
