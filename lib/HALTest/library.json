@@ -1,5 +1,5 @@
 {
-    "name": "ArduinoNative",
+    "name": "HALTest",
     "version": "0.1.0",
     "description": "...",
     "authors": [{
@@ -9,7 +9,9 @@
         "maintainer": true
     }],
     "license": "MIT",
-    "dependencies": [],
+    "dependencies": [{
+        "name": "HALInterfaces"
+    }],
     "frameworks": "*",
     "platforms": "*"
 }

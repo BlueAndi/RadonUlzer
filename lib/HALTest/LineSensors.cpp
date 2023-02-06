@@ -25,160 +25,56 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Line sensors array realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup HAL
- *
- * @{
  */
-
-#ifndef ARDUINO_H
-#define ARDUINO_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
-
-#define _USE_MATH_DEFINES
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "LineSensors.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
 
-class Serial_
+/******************************************************************************
+ * Prototypes
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+bool LineSensors::isCalibrationSuccessful()
 {
-public:
-
-    Serial_()
-    {
-    }
-
-    ~Serial_()
-    {
-    }
-
-    void begin(unsigned long baudrate)
-    {
-        (void)baudrate;
-    }
-
-    void end()
-    {
-    }
-
-    void print(const char str[])
-    {
-        printf("%s", str);
-    }
-
-    void print(uint8_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
-    }
-
-private:
-
-};
-
-extern Serial_ Serial;
+    return false;
+}
 
 /******************************************************************************
- * Functions
+ * Protected Methods
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
 
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
 
-#endif  /* ARDUINO_H */
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

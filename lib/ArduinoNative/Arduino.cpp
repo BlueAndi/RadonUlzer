@@ -66,6 +66,9 @@
  * Local Variables
  *****************************************************************************/
 
+/** Serial driver, used by Arduino applications. */
+Serial_ Serial;
+
 #ifndef UNIT_TEST
 
 /**
@@ -73,9 +76,6 @@
  * Everything above would cause missbehaviour in the application.
  */
 static const int MAX_TIME_STEP  = 10;
-
-/** Serial driver, used by Arduino applications. */
-Serial_ Serial;
 
 /** The milliseconds passed in the simulation since the start. */
 static unsigned long gElapsedTimeSinceReset = 0;

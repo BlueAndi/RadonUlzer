@@ -25,160 +25,66 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Green LED realization
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALTarget
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef LEDGREEN_H
+#define LEDGREEN_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "ILed.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/** This class provides access to the Zumo target green LED. */
+class LedGreen : public ILed
 {
 public:
-
-    Serial_()
+    /**
+     * Constructs the green LED adapter.
+     */
+    LedGreen() : ILed()
     {
     }
 
-    ~Serial_()
+    /**
+     * Destroys the green LED adapter.
+     */
+    ~LedGreen()
     {
     }
 
-    void begin(unsigned long baudrate)
+    /**
+     * Enables/Disables the LED.
+     *
+     * @param[in] enableIt  Enable LED with true, disable it with false.
+     */
+    void enable(bool enableIt) final
     {
-        (void)baudrate;
-    }
-
-    void end()
-    {
-    }
-
-    void print(const char str[])
-    {
-        printf("%s", str);
-    }
-
-    void print(uint8_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
     }
 
 private:
-
 };
-
-extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* LEDGREEN_H */

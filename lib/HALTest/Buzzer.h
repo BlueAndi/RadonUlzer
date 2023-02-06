@@ -25,160 +25,104 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Buzzer realization
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALTarget
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef BUZZER_H
+#define BUZZER_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "IBuzzer.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/** This class provides access to the Zumo target buzzer. */
+class Buzzer : public IBuzzer
 {
 public:
-
-    Serial_()
+    /**
+     * Constructs the buzzer adapter.
+     */
+    Buzzer() : IBuzzer()
     {
     }
 
-    ~Serial_()
+    /**
+     * Destroys the buzzer adapter.
+     */
+    ~Buzzer()
     {
     }
 
-    void begin(unsigned long baudrate)
-    {
-        (void)baudrate;
-    }
+    /**
+     * Plays the specified frequency for the specified duration.
+     *
+     * This function plays the note in the background while your program continues
+     * to execute. If you call another buzzer function while the note is playing,
+     * the new function call will overwrite the previous and take control of the
+     * buzzer.
+     *
+     * @warning @a frequency &times; @a duration / 1000 must be no greater than
+     * 0xFFFF (65535). This means you can't use a duration of 65535 ms for
+     * frequencies greater than 1 kHz. For example, the maximum duration you can
+     * use for a frequency of 10 kHz is 6553 ms. If you use a duration longer than
+     * this, you will produce an integer overflow that can result in unexpected
+     * behavior.
+     *
+     * @param[in] freq        Frequency to play in 0.1 Hz.
+     * @param[in] duration    Duration of the note in milliseconds.
+     * @param[in] volume      Volume of the note (0-15).
+     */
+    void playFrequency(uint16_t freq, uint16_t duration, uint8_t volume) final;
 
-    void end()
-    {
-    }
+    /**
+     * Plays a melody sequence out of RAM.
+     * 
+     * @param[in] sequence Melody sequence in RAM
+     */
+    void playMelody(const char* sequence) final;
 
-    void print(const char str[])
-    {
-        printf("%s", str);
-    }
+    /**
+     * Plays a melody sequence out of program space.
+     * 
+     * @param[in] sequence Melody sequence in program space
+     */
+    void playMelodyPGM(const char* sequence) final;
 
-    void print(uint8_t value)
+    /**
+     * Checks whether a note, frequency, or sequence is being played.
+     *
+     * @return if the buzzer is current playing a note, frequency, or sequence it will
+     * return true otherwise false.
+     */
+    bool isPlaying() final
     {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
+        return false;
     }
 
 private:
 
 };
 
-extern Serial_ Serial;
-
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* BUZZER_H */

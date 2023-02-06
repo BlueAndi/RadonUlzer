@@ -25,160 +25,116 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Encoders realization
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALTarget
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef ENCODERS_H
+#define ENCODERS_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "IEncoders.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/** This class provides access to the Zumo target encoders. */
+class Encoders : public IEncoders
 {
 public:
-
-    Serial_()
+    /**
+     * Constructs the encoders adapter.
+     */
+    Encoders() : IEncoders()
     {
     }
 
-    ~Serial_()
+    /**
+     * Destroys the encoders adapter.
+     */
+    ~Encoders()
     {
     }
 
-    void begin(unsigned long baudrate)
+    /**
+     * Returns the number of counts that have been detected from the left-side
+     * encoder.  These counts start at 0. Positive counts correspond to forward
+     * movement of the left side of the robot, while negative counts correspond
+     * to backwards movement.
+     *
+     * The count is returned as a signed 16-bit integer. When the count goes
+     * over 32767, it will overflow down to -32768.  When the count goes below
+     * -32768, it will overflow up to 32767.
+     * 
+     * @return Encoder steps left
+     */
+    int16_t getCountsLeft() final
     {
-        (void)baudrate;
+        return 0;
     }
 
-    void end()
+    /**
+     * Returns the number of counts that have been detected from the right-side
+     * encoder.  These counts start at 0. Positive counts correspond to forward
+     * movement of the left side of the robot, while negative counts correspond
+     * to backwards movement.
+     *
+     * The count is returned as a signed 16-bit integer. When the count goes
+     * over 32767, it will overflow down to -32768.  When the count goes below
+     * -32768, it will overflow up to 32767.
+     * 
+     * @return Encoder steps right
+     */
+    int16_t getCountsRight() final
     {
+        return 0;
     }
 
-    void print(const char str[])
+    /**
+     * This function is just like getCountsLeft() except it also clears the
+     * counts before returning. If you call this frequently enough, you will
+     * not have to worry about the count overflowing.
+     * 
+     * @return Encoder steps left
+     */
+    int16_t getCountsAndResetLeft() final
     {
-        printf("%s", str);
+        return 0;
     }
 
-    void print(uint8_t value)
+    /**
+     * This function is just like getCountsRight() except it also clears the
+     * counts before returning. If you call this frequently enough, you will
+     * not have to worry about the count overflowing.
+     * 
+     * @return Encoder steps right
+     */
+    int16_t getCountsAndResetRight() final
     {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
+        return 0;
     }
 
 private:
 
 };
 
-extern Serial_ Serial;
-
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* ENCODERS_H */

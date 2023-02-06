@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,103 +25,56 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef CALIBRATION_STATE_H
-#define CALIBRATION_STATE_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IState.h"
-#include <SimpleTimer.h>
-#include <RelativeEncoders.h>
 #include <Board.h>
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The system calibration state. */
-class CalibrationState : public IState
-{
-public:
-    /**
-     * Get state instance.
-     *
-     * @return State instance.
-     */
-    static CalibrationState& getInstance()
-    {
-        static CalibrationState instance;
-
-        /* Singleton idiom to force initialization during first usage. */
-
-        return instance;
-    }
-
-    /**
-     * If the state is entered, this method will called once.
-     */
-    void entry() final;
-
-    /**
-     * Processing the state.
-     *
-     * @param[in] sm State machine, which is calling this state.
-     */
-    void process(StateMachine& sm) final;
-
-    /**
-     * If the state is left, this method will be called once.
-     */
-    void exit() final;
-
-protected:
-private:
-    /**
-     * Duration in ms about to wait, until the calibration drive starts.
-     */
-    static const uint32_t WAIT_TIME = 1000;
-
-    SimpleTimer m_timer; /**< Timer used to wait, until the calibration drive starts. */
-    uint16_t    m_steps; /**< Calibration steps, used to determine the rotation direction during calibration drive. */
-    RelativeEncoders m_encoder; /**< Encoders used to turn the robot over the track with the sensors. */
-
-    /**
-     * Default constructor.
-     */
-    CalibrationState() : m_timer(), m_steps(0), m_encoder(Board::getInstance().getEncoders())
-    {
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~CalibrationState()
-    {
-    }
-
-    CalibrationState(const CalibrationState& state);
-    CalibrationState& operator=(const CalibrationState& state);
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* CALIBRATION_STATE_H */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+void Board::init()
+{
+    m_lineSensors.init();
+}
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

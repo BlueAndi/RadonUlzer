@@ -25,160 +25,158 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Display realization
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALTarget
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef DISPLAY_H
+#define DISPLAY_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "IDisplay.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/** This class provides access to the Zumo target LCD. */
+class Display : public IDisplay
 {
 public:
-
-    Serial_()
+    /**
+     * Constructs the display adapter.
+     */
+    Display() : IDisplay()
     {
     }
 
-    ~Serial_()
+    /**
+     * Destroys the display adapter.
+     */
+    ~Display()
     {
     }
 
-    void begin(unsigned long baudrate)
-    {
-        (void)baudrate;
-    }
-
-    void end()
+    /**
+     * Clear the display and set the cursor to the upper left corner.
+     */
+    void clear() final
     {
     }
 
-    void print(const char str[])
+    /**
+     * Set the cursor to the given position.
+     *
+     * @param[in] xCoord x-coordinate, 0 is the most left position.
+     * @param[in] yCoord y-coordinate, 0 is the most upper position.
+     */
+    void gotoXY(uint8_t xCoord, uint8_t yCoord) final
     {
-        printf("%s", str);
     }
 
-    void print(uint8_t value)
+    /**
+     * Print the string to the display at the current cursor position.
+     *
+     * @param[in] str   String
+     *
+     * @return Printed number of characters
+     */
+    size_t print(const char str[]) final
     {
-        printf("%u", value);
+        return 0;
     }
 
-    void print(uint16_t value)
+    /**
+     * Print the unsigned 8-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(uint8_t value) final
     {
-        printf("%u", value);
+        return 0;
     }
 
-    void print(uint32_t value)
+    /**
+     * Print the unsigned 16-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(uint16_t value) final
     {
-        printf("%u", value);
+        return 0;
     }
 
-    void print(int8_t value)
+    /**
+     * Print the unsigned 32-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(uint32_t value) final
     {
-        printf("%d", value);
+        return 0;
     }
 
-    void print(int16_t value)
+    /**
+     * Print the signed 8-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(int8_t value) final
     {
-        printf("%d", value);
+        return 0;
     }
 
-    void print(int32_t value)
+    /**
+     * Print the signed 16-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(int16_t value) final
     {
-        printf("%d", value);
+        return 0;
     }
 
-    void println(const char str[])
+    /**
+     * Print the signed 32-bit value to the display at the current cursor position.
+     *
+     * @param[in] value Value
+     *
+     * @return Printed number of characters
+     */
+    size_t print(int32_t value) final
     {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
+        return 0;
     }
 
 private:
-
 };
-
-extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* DISPLAY_H */

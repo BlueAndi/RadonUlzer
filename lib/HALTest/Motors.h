@@ -25,160 +25,105 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Motors realization
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALTarget
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef MOTORS_H
+#define MOTORS_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
+#include "IMotors.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/** This class provides access to the Zumo target motors. */
+class Motors : public IMotors
 {
 public:
-
-    Serial_()
+    /**
+     * Constructs the motors adapter.
+     */
+    Motors() : IMotors()
     {
     }
 
-    ~Serial_()
+    /**
+     * Destroys the motors adapter.
+     */
+    ~Motors()
     {
     }
 
-    void begin(unsigned long baudrate)
+    /**
+     * Sets the speeds for both motors.
+     *
+     * @param[in] leftSpeed A number from -400 to 400 representing the speed and
+     * direction of the right motor. Values of -400 or less result in full speed
+     * reverse, and values of 400 or more result in full speed forward.
+     * @param[in] rightSpeed A number from -400 to 400 representing the speed and
+     * direction of the right motor. Values of -400 or less result in full speed
+     * reverse, and values of 400 or more result in full speed forward.
+     */
+    void setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
     {
-        (void)baudrate;
     }
 
-    void end()
+    /**
+     * Get maximum speed of the motors in digits.
+     *
+     * @return Max. speed in digits
+     */
+    int16_t getMaxSpeed() const final
     {
+        return MAX_SPEED;
     }
 
-    void print(const char str[])
+    /**
+     * Get the current speed of the left motor.
+     *
+     * @return The left motor speed in digits.
+     */
+    int16_t getLeftSpeed() final
     {
-        printf("%s", str);
+        return 0;
     }
 
-    void print(uint8_t value)
+    /**
+     * Get the current speed of the right motor.
+     *
+     * @return The right motor speed in digits.
+     */
+    int16_t getRightSpeed() final
     {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
+        return 0;
     }
 
 private:
-
+    /**
+     * The maximum speed of a single motor in PWM digits.
+     */
+    static const int16_t MAX_SPEED = 400;
 };
-
-extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* MOTORS_H */

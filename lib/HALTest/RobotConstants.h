@@ -25,160 +25,69 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Robot specific constants
  * @author Andreas Merkle <web@blue-andi.de>
  * 
- * @addtogroup HAL
+ * @addtogroup HALInterfaces
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef ROBOTCONSTANTS_H
+#define ROBOTCONSTANTS_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <Arduino.h>
 #include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
-#include <string.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#define PSTR
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-class Serial_
+/**
+ * Abstracts the physical robot constants.
+ */
+namespace RobotConstants
 {
-public:
+    /**
+     * Gear ratio multiplied with 1000.
+     */
+    static const uint32_t   GEAR_RATIO              = 75810;
 
-    Serial_()
-    {
-    }
+    /**
+     * Encoder resolution in counts per revolution of the motor shaft.
+     */
+    static const uint16_t   ENCODER_RESOLUTION      = 12;
 
-    ~Serial_()
-    {
-    }
+    /**
+     * Calibrated wheel diameter in mm.
+     * This means the real wheel diameter was adapted after calibration drive.
+     */
+    static const uint32_t   WHEEL_DIAMETER          = 36;
 
-    void begin(unsigned long baudrate)
-    {
-        (void)baudrate;
-    }
+    /**
+     * Wheel circumference in um.
+     */
+    static const uint32_t   WHEEL_CIRCUMFERENCE     = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
-    void end()
-    {
-    }
-
-    void print(const char str[])
-    {
-        printf("%s", str);
-    }
-
-    void print(uint8_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
-    }
-
-private:
-
+    /**
+     * Number of encoder steps per mm.
+     */
+    static const uint32_t   ENCODER_STEPS_PER_MM    = (ENCODER_RESOLUTION * GEAR_RATIO) / WHEEL_CIRCUMFERENCE;
 };
-
-extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif /* ROBOTCONSTANTS_H */
