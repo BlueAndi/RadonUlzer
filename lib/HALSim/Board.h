@@ -304,15 +304,6 @@ private:
     LedGreen m_ledGreen;
 
     /**
-     * Calibrated wheel diameter in mm.
-     * This means the real wheel diameter was adapted after calibration drive.
-     */
-    static const uint32_t WHEEL_DIAMETER = 36;
-
-    /** Wheel circumference in um. */
-    static const uint32_t WHEEL_CIRCUMFERENCE = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
-
-    /**
      * Constructs the concrete board.
      */
     Board() :
