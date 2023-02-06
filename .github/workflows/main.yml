@@ -100,6 +100,9 @@ jobs:
     - name: Perform static checks on target a-star32U4
       run: platformio check --environment a-star32U4
 
+    - name: Perform test on target Test (native)
+      run: platformio test --environment Test
+
   # Build documentation
   doc:
     # The type of runner that the job will run on.
