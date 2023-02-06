@@ -100,9 +100,6 @@ jobs:
     - name: Perform static checks on target a-star32U4
       run: platformio check --environment a-star32U4
 
-    - name: Perform static checks on target WebotsSim
-      run: platformio check --environment WebotsSim
-
   # Build documentation
   doc:
     # The type of runner that the job will run on.
