@@ -1,0 +1,31 @@
+@startuml
+
+title Layers
+
+package Application
+package Service
+package HAL
+
+Application ..> Service: <<access>>
+Application ...> HAL: <<access>>
+
+Service ..> HAL: <<access>>
+
+package "HAL" as halDetail {
+    package HALInterfaces
+    package HALTarget
+    package HALSim
+    package HALTest
+
+    HALInterfaces <|.. HALTarget: <<realize>>
+    HALInterfaces <|.. HALSim: <<realize>>
+    HALInterfaces <|.. HALTest: <<realize>>
+}
+
+HAL -[hidden]-- halDetail
+
+note top of halDetail
+    HAL white box view
+end note
+
+@enduml
