@@ -38,7 +38,7 @@
 
 ### Layers
 
-![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Layers.plantuml)
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/DevelopmentView/Layers.plantuml)
 
 ## Logical View
 
@@ -60,7 +60,7 @@
 
 #### Release Track
 
-![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/ReleaseState.plantuml)
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/ReleaseTrackState.plantuml)
 
 #### Driving
 
