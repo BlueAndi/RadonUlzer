@@ -37,10 +37,16 @@
 #include "StartupState.h"
 #include <Board.h>
 #include <Mileage.h>
+#include <Logging.h>
+#include <LogSinkPrinter.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
+
+#ifndef CONFIG_LOG_SEVERITY
+#define CONFIG_LOG_SEVERITY     (Logging::LOG_LEVEL_INFO)
+#endif /* CONFIG_LOG_SEVERITY */
 
 /******************************************************************************
  * Types and Classes
@@ -57,6 +63,9 @@
 /** The system state machine. */
 static StateMachine gSystemStateMachine;
 
+/** Serial log sink */
+static LogSinkPrinter   gLogSinkSerial("Serial", &Serial);
+
 /******************************************************************************
  * External functions
  *****************************************************************************/
@@ -68,6 +77,16 @@ static StateMachine gSystemStateMachine;
 void setup() // cppcheck-suppress unusedFunction
 {
     Board::getInstance().init();
+    Serial.begin(115200);
+
+    /* Register serial log sink and select it per default. */
+    if (true == Logging::getInstance().registerSink(&gLogSinkSerial))
+    {
+        Logging::getInstance().selectSink("Serial");
+    }
+    
+    Logging::getInstance().setLogLevel(CONFIG_LOG_SEVERITY);
+
     gSystemStateMachine.setState(&StartupState::getInstance());
 }
 
