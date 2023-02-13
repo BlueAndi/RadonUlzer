@@ -63,7 +63,7 @@ void LogSinkPrinter::send(const Logging::Msg& msg)
     if (nullptr != m_output)
     {
         char            buffer[LOG_MESSAGE_BUFFER_SIZE] = { 0 };
-        uint16_t             written                         = 0;
+        uint16_t        written                         = 0;
         const char*     STR_CUT_OFF_SEQ                 = "...\n";
         const uint16_t  STR_CUT_OFF_SEQ_LEN             = strlen(STR_CUT_OFF_SEQ);
 
