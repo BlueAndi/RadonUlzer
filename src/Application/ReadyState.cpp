@@ -36,6 +36,7 @@
 #include <Board.h>
 #include "StateMachine.h"
 #include "ReleaseTrackState.h"
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -97,17 +98,26 @@ void ReadyState::process(StateMachine& sm)
         int16_t         position     = lineSensors.readLine();
         const uint16_t* sensorValues = lineSensors.getSensorValues();
 
+        char msg[Logging::MESSAGE_BUFFER_SIZE] = "";
+        char tmp[10U] = {0};
+
         /* Print line sensor value on console for debug purposes. */
         for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
         {
+            
             if (0 < index)
             {
-                Serial.print(" / ");
+                strcat(msg, " / ");
             }
-            Serial.print(sensorValues[index]);
+            
+            snprintf(tmp, 10U, "%u", sensorValues[index]);
+            strcat(msg, tmp);
         }
-        Serial.print(" -> ");
-        Serial.println(position);
+        strcat(msg, " -> ");
+        snprintf(tmp, 10U, "%u\n", position);
+        strcat(msg, tmp);
+
+        LOG_DEBUG(msg);
 
         m_timer.restart();
     }
