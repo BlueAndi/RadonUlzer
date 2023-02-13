@@ -107,14 +107,14 @@ void Logging::unregisterSink(LogSink* sink)
     }
 }
 
-bool Logging::selectSink(const String& name)
+bool Logging::selectSink(const char* name)
 {
     bool    status  = false;
     uint8_t index   = 0U;
 
     while((MAX_SINKS > index) && (false == status))
     {
-        if (m_sinks[index]->getName() == name)
+        if (0U == strcmp(m_sinks[index]->getName(), name))
         {
             m_selectedSink = m_sinks[index];
             status = true;
@@ -173,48 +173,6 @@ void Logging::processLogMessage(const char* file, int line, const Logging::LogLe
         msg.filename    = getBaseNameFromPath(file);
         msg.line        = line;
         msg.str         = buffer;
-
-        m_selectedSink->send(msg);
-    }
-    else
-    {
-        /* LogMessage is discarded! */
-    }
-}
-
-void Logging::processLogMessage(const char* file, int line, const Logging::LogLevel messageLogLevel, const String& message)
-{
-    if ((true == isSeverityEnabled(messageLogLevel)) &&
-        (nullptr != m_selectedSink))
-    {
-        Msg msg;
-
-        msg.timestamp   = millis();
-        msg.level       = messageLogLevel;
-        msg.filename    = getBaseNameFromPath(file);
-        msg.line        = line;
-        msg.str         = message.c_str();
-
-        m_selectedSink->send(msg);
-    }
-    else
-    {
-        /* LogMessage is discarded! */
-    }
-}
-
-void Logging::processLogMessage(uint32_t timestamp, const String& logger, const LogLevel messageLogLevel, const String& message)
-{
-    if ((true == isSeverityEnabled(messageLogLevel)) &&
-        (nullptr != m_selectedSink))
-    {
-        Msg msg;
-
-        msg.timestamp   = timestamp;
-        msg.level       = messageLogLevel;
-        msg.filename    = logger.c_str();
-        msg.line        = 0;
-        msg.str         = message.c_str();
 
         m_selectedSink->send(msg);
     }

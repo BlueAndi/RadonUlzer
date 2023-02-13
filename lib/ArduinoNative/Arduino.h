@@ -51,7 +51,6 @@
 #include <math.h>
 #include <string.h>
 #include <Print.h>
-#include <WString.h>
 
 /******************************************************************************
  * Macros

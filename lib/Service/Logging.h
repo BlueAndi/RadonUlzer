@@ -226,7 +226,7 @@ public:
      *
      * @return If sink is selected, it will return true otherwise false.
      */
-    bool selectSink(const String& name);
+    bool selectSink(const char* name);
 
     /**
      * Get selected sink.
@@ -262,32 +262,6 @@ public:
      * @note The max. size of a logMessage is restricted by MESSAGE_BUFFER_SIZE.
      */
     void processLogMessage(const char* file, int line, const LogLevel messageLogLevel, const char* format, ...);
-
-    /**
-     * Write a formatable logMessage to the current output,
-     * if the severity is >= the current logLevel, otherwise the logMessage is discarded.
-     *
-     * @param[in] file              Name of the file
-     * @param[in] line              Line number in the file
-     * @param[in] messageLogLevel   The logLevel.
-     * @param[in] message           The message as string.
-     *
-     * @note The max. size of a logMessage is restricted by MESSAGE_BUFFER_SIZE.
-     */
-    void processLogMessage(const char* file, int line, const LogLevel messageLogLevel, const String& message);
-
-    /**
-     * Write a formatable logMessage to the current output,
-     * if the severity is >= the current logLevel, otherwise the logMessage is discarded.
-     *
-     * @param[in] timestamp         Timestamp in ms.
-     * @param[in] logger            Logger name.
-     * @param[in] messageLogLevel   The logLevel.
-     * @param[in] message           The message as string.
-     *
-     * @note The max. size of a logMessage is restricted by MESSAGE_BUFFER_SIZE.
-     */
-    void processLogMessage(uint32_t timestamp, const String& logger, const LogLevel messageLogLevel, const String& message);
 
     /** Number of supported log sinks. */
     static const uint8_t MAX_SINKS = 2U;
@@ -376,7 +350,7 @@ public:
      *
      * @return Name of the sink.
      */
-    virtual const String& getName() const = 0;
+    virtual const char* getName() const = 0;
 
     /**
      * Send a log message to this sink.

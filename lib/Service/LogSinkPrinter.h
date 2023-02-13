@@ -76,8 +76,8 @@ public:
      * @param[in] name      Name of the sink
      * @param[in] output    Printer
      */
-    LogSinkPrinter(const String& name, Print* output) :
-        m_name(name),
+    LogSinkPrinter(const char* name, Print* output) :
+        m_name((char *)name),
         m_output(output)
     {
     }
@@ -114,9 +114,9 @@ public:
      *
      * @param[in] name Name of the sink
      */
-    void setName(const String& name)
+    void setName(const char* name)
     {
-        m_name = name;
+        m_name = (char *)name;
     }
 
     /**
@@ -124,7 +124,7 @@ public:
      *
      * @return Name of the sink.
      */
-    const String& getName() const final
+    const char* getName() const final
     {
         return m_name;
     }
@@ -153,7 +153,7 @@ public:
 
 private:
 
-    String  m_name;     /**< Name of the sink */
+    char*  m_name;     /**< Name of the sink */
     Print*  m_output;   /**< Log sink output */
 
     LogSinkPrinter(const LogSinkPrinter& sink);
