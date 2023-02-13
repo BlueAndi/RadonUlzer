@@ -87,6 +87,8 @@ void setup() // cppcheck-suppress unusedFunction
     
     Logging::getInstance().setLogLevel(CONFIG_LOG_SEVERITY);
 
+    LOG_INFO("Logger Initialized");
+
     gSystemStateMachine.setState(&StartupState::getInstance());
 }
 
