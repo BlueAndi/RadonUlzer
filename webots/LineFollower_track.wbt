@@ -3,6 +3,7 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
 
 WorldInfo {
   info [
@@ -21,8 +22,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.31777876884105705 0.13852143467609487 -0.9379917196911379 2.365315370938181
-  position 1.095118422716392 1.4180219273298345 1.5314026488317196
+  orientation 0.2842715722241727 0.1501952621995941 -0.94690604414482 2.2138090430328927
+  position 0.6949374046590175 1.7817395842985715 1.1565464704881494
 }
 TexturedBackground {
 }
@@ -59,14 +60,16 @@ RectangleArena {
   wallHeight 0.05
 }
 Robot {
-  translation -0.250771 -0.012149 0.0139993
-  rotation -2.3039459926242025e-07 3.2834789223247685e-07 -0.9999999999999195 -1.5702132051251514
+  translation -0.249993 -0.0412039 0.0139993
+  rotation -6.60216e-09 -2.69589e-07 1 1.52863
   children [
-    DEF TrackLeft Track {
+    DEF TRACK_LEFT Track {
       translation 0 0.0375 0
+      rotation 0 1 0 0
       children [
         DEF WHEEL_FL TrackWheel {
           position 0.0225 0.005
+          rotation 0.6681343103444981 -0.5261152487176364 0.5261171812507756 1.9635600942618647
           radius 0.018
           children [
             DEF TRACK_WHEEL Transform {
@@ -78,7 +81,7 @@ Robot {
                   }
                   geometry Cylinder {
                     height 0.01
-                    radius 0.018
+                    radius 0.0175
                   }
                 }
               ]
@@ -87,6 +90,7 @@ Robot {
         }
         DEF WHEEL_RL TrackWheel {
           position -0.0225 0.005
+          rotation 0.6681343103444981 -0.5261152487176364 0.5261171812507756 1.9635600942618647
           radius 0.018
           children [
             USE TRACK_WHEEL
@@ -123,22 +127,24 @@ Robot {
           maxVelocity 0.3
         }
         PositionSensor {
-          name "encoder_left"
+          name "position_sensor_left"
         }
       ]
       animatedGeometry DEF ANIM_WHEEL Shape {
-        appearance USE WHEEL_COLOR
+        appearance Rubber {
+        }
         geometry Box {
-          size 0.003 0.001 0.01
+          size 0.003 0.008 0.002
         }
       }
       geometriesCount 70
     }
-    DEF TrackRight Track {
+    DEF TRACK_RIGHT Track {
       translation 0 -0.0375 0
       children [
         DEF WHEEL_FR TrackWheel {
           position 0.0225 0.005
+          rotation 0.6681343103444981 0.5261152487176364 -0.5261171812507756 1.9635600942618647
           radius 0.018
           children [
             DEF TRACK_WHEEL Transform {
@@ -159,6 +165,7 @@ Robot {
         }
         DEF WHEEL_RR TrackWheel {
           position -0.0225 0.005
+          rotation 0.6681343103444981 0.5261152487176364 -0.5261171812507756 1.9635600942618647
           radius 0.018
           children [
             USE TRACK_WHEEL
@@ -166,24 +173,7 @@ Robot {
         }
       ]
       name "track_right"
-      boundingObject Group {
-        children [
-          Transform {
-            translation 0.0225 0 0.00499976
-            rotation 1 0 0 1.5708
-            children [
-              USE WHEEL_BO
-            ]
-          }
-          Transform {
-            translation -0.0225 0 0.00499976
-            rotation 1 0 0 1.5708
-            children [
-              USE WHEEL_BO
-            ]
-          }
-        ]
-      }
+      boundingObject USE TRACK_BO
       physics USE TRACK_PH
       device [
         LinearMotor {
@@ -191,13 +181,13 @@ Robot {
           maxVelocity 0.3
         }
         PositionSensor {
-          name "encoder_right"
+          name "position_sensor_right"
         }
       ]
       animatedGeometry USE ANIM_WHEEL
       geometriesCount 70
     }
-    DEF Display Group {
+    DEF BODY Group {
       children [
         Shape {
           appearance DEF BASECOLOR PBRAppearance {
@@ -209,7 +199,7 @@ Robot {
         }
       ]
     }
-    DEF LineSensorArray Group {
+    DEF LINE_SENSOR_ARRAY Group {
       children [
         Transform {
           translation 0.0425 0 -0.009
@@ -423,7 +413,7 @@ Robot {
         }
       ]
     }
-    DEF LEDs Group {
+    DEF LEDS Group {
       children [
         LED {
           translation -0.03 0.02 0.01
@@ -499,7 +489,7 @@ Robot {
     }
   ]
   name "Zumo"
-  boundingObject USE Display
+  boundingObject USE BODY
   physics Physics {
   }
   controller "<extern>"
