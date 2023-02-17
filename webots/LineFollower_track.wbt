@@ -22,8 +22,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.2842715722241727 0.1501952621995941 -0.94690604414482 2.2138090430328927
-  position 0.6949374046590175 1.7817395842985715 1.1565464704881494
+  orientation 0.4790106974293961 0.12926139941301237 -0.8682397378431795 2.6812989615326357
+  position 0.843170358154987 0.6349322031181632 1.5686016154844176
 }
 TexturedBackground {
 }
@@ -101,7 +101,15 @@ Robot {
       boundingObject DEF TRACK_BO Group {
         children [
           Transform {
-            translation 0.0225 0 0.00499976
+            translation 0 0 0.005
+            children [
+              Box {
+                size 0.01 0.01 0.038
+              }
+            ]
+          }
+          Transform {
+            translation 0.0225 0 0.005
             rotation 1 0 0 1.5708
             children [
               DEF WHEEL_BO Cylinder {
