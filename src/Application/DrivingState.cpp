@@ -71,6 +71,7 @@ void DrivingState::entry()
     const int16_t                      maxSpeed = Board::getInstance().getMotors().getMaxSpeed();
 
     m_observationTimer.start(OBSERVATION_DURATION);
+    m_pidProcessTime.start(0); /* Immediate */
     m_lineStatus  = LINE_STATUS_FIND_START_LINE;
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
     m_posMovAvg.clear();
@@ -81,6 +82,7 @@ void DrivingState::entry()
     m_pidCtrl.setPFactor(parSet.kPNumerator, parSet.kPDenominator);
     m_pidCtrl.setIFactor(parSet.kINumerator, parSet.kIDenominator);
     m_pidCtrl.setDFactor(parSet.kDNumerator, parSet.kDDenominator);
+    m_pidCtrl.setSampleTime(PID_PROCESS_PERIOD);
     m_pidCtrl.setLimits(-maxSpeed, maxSpeed);
     m_pidCtrl.setDerivativeOnMeasurement(true);
 }
@@ -210,7 +212,12 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
 
         if (TRACK_STATUS_FINISHED != m_trackStatus)
         {
-            adaptDriving(position);
+            if (true == m_pidProcessTime.isTimeout())
+            {
+                adaptDriving(position);
+
+                m_pidProcessTime.start(PID_PROCESS_PERIOD);
+            }
         }
     }
 }

@@ -27,7 +27,7 @@
 /**
  * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -120,8 +120,12 @@ private:
     /** Max. distance in mm after a lost track must be found again. */
     static const uint32_t MAX_DISTANCE = 200;
 
+    /** Period in ms for PID processing. */
+    static const uint32_t PID_PROCESS_PERIOD = 10;
+
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
+    SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
     PIDController<int16_t> m_pidCtrl;          /**< PID controller, used for driving. */
     int16_t                m_topSpeed;         /**< Top speed */
     LineStatus             m_lineStatus;       /**< Status of start-/end line detection */
@@ -135,6 +139,7 @@ private:
     DrivingState() :
         m_observationTimer(),
         m_lapTime(),
+        m_pidProcessTime(),
         m_pidCtrl(),
         m_topSpeed(0),
         m_lineStatus(LINE_STATUS_FIND_START_LINE),
