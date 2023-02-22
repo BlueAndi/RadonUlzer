@@ -144,6 +144,16 @@ private:
 
     /* Last position value of the right sensor in [m], used as reference. */
     double m_lastResetValueRight;
+
+    /**
+     * Calculate the absolute number of encoder steps by position change.
+     * 
+     * @param[in] lastPos   Last position in [m]
+     * @param[in] pos       Current position in [m]
+     * 
+     * @return Absolute number of encoder steps
+     */
+    int16_t calculateSteps(double lastPos, double pos) const;
 };
 
 /******************************************************************************

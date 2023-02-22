@@ -68,10 +68,7 @@ int16_t Encoders::getCountsLeft()
      */
     if (nullptr != m_posSensorLeft)
     {
-        double deltaPos   = (m_posSensorLeft->getValue() - m_lastResetValueLeft) * 1000.0f;       /* [mm] */
-        double deltaSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
-
-        steps = static_cast<int16_t>(deltaSteps);
+        steps = calculateSteps(m_lastResetValueLeft, m_posSensorLeft->getValue());
     }
 
     return steps;
@@ -86,10 +83,7 @@ int16_t Encoders::getCountsRight()
      */
     if (nullptr != m_posSensorRight)
     {
-        double deltaPos   = (m_posSensorRight->getValue() - m_lastResetValueRight) * 1000.0f;     /* [mm] */
-        double deltaSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
-
-        steps = static_cast<int16_t>(deltaSteps);
+        steps = calculateSteps(m_lastResetValueRight, m_posSensorRight->getValue());
     }
 
     return steps;
@@ -120,6 +114,36 @@ int16_t Encoders::getCountsAndResetRight()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+int16_t Encoders::calculateSteps(double lastPos, double pos) const
+{
+    int16_t steps = 0;
+
+    /* Position sensor provides NAN until the first simulation step was perfomed. */
+    if (false == isnan(pos))
+    {
+        double deltaPos     = (m_posSensorRight->getValue() - m_lastResetValueRight) * 1000.0f;     /* [mm] */
+        double encoderSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
+
+        /* Simulate int16_t wrap around. */
+        if (static_cast<double>(INT16_MAX) < encoderSteps)
+        {
+            encoderSteps = static_cast<double>(INT16_MIN) + encoderSteps - static_cast<double>(INT16_MAX);
+        }
+        else if (static_cast<double>(INT16_MIN) > encoderSteps)
+        {
+            encoderSteps = static_cast<double>(INT16_MIN) - encoderSteps + static_cast<double>(INT16_MAX);
+        }
+        else
+        {
+            ;
+        }
+
+        steps = static_cast<int16_t>(encoderSteps);
+    }
+
+    return steps;
+}
 
 /******************************************************************************
  * External Functions
