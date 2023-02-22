@@ -231,11 +231,11 @@ private:
     /** Name of the infrared emitter 4 in the robot simulation. */
     static const char* EMITTER_4_NAME;
 
-    /** Name of the encoder of the left motor in the robot simulation. */
-    static const char* ENCODER_LEFT_NAME;
+    /** Name of the position sensor of the left motor in the robot simulation. */
+    static const char* POS_SENSOR_LEFT_NAME;
 
-    /** Name of the encoder of the right motor in the robot simulation. */
-    static const char* ENCODER_RIGHT_NAME;
+    /** Name of the position sensor of the right motor in the robot simulation. */
+    static const char* POS_SENSOR_RIGHT_NAME;
 
     /** Name of the light sensor 0 in the robot simulation. */
     static const char* LIGHT_SENSOR_0_NAME;
@@ -316,8 +316,8 @@ private:
         m_buttonC(m_keyboard),
         m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(m_simTime, m_robot.getPositionSensor(ENCODER_LEFT_NAME),
-                   m_robot.getPositionSensor(ENCODER_RIGHT_NAME)),
+        m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
+                   m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
         m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                       m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
                       m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
