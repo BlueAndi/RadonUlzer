@@ -27,7 +27,7 @@
 /**
  * @brief  PID regulator
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Service
  *
  * @{
@@ -345,7 +345,7 @@ public:
             /* Limit the controller output */
             output = constrain(output, m_min, m_max);
 
-            m_integral += error;
+            m_integral         = integral;
             m_lastError        = error;
             m_lastTimestamp    = timestamp;
             m_lastOutput       = output;
