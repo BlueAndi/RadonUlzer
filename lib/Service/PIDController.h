@@ -129,12 +129,12 @@ struct Type<int32_t>
 
 /**
  * A proportional–integral–derivative controller (PID controller).
- * It is especially created for using integers instead of floating datatypes.
+ * It uses fixed point arithmetic for better performance.
  *
  * e(t) = sp(t) - pv(t)
  * co(t) = Kp * e(t) + Ki * Integral(e(t) dt) + Kd * e(t) / dt
  *
- * e(t): Error
+ * e(t):  Error
  * sp(t): Set Point
  * pv(t): Process Value
  * co(t): Controller Output
