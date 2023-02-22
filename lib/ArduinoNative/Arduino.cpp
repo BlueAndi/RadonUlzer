@@ -62,6 +62,13 @@
  * Prototypes
  *****************************************************************************/
 
+extern void setup();
+extern void loop();
+
+#ifndef UNIT_TEST
+static int simulationStep();
+#endif
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -104,16 +111,8 @@ static webots::Robot* gRobot = nullptr;
  * External Functions
  *****************************************************************************/
 
-extern void setup();
-extern void loop();
-
-#ifndef UNIT_TEST
-static int simulationStep();
-#endif
-
 #ifdef UNIT_TEST
 
-/**************************************************************************************************/
 extern int main(int argc, char** argv)
 {
     setup(); /* Prepare test */
@@ -122,7 +121,6 @@ extern int main(int argc, char** argv)
     return 0;
 }
 
-/**************************************************************************************************/
 extern unsigned long millis()
 {
     clock_t now = clock();
@@ -130,7 +128,6 @@ extern unsigned long millis()
     return (now * 1000UL) / CLOCKS_PER_SEC;
 }
 
-/**************************************************************************************************/
 extern void delay(unsigned long ms)
 {
     unsigned long timestamp = millis();
@@ -153,7 +150,7 @@ extern int main(int argc, char** argv)
 
     if (nullptr != gRobot)
     {
-        gTimeStep = (int)gRobot->getBasicTimeStep();
+        gTimeStep = static_cast<int>(gRobot->getBasicTimeStep());
     }
 
     if ((0 == gTimeStep) ||
@@ -224,8 +221,10 @@ static int simulationStep()
 
     if (nullptr != gRobot)
     {
+        /* Perform a step in the simulation. */
         ret = gRobot->step(gTimeStep);
 
+        /* Update the global system tick timer, used by millis() and delay(). */
         gElapsedTimeSinceReset += gTimeStep;
     }
 
