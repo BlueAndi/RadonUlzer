@@ -139,10 +139,10 @@ private:
     /* The position sensor of the right motor in the robot simulation. */
     webots::PositionSensor* m_posSensorRight;
 
-    /* Reset value needed to calculate the steps. */
+    /* Last position value of the left sensor in [m], used as reference. */
     double m_lastResetValueLeft;
 
-    /* Reset value needed to calculate the steps. */
+    /* Last position value of the right sensor in [m], used as reference. */
     double m_lastResetValueRight;
 };
 

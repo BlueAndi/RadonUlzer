@@ -64,11 +64,13 @@ Mileage Mileage::m_instance;
 
 void Mileage::clear()
 {
-    (void)m_encoders.getCountsAndResetLeft();
-    (void)m_encoders.getCountsAndResetRight();
+    IEncoders& encoders = Board::getInstance().getEncoders();
 
     m_encoderStepsLeft  = 0;
     m_encoderStepsRight = 0;
+
+    m_relEncLeft.setSteps(encoders.getCountsLeft());
+    m_relEncRight.setSteps(encoders.getCountsRight());
 }
 
 void Mileage::process()
@@ -79,8 +81,9 @@ void Mileage::process()
     }
     else if (true == m_timer.isTimeout())
     {
-        int16_t    stepsLeft     = m_encoders.getCountsAndResetLeft();
-        int16_t    stepsRight    = m_encoders.getCountsAndResetRight();
+        IEncoders& encoders = Board::getInstance().getEncoders();
+        int16_t    stepsLeft     = m_relEncLeft.calculate(encoders.getCountsLeft());
+        int16_t    stepsRight    = m_relEncRight.calculate(encoders.getCountsRight());
         uint16_t   absStepsLeft  = abs(stepsLeft);
         uint16_t   absStepsRight = abs(stepsRight);
         uint32_t   deltaTime     = m_timer.getCurrentDuration();
@@ -94,6 +97,10 @@ void Mileage::process()
         /* Calculate the speed of left and right */
         m_speedLeft  = (stepsLeft * 500) / deltaTime;
         m_speedRight = (stepsRight * 500) / deltaTime;
+
+        /* Clear relative encoders */
+        m_relEncLeft.setSteps(encoders.getCountsLeft());
+        m_relEncRight.setSteps(encoders.getCountsRight());
 
         m_timer.restart();
     }

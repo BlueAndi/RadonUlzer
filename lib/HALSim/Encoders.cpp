@@ -63,12 +63,15 @@ int16_t Encoders::getCountsLeft()
 {
     int16_t steps = 0;
 
-    /* The position sensor provides the driven distance in m. 
-     * The encoder steps are dervied from it.
+    /* The position sensor provides the driven distance in [m].
+     * The encoder steps are dervived from it.
      */
     if (nullptr != m_posSensorLeft)
     {
-        steps = static_cast<int16_t>((m_posSensorLeft->getValue() - m_lastResetValueLeft) * 1000 * RobotConstants::ENCODER_STEPS_PER_MM);
+        double deltaPos   = (m_posSensorLeft->getValue() - m_lastResetValueLeft) * 1000.0f;       /* [mm] */
+        double deltaSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
+
+        steps = static_cast<int16_t>(deltaSteps);
     }
 
     return steps;
@@ -78,12 +81,15 @@ int16_t Encoders::getCountsRight()
 {
     int16_t steps = 0;
 
-    /* The position sensor provides the driven distance in m. 
-     * The encoder steps are dervied from it.
+    /* The position sensor provides the driven distance in [m].
+     * The encoder steps are dervived from it.
      */
     if (nullptr != m_posSensorRight)
     {
-        steps = static_cast<int16_t>((m_posSensorRight->getValue() - m_lastResetValueLeft) * 1000 * RobotConstants::ENCODER_STEPS_PER_MM);
+        double deltaPos   = (m_posSensorRight->getValue() - m_lastResetValueRight) * 1000.0f;     /* [mm] */
+        double deltaSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
+
+        steps = static_cast<int16_t>(deltaSteps);
     }
 
     return steps;
@@ -98,13 +104,6 @@ int16_t Encoders::getCountsAndResetLeft()
     return steps;
 }
 
-/**
- * This function is just like getCountsRight() except it also clears the
- * counts before returning.  If you call this frequently enough, you will
- * not have to worry about the count overflowing.
- * 
- * @return Encoder steps right
- */
 int16_t Encoders::getCountsAndResetRight()
 {
     int16_t steps = getCountsRight();

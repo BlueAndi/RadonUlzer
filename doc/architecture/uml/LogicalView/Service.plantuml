@@ -40,6 +40,13 @@ package "Service" as serviceLayer {
         Moving average filter which can be
         configured at compile time.
     end note
+
+    class RelativeEncoder <<service>>
+
+    note top of RelativeEncoder
+        Calculates the relative encoder
+        steps from a reference point.
+    end note
 }
 
 @enduml

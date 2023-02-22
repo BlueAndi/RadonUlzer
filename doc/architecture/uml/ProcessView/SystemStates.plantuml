@@ -3,28 +3,28 @@
 title System States
 
 state StartupState
-state CalibrationState
+state LineSensorsCalibrationState
 state ErrorState
 state DrivingState
 state ReadyState
 state ReleaseTrackState
 
 [*] --> StartupState: Power up
-StartupState --> CalibrationState: [Pushbutton A triggered]
-CalibrationState --> ReadyState: [Calibration finished]
-CalibrationState --> ErrorState: [Calibration failed]
+StartupState --> LineSensorsCalibrationState: [Pushbutton A triggered]
+LineSensorsCalibrationState --> ReadyState: [Calibration finished]
+LineSensorsCalibrationState --> ErrorState: [Calibration failed]
 ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
 ReleaseTrackState --> DrivingState: [After 5s]
 ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
 DrivingState --> ReadyState: [End line detected] or\n[Track lost] or\n[End line not found after 5 min.]
-ErrorState --> CalibrationState: [Pushbutton A triggered]
+ErrorState --> LineSensorsCalibrationState: [Pushbutton A triggered]
 
 note right of StartupState
     Initialize the system and wait till
     the operator is ready for calibration.
 end note
 
-note right of CalibrationState
+note right of LineSensorsCalibrationState
     Calibrates the system on the playfield.
 end note
 

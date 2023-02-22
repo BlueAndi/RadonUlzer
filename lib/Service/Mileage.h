@@ -45,7 +45,7 @@
  *****************************************************************************/
 #include <Arduino.h>
 #include <SimpleTimer.h>
-#include <RelativeEncoders.h>
+#include <RelativeEncoder.h>
 
 /******************************************************************************
  * Macros
@@ -131,11 +131,14 @@ private:
     /** Right speed in steps/s */
     int16_t m_speedRight;
 
-    /** The encoder for the Mileage. */
-    RelativeEncoders m_encoders;
+    /** Relative encoder left */
+    RelativeEncoder m_relEncLeft;
+
+    /** Relative encoder right */
+    RelativeEncoder m_relEncRight;
 
     /**
-     * Default constructor.
+     * Construct the mileage instance.
      */
     Mileage() : 
         m_timer(), 
@@ -143,12 +146,13 @@ private:
         m_encoderStepsRight(0), 
         m_speedLeft(0), 
         m_speedRight(0),
-        m_encoders(Board::getInstance().getEncoders())
+        m_relEncLeft(),
+        m_relEncRight()
     {
     }
 
     /**
-     * Destructor.
+     * Destroy the mileage instance.
      */
     ~Mileage()
     {

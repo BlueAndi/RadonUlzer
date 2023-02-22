@@ -35,7 +35,7 @@
 #include "ErrorState.h"
 #include <Board.h>
 #include "StateMachine.h"
-#include "CalibrationState.h"
+#include "LineSensorsCalibrationState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -79,7 +79,7 @@ void ErrorState::process(StateMachine& sm)
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
-        sm.setState(&CalibrationState::getInstance());
+        sm.setState(&LineSensorsCalibrationState::getInstance());
     }
 }
 

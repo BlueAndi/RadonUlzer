@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Line sensors calibration state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "CalibrationState.h"
+#include "LineSensorsCalibrationState.h"
 #include <Board.h>
 #include "StateMachine.h"
 #include "ReadyState.h"
@@ -62,75 +62,57 @@
  * Public Methods
  *****************************************************************************/
 
-void CalibrationState::entry()
+void LineSensorsCalibrationState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    IDisplay&  display  = Board::getInstance().getDisplay();
+    IEncoders& encoders = Board::getInstance().getEncoders();
+    IMotors&   motors   = Board::getInstance().getMotors();
 
     display.clear();
     display.print("Calib");
+    display.gotoXY(0, 1);
+    display.print("LineS");
 
     /* Prepare calibration drive. */
-    m_steps = 0;
+    m_relEnc.setSteps(encoders.getCountsLeft());
+    m_steps            = 0;
+    m_calibrationSpeed = motors.getMaxSpeed() / 3;
 
     /* Wait some time, before starting the calibration drive. */
+    m_phase = PHASE_1_WAIT;
     m_timer.start(WAIT_TIME);
 }
 
-void CalibrationState::process(StateMachine& sm)
+void LineSensorsCalibrationState::process(StateMachine& sm)
 {
-    /* Wait some time so the user gets its fingers off the robot and then begin
-     * automatic sensor calibration by rotating in place to sweep the sensors
-     * over the line.
-     */
-    if (true == m_timer.isTimeout())
+    switch (m_phase)
     {
-        IMotors&      motors          = Board::getInstance().getMotors();
-        ILineSensors& lineSensors     = Board::getInstance().getLineSensors();
-        const int16_t CALIB_SPEED     = motors.getMaxSpeed() / 2;
-        const uint16_t CALIB_LR_STEPS = 600;
-        const uint16_t CALIB_STEPS_MAX = 4 * CALIB_LR_STEPS;
+    case PHASE_1_WAIT:
+        phase1Wait();
+        break;
 
-        /*
-         * The first 30 steps the robot rotates right, the next
-         * 60 steps left and then 30 steps right again.
-         */
-        if (CALIB_STEPS_MAX > m_steps)
-        {
-            if ((CALIB_LR_STEPS < m_steps) && ((CALIB_STEPS_MAX - CALIB_LR_STEPS) >= m_steps))
-            {
-                motors.setSpeeds(-CALIB_SPEED, CALIB_SPEED);
-            }
-            else
-            {
-                motors.setSpeeds(CALIB_SPEED, -CALIB_SPEED);
-            }
+    case PHASE_2_TURN_LEFT:
+        phase2TurnLeft();
+        break;
 
-            lineSensors.calibrate();
+    case PHASE_3_TURN_RIGHT:
+        phase3TurnRight();
+        break;
 
-            m_steps += abs(m_encoder.getCountsAndResetLeft());
-        }
-        else
-        {
-            motors.setSpeeds(0, 0);
+    case PHASE_4_TURN_ORIG:
+        phase4TurnOrigin();
+        break;
 
-            if (false == lineSensors.isCalibrationSuccessful())
-            {
-                char str[10];
+    case PHASE_5_FINISHED:
+        phase5Finished(sm);
+        break;
 
-                snprintf(str, sizeof(str), "Cal %u", lineSensors.getCalibErrorInfo());
-
-                ErrorState::getInstance().setErrorMsg(str);
-                sm.setState(&ErrorState::getInstance());
-            }
-            else
-            {
-                sm.setState(&ReadyState::getInstance());
-            }
-        }
+    default:
+        break;
     }
 }
 
-void CalibrationState::exit()
+void LineSensorsCalibrationState::exit()
 {
     m_timer.stop();
 }
@@ -142,6 +124,96 @@ void CalibrationState::exit()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void LineSensorsCalibrationState::phase1Wait()
+{
+    if (true == m_timer.isTimeout())
+    {
+        IEncoders& encoders = Board::getInstance().getEncoders();
+        IMotors&   motors   = Board::getInstance().getMotors();
+
+        m_relEnc.setSteps(encoders.getCountsLeft());
+
+        /* Turn left */
+        m_phase = PHASE_2_TURN_LEFT;
+        motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
+    }
+}
+
+void LineSensorsCalibrationState::phase2TurnLeft()
+{
+    IEncoders&    encoders    = Board::getInstance().getEncoders();
+    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+
+    lineSensors.calibrate();
+
+    if (CALIB_LR_STEPS <= steps)
+    {
+        IMotors& motors = Board::getInstance().getMotors();
+
+        /* Turn right */
+        m_phase = PHASE_3_TURN_RIGHT;
+        m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
+        motors.setSpeeds(m_calibrationSpeed, -m_calibrationSpeed);
+    }
+}
+
+void LineSensorsCalibrationState::phase3TurnRight()
+{
+    IEncoders&    encoders    = Board::getInstance().getEncoders();
+    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+
+    lineSensors.calibrate();
+
+    if ((2 * CALIB_LR_STEPS) <= steps)
+    {
+        IMotors& motors = Board::getInstance().getMotors();
+
+        /* Turn left */
+        m_phase = PHASE_4_TURN_ORIG;
+        m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
+        motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
+    }
+}
+
+void LineSensorsCalibrationState::phase4TurnOrigin()
+{
+    IEncoders&    encoders    = Board::getInstance().getEncoders();
+    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+
+    lineSensors.calibrate();
+
+    if (CALIB_LR_STEPS <= steps)
+    {
+        IMotors& motors = Board::getInstance().getMotors();
+
+        /* Stop */
+        m_phase = PHASE_5_FINISHED;
+        motors.setSpeeds(0, 0);
+    }
+}
+
+void LineSensorsCalibrationState::phase5Finished(StateMachine& sm)
+{
+    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+
+    if (false == lineSensors.isCalibrationSuccessful())
+    {
+        char str[10];
+
+        snprintf(str, sizeof(str), "Cal %u", lineSensors.getCalibErrorInfo());
+
+        ErrorState::getInstance().setErrorMsg(str);
+        sm.setState(&ErrorState::getInstance());
+    }
+    else
+    {
+        sm.setState(&ReadyState::getInstance());
+    }
+}
 
 /******************************************************************************
  * External Functions

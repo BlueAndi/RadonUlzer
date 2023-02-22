@@ -25,16 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Relative encoder
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
+ *
+ * @addtogroup Service
  *
  * @{
  */
 
-#ifndef CALIBRATION_STATE_H
-#define CALIBRATION_STATE_H
+#ifndef RELATIVE_ENCODER_H
+#define RELATIVE_ENCODER_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,6 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IState.h"
-#include <SimpleTimer.h>
-#include <RelativeEncoders.h>
 #include <Board.h>
 
 /******************************************************************************
@@ -56,72 +53,66 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system calibration state. */
-class CalibrationState : public IState
+/**
+ * A relative encoder provides always the step difference between a reference
+ * point (absolute number of encoder steps) to the current position (current
+ * number of encoder steps).
+ */
+class RelativeEncoder
 {
 public:
     /**
-     * Get state instance.
-     *
-     * @return State instance.
+     * Constructs a relative encoder.
+     * The reference point is set to 0 steps.
      */
-    static CalibrationState& getInstance()
+    RelativeEncoder() : m_lastSteps(0)
     {
-        static CalibrationState instance;
-
-        /* Singleton idiom to force initialization during first usage. */
-
-        return instance;
     }
 
     /**
-     * If the state is entered, this method will called once.
-     */
-    void entry() final;
-
-    /**
-     * Processing the state.
+     * Constructs a relative encoder.
+     * The reference point is assigned by the parameter.
      *
-     * @param[in] sm State machine, which is calling this state.
+     * @param[in] steps Reference point (absolute encoder steps)
      */
-    void process(StateMachine& sm) final;
+    RelativeEncoder(int16_t steps) : m_lastSteps(steps)
+    {
+    }
 
     /**
-     * If the state is left, this method will be called once.
+     * Destroys the relative encoder instance.
      */
-    void exit() final;
+    ~RelativeEncoder()
+    {
+    }
 
-protected:
+    /**
+     * Set the reference point of the encoder.
+     * The delta steps are calculated from this.
+     *
+     * @param[in] steps Reference point (absolute number of encoder steps)
+     */
+    void setSteps(int16_t steps)
+    {
+        m_lastSteps = steps;
+    }
+
+    /**
+     * Calculate the relative number of encoder steps from the given
+     * absolute encoder step number to the reference point.
+     *
+     * @param[in] steps Current absolute number of encoder steps.
+     *
+     * @return Delta steps
+     */
+    int16_t calculate(int16_t steps);
+
 private:
-    /**
-     * Duration in ms about to wait, until the calibration drive starts.
-     */
-    static const uint32_t WAIT_TIME = 1000;
-
-    SimpleTimer m_timer; /**< Timer used to wait, until the calibration drive starts. */
-    uint16_t    m_steps; /**< Calibration steps, used to determine the rotation direction during calibration drive. */
-    RelativeEncoders m_encoder; /**< Encoders used to turn the robot over the track with the sensors. */
-
-    /**
-     * Default constructor.
-     */
-    CalibrationState() : m_timer(), m_steps(0), m_encoder(Board::getInstance().getEncoders())
-    {
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~CalibrationState()
-    {
-    }
-
-    CalibrationState(const CalibrationState& state);
-    CalibrationState& operator=(const CalibrationState& state);
+    int16_t m_lastSteps; /**< Last absolute number of encoder steps. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* CALIBRATION_STATE_H */
+#endif /* ENCODERS_H */
