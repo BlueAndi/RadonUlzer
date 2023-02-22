@@ -81,7 +81,7 @@ void Mileage::process()
     }
     else if (true == m_timer.isTimeout())
     {
-        IEncoders& encoders = Board::getInstance().getEncoders();
+        IEncoders& encoders      = Board::getInstance().getEncoders();
         int16_t    stepsLeft     = m_relEncLeft.calculate(encoders.getCountsLeft());
         int16_t    stepsRight    = m_relEncRight.calculate(encoders.getCountsRight());
         uint16_t   absStepsLeft  = abs(stepsLeft);
@@ -93,10 +93,6 @@ void Mileage::process()
 
         /* Calculate absolute accumulated number steps for the left encoder. */
         m_encoderStepsRight += absStepsRight;
-
-        /* Calculate the speed of left and right */
-        m_speedLeft  = (stepsLeft * 500) / deltaTime;
-        m_speedRight = (stepsRight * 500) / deltaTime;
 
         /* Clear relative encoders */
         m_relEncLeft.setSteps(encoders.getCountsLeft());
@@ -116,21 +112,6 @@ uint32_t Mileage::getMileageCenter() const
     uint32_t encoderSteps = (m_encoderStepsLeft + m_encoderStepsRight) / 2;
 
     return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
-}
-
-int16_t Mileage::getSpeedCenter() const
-{
-    return (m_speedLeft + m_speedRight) / 2;
-}
-
-int16_t Mileage::getSpeedLeft() const
-{
-    return m_speedLeft;
-}
-
-int16_t Mileage::getSpeedRight() const
-{
-    return m_speedRight;
 }
 
 /******************************************************************************
