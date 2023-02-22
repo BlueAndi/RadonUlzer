@@ -27,14 +27,14 @@
 /**
  * @brief  Keyboard realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
  */
 
-#ifndef KEYBOARD_PRIVATE_H
-#define KEYBOARD_PRIVATE_H
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
 /******************************************************************************
  * Compile Switches
@@ -46,6 +46,8 @@
 #include <webots/Keyboard.hpp>
 #include <webots/Robot.hpp>
 
+#include "SimTime.h"
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -55,30 +57,34 @@
  *****************************************************************************/
 
 /** This class implements a custom keyboard for better functionality. */
-class KeyboardPrivate
+class Keyboard
 {
 public:
     /**
      * Constructs the encoders adapter.
      */
-    KeyboardPrivate(webots::Robot* robot, webots::Keyboard *keyboard): 
+    Keyboard(SimTime& simTime, webots::Keyboard* keyboard) :
         m_oldKeys(),
         m_newKeys(),
-        m_robot(robot), 
+        m_simTime(simTime),
         m_keyboard(keyboard)
     {
+        if (nullptr != keyboard)
+        {
+            keyboard->enable(simTime.getTimeStep());
+        }
     }
 
     /**
      * Destroys the encoders adapter.
      */
-    ~KeyboardPrivate()
+    ~Keyboard()
     {
     }
 
     /**
-     * Gets the current buttons pressed on the keyboard. Needs to be called 
-     * cyclically to work correctly.
+     * Gets the current buttons pressed on the keyboard. Needs to be called
+     * cyclically to work correct.
      */
     void getPressedButtons()
     {
@@ -87,7 +93,7 @@ public:
         {
             m_oldKeys[arrayIndex] = m_newKeys[arrayIndex];
         }
-        
+
         /* Getting the new values. Currently the limit of the simulation is seven
          * keypresses that can be detected simultaniously.
          */
@@ -99,141 +105,78 @@ public:
 
     /**
      * Checks weather the button A was pressed since the last update.
-     * 
+     *
      * @return Return true if button A was pressed since the last update
      */
     bool buttonAPressed()
     {
-        bool buttonPressed = false;
-
-        /* Checks if button A is existing in the new values, but not the old ones.
-         * If so, it's newly pressed and true is returned.
-         */
-        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
-            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
-        {
-            buttonPressed = true;
-        }
-
-        return buttonPressed;
+        return isButtonPressed(KEY_CODE_A_LOWER_CASE, KEY_CODE_A_UPPER_CASE);
     }
 
     /**
      * Checks weather the button A was released since the last update.
-     * 
+     *
      * @return Return true if button A was released since the last update
      */
     bool buttonAReleased()
     {
-        bool buttonReleased = false;
-
-        /* Checks if button A is existing in the new values, but not the old ones.
-         * If so, it's newly released and true is returned.
-         */
-        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)) && 
-            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_A_LOWER_CASE)))
-        {
-            buttonReleased = true;
-        }
-
-        return buttonReleased;
+        return isButtonReleased(KEY_CODE_A_LOWER_CASE, KEY_CODE_A_UPPER_CASE);
     }
 
     /**
      * Checks weather the button B was pressed since the last update.
-     * 
+     *
      * @return Return true if button B was pressed since the last update
      */
     bool buttonBPressed()
     {
-        bool buttonPressed = false;
-
-        /* Checks if button B is existing in the new values, but not the old ones.
-         * If so, it's newly pressed and true is returned.
-         */
-        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
-            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
-        {
-            buttonPressed = true;
-        }
-
-        return buttonPressed;
+        return isButtonPressed(KEY_CODE_B_LOWER_CASE, KEY_CODE_B_UPPER_CASE);
     }
 
     /**
      * Checks weather the button B was released since the last update.
-     * 
+     *
      * @return Return true if button B was released since the last update
      */
     bool buttonBReleased()
     {
-        bool buttonReleased = false;
-
-        /* Checks if button B is existing in the new values, but not the old ones.
-         * If so, it's newly released and true is returned.
-         */
-        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)) && 
-            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_B_UPPER_CASE, KEY_CODE_B_LOWER_CASE)))
-        {
-            buttonReleased = true;
-        }
-
-        return buttonReleased;
+        return isButtonReleased(KEY_CODE_B_LOWER_CASE, KEY_CODE_B_UPPER_CASE);
     }
 
     /**
      * Checks weather the button C was pressed since the last update.
-     * 
+     *
      * @return Return true if button C was pressed since the last update
      */
     bool buttonCPressed()
     {
-        bool buttonPressed = false;
-
-        /* Checks if button C is existing in the new values, but not the old ones.
-         * If so, it's newly pressed and true is returned.
-         */
-        if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
-            (true == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_A_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
-        {
-            buttonPressed = true;
-        }
-
-        return buttonPressed;
+        return isButtonPressed(KEY_CODE_C_LOWER_CASE, KEY_CODE_C_UPPER_CASE);
     }
 
     /**
      * Checks weather the button C was released since the last update.
-     * 
+     *
      * @return Return true if button C was released since the last update
      */
     bool buttonCReleased()
     {
-        bool buttonReleased = false;
-
-        /* Checks if button C is existing in the new values, but not the old ones.
-         * If so, it's newly released and true is returned.
-         */
-        if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)) && 
-            (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), KEY_CODE_C_UPPER_CASE, KEY_CODE_C_LOWER_CASE)))
-        {
-            buttonReleased = true;
-        }
-
-        return buttonReleased;
+        return isButtonReleased(KEY_CODE_C_LOWER_CASE, KEY_CODE_C_UPPER_CASE);
     }
 
     /**
      * Waits until Button A gets released.
      * Needs to call the robots step() method and getPressedButtons()
-     * to update the keypresses correctly and avoid getting stuck 
+     * to update the keypresses correctly and avoid getting stuck
      * in the while loop.
      */
     void waitForReleaseA()
     {
         while (!buttonAReleased())
         {
-            m_robot->step(int(m_robot->getBasicTimeStep()));
+            if (false == m_simTime.step())
+            {
+                break;
+            }
             getPressedButtons();
         }
     }
@@ -241,14 +184,17 @@ public:
     /**
      * Waits until Button B gets released.
      * Needs to call the robots step() method and getPressedButtons()
-     * to update the keypresses correctly and avoid getting stuck 
+     * to update the keypresses correctly and avoid getting stuck
      * in the while loop.
      */
     void waitForReleaseB()
     {
         while (!buttonBReleased())
         {
-            m_robot->step(int(m_robot->getBasicTimeStep()));
+            if (false == m_simTime.step())
+            {
+                break;
+            }
             getPressedButtons();
         }
     }
@@ -256,20 +202,22 @@ public:
     /**
      * Waits until Button C gets released.
      * Needs to call the robots step() method and getPressedButtons()
-     * to update the keypresses correctly and avoid getting stuck 
+     * to update the keypresses correctly and avoid getting stuck
      * in the while loop.
      */
     void waitForReleaseC()
     {
         while (!buttonCReleased())
         {
-            m_robot->step(int(m_robot->getBasicTimeStep()));
+            if (false == m_simTime.step())
+            {
+                break;
+            }
             getPressedButtons();
         }
     }
 
 private:
-
     /** The key code of the lower case a character, which simulates the button. */
     static const char KEY_CODE_A_LOWER_CASE = 'a';
 
@@ -299,16 +247,36 @@ private:
 
     webots::Keyboard* m_keyboard; /**< Robot keyboard */
 
-    webots::Robot* m_robot; /**< Robot */
+    SimTime& m_simTime; /**< Simulation time */
+
+    /**
+     * Is the button pressed?
+     *
+     * @param[in] lowerCaseChar Lower case character ASCII value
+     * @param[in] upperCaseChar Upper case character ASCII value
+     *
+     * @return If pressed, it will return true otherwise false.
+     */
+    bool isButtonPressed(char lowerCaseChar, char upperCaseChar) const;
+
+    /**
+     * Is the button released?
+     *
+     * @param[in] lowerCaseChar Lower case character ASCII value
+     * @param[in] upperCaseChar Upper case character ASCII value
+     *
+     * @return If released, it will return true otherwise false.
+     */
+    bool isButtonReleased(char lowerCaseChar, char upperCaseChar) const;
 
     /**
      * Checks whether the given array contains a element.
-     * 
+     *
      * @param[in]   array           The array where to search for the element.
      * @param[in]   arraySize       Number of array elements.
      * @param[in]   elemLowerCase   Lower case character
      * @param[in]   elemUppercase   Upper case character
-     * 
+     *
      * @return If found, it will return true otherwise false.
      */
     bool arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase) const;
@@ -318,4 +286,4 @@ private:
  * Functions
  *****************************************************************************/
 
-#endif /* KEYBOARD_PRIVATE_H */
+#endif /* KEYBOARD_H */

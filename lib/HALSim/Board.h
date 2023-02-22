@@ -27,7 +27,7 @@
 /**
  * @brief  The simulation robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
@@ -58,7 +58,8 @@
 
 #include <math.h>
 #include <webots/Robot.hpp>
-#include <KeyboardPrivate.h>
+#include <Keyboard.h>
+#include <SimTime.h>
 
 /******************************************************************************
  * Macros
@@ -202,7 +203,6 @@ public:
     }
 
 protected:
-
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;
@@ -264,11 +264,11 @@ private:
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
-    /** Own keyboard that wraps the webots keyboard. */
-    KeyboardPrivate m_keyboard;
+    /** Simulation time handler */
+    SimTime m_simTime;
 
-    /** Time step of the current world. */
-    int m_timeStep;
+    /** Own keyboard that wraps the webots keyboard. */
+    Keyboard m_keyboard;
 
     /** Button A driver */
     ButtonA m_buttonA;
@@ -309,16 +309,16 @@ private:
     Board() :
         IBoard(),
         m_robot(),
-        m_keyboard(&m_robot, m_robot.getKeyboard()),
-        m_timeStep(static_cast<int>(m_robot.getBasicTimeStep())),
+        m_simTime(m_robot),
+        m_keyboard(m_simTime, m_robot.getKeyboard()),
         m_buttonA(m_keyboard),
         m_buttonB(m_keyboard),
         m_buttonC(m_keyboard),
         m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(m_robot.getPositionSensor(ENCODER_LEFT_NAME),
+        m_encoders(m_simTime, m_robot.getPositionSensor(ENCODER_LEFT_NAME),
                    m_robot.getPositionSensor(ENCODER_RIGHT_NAME)),
-        m_lineSensors(m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
+        m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                       m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
                       m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
                       m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
@@ -328,15 +328,6 @@ private:
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME))
     {
-        m_robot.getKeyboard()->enable(m_timeStep);
-        m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME)->enable(m_timeStep);
-        m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME)->enable(m_timeStep);
-        m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME)->enable(m_timeStep);
-        m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME)->enable(m_timeStep);
-        m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(m_timeStep);
-
-        m_robot.getPositionSensor(ENCODER_LEFT_NAME)->enable(m_timeStep);
-        m_robot.getPositionSensor(ENCODER_RIGHT_NAME)->enable(m_timeStep);
     }
 
     /**
@@ -347,13 +338,13 @@ private:
     }
 
     /**
-     * Get the robot instance of the simulation.
+     * Get the simulation time handler.
      *
-     * @return The Webot robot instance.
+     * @return Simulation time handler
      */
-    webots::Robot& getRobot()
+    SimTime& getSimTime()
     {
-        return m_robot;
+        return m_simTime;
     }
 
     /**
@@ -361,7 +352,7 @@ private:
      *
      * @return The keyboard.
      */
-    KeyboardPrivate& getKeyboard()
+    Keyboard& getKeyboard()
     {
         return m_keyboard;
     }

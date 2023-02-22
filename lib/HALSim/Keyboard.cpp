@@ -32,7 +32,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "KeyboardPrivate.h"
+#include "Keyboard.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -66,7 +66,39 @@
  * Private Methods
  *****************************************************************************/
 
-bool KeyboardPrivate::arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase) const
+bool Keyboard::isButtonPressed(char lowerCaseChar, char upperCaseChar) const
+{
+    bool buttonPressed = false;
+
+    /* Checks if button is existing in the new values, but not the old ones.
+     * If so, it's newly pressed and true is returned.
+     */
+    if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), upperCaseChar, lowerCaseChar)) && 
+        (true == arrayContains(m_newKeys, sizeof(m_newKeys), upperCaseChar, lowerCaseChar)))
+    {
+        buttonPressed = true;
+    }
+
+    return buttonPressed;
+}
+
+bool Keyboard::isButtonReleased(char lowerCaseChar, char upperCaseChar) const
+{
+    bool buttonReleased = false;
+
+    /* Checks if button is existing in the new values, but not the old ones.
+     * If so, it's newly released and true is returned.
+     */
+    if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), upperCaseChar, lowerCaseChar)) && 
+        (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), upperCaseChar, lowerCaseChar)))
+    {
+        buttonReleased = true;
+    }
+
+    return buttonReleased;
+}
+
+bool Keyboard::arrayContains(const uint16_t array[], uint16_t arraySize, char elemLowerCase, char elemUppercase) const
 {
     bool elementFound = false;
 
