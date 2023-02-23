@@ -86,7 +86,6 @@ void Mileage::process()
         int16_t    stepsRight    = m_relEncRight.calculate(encoders.getCountsRight());
         uint16_t   absStepsLeft  = abs(stepsLeft);
         uint16_t   absStepsRight = abs(stepsRight);
-        uint32_t   deltaTime     = m_timer.getCurrentDuration();
 
         /* Calculate absolute accumulated number steps for the left encoder. */
         m_encoderStepsLeft += absStepsLeft;
