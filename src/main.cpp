@@ -37,6 +37,7 @@
 #include "StartupState.h"
 #include <Board.h>
 #include <Mileage.h>
+#include <Speedometer.h>
 
 /******************************************************************************
  * Macros
@@ -78,6 +79,8 @@ void setup() // cppcheck-suppress unusedFunction
 void loop() // cppcheck-suppress unusedFunction
 {
     Mileage::getInstance().process();
+    Speedometer::getInstance().process();
+
     gSystemStateMachine.process();
 }
 
