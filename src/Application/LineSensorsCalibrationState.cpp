@@ -64,9 +64,9 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&  display  = Board::getInstance().getDisplay();
-    IEncoders& encoders = Board::getInstance().getEncoders();
-    IMotors&   motors   = Board::getInstance().getMotors();
+    IDisplay&      display  = Board::getInstance().getDisplay();
+    IEncoders&     encoders = Board::getInstance().getEncoders();
+    const IMotors& motors   = Board::getInstance().getMotors();
 
     display.clear();
     display.print("Calib");
