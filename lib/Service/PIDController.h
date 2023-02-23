@@ -304,7 +304,7 @@ public:
      */
     T calculate(T setpoint, T processValue)
     {
-        T output = m_lastOutput;
+        T output;
 
         if (true == m_resync)
         {
