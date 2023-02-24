@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Board interface, which abstracts the physical board
+ * @brief  Proximity sensors realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALInterfaces
  *
  * @{
  */
-
-#ifndef IBOARD_H
-#define IBOARD_H
+#ifndef PROXIMITYSENSORS_H
+#define PROXIMITYSENSORS_H
 
 /******************************************************************************
  * Compile Switches
@@ -44,14 +43,8 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IButton.h>
-#include <IBuzzer.h>
-#include <IDisplay.h>
-#include <IEncoders.h>
-#include <ILineSensors.h>
-#include <IMotors.h>
-#include <ILed.h>
 #include <IProximitySensors.h>
+#include <Zumo32U4ProximitySensors.h>
 
 /******************************************************************************
  * Macros
@@ -61,124 +54,79 @@
  * Types and Classes
  *****************************************************************************/
 
-/**
- * Abstracts the physical board interface.
- */
-class IBoard
+/** The proximity sensors realization for the target. */
+class ProximitySensors : public IProximitySensors
 {
 public:
-
     /**
-     * Destroys the board interface.
+     * Constructs the interface.
      */
-    virtual ~IBoard()
+    ProximitySensors() : IProximitySensors(), m_proximitySensors()
     {
     }
 
     /**
-     * Initialize the hardware.
+     * Destroys the interface.
      */
-    virtual void init() = 0;
+    virtual ~ProximitySensors()
+    {
+    }
 
     /**
-     * Get button A driver.
+     * Initialize only the front proximity sensor.
+     */
+    void initFrontSensor() final
+    {
+        m_proximitySensors.initFrontSensor();
+    }
+
+    /**
+     * Returns the number of sensors.
      *
-     * @return Button A driver.
+     * @return Number of sensors
      */
-    virtual IButton& getButtonA() = 0;
+    uint8_t getNumSensors() const final
+    {
+        return m_proximitySensors.getNumSensors();
+    }
 
     /**
-     * Get button B driver.
+     * Emits IR pulses and gets readings from the sensors.
+     */
+    void read() final
+    {
+        m_proximitySensors.read();
+    }
+
+    /**
+     * Returns the number of brightness levels for the left LEDs that
+     * activated the front proximity sensor.
      *
-     * @return Button B driver.
+     * @return Number of brightness levels
      */
-    virtual IButton& getButtonB() = 0;
+    uint8_t countsFrontWithLeftLeds() const final
+    {
+        return m_proximitySensors.countsFrontWithLeftLeds();
+    }
 
     /**
-     * Get button C driver.
+     * Returns the number of brightness levels for the right LEDs that
+     * activated the front proximity sensor.
      *
-     * @return Button C driver.
+     * @return Number of brightness levels
      */
-    virtual IButton& getButtonC() = 0;
-
-    /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    virtual IBuzzer& getBuzzer() = 0;
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    virtual IDisplay& getDisplay() = 0;
-
-    /**
-     * Get encoders driver.
-     * 
-     * @return Encoders driver.
-     */
-    virtual IEncoders& getEncoders() = 0;
-
-    /**
-     * Get line sensors driver.
-     *
-     * @return Line sensor driver.
-     */
-    virtual ILineSensors& getLineSensors() = 0;
-
-    /**
-     * Get motor driver.
-     *
-     * @return Motor driver.
-     */
-    virtual IMotors& getMotors() = 0;
-
-    /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    virtual ILed& getRedLed() = 0;
-
-    /**
-     * Get yellow LED driver.
-     *
-     * @return Yellow LED driver.
-     */
-    virtual ILed& getYellowLed() = 0;
-
-    /**
-     * Get green LED driver.
-     *
-     * @return Green LED driver.
-     */
-    virtual ILed& getGreenLed() = 0;
-
-    /**
-     * Get proximity sensors driver.
-     * 
-     * @return Proximity sensors driver
-     */
-    virtual IProximitySensors& getProximitySensors() = 0;
+    uint8_t countsFrontWithRightLeds() const final
+    {
+        return m_proximitySensors.countsFrontWithRightLeds();
+    }
 
 protected:
-
-    /**
-     * Constructs the board interface.
-     */
-    IBoard()
-    {
-    }
-
 private:
-
+    Zumo32U4ProximitySensors m_proximitySensors; /**< Zumo32U4 proximity sensors */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* IBOARD_H */
+#endif /* PROXIMITYSENSORS_H */
