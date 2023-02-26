@@ -10,7 +10,7 @@ WorldInfo {
     "Example uses of Track nodes, as caterpillar tracks on a robot, or as a conveyor belt."
   ]
   title "Track"
-  basicTimeStep 1
+  basicTimeStep 8
   contactProperties [
     ContactProperties {
       material1 "track material"
@@ -22,8 +22,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.4790106974293961 0.12926139941301237 -0.8682397378431795 2.6812989615326357
-  position 0.843170358154987 0.6349322031181632 1.5686016154844176
+  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
+  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
 }
 TexturedBackground {
 }
@@ -63,6 +63,24 @@ Robot {
   translation -0.249993 -0.0412039 0.0139993
   rotation -6.60216e-09 -2.69589e-07 1 1.52863
   children [
+    DEF SHIELD Group {
+      children [
+        Transform {
+          translation 0.047 0 0.007
+          rotation 0 1 0 -0.42
+          children [
+            Shape {
+              appearance PBRAppearance {
+                emissiveColor 0.4 0.4 0.4
+              }
+              geometry Box {
+                size 0.001 0.1 0.04
+              }
+            }
+          ]
+        }
+      ]
+    }
     DEF TRACK_LEFT Track {
       translation 0 0.0375 0
       rotation 0 1 0 0
@@ -198,34 +216,52 @@ Robot {
     DEF BODY Group {
       children [
         Shape {
-          appearance DEF BASECOLOR PBRAppearance {
-            emissiveColor 0.4 0.4 0.4
+          appearance DEF BODY_COLOR PBRAppearance {
+            emissiveColor 0.2 0.2 0.2
           }
-          geometry Box {
-            size 0.08 0.065 0.02
-          }
+        }
+        Transform {
+          translation 0.0325 0 0.0025
+          children [
+            Shape {
+              appearance USE BODY_COLOR
+              geometry Box {
+                size 0.025 0.065 0.015
+              }
+            }
+          ]
+        }
+        Transform {
+          translation -0.01 0 0
+          children [
+            Shape {
+              appearance USE BODY_COLOR
+              geometry Box {
+                size 0.06 0.065 0.02
+              }
+            }
+          ]
         }
       ]
     }
     DEF LINE_SENSOR_ARRAY Group {
       children [
         Transform {
-          translation 0.0425 0 -0.009
+          translation 0.0425 0 -0.0075
           children [
             Shape {
-              appearance USE BASECOLOR
+              appearance USE BODY_COLOR
               geometry Box {
-                size 0.005 0.01 0.002
+                size 0.005 0.01 0.005
               }
             }
           ]
         }
         Transform {
           translation 0.049 0 -0.009
-          rotation 0 0 1 3.14159
           children [
             Shape {
-              appearance USE BASECOLOR
+              appearance USE BODY_COLOR
               geometry Box {
                 size 0.008 0.095 0.002
               }
