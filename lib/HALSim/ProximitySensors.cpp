@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Proximity sensors realization
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
+#include "ProximitySensors.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -69,12 +69,6 @@
 /******************************************************************************
  * External Functions
  *****************************************************************************/
-
-void Board::init()
-{
-    m_lineSensors.init();
-    m_proximitySensors.initFrontSensor();
-}
 
 /******************************************************************************
  * Local Functions

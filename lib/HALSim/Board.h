@@ -55,6 +55,7 @@
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
+#include <ProximitySensors.h>
 
 #include <math.h>
 #include <webots/Robot.hpp>
@@ -202,6 +203,16 @@ public:
         return m_ledGreen;
     }
 
+    /**
+     * Get proximity sensors driver.
+     * 
+     * @return Proximity sensors driver
+     */
+    IProximitySensors& getProximitySensors() final
+    {
+        return m_proximitySensors;
+    }
+
 protected:
 private:
     /** Name of the speaker in the robot simulation. */
@@ -303,6 +314,9 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
+    /** Proximity sensors */
+    ProximitySensors m_proximitySensors;
+
     /**
      * Constructs the concrete board.
      */
@@ -326,7 +340,8 @@ private:
         m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-        m_ledGreen(m_robot.getLED(LED_GREEN_NAME))
+        m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
+        m_proximitySensors()
     {
     }
 

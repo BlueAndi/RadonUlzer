@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Board interface, which abstracts the physical board
+ * @brief  Abstract proximity sensors interface
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup HALInterfaces
  *
  * @{
  */
-
-#ifndef IBOARD_H
-#define IBOARD_H
+#ifndef IPROXIMITYSENSORS_H
+#define IPROXIMITYSENSORS_H
 
 /******************************************************************************
  * Compile Switches
@@ -44,14 +43,6 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IButton.h>
-#include <IBuzzer.h>
-#include <IDisplay.h>
-#include <IEncoders.h>
-#include <ILineSensors.h>
-#include <IMotors.h>
-#include <ILed.h>
-#include <IProximitySensors.h>
 
 /******************************************************************************
  * Macros
@@ -61,124 +52,63 @@
  * Types and Classes
  *****************************************************************************/
 
-/**
- * Abstracts the physical board interface.
- */
-class IBoard
+/** The abstract proximity sensors interface. */
+class IProximitySensors
 {
 public:
-
     /**
-     * Destroys the board interface.
+     * Destroys the interface.
      */
-    virtual ~IBoard()
+    virtual ~IProximitySensors()
     {
     }
 
     /**
-     * Initialize the hardware.
+     * Initialize only the front proximity sensor.
      */
-    virtual void init() = 0;
+    virtual void initFrontSensor() = 0;
 
     /**
-     * Get button A driver.
-     *
-     * @return Button A driver.
-     */
-    virtual IButton& getButtonA() = 0;
-
-    /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    virtual IButton& getButtonB() = 0;
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    virtual IButton& getButtonC() = 0;
-
-    /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    virtual IBuzzer& getBuzzer() = 0;
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    virtual IDisplay& getDisplay() = 0;
-
-    /**
-     * Get encoders driver.
+     * Returns the number of sensors.
      * 
-     * @return Encoders driver.
+     * @return Number of sensors
      */
-    virtual IEncoders& getEncoders() = 0;
+    virtual uint8_t getNumSensors() const = 0;
 
     /**
-     * Get line sensors driver.
-     *
-     * @return Line sensor driver.
+     * Emits IR pulses and gets readings from the sensors.
      */
-    virtual ILineSensors& getLineSensors() = 0;
+    virtual void read() = 0;
 
     /**
-     * Get motor driver.
-     *
-     * @return Motor driver.
-     */
-    virtual IMotors& getMotors() = 0;
-
-    /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    virtual ILed& getRedLed() = 0;
-
-    /**
-     * Get yellow LED driver.
-     *
-     * @return Yellow LED driver.
-     */
-    virtual ILed& getYellowLed() = 0;
-
-    /**
-     * Get green LED driver.
-     *
-     * @return Green LED driver.
-     */
-    virtual ILed& getGreenLed() = 0;
-
-    /**
-     * Get proximity sensors driver.
+     * Returns the number of brightness levels for the left LEDs that
+     * activated the front proximity sensor.
      * 
-     * @return Proximity sensors driver
+     * @return Number of brightness levels 
      */
-    virtual IProximitySensors& getProximitySensors() = 0;
+    virtual uint8_t countsFrontWithLeftLeds() const = 0;
+
+    /**
+     * Returns the number of brightness levels for the right LEDs that
+     * activated the front proximity sensor.
+     * 
+     * @return Number of brightness levels 
+     */
+    virtual uint8_t countsFrontWithRightLeds() const = 0;
 
 protected:
-
     /**
-     * Constructs the board interface.
+     * Constructs the interface.
      */
-    IBoard()
+    IProximitySensors()
     {
     }
 
 private:
-
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* IBOARD_H */
+#endif /* IPROXIMITYSENSORS_H */
