@@ -476,7 +476,6 @@ public:
 
     /**
      * Clear last error and integral value.
-     * The next call of calculate() will enforce a calculation.
      */
     void clear()
     {
@@ -498,8 +497,8 @@ public:
      * Set sample time (dT).
      * Note, internally the integral and derivative factors will be automatically
      * adjusted.
-     *
-     * A 0 sample means, calculaton takes place every calculate() call.
+     * 
+     * Ensure that the calculate() method is called once in this period.
      *
      * @param[in]   sampleTime  Sample time in ms
      */

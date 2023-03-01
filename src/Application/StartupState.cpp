@@ -35,7 +35,7 @@
 #include "StartupState.h"
 #include <Board.h>
 #include "StateMachine.h"
-#include "LineSensorsCalibrationState.h"
+#include "MotorSpeedCalibrationState.h"
 #include "Sound.h"
 
 /******************************************************************************
@@ -93,7 +93,7 @@ void StartupState::process(StateMachine& sm)
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
-        sm.setState(&LineSensorsCalibrationState::getInstance());
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 }
 

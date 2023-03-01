@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include "LineSensorsCalibrationState.h"
 #include <Board.h>
+#include <DifferentialDrive.h>
 #include "StateMachine.h"
 #include "ReadyState.h"
 #include "ErrorState.h"
@@ -64,9 +65,9 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&      display  = Board::getInstance().getDisplay();
-    IEncoders&     encoders = Board::getInstance().getEncoders();
-    const IMotors& motors   = Board::getInstance().getMotors();
+    IDisplay&          display   = Board::getInstance().getDisplay();
+    IEncoders&         encoders  = Board::getInstance().getEncoders();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     display.clear();
     display.print("Calib");
@@ -76,7 +77,8 @@ void LineSensorsCalibrationState::entry()
     /* Prepare calibration drive. */
     m_relEnc.setSteps(encoders.getCountsLeft());
     m_steps            = 0;
-    m_calibrationSpeed = motors.getMaxSpeed() / 3;
+    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
+    diffDrive.enable();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
@@ -114,6 +116,9 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    diffDrive.disable();
     m_timer.stop();
 }
 
@@ -129,14 +134,14 @@ void LineSensorsCalibrationState::phase1Wait()
 {
     if (true == m_timer.isTimeout())
     {
-        IEncoders& encoders = Board::getInstance().getEncoders();
-        IMotors&   motors   = Board::getInstance().getMotors();
+        IEncoders&         encoders  = Board::getInstance().getEncoders();
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         m_relEnc.setSteps(encoders.getCountsLeft());
 
         /* Turn left */
         m_phase = PHASE_2_TURN_LEFT;
-        motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
+        diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
     }
 }
 
@@ -150,12 +155,12 @@ void LineSensorsCalibrationState::phase2TurnLeft()
 
     if (CALIB_LR_STEPS <= steps)
     {
-        IMotors& motors = Board::getInstance().getMotors();
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         /* Turn right */
         m_phase = PHASE_3_TURN_RIGHT;
         m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
-        motors.setSpeeds(m_calibrationSpeed, -m_calibrationSpeed);
+        diffDrive.setLinearSpeed(m_calibrationSpeed, -m_calibrationSpeed);
     }
 }
 
@@ -169,12 +174,12 @@ void LineSensorsCalibrationState::phase3TurnRight()
 
     if ((2 * CALIB_LR_STEPS) <= steps)
     {
-        IMotors& motors = Board::getInstance().getMotors();
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         /* Turn left */
         m_phase = PHASE_4_TURN_ORIG;
         m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
-        motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
+        diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
     }
 }
 
@@ -188,11 +193,11 @@ void LineSensorsCalibrationState::phase4TurnOrigin()
 
     if (CALIB_LR_STEPS <= steps)
     {
-        IMotors& motors = Board::getInstance().getMotors();
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         /* Stop */
         m_phase = PHASE_5_FINISHED;
-        motors.setSpeeds(0, 0);
+        diffDrive.setLinearSpeed(0, 0);
     }
 }
 

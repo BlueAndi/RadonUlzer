@@ -38,6 +38,8 @@
 #include <Board.h>
 #include <Mileage.h>
 #include <Speedometer.h>
+#include <SimpleTimer.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Macros
@@ -55,8 +57,14 @@
  * Variables
  *****************************************************************************/
 
+/** Differential drive control period in ms. */
+static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+
 /** The system state machine. */
 static StateMachine gSystemStateMachine;
+
+/** Timer used for differential drive control processing. */
+static SimpleTimer gControlInterval;
 
 /******************************************************************************
  * External functions
@@ -70,6 +78,7 @@ void setup() // cppcheck-suppress unusedFunction
 {
     Board::getInstance().init();
     gSystemStateMachine.setState(&StartupState::getInstance());
+    gControlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 }
 
 /**
@@ -80,6 +89,12 @@ void loop() // cppcheck-suppress unusedFunction
 {
     Mileage::getInstance().process();
     Speedometer::getInstance().process();
+
+    if (true == gControlInterval.isTimeout())
+    {
+        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        gControlInterval.restart();
+    }
 
     gSystemStateMachine.process();
 }
