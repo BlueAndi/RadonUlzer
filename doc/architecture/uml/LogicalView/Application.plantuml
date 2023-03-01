@@ -38,6 +38,7 @@ package "Application" as appLayer {
     end note
 
     class StartupState <<control>>
+    class MotorSpeedCalibrationState <<control>>
     class LineSensorsCalibrationState <<control>>
     class ErrorState <<control>>
     class DrivingState <<control>>
@@ -55,6 +56,13 @@ package "Application" as appLayer {
     note bottom of StartupState
         The system starts up and shows
         the team name on the display.
+    end note
+
+    note bottom of MotorSpeedCalibrationState
+        The robot drives with full speed forward
+        and with full speed backwar to determine
+        the max speed in steps/s. The slowest
+        motor is considered!
     end note
 
     note bottom of LineSensorsCalibrationState
@@ -99,11 +107,12 @@ App *--> StateMachine
 StateMachine o--> "0..1" IState
 
 IState <|.. StartupState: <<realize>>
+IState <|.... MotorSpeedCalibrationState: <<realize>>
 IState <|.. LineSensorsCalibrationState: <<realize>>
-IState <|.. ErrorState: <<realize>>
+IState <|.... ErrorState: <<realize>>
 IState <|.. ReadyState: <<realize>>
-IState <|.. ReleaseTrackState: <<realize>>
-IState <|.. DrivingState: <<realize>>
+IState <|.... ReleaseTrackState: <<realize>>
+IState <|.... DrivingState: <<realize>>
 
 ReleaseTrackState ..> ParameterSets: <<use>>
 DrivingState ..> ParameterSets: <<use>>
