@@ -93,36 +93,38 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
 ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
-        "PID Slow", 320, /* Top speed */
-        1,               /* Kp Numerator */
-        4,               /* Kp Denominator */
-        1,               /* Ki Numerator */
-        60,              /* Ki Denominator */
-        4,               /* Kd Numerator */
-        1                /* Kd Denominator */
+        "PID Slow", /* Name */
+        1920,       /* Top speed in steps/s */
+        3,          /* Kp Numerator */
+        2,          /* Kp Denominator */
+        1,          /* Ki Numerator */
+        60,         /* Ki Denominator */
+        4,          /* Kd Numerator */
+        1           /* Kd Denominator */
     };
 
     m_parSets[1] = {
-        "PID Fast", 400, /* Top speed */
-        1,               /* Kp Numerator */
-        4,               /* Kp Denominator */
-        1,               /* Ki Numerator */
-        40,              /* Ki Denominator */
-        10,              /* Kd Numerator */
-        1                /* Kd Denominator */
+        "PID Fast", /* Name */
+        2400,       /* Top speed in steps/s */
+        3,          /* Kp Numerator */
+        2,          /* Kp Denominator */
+        1,          /* Ki Numerator */
+        40,         /* Ki Denominator */
+        10,         /* Kd Numerator */
+        1           /* Kd Denominator */
     };
 
     m_parSets[2] = {
-        "PD Fast", 400, /* Top speed */
-        1,              /* Kp Numerator */
-        2,              /* Kp Denominator */
-        0,              /* Ki Numerator */
-        1,              /* Ki Denominator */
-        10,             /* Kd Numerator */
-        1               /* Kd Denominator */
+        "PD Fast", /* Name */
+        2400,      /* Top speed in steps/s */
+        3,         /* Kp Numerator */
+        1,         /* Kp Denominator */
+        0,         /* Ki Numerator */
+        1,         /* Ki Denominator */
+        10,        /* Kd Numerator */
+        1          /* Kd Denominator */
     };
 }
-
 
 ParameterSets::~ParameterSets()
 {

@@ -35,6 +35,7 @@
 #include "DrivingState.h"
 #include <Board.h>
 #include <Sound.h>
+#include <DifferentialDrive.h>
 
 #include "StateMachine.h"
 #include "ReadyState.h"
@@ -67,14 +68,17 @@
 
 void DrivingState::entry()
 {
-    const ParameterSets::ParameterSet& parSet   = ParameterSets::getInstance().getParameterSet();
-    const int16_t                      maxSpeed = Board::getInstance().getMotors().getMaxSpeed();
+    const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
+    DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
+    const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
 
     m_observationTimer.start(OBSERVATION_DURATION);
     m_pidProcessTime.start(0); /* Immediate */
     m_lineStatus  = LINE_STATUS_FIND_START_LINE;
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
     m_posMovAvg.clear();
+
+    diffDrive.enable();
 
     /* Configure PID controller with selected parameter set. */
     m_topSpeed = parSet.topSpeed;
@@ -89,9 +93,9 @@ void DrivingState::entry()
 
 void DrivingState::process(StateMachine& sm)
 {
-    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    IMotors&      motors      = Board::getInstance().getMotors();
-    int16_t       position    = 0;
+    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
+    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
+    int16_t            position    = 0;
 
     /* Get the position of the line. */
     position = lineSensors.readLine();
@@ -115,7 +119,7 @@ void DrivingState::process(StateMachine& sm)
 
     default:
         /* Fatal error */
-        motors.setSpeeds(0, 0);
+        diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
         sm.setState(&ReadyState::getInstance());
         break;
@@ -129,7 +133,7 @@ void DrivingState::process(StateMachine& sm)
         /* Stop motors immediately. Don't move this to a later position,
          * as this would extend the driven length.
          */
-        motors.setSpeeds(0, 0);
+        diffDrive.setLinearSpeed(0, 0);
 
         Sound::playAlarm();
     }
@@ -137,6 +141,9 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    diffDrive.disable();
     m_observationTimer.stop();
     Board::getInstance().getYellowLed().enable(false);
 }
@@ -183,12 +190,12 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
             /* End line detected */
             else if (LINE_STATUS_FIND_END_LINE == m_lineStatus)
             {
-                IMotors& motors = Board::getInstance().getMotors();
+                DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
                 /* Stop motors immediately. Don't move this to a later position,
                  * as this would extend the driven length.
                  */
-                motors.setSpeeds(0, 0);
+                diffDrive.setLinearSpeed(0, 0);
 
                 Sound::playBeep();
                 m_trackStatus = TRACK_STATUS_FINISHED;
@@ -224,7 +231,7 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
 
 void DrivingState::processTrackLost(int16_t position, const uint16_t* lineSensorValues)
 {
-    IMotors& motors = Board::getInstance().getMotors();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     if (nullptr == lineSensorValues)
     {
@@ -245,7 +252,7 @@ void DrivingState::processTrackLost(int16_t position, const uint16_t* lineSensor
         /* Stop motors immediately. Don't move this to a later position,
          * as this would extend the driven length.
          */
-        motors.setSpeeds(0, 0);
+        diffDrive.setLinearSpeed(0, 0);
 
         Sound::playAlarm();
         m_trackStatus = TRACK_STATUS_FINISHED;
@@ -253,7 +260,7 @@ void DrivingState::processTrackLost(int16_t position, const uint16_t* lineSensor
     else
     {
         /* Drive straight on. */
-        motors.setSpeeds(m_topSpeed, m_topSpeed);
+        diffDrive.setLinearSpeed(m_topSpeed, m_topSpeed);
     }
 }
 
@@ -324,11 +331,11 @@ bool DrivingState::isTrackGapDetected(int16_t position) const
 
 void DrivingState::adaptDriving(int16_t position)
 {
-    IMotors&            motors          = Board::getInstance().getMotors();
+    DifferentialDrive&  diffDrive       = DifferentialDrive::getInstance();
     const ILineSensors& lineSensors     = Board::getInstance().getLineSensors();
-    int16_t             speedDifference = 0;
-    int16_t             leftSpeed       = 0;
-    int16_t             rightSpeed      = 0;
+    int16_t             speedDifference = 0; /* [steps/s] */
+    int16_t             leftSpeed       = 0; /* [steps/s] */
+    int16_t             rightSpeed      = 0; /* [steps/s] */
 
     /* Our "error" is how far we are away from the center of the
      * line, which corresponds to position (max. line sensor value multiplied
@@ -354,7 +361,7 @@ void DrivingState::adaptDriving(int16_t position)
     leftSpeed  = constrain(leftSpeed, 0, m_topSpeed);
     rightSpeed = constrain(rightSpeed, 0, m_topSpeed);
 
-    motors.setSpeeds(leftSpeed, rightSpeed);
+    diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
 
 /******************************************************************************

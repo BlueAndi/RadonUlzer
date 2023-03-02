@@ -63,7 +63,7 @@ public:
     struct ParameterSet
     {
         const char* name;          /**< Name of the parameter set */
-        int16_t     topSpeed;      /**< Top speed in digits [0; 400] */
+        int16_t     topSpeed;      /**< Top speed in steps/s */
         int16_t     kPNumerator;   /**< Kp numerator value */
         int16_t     kPDenominator; /**< Kp denominator value */
         int16_t     kINumerator;   /**< Ki numerator value */
