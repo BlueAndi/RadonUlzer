@@ -86,18 +86,38 @@ public:
     /**
      * Enable the differential drive control.
      * It will control the motors during processing if the max. speed is available too.
+     *
+     * The linear and angular speeds will be set to 0. This avoid any
+     * unexpected driving behaviour. The internal PID controllers will
+     * be reset.
      */
     void enable()
     {
+        m_linearSpeedCenterSetPoint = 0;
+        m_linearSpeedLeftSetPoint   = 0;
+        m_linearSpeedRightSetPoint  = 0;
+        m_angularSpeedSetPoint      = 0;
+
+        m_motorSpeedLeftPID.clear();
+        m_motorSpeedRightPID.clear();
+
         m_isEnabled = true;
     }
 
     /**
      * Disable the differential drive control.
-     * The motors are not controlled anymore.
+     * It will stop the motors to avoid any unexpected driving behaviour.
+     * After that the motors are not controlled anymore.
+     * 
+     * Important: Processing the differential drive control shall not be stopped.
      */
     void disable()
     {
+        m_linearSpeedCenterSetPoint = 0;
+        m_linearSpeedLeftSetPoint   = 0;
+        m_linearSpeedRightSetPoint  = 0;
+        m_angularSpeedSetPoint      = 0;
+
         m_isEnabled = false;
     }
 
