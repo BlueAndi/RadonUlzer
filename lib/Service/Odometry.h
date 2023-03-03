@@ -88,6 +88,16 @@ public:
      */
     uint32_t getMileageCenter() const;
 
+    /**
+     * Get current orientation in mrad.
+     * 
+     * @return Orientation in mrad
+     */
+    int16_t getOrientation() const
+    {
+        return m_orientation;
+    }
+
 private:
     /** Odometry instance */
     static Odometry m_instance;
@@ -119,7 +129,10 @@ private:
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
     int16_t m_orientation;
 
+    /** Last motor speed value left in digits. Necessary to determine delta calculation. */
     int16_t m_lastMotorSpeedLeft;
+
+    /** Last motor speed value right in digits. Necessary to determine delta calculation. */
     int16_t m_lastMotorSpeedRight;
 
     /**

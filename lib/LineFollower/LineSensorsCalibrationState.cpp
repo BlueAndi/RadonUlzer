@@ -35,7 +35,8 @@
 #include "LineSensorsCalibrationState.h"
 #include <Board.h>
 #include <DifferentialDrive.h>
-#include "StateMachine.h"
+#include <Odometry.h>
+#include <StateMachine.h>
 #include "ReadyState.h"
 #include "ErrorState.h"
 
@@ -66,7 +67,6 @@
 void LineSensorsCalibrationState::entry()
 {
     IDisplay&          display   = Board::getInstance().getDisplay();
-    IEncoders&         encoders  = Board::getInstance().getEncoders();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     display.clear();
@@ -75,8 +75,6 @@ void LineSensorsCalibrationState::entry()
     display.print("LineS");
 
     /* Prepare calibration drive. */
-    m_relEnc.setSteps(encoders.getCountsLeft());
-    m_steps            = 0;
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
     diffDrive.enable();
 
@@ -134,10 +132,7 @@ void LineSensorsCalibrationState::phase1Wait()
 {
     if (true == m_timer.isTimeout())
     {
-        IEncoders&         encoders  = Board::getInstance().getEncoders();
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        m_relEnc.setSteps(encoders.getCountsLeft());
 
         /* Turn left */
         m_phase = PHASE_2_TURN_LEFT;
@@ -147,51 +142,46 @@ void LineSensorsCalibrationState::phase1Wait()
 
 void LineSensorsCalibrationState::phase2TurnLeft()
 {
-    IEncoders&    encoders    = Board::getInstance().getEncoders();
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+    Odometry&     odometry    = Odometry::getInstance();
 
     lineSensors.calibrate();
 
-    if (CALIB_LR_STEPS <= steps)
+    if (CALIB_ANGLE <= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         /* Turn right */
         m_phase = PHASE_3_TURN_RIGHT;
-        m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
         diffDrive.setLinearSpeed(m_calibrationSpeed, -m_calibrationSpeed);
     }
 }
 
 void LineSensorsCalibrationState::phase3TurnRight()
 {
-    IEncoders&    encoders    = Board::getInstance().getEncoders();
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+    Odometry&     odometry    = Odometry::getInstance();
 
     lineSensors.calibrate();
 
-    if ((2 * CALIB_LR_STEPS) <= steps)
+    if ((-CALIB_ANGLE) >= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
         /* Turn left */
         m_phase = PHASE_4_TURN_ORIG;
-        m_relEnc.setSteps(encoders.getCountsLeft()); /* Clear */
         diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
     }
 }
 
 void LineSensorsCalibrationState::phase4TurnOrigin()
 {
-    IEncoders&    encoders    = Board::getInstance().getEncoders();
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    uint16_t      steps       = abs(m_relEnc.calculate(encoders.getCountsLeft()));
+    Odometry&     odometry    = Odometry::getInstance();
 
     lineSensors.calibrate();
 
-    if (CALIB_LR_STEPS <= steps)
+    if (0 <= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 

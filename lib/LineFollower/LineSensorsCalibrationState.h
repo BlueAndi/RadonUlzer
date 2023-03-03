@@ -43,7 +43,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IState.h"
+#include <IState.h>
 #include <SimpleTimer.h>
 #include <RelativeEncoder.h>
 
@@ -108,20 +108,18 @@ private:
     static const uint32_t WAIT_TIME = 1000;
 
     /**
-     * Number of calibration encoder steps to turn left and right.
+     * Calibration turn angle in mrad (corresponds to 60°).
      */
-    const uint16_t CALIB_LR_STEPS  = 600;
+    static const int16_t CALIB_ANGLE = static_cast<int16_t>((2000.0f * PI) / 6.0f);
 
-    SimpleTimer     m_timer;            /**< Timer used to wait, until the calibration drive starts. */
-    Phase           m_phase;            /**< Current calibration phase */
-    RelativeEncoder m_relEnc;           /**< Relative encoder provides the number of steps for dT. */
-    int16_t         m_steps;            /**< Absolute number of steps, used to determine different turning directions. */
-    int16_t         m_calibrationSpeed; /**< Speed in steps/s for the calibration drive. */
+    SimpleTimer m_timer;            /**< Timer used to wait, until the calibration drive starts. */
+    Phase       m_phase;            /**< Current calibration phase */
+    int16_t     m_calibrationSpeed; /**< Speed in steps/s for the calibration drive. */
 
     /**
      * Default constructor.
      */
-    LineSensorsCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_relEnc(0), m_steps(0), m_calibrationSpeed(0)
+    LineSensorsCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_calibrationSpeed(0)
     {
     }
 
