@@ -25,14 +25,25 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Main entry point
+ * @brief  Statemachine
  * @author Andreas Merkle <web@blue-andi.de>
+ * 
+ * @addtogroup Application
+ *
+ * @{
  */
+
+#ifndef STATE_MACHINE_H
+#define STATE_MACHINE_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <App.h>
+#include "IState.h"
 
 /******************************************************************************
  * Macros
@@ -42,39 +53,60 @@
  * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Variables
- *****************************************************************************/
-
-/** The main application. */
-static App gApplication;
-
-/******************************************************************************
- * External functions
- *****************************************************************************/
-
-/**
- * Initialize the system.
- * This function is called once during startup.
- */
-void setup() // cppcheck-suppress unusedFunction
+/** The system state machine. */
+class StateMachine
 {
-    gApplication.setup();
-}
+public:
+    /**
+     * Default constructor.
+     */
+    StateMachine() : m_currentState(nullptr), m_nextState(nullptr)
+    {
+    }
 
-/**
- * Main program loop.
- * This function is called cyclic.
- */
-void loop() // cppcheck-suppress unusedFunction
-{
-    gApplication.loop();
-}
+    /**
+     * Default destructor.
+     */
+    ~StateMachine()
+    {
+    }
+
+    /**
+     * Set next state.
+     *
+     * @param[in] state Next state.
+     */
+    void setState(IState* state)
+    {
+        m_nextState = state;
+    }
+
+    /**
+     * Get current state.
+     *
+     * @return Current state.
+     */
+    IState* getState()
+    {
+        return m_currentState;
+    }
+
+    /**
+     * Process state machine.
+     */
+    void process();
+
+protected:
+private:
+    IState* m_currentState; /**< Current active state */
+    IState* m_nextState;    /**< Next state */
+
+    StateMachine(const StateMachine& sm);
+    StateMachine& operator=(const StateMachine& sm);
+};
 
 /******************************************************************************
- * Local functions
+ * Functions
  *****************************************************************************/
+
+#endif /* STATE_MACHINE_H */

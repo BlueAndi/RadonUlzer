@@ -25,88 +25,76 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Statemachine state
+ * @brief  Statemachine
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef STATE_MACHINE_H
-#define STATE_MACHINE_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IState.h"
+#include "StateMachine.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The system state machine. */
-class StateMachine
-{
-public:
-    /**
-     * Default constructor.
-     */
-    StateMachine() : m_currentState(nullptr), m_nextState(nullptr)
-    {
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~StateMachine()
-    {
-    }
-
-    /**
-     * Set next state.
-     *
-     * @param[in] state Next state.
-     */
-    void setState(IState* state)
-    {
-        m_nextState = state;
-    }
-
-    /**
-     * Get current state.
-     *
-     * @return Current state.
-     */
-    IState* getState()
-    {
-        return m_currentState;
-    }
-
-    /**
-     * Process state machine.
-     */
-    void process();
-
-protected:
-private:
-    IState* m_currentState; /**< Current active state */
-    IState* m_nextState;    /**< Next state */
-
-    StateMachine(const StateMachine& sm);
-    StateMachine& operator=(const StateMachine& sm);
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* STATE_MACHINE_H */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void StateMachine::process()
+{
+    /* Change state? */
+    if (nullptr != m_nextState)
+    {
+        /* Leave current state */
+        if (nullptr != m_currentState)
+        {
+            m_currentState->exit();
+        }
+
+        m_currentState = m_nextState;
+        m_nextState    = nullptr;
+
+        /* Enter new state */
+        m_currentState->entry();
+    }
+
+    /* Process current state */
+    if (nullptr != m_currentState)
+    {
+        m_currentState->process(*this);
+    }
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

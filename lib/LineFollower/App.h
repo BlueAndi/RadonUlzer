@@ -25,76 +25,83 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  LineFollower application
  * @author Andreas Merkle <web@blue-andi.de>
+ * 
+ * @addtogroup Application
+ *
+ * @{
  */
+
+#ifndef APP_H
+#define APP_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "StateMachine.h"
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <StateMachine.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void StateMachine::process()
+/** The line follower application. */
+class App
 {
-    /* Change state? */
-    if (nullptr != m_nextState)
+public:
+
+    /**
+     * Construct the line follower application.
+     */
+    App() :
+        m_systemStateMachine(),
+        m_controlInterval()
     {
-        /* Leave current state */
-        if (nullptr != m_currentState)
-        {
-            m_currentState->exit();
-        }
-
-        m_currentState = m_nextState;
-        m_nextState    = nullptr;
-
-        /* Enter new state */
-        m_currentState->entry();
     }
 
-    /* Process current state */
-    if (nullptr != m_currentState)
+    /**
+     * Destroy the line follower application.
+     */
+    ~App()
     {
-        m_currentState->process(*this);
     }
-}
+
+    /**
+     * Setup the application.
+     */
+    void setup();
+
+    /**
+     * Process the application periodically.
+     */
+    void loop();
+
+private:
+
+    /** Differential drive control period in ms. */
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+
+    /** The system state machine. */
+    StateMachine m_systemStateMachine;
+
+    /** Timer used for differential drive control processing. */
+    SimpleTimer m_controlInterval;
+
+    App(const App& app);
+    App& operator=(const App& app);
+};
 
 /******************************************************************************
- * Protected Methods
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* APP_H */
