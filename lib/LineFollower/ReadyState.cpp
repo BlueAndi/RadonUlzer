@@ -34,7 +34,7 @@
  *****************************************************************************/
 #include "ReadyState.h"
 #include <Board.h>
-#include "StateMachine.h"
+#include <StateMachine.h>
 #include "ReleaseTrackState.h"
 
 /******************************************************************************

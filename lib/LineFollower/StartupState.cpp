@@ -34,7 +34,7 @@
  *****************************************************************************/
 #include "StartupState.h"
 #include <Board.h>
-#include "StateMachine.h"
+#include <StateMachine.h>
 #include "MotorSpeedCalibrationState.h"
 #include "Sound.h"
 
