@@ -25,14 +25,26 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Main entry point
+ * @brief  LineFollower application
  * @author Andreas Merkle <web@blue-andi.de>
+ * 
+ * @addtogroup Application
+ *
+ * @{
  */
+
+#ifndef APP_H
+#define APP_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <App.h>
+#include <StateMachine.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -42,39 +54,54 @@
  * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Variables
- *****************************************************************************/
-
-/** The main application. */
-static App gApplication;
-
-/******************************************************************************
- * External functions
- *****************************************************************************/
-
-/**
- * Initialize the system.
- * This function is called once during startup.
- */
-void setup() // cppcheck-suppress unusedFunction
+/** The line follower application. */
+class App
 {
-    gApplication.setup();
-}
+public:
 
-/**
- * Main program loop.
- * This function is called cyclic.
- */
-void loop() // cppcheck-suppress unusedFunction
-{
-    gApplication.loop();
-}
+    /**
+     * Construct the line follower application.
+     */
+    App() :
+        m_systemStateMachine(),
+        m_controlInterval()
+    {
+    }
+
+    /**
+     * Destroy the line follower application.
+     */
+    ~App()
+    {
+    }
+
+    /**
+     * Setup the application.
+     */
+    void setup();
+
+    /**
+     * Process the application periodically.
+     */
+    void loop();
+
+private:
+
+    /** Differential drive control period in ms. */
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+
+    /** The system state machine. */
+    StateMachine m_systemStateMachine;
+
+    /** Timer used for differential drive control processing. */
+    SimpleTimer m_controlInterval;
+
+    App(const App& app);
+    App& operator=(const App& app);
+};
 
 /******************************************************************************
- * Local functions
+ * Functions
  *****************************************************************************/
+
+#endif /* APP_H */

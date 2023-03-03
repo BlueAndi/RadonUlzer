@@ -25,21 +25,31 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Main entry point
+ * @brief  LineFollower application
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <App.h>
+#include "App.h"
+#include "StartupState.h"
+#include <Board.h>
+#include <Mileage.h>
+#include <Speedometer.h>
+#include <DifferentialDrive.h>
+#include <Odometry.h>
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
 
 /******************************************************************************
@@ -47,34 +57,57 @@
  *****************************************************************************/
 
 /******************************************************************************
- * Variables
+ * Local Variables
  *****************************************************************************/
 
-/** The main application. */
-static App gApplication;
-
 /******************************************************************************
- * External functions
+ * Public Methods
  *****************************************************************************/
 
-/**
- * Initialize the system.
- * This function is called once during startup.
- */
-void setup() // cppcheck-suppress unusedFunction
+void App::setup()
 {
-    gApplication.setup();
+    Board::getInstance().init();
+    m_systemStateMachine.setState(&StartupState::getInstance());
+    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 }
 
-/**
- * Main program loop.
- * This function is called cyclic.
- */
-void loop() // cppcheck-suppress unusedFunction
+void App::loop()
 {
-    gApplication.loop();
+    Mileage::getInstance().process();
+    Speedometer::getInstance().process();
+
+    if (true == m_controlInterval.isTimeout())
+    {
+        /* The differential drive control needs the measured speed of the
+         * left and right wheel. Therefore it shall be processed after
+         * the speedometer.
+         */
+        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        
+        /* The odometry unit needs to detect motor speed changes to be able to
+         * calculate correct values. Therefore it shall be processed right after
+         * the differential drive control.
+         */
+        Odometry::getInstance().process();
+
+        m_controlInterval.restart();
+    }
+
+    m_systemStateMachine.process();
 }
 
 /******************************************************************************
- * Local functions
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
  *****************************************************************************/

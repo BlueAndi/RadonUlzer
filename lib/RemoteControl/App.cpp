@@ -25,14 +25,18 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  RemoteControl application
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "StateMachine.h"
+#include "App.h"
+#include <Board.h>
+#include <Mileage.h>
+#include <Speedometer.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -58,29 +62,25 @@
  * Public Methods
  *****************************************************************************/
 
-void StateMachine::process()
+void App::setup()
 {
-    /* Change state? */
-    if (nullptr != m_nextState)
+    Board::getInstance().init();
+    /* m_systemStateMachine.setState(&StartupState::getInstance()); */
+    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+}
+
+void App::loop()
+{
+    Mileage::getInstance().process();
+    Speedometer::getInstance().process();
+
+    if (true == m_controlInterval.isTimeout())
     {
-        /* Leave current state */
-        if (nullptr != m_currentState)
-        {
-            m_currentState->exit();
-        }
-
-        m_currentState = m_nextState;
-        m_nextState    = nullptr;
-
-        /* Enter new state */
-        m_currentState->entry();
+        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        m_controlInterval.restart();
     }
 
-    /* Process current state */
-    if (nullptr != m_currentState)
-    {
-        m_currentState->process(*this);
-    }
+    m_systemStateMachine.process();
 }
 
 /******************************************************************************

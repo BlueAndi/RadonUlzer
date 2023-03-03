@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Statemachine state
+ * @brief  RemoteControl application
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef STATE_MACHINE_H
-#define STATE_MACHINE_H
+#ifndef APP_H
+#define APP_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,7 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IState.h"
+#include <StateMachine.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -53,60 +54,54 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system state machine. */
-class StateMachine
+/** The remote control application. */
+class App
 {
 public:
+
     /**
-     * Default constructor.
+     * Construct the remote control application.
      */
-    StateMachine() : m_currentState(nullptr), m_nextState(nullptr)
+    App() :
+        m_systemStateMachine(),
+        m_controlInterval()
     {
     }
 
     /**
-     * Default destructor.
+     * Destroy the remote control application.
      */
-    ~StateMachine()
+    ~App()
     {
     }
 
     /**
-     * Set next state.
-     *
-     * @param[in] state Next state.
+     * Setup the application.
      */
-    void setState(IState* state)
-    {
-        m_nextState = state;
-    }
+    void setup();
 
     /**
-     * Get current state.
-     *
-     * @return Current state.
+     * Process the application periodically.
      */
-    IState* getState()
-    {
-        return m_currentState;
-    }
+    void loop();
 
-    /**
-     * Process state machine.
-     */
-    void process();
-
-protected:
 private:
-    IState* m_currentState; /**< Current active state */
-    IState* m_nextState;    /**< Next state */
 
-    StateMachine(const StateMachine& sm);
-    StateMachine& operator=(const StateMachine& sm);
+    /** Differential drive control period in ms. */
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+
+    /** The system state machine. */
+    StateMachine m_systemStateMachine;
+
+    /** Timer used for differential drive control processing. */
+    SimpleTimer m_controlInterval;
+
+    App(const App& app);
+    App& operator=(const App& app);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* STATE_MACHINE_H */
+#endif /* APP_H */
