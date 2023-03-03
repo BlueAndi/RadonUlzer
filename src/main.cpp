@@ -40,6 +40,7 @@
 #include <Speedometer.h>
 #include <SimpleTimer.h>
 #include <DifferentialDrive.h>
+#include <Odometry.h>
 
 /******************************************************************************
  * Macros
@@ -92,7 +93,18 @@ void loop() // cppcheck-suppress unusedFunction
 
     if (true == gControlInterval.isTimeout())
     {
+        /* The differential drive control needs the measured speed of the
+         * left and right wheel. Therefore it shall be processed after
+         * the speedometer.
+         */
         DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        
+        /* The odometry unit needs to detect motor speed changes to be able to
+         * calculate correct values. Therefore it shall be processed right after
+         * the differential drive control.
+         */
+        Odometry::getInstance().process();
+
         gControlInterval.restart();
     }
 
