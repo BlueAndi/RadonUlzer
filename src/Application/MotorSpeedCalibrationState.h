@@ -110,7 +110,7 @@ private:
      * Calibration drive duration in ms.
      * It means how long the robot is driven with max. speed forward/backward.
      */
-    static const uint32_t CALIB_DURATION = 2000;
+    static const uint32_t CALIB_DURATION = 1000;
 
     SimpleTimer     m_timer; /**< Timer used to wait, until the calibration drive starts and for drive duration. */
     Phase           m_phase; /**< Current calibration phase */
