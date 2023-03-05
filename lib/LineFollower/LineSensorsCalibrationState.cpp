@@ -147,7 +147,7 @@ void LineSensorsCalibrationState::phase2TurnLeft()
 
     lineSensors.calibrate();
 
-    if (CALIB_ANGLE <= odometry.getOrientation())
+    if ((-CALIB_ANGLE) >= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -164,7 +164,7 @@ void LineSensorsCalibrationState::phase3TurnRight()
 
     lineSensors.calibrate();
 
-    if ((-CALIB_ANGLE) >= odometry.getOrientation())
+    if (CALIB_ANGLE <= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -181,7 +181,7 @@ void LineSensorsCalibrationState::phase4TurnOrigin()
 
     lineSensors.calibrate();
 
-    if (0 <= odometry.getOrientation())
+    if (0 >= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 

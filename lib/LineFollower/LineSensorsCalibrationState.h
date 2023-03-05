@@ -46,6 +46,7 @@
 #include <IState.h>
 #include <SimpleTimer.h>
 #include <RelativeEncoder.h>
+#include <FPMath.h>
 
 /******************************************************************************
  * Macros
@@ -110,7 +111,7 @@ private:
     /**
      * Calibration turn angle in mrad (corresponds to 60°).
      */
-    static const int16_t CALIB_ANGLE = static_cast<int16_t>((2000.0f * PI) / 6.0f);
+    static const int16_t CALIB_ANGLE = (FP_2PI() / 6);
 
     SimpleTimer m_timer;            /**< Timer used to wait, until the calibration drive starts. */
     Phase       m_phase;            /**< Current calibration phase */

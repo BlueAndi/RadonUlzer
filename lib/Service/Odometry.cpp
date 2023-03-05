@@ -35,6 +35,7 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <RobotConstants.h>
+#include <FPMath.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -43,9 +44,6 @@
 /******************************************************************************
  * Macros
  *****************************************************************************/
-
-/** 2 * PI in mrad fixpoint */
-#define FP_2PI() (static_cast<int16_t>(2000.0f * PI))
 
 /******************************************************************************
  * Types and classes
@@ -58,6 +56,8 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
+
+const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(2 * RobotConstants::ENCODER_STEPS_PER_MM);
 
 /******************************************************************************
  * Public Methods
@@ -89,18 +89,21 @@ void Odometry::process()
         m_lastMotorSpeedLeft  = motors.getLeftSpeed();
         m_lastMotorSpeedRight = motors.getRightSpeed();
     }
-    /* If one of the motor speed changes, calculate the delta orientation. */
-    else if ((m_lastMotorSpeedLeft != motors.getLeftSpeed()) || (m_lastMotorSpeedRight != motors.getRightSpeed()))
+    /* The calculation of the orientation/movement depends on the driven distance.
+     * If a distance threshold is exceeded, it will be calculated.
+     */
+    else if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
     {
-        /* The alpha is approximated for performance reason. */
-        int16_t alpha = 1000 * (relStepsRight - relStepsLeft);
-        alpha /= static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-        alpha /= static_cast<int16_t>(RobotConstants::WHEEL_BASE); /* [mrad] */
-        alpha %= FP_2PI(); /* -2*PI < alpha < +2*PI */
+        int16_t alpha       = 0;
+        int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
+        int16_t dX          = 0;
+        int16_t dY          = 0;
 
-        /* Calculate orientation */
-        m_orientation += alpha;
-        m_orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
+        m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
+
+        calculateDeltaPos(stepsCenter, alpha, dX, dY);
+        m_posX += dX;
+        m_posY += dY;
 
         /* Reset to be able to calculate the next delta. */
         m_lastMotorSpeedLeft      = motors.getLeftSpeed();
@@ -126,6 +129,29 @@ uint32_t Odometry::getMileageCenter() const
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+int16_t Odometry::calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const
+{
+    /* The alpha is approximated for performance reason. */
+    alpha = 1000 * (stepsRight - stepsLeft);
+    alpha /= static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+    alpha /= static_cast<int16_t>(RobotConstants::WHEEL_BASE); /* [mrad] */
+    alpha %= FP_2PI();                                         /* -2*PI < alpha < +2*PI */
+
+    /* Calculate orientation */
+    orientation += alpha;
+    orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
+
+    return orientation;
+}
+
+void Odometry::calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const
+{
+    int16_t distCenter = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
+
+    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(alpha));
+    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(alpha));
+}
 
 /******************************************************************************
  * External Functions
