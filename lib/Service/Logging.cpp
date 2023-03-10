@@ -76,7 +76,7 @@ static void printHead(const char* filename, int lineNumber, Logging::LogLevel le
 
 void Logging::print(const char* filename, int lineNumber, Logging::LogLevel level, const char* format, ...)
 {
-    const size_t MESSAGE_BUFFER_SIZE = 512;
+    const size_t MESSAGE_BUFFER_SIZE = 80;
     char         buffer[MESSAGE_BUFFER_SIZE];
     va_list      args;
 
@@ -95,7 +95,7 @@ void Logging::print(const char* filename, int lineNumber, Logging::LogLevel leve
 
 static void printHead(const char* filename, int lineNumber, Logging::LogLevel level)
 {
-    uint8_t     HEAD_BUFFER_SIZE         = 80U;
+    uint8_t     HEAD_BUFFER_SIZE         = 40U;
     char        buffer[HEAD_BUFFER_SIZE] = {0};
     uint16_t    written                  = 0;
     const char* levelStr                 = "U";
