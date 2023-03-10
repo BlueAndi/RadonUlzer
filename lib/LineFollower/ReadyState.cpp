@@ -97,19 +97,17 @@ void ReadyState::process(StateMachine& sm)
         uint8_t         index        = 0;
         int16_t         position     = lineSensors.readLine();
         const uint16_t* sensorValues = lineSensors.getSensorValues();
-
-        char msg[80U] = "";
-        char tmp[10U] = {0};
+        char            msg[80U]     = "";
+        char            tmp[10U]     = "";
 
         /* Print line sensor value on console for debug purposes. */
         for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
         {
-            
             if (0 < index)
             {
                 strcat(msg, " / ");
             }
-            
+
             snprintf(tmp, 10U, "%u", sensorValues[index]);
             strcat(msg, tmp);
         }
