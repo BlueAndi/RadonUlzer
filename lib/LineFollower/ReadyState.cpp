@@ -117,7 +117,7 @@ void ReadyState::process(StateMachine& sm)
         snprintf(tmp, 10U, "%u", position);
         strcat(msg, tmp);
 
-        LOG_DEBUG(msg);
+        LOG_DEBUG("ReadyState", msg);
 
         m_timer.restart();
     }
