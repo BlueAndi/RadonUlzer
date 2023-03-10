@@ -108,11 +108,11 @@ void ReadyState::process(StateMachine& sm)
                 strncat(msg, " / ", 4U);
             }
 
-            snprintf(tmp, 10U, "%u", sensorValues[index]);
+            snprintf(tmp, sizeof(tmp), "%u", sensorValues[index]);
             strcat(msg, tmp);
         }
         strncat(msg, " -> ", 5U);
-        snprintf(tmp, 10U, "%u", position);
+        snprintf(tmp, sizeof(tmp), "%u", position);
         strcat(msg, tmp);
 
         LOG_DEBUG("ReadyState", msg);
