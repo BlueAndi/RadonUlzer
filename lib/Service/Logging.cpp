@@ -128,7 +128,7 @@ static void printHead(const char* filename, int lineNumber, Logging::LogLevel le
 
     written = snprintf(buffer,
                        HEAD_BUFFER_SIZE,
-                       "%6lu [%1s] %24s:%5u ",
+                       "%6lu [%1s] %10s:%04u |   ",
                        millis(),
                        levelStr,
                        filename,
