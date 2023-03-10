@@ -98,7 +98,7 @@ void ReadyState::process(StateMachine& sm)
         int16_t         position     = lineSensors.readLine();
         const uint16_t* sensorValues = lineSensors.getSensorValues();
 
-        char msg[Logging::MESSAGE_BUFFER_SIZE] = "";
+        char msg[80U] = "";
         char tmp[10U] = {0};
 
         /* Print line sensor value on console for debug purposes. */
