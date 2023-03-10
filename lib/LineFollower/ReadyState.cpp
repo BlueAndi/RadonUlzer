@@ -105,13 +105,13 @@ void ReadyState::process(StateMachine& sm)
         {
             if (0 < index)
             {
-                strcat(msg, " / ");
+                strncat(msg, " / ", 4U);
             }
 
             snprintf(tmp, 10U, "%u", sensorValues[index]);
             strcat(msg, tmp);
         }
-        strcat(msg, " -> ");
+        strncat(msg, " -> ", 5U);
         snprintf(tmp, 10U, "%u", position);
         strcat(msg, tmp);
 
