@@ -139,6 +139,9 @@ static void printHead(const char* filename, int lineNumber, Logging::LogLevel le
                        levelStr,
                        filename,
                        lineNumber);
-    
-    Serial.print(buffer);
+
+    if (0U < written)
+    {
+        Serial.print(buffer);
+    }
 }
