@@ -25,18 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Logging
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
-#include <Board.h>
-#include <StateMachine.h>
-#include "ReleaseTrackState.h"
-#include <Logging.h>
+#include "Logging.h"
+#include <stdarg.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -54,6 +52,8 @@
  * Prototypes
  *****************************************************************************/
 
+static void printHead(const char* filename, int lineNumber, Logging::LogLevel level);
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -61,79 +61,6 @@
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
-
-void ReadyState::entry()
-{
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
-
-    display.clear();
-    display.print("Rdy.");
-
-    if (true == m_isLapTimeAvailable)
-    {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-    }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
-}
-
-void ReadyState::process(StateMachine& sm)
-{
-    IButton& buttonA = Board::getInstance().getButtonA();
-
-    /* Shall track be released? */
-    if (true == buttonA.isPressed())
-    {
-        buttonA.waitForRelease();
-        sm.setState(&ReleaseTrackState::getInstance());
-    }
-    /* Shall the line sensor values be printed out on console? */
-    else if (true == m_timer.isTimeout())
-    {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            msg[80U];
-        char            tmp[10U];
-        msg[0] = '\0';
-        tmp[0] = '\0';
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                strncat(msg, " / ", (sizeof(msg) - strlen(msg) - 1));
-            }
-
-            snprintf(tmp, sizeof(tmp), "%u", sensorValues[index]);
-            strncat(msg, tmp, (sizeof(msg) - strlen(msg) - 1));
-        }
-        strncat(msg, " -> ", (sizeof(msg) - strlen(msg) - 1));
-        snprintf(tmp, sizeof(tmp), "%u", position);
-        strncat(msg, tmp, (sizeof(msg) - strlen(msg) - 1));
-
-        LOG_DEBUG("ReadyState", msg);
-
-        m_timer.restart();
-    }
-}
-
-void ReadyState::exit()
-{
-    m_timer.stop();
-    m_isLapTimeAvailable = false;
-}
-
-void ReadyState::setLapTime(uint32_t lapTime)
-{
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
-}
 
 /******************************************************************************
  * Protected Methods
@@ -147,6 +74,74 @@ void ReadyState::setLapTime(uint32_t lapTime)
  * External Functions
  *****************************************************************************/
 
+void Logging::print(const char* filename, int lineNumber, Logging::LogLevel level, const char* format, ...)
+{
+    const size_t MESSAGE_BUFFER_SIZE = 80;
+    char         buffer[MESSAGE_BUFFER_SIZE];
+    va_list      args;
+
+    printHead(filename, lineNumber, level);
+
+    va_start(args, format);
+    vsnprintf(buffer, MESSAGE_BUFFER_SIZE, format, args);
+    va_end(args);
+
+    Serial.println(buffer);
+}
+
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Print the head or metadata of the log message.
+ * @param[in] filename Name of the file where the message originates.
+ * @param[in] lineNumber Number of the line where the message originates.
+ * @param[in] level Serverity level of the message.
+ */
+static void printHead(const char* filename, int lineNumber, Logging::LogLevel level)
+{
+    uint8_t     HEAD_BUFFER_SIZE         = 40U;
+    char        buffer[HEAD_BUFFER_SIZE] = {0};
+    uint16_t    written                  = 0;
+    const char* levelStr                 = "U";
+
+    switch (level)
+    {
+    case Logging::LOG_LEVEL_FATAL:
+        levelStr = "F";
+        break;
+
+    case Logging::LOG_LEVEL_ERROR:
+        levelStr = "E";
+        break;
+    
+    case Logging::LOG_LEVEL_WARNING:
+        levelStr = "W";
+        break;
+
+    case Logging::LOG_LEVEL_INFO:
+        levelStr = "I";
+        break;
+
+    case Logging::LOG_LEVEL_DEBUG:
+        levelStr = "D";
+        break;
+
+    default:
+        break;
+    }
+
+    written = snprintf(buffer,
+                       HEAD_BUFFER_SIZE,
+                       "%6lu [%1s] %10s:%04u |   ",
+                       millis(),
+                       levelStr,
+                       filename,
+                       lineNumber);
+
+    if (0U < written)
+    {
+        Serial.print(buffer);
+    }
+}
