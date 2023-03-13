@@ -156,6 +156,25 @@ public:
         printf("%d\n", value);
     }
 
+    void write(const uint8_t* buffer, size_t length)
+    {
+        for (size_t i = 0; i < length; i++)
+        {
+            printf("%02hhX", buffer[i]);
+        }
+        printf("\n");
+    }
+
+    int available()
+    {
+        return 0;
+    }
+
+    size_t readBytes(uint8_t *buffer, size_t length)
+    {
+        return 0;
+    }
+
 private:
 
 };
