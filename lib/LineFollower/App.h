@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
+#include <YAPServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -95,6 +96,8 @@ private:
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
+
+    YAPServer m_yapServer;
 
     App(const App& app);
     App& operator=(const App& app);

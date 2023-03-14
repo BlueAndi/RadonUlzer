@@ -39,7 +39,6 @@
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
-#include <YAPServer.hpp>
 
 /******************************************************************************
  * Compiler Switches
@@ -74,7 +73,7 @@ void App::setup()
 
 void App::loop()
 {
-    YAPServer::getInstance().process();
+    m_yapServer.process();
     Mileage::getInstance().process();
     Speedometer::getInstance().process();
 
