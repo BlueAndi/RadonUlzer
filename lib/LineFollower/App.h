@@ -97,7 +97,8 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
-    YAPServer m_yapServer;
+    /** YAP Server Instance */
+    YAPServer<10> m_yapServer;
 
     App(const App& app);
     App& operator=(const App& app);

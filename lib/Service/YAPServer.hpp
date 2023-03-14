@@ -51,20 +51,15 @@
  * Macros
  *****************************************************************************/
 
-/**
- * Maximum allowed of configurable channels.
- */
-#ifndef YAP_MAXCHANNELS
-#define YAP_MAXCHANNELS (10)
-#endif
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
 /**
- *  Class for the YAP Server.
+ * Class for the YAP Server.
+ * @tparam maxChannels Maximum number of channels
  */
+template<uint8_t maxChannels>
 class YAPServer
 {
 public:
@@ -121,7 +116,7 @@ public:
     {
         uint8_t itr;
 
-        for (itr = 0; itr < YAP_MAXCHANNELS; itr++)
+        for (itr = 0; itr < maxChannels; itr++)
         {
             if (nullptr == m_dataChannels[itr])
             {
@@ -144,29 +139,28 @@ public:
      */
     void printChannels()
     {
-        for (uint8_t i = 0; i < YAP_MAXCHANNELS; i++)
+        for (uint8_t i = 0; i < maxChannels; i++)
         {
-            if (nullptr == m_dataChannels[i])
+            if (nullptr == m_dataChannels[i + 1])
             {
                 Serial.print("Channel ");
-                Serial.print(i);
+                Serial.print(i + 1);
                 Serial.println(": Nullptr");
             }
             else
             {
                 Serial.print("Channel ");
-                Serial.print(i);
+                Serial.print(i + 1);
                 Serial.print(": ");
-                Serial.print(m_dataChannels[i]->m_name);
+                Serial.print(m_dataChannels[i + 1]->m_name);
                 Serial.print(" --- DLC: ");
-                Serial.println(m_dataChannels[i]->m_dlc);
+                Serial.println(m_dataChannels[i + 1]->m_dlc);
             }
         }
         Serial.println("--------------------------");
     }
 
 private:
-
     /**
      * Callback for the Control Channel
      * @param[in] rcvData Payload of received frame.
@@ -200,7 +194,7 @@ private:
 
             uint8_t itr;
 
-            for (itr = 0; itr < YAP_MAXCHANNELS; itr++)
+            for (itr = 0; itr < maxChannels; itr++)
             {
                 if (0U == strncmp(channelName, m_dataChannels[itr]->m_name, CHANNEL_NAME_MAX_LEN))
                 {
@@ -244,8 +238,15 @@ private:
                 if (isFrameValid(rcvFrame, payloadLength))
                 {
                     // Callback
-                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel]->m_callback(
-                        rcvFrame.fields.payload.m_data);
+                    if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
+                    {
+                        callbackControlChannel(rcvFrame.fields.payload.m_data);
+                    }
+                    else
+                    {
+                        m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1]->m_callback(
+                            rcvFrame.fields.payload.m_data);
+                    }
                 }
             }
         }
@@ -338,7 +339,7 @@ private:
     /**
      *  Array of Data Channels.
      */
-    Channel* m_dataChannels[YAP_MAXCHANNELS];
+    Channel* m_dataChannels[maxChannels];
 
     /**
      * Current Sync state.
