@@ -136,6 +136,7 @@ extern int main(int argc, char** argv)
 {
     int       status   = 0;
     Keyboard& keyboard = Board::getInstance().getKeyboard();
+    SocketServer::getInstance().init();
     
     /* Get simulation time handler. It will be used by millis() and delay(). */
     gSimTime = &Board::getInstance().getSimTime();
@@ -161,6 +162,7 @@ extern int main(int argc, char** argv)
         while (true == gSimTime->step())
         {
             keyboard.getPressedButtons();
+            SocketServer::getInstance().process();
             loop();
         }
 

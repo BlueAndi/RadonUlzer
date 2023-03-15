@@ -50,6 +50,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include "SocketServer.h"
 
 /******************************************************************************
  * Macros
@@ -57,7 +58,7 @@
 
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 
-#define PSTR
+// #define PSTR
 
 #define PI  M_PI
 
@@ -158,21 +159,33 @@ public:
 
     void write(const uint8_t* buffer, size_t length)
     {
-        for (size_t i = 0; i < length; i++)
-        {
-            printf("%02hhX", buffer[i]);
-        }
-        printf("\n");
+        SocketServer::getInstance().sendMessage(buffer, length);
     }
 
     int available()
     {
-        return 0;
+        return SocketServer::getInstance().available();
     }
 
-    size_t readBytes(uint8_t *buffer, size_t length)
+    size_t readBytes(uint8_t* buffer, size_t length)
     {
-        return 0;
+        size_t count = 0;
+
+        for (count = 0; count < length; count++)
+        {
+            int rcv = SocketServer::getInstance().getByte();
+
+            if (rcv == -1)
+            {
+                break;
+            }
+            else
+            {
+                buffer[count] = rcv;
+            }
+        }
+
+        return count;
     }
 
 private:
