@@ -66,7 +66,7 @@ public:
     /**
      * Construct the YAP Server.
      */
-    YAPServer() : m_dataChannels{nullptr}, m_isSynced(false), m_lastSyncCommand(0U), m_lastSyncResponse(0U)
+    YAPServer() : m_isSynced(false), m_lastSyncCommand(0U), m_lastSyncResponse(0U)
     {
     }
 
@@ -114,24 +114,20 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
-        uint8_t itr;
+        uint8_t itr = 0;
 
         for (itr = 0; itr < maxChannels; itr++)
         {
-            if (nullptr == m_dataChannels[itr])
+            if (nullptr == m_dataChannels[itr].m_callback)
             {
-                m_dataChannels[itr] = new Channel(channelName, itr, dlc, cb);
-
-                if (nullptr == m_dataChannels[itr])
-                {
-                    itr = 0U;
-                }
-
+                m_dataChannels[itr].m_name     = channelName;
+                m_dataChannels[itr].m_dlc      = dlc;
+                m_dataChannels[itr].m_callback = cb;
                 break;
             }
         }
 
-        return itr;
+        return (itr == maxChannels) ? 0U : (itr + 1);
     }
 
     /**
@@ -141,7 +137,7 @@ public:
     {
         for (uint8_t i = 0; i < maxChannels; i++)
         {
-            if (nullptr == m_dataChannels[i + 1])
+            if (nullptr == m_dataChannels[i].m_callback)
             {
                 Serial.print("Channel ");
                 Serial.print(i + 1);
@@ -152,9 +148,9 @@ public:
                 Serial.print("Channel ");
                 Serial.print(i + 1);
                 Serial.print(": ");
-                Serial.print(m_dataChannels[i + 1]->m_name);
+                Serial.print(m_dataChannels[i].m_name);
                 Serial.print(" --- DLC: ");
-                Serial.println(m_dataChannels[i + 1]->m_dlc);
+                Serial.println(m_dataChannels[i].m_dlc);
             }
         }
         Serial.println("--------------------------");
@@ -196,10 +192,10 @@ private:
 
             for (itr = 0; itr < maxChannels; itr++)
             {
-                if (0U == strncmp(channelName, m_dataChannels[itr]->m_name, CHANNEL_NAME_MAX_LEN))
+                if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
                 {
                     // Channel name found. Send SRCB_RSP
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, itr, m_dataChannels[itr]->m_dlc};
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, itr, m_dataChannels[itr].m_dlc};
                     send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     break;
                 }
@@ -228,9 +224,9 @@ private:
             Serial.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
 
             // Determine which callback to call, if any.
-            if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel])
+            if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel].m_callback)
             {
-                uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel]->m_dlc;
+                uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel].m_dlc;
 
                 // Read Payload
                 Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
@@ -244,7 +240,7 @@ private:
                     }
                     else
                     {
-                        m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1]->m_callback(
+                        m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
                             rcvFrame.fields.payload.m_data);
                     }
                 }
@@ -339,7 +335,7 @@ private:
     /**
      *  Array of Data Channels.
      */
-    Channel* m_dataChannels[maxChannels];
+    Channel m_dataChannels[maxChannels];
 
     /**
      * Current Sync state.
