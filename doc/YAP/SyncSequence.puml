@@ -1,0 +1,42 @@
+@startuml Synchronization Sequence YAPServer
+Title Synchronization Sequence
+autoactivate on
+
+participant Server_1
+participant Server_2
+
+note across: Both Servers are out of Sync
+== SYNC of Server_1 ==
+
+Server_1 -> Server_2 : SYNC
+note left: Server_1 wants to send Data Frames. Sends SYNC
+
+Server_2 -->> Server_1 : SYNC_RSP
+note left: Only Server_1 is Synced\n and can send Data Frames
+note right: Server_2 remains as listen-only.\n It does not know that its RSP got through
+
+== SYNC of Server_2 ==
+
+Server_2 -> Server_1 : SYNC
+note right: Server_2 wants to send Data Frames. Sends SYNC
+
+Server_1 -->> Server_2 : SYNC_RSP
+note left: Server_1 is already Synced.\nCan still reply with SYNC_RSP
+note right: Server_2 is Synced\nand can send Data Frames
+
+note across: Both Servers are Synced
+
+== Server_1 falls Out-Of-Sync ==
+Server_1 -> Server_2 : SYNC
+note left: Periodic Heartbeat
+
+Server_2 --x Server_1 : SYNC_RSP
+deactivate
+note right: Server_2 may or may not respond.
+note left: After timeout, Server_1 cannot\nsend Data Frames
+
+Server_2 -> Server_1 : SYNC
+Server_1 -->> Server_2 : SYNC_RSP
+note right: Server_2 remains synced.
+
+@enduml
