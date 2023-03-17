@@ -219,14 +219,8 @@ void SocketServer::processRx()
                         m_rcvQueue.push(recvbuf[i]);
                     }
                 }
-                else if (result == 0)
-                {
-                    closesocket(m_clientSocket);
-                    m_clientSocket = INVALID_SOCKET;
-                }
                 else
                 {
-                    printf("recv failed with error: %d\n", WSAGetLastError());
                     closesocket(m_clientSocket);
                     m_clientSocket = INVALID_SOCKET;
                 }
