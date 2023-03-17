@@ -156,6 +156,25 @@ public:
         Serial.println("--------------------------");
     }
 
+    void printFrame(const Frame& frame, uint8_t payloadLength)
+    {
+        Serial.println("=== Begin Frame ===");
+        Serial.print("Channel:");
+        Serial.println(frame.fields.header.headerFields.m_channel);
+        Serial.print("Valid Checksum:");
+        Serial.println(isFrameValid(frame, payloadLength));
+        Serial.print("Data:");
+
+        for (uint8_t i = 0; i < payloadLength; i++)
+        {
+            Serial.print(frame.fields.payload.m_data[i]);
+            Serial.print(" ");
+        }
+
+        Serial.println("");
+        Serial.println("=== End Frame ===");
+    }
+
 private:
     /**
      * Callback for the Control Channel
