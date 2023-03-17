@@ -83,7 +83,7 @@ public:
     void begin(unsigned long baudrate)
     {
         (void)baudrate;
-        m_socketServer.init(65432);
+        m_socketServer.init(65432, 1);
     }
 
     void end()

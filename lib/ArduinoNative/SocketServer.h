@@ -75,9 +75,10 @@ public:
     /**
      * Initialize the SocketServer.
      * @param[in] port Port number to set the Socket to.
+     * @param[in] maxConnections Number of maxConnections allowed.
      * @returns true if server has been succesfully set-up.
      */
-    bool init(uint16_t port);
+    bool init(uint16_t port, uint8_t maxConnections);
 
     /**
      * Send a message to the socket.

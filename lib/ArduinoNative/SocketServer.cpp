@@ -42,7 +42,6 @@
  *****************************************************************************/
 
 #define DEFAULT_BUFLEN  512
-#define MAX_CONNECTIONS 1
 
 /******************************************************************************
  * Prototypes
@@ -66,7 +65,7 @@ SocketServer::~SocketServer()
     WSACleanup();
 }
 
-bool SocketServer::init(uint16_t port)
+bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 {
     bool             success = true;
     WSADATA          wsaData;
@@ -120,7 +119,7 @@ bool SocketServer::init(uint16_t port)
 
     freeaddrinfo(result);
 
-    iResult = listen(m_listenSocket, MAX_CONNECTIONS);
+    iResult = listen(m_listenSocket, maxConnections);
     if (iResult == SOCKET_ERROR)
     {
         printf("listen failed with error: %d\n", WSAGetLastError());
