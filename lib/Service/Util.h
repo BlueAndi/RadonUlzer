@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Mileage
+ * @brief  Utilities
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Service
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef MILEAGE_H
-#define MILEAGE_H
+#ifndef UTIL_H
+#define UTIL_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,10 +43,14 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Arduino.h>
-#include <SimpleTimer.h>
-#include <Board.h>
-#include <RelativeEncoders.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+/**
+ * Utilities
+ */
+namespace Util
+{
 
 /******************************************************************************
  * Macros
@@ -56,81 +60,28 @@
  * Types and Classes
  *****************************************************************************/
 
-/** This class provides the mileage, based on the encoder informations. */
-class Mileage
-{
-public:
-    /**
-     * Get mileage instance.
-     *
-     * @return Mileage instance.
-     */
-    static Mileage& getInstance()
-    {
-        return m_instance;
-    }
-
-    /**
-     * Clear mileage.
-     */
-    void clear();
-
-    /**
-     * Update mileage, based on the measured encoder steps.
-     * Call this function cyclic.
-     */
-    void process();
-
-    /**
-     * Get center mileage in mm.
-     *
-     * @return Mileage in mm
-     */
-    uint32_t getMileageCenter() const;
-
-private:
-    /** Min. period in ms, after which the mileage shall be calculated. */
-    static const uint32_t MIN_PERIOD = 5;
-
-    /** Mileage instance */
-    static Mileage m_instance;
-
-    /** Timer used to control processing of encoders. */
-    SimpleTimer m_timer;
-
-    /** Mileage left in encoder steps. */
-    uint32_t m_encoderStepsLeft;
-
-    /** Mileage right in encoder steps. */
-    uint32_t m_encoderStepsRight;
-
-    /** Relative encoders left/right */
-    RelativeEncoders m_relEncoders;
-
-    /**
-     * Construct the mileage instance.
-     */
-    Mileage() :
-        m_timer(),
-        m_encoderStepsLeft(0),
-        m_encoderStepsRight(0),
-        m_relEncoders(Board::getInstance().getEncoders())
-    {
-    }
-
-    /**
-     * Destroy the mileage instance.
-     */
-    ~Mileage()
-    {
-    }
-
-    Mileage(const Mileage& value);
-    Mileage& operator=(const Mileage& value);
-};
-
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* MILEAGE_H */
+/**
+ * Unsigned integer to string, without preceeding zeros.
+ * 
+ * @param[out]  str     Destination string
+ * @param[in]   size    Size of the destination string in byte
+ * @param[in]   value   Value
+ */
+void uintToStr(char* str, size_t size, uint32_t value);
+
+/**
+ * Signed integer to string, without preceeding zeros.
+ * 
+ * @param[out]  str     Destination string
+ * @param[in]   size    Size of the destination string in byte
+ * @param[in]   value   Value
+ */
+void intToStr(char* str, size_t size, int32_t value);
+
+}
+
+#endif /* UTIL_H */

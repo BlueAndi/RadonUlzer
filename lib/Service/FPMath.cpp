@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Relative encoders
+ * @brief  Fixpoint math
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "RelativeEncoder.h"
+#include "FPMath.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -57,35 +57,6 @@
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
-
-int16_t RelativeEncoder::calculate(int16_t steps)
-{
-    int16_t diffSteps = 0;
-
-    /* Wrap around in positive direction: +MAX to -MAX
-     * Wrap around in negative direction: -MAX to +MAX
-     */
-
-    /* Wrap around in positive direction? */
-    if (((INT16_MAX / 2) < (-m_lastSteps)) && ((INT16_MAX / 2) < steps))
-    {
-        /* Drives forward */
-        diffSteps = steps + (m_lastSteps - INT16_MIN);
-    }
-    /* Wrap around in negative direction? */
-    else if (((INT16_MAX / 2) < m_lastSteps) && ((INT16_MAX / 2) < (-steps)))
-    {
-        /* Drives backward */
-        diffSteps = steps + (m_lastSteps - INT16_MAX);
-    }
-    /* No wrap around */
-    else
-    {
-        diffSteps = steps - m_lastSteps;
-    }
-
-    return diffSteps;
-}
 
 /******************************************************************************
  * Protected Methods

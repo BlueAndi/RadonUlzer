@@ -25,16 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Mileage
+ * @brief  Utilities
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Mileage.h>
-#include <Board.h>
-#include <RobotConstants.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -56,56 +54,9 @@
  * Local Variables
  *****************************************************************************/
 
-Mileage Mileage::m_instance;
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
-
-void Mileage::clear()
-{
-    m_encoderStepsLeft  = 0;
-    m_encoderStepsRight = 0;
-    m_relEncoders.clear();
-}
-
-void Mileage::process()
-{
-    if (false == m_timer.isRunning())
-    {
-        m_timer.start(MIN_PERIOD);
-    }
-    else if (true == m_timer.isTimeout())
-    {
-        int16_t  stepsLeft     = m_relEncoders.getCountsLeft();
-        int16_t  stepsRight    = m_relEncoders.getCountsRight();
-        uint16_t absStepsLeft  = abs(stepsLeft);
-        uint16_t absStepsRight = abs(stepsRight);
-
-        /* Calculate absolute accumulated number steps for the left encoder. */
-        m_encoderStepsLeft += absStepsLeft;
-
-        /* Calculate absolute accumulated number steps for the left encoder. */
-        m_encoderStepsRight += absStepsRight;
-
-        /* Clear relative encoders */
-        m_relEncoders.clear();
-
-        m_timer.restart();
-    }
-    else
-    {
-        /* No processing. */
-        ;
-    }
-}
-
-uint32_t Mileage::getMileageCenter() const
-{
-    uint32_t encoderSteps = (m_encoderStepsLeft + m_encoderStepsRight) / 2;
-
-    return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
-}
 
 /******************************************************************************
  * Protected Methods
@@ -118,6 +69,86 @@ uint32_t Mileage::getMileageCenter() const
 /******************************************************************************
  * External Functions
  *****************************************************************************/
+
+void Util::uintToStr(char* str, size_t size, uint32_t value)
+{
+    if ((nullptr != str) && (0 < size))
+    {
+        size_t   idx     = 0;
+        uint8_t  digits  = 10; /* 0 - 4294967295 */
+        uint32_t divisor = 1000000000;
+
+        while (((size - 1) > idx) && (0 < digits))
+        {
+            char digit = static_cast<char>(value / divisor);
+
+            /* No preceeding zeros. */
+            if (0 == idx)
+            {
+                if ((0 < digit) || (1 == digits))
+                {
+                    str[idx] = digit + '0';
+                    ++idx;
+                }
+            }
+            else
+            {
+                str[idx] = digit + '0';
+                ++idx;
+            }
+
+            --digits;
+            value %= divisor;
+            divisor /= 10;
+        }
+
+        str[idx] = '\0';
+    }
+}
+
+void Util::intToStr(char* str, size_t size, int32_t value)
+{
+    if ((nullptr != str) && (0 < size))
+    {
+        size_t   idx     = 0;
+        uint8_t  digits  = 10; /* -2147483648 - 2147483647 */
+        uint32_t divisor = 1000000000;
+
+        if (0 > value)
+        {
+            str[idx] = '-';
+            ++idx;
+
+            value *= -1;
+        }
+
+        while (((size - 1) > idx) && (0 < digits))
+        {
+            char digit = static_cast<char>(value / divisor);
+
+            /* No preceeding zeros. */
+            if (0 == idx)
+            {
+                if ((0 < digit) || (1 == digits))
+                {
+                    str[idx] = digit + '0';
+                    ++idx;
+                }
+            }
+            else
+            {
+                str[idx] = digit + '0';
+                ++idx;
+            }
+
+            --digits;
+            value %= divisor;
+            divisor /= 10;
+        }
+
+        str[idx] = '\0';
+    }
+}
 
 /******************************************************************************
  * Local Functions

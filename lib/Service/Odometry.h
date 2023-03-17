@@ -44,7 +44,8 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
-#include <RelativeEncoder.h>
+#include <Board.h>
+#include <RelativeEncoders.h>
 
 /******************************************************************************
  * Macros
@@ -90,7 +91,7 @@ public:
 
     /**
      * Get current orientation in mrad.
-     * 
+     *
      * @return Orientation in mrad
      */
     int16_t getOrientation() const
@@ -98,9 +99,27 @@ public:
         return m_orientation;
     }
 
+    /**
+     * Get absolute position in coordinatesystem.
+     * The x- and y-axis unit is mm.
+     *
+     * @param[out] posX x-coordinate
+     * @param[out] posY y-coordinate
+     */
+    void getPosition(int32_t& posX, int32_t& posY) const
+    {
+        posX = m_posX;
+        posY = m_posY;
+    }
+
 private:
-    /** Odometry instance */
-    static Odometry m_instance;
+    /**
+     * If at least one side moved about 2 mm, a new calculation shall be done.
+     * 
+     * Use a multiple of RobotConstants::ENCODER_STEPS_PER_MM for better
+     * accuracy.
+     */
+    static const int16_t STEPS_THRESHOLD;
 
     /**
      * Last number of relative encoder steps left. Its used to avoid permanent
@@ -120,11 +139,8 @@ private:
     /** Absolute number of encoder steps right. Used to determine the mileage. */
     uint32_t m_absEncStepsRight;
 
-    /** Relative encoder left. */
-    RelativeEncoder m_relEncLeft;
-
-    /** Relative encoder right. */
-    RelativeEncoder m_relEncRight;
+    /** Relative encoders left/right. */
+    RelativeEncoders m_relEncoders;
 
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
     int16_t m_orientation;
@@ -135,6 +151,12 @@ private:
     /** Last motor speed value right in digits. Necessary to determine delta calculation. */
     int16_t m_lastMotorSpeedRight;
 
+    /** Absolute position on x-axis. Unit is mm. */
+    int32_t m_posX;
+
+    /** Absolute position on y-axis. Unit is mm. */
+    int32_t m_posY;
+
     /**
      * Construct the odometry instance.
      */
@@ -143,11 +165,12 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_absEncStepsLeft(0),
         m_absEncStepsRight(0),
-        m_relEncLeft(),
-        m_relEncRight(),
+        m_relEncoders(Board::getInstance().getEncoders()),
         m_orientation(0),
         m_lastMotorSpeedLeft(0),
-        m_lastMotorSpeedRight(0)
+        m_lastMotorSpeedRight(0),
+        m_posX(0),
+        m_posY(0)
     {
     }
 
@@ -160,6 +183,28 @@ private:
 
     Odometry(const Odometry& value);
     Odometry& operator=(const Odometry& value);
+
+    /**
+     * Calculate the orientation in mrad.
+     *
+     * @param[in] orientation   Current orientation in mrad
+     * @param[in] stepsLeft     Number of encoder steps left
+     * @param[in] stepsRight    Number of encoder steps right
+     * @param[out] alpha        Delta angle in mrad
+     *
+     * @return Orientation in mrad
+     */
+    int16_t calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const;
+
+    /**
+     * Calculate the vector from last position to new position.
+     *
+     * @param[in]   stepsCenter Number of steps center
+     * @param[in]   alpha       Delta angle in mrad
+     * @param[out]  dX          Delta x-position on x-axis
+     * @param[out]  dY          Delta y-position on y-axis
+     */
+    void calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const;
 };
 
 /******************************************************************************

@@ -25,16 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Relative encoder
+ * @brief  Fixpoint math
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup Service
+ * @addtogroup Application
  *
  * @{
  */
 
-#ifndef RELATIVE_ENCODER_H
-#define RELATIVE_ENCODER_H
+#ifndef FPMATH_H
+#define FPMATH_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,76 +43,29 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
+/** 2 * PI in mrad fixpoint */
+#define FP_2PI() (static_cast<int16_t>(2000.0f * PI))
+
+/** Convert value from mrad to deg. */
+#define MRAD2DEG(__mrad) (static_cast<int16_t>(((static_cast<int32_t>(__mrad) * 360) / static_cast<int32_t>(FP_2PI()))))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
-
-/**
- * A relative encoder provides always the step difference between a reference
- * point (absolute number of encoder steps) to the current position (current
- * number of encoder steps).
- */
-class RelativeEncoder
-{
-public:
-    /**
-     * Constructs a relative encoder.
-     * The reference point is set to 0 steps.
-     */
-    RelativeEncoder() : m_lastSteps(0)
-    {
-    }
-
-    /**
-     * Constructs a relative encoder.
-     * The reference point is assigned by the parameter.
-     *
-     * @param[in] steps Reference point (absolute encoder steps)
-     */
-    RelativeEncoder(int16_t steps) : m_lastSteps(steps)
-    {
-    }
-
-    /**
-     * Destroys the relative encoder instance.
-     */
-    ~RelativeEncoder()
-    {
-    }
-
-    /**
-     * Set the reference point of the encoder.
-     * The delta steps are calculated from this.
-     *
-     * @param[in] steps Reference point (absolute number of encoder steps)
-     */
-    void setSteps(int16_t steps)
-    {
-        m_lastSteps = steps;
-    }
-
-    /**
-     * Calculate the relative number of encoder steps from the given
-     * absolute encoder step number to the reference point.
-     *
-     * @param[in] steps Current absolute number of encoder steps.
-     *
-     * @return Delta steps
-     */
-    int16_t calculate(int16_t steps);
-
-private:
-    int16_t m_lastSteps; /**< Last absolute number of encoder steps. */
-};
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* ENCODERS_H */
+namespace FPMath
+{
+
+}
+
+#endif /* FPMATH_H */

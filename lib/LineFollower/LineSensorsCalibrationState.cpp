@@ -37,6 +37,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <StateMachine.h>
+#include <Util.h>
 #include "ReadyState.h"
 #include "ErrorState.h"
 
@@ -147,7 +148,7 @@ void LineSensorsCalibrationState::phase2TurnLeft()
 
     lineSensors.calibrate();
 
-    if (CALIB_ANGLE <= odometry.getOrientation())
+    if ((-CALIB_ANGLE) >= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -164,7 +165,7 @@ void LineSensorsCalibrationState::phase3TurnRight()
 
     lineSensors.calibrate();
 
-    if ((-CALIB_ANGLE) >= odometry.getOrientation())
+    if (CALIB_ANGLE <= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -181,7 +182,7 @@ void LineSensorsCalibrationState::phase4TurnOrigin()
 
     lineSensors.calibrate();
 
-    if (0 <= odometry.getOrientation())
+    if (0 >= odometry.getOrientation())
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -198,8 +199,14 @@ void LineSensorsCalibrationState::phase5Finished(StateMachine& sm)
     if (false == lineSensors.isCalibrationSuccessful())
     {
         char str[10];
+        char valueStr[10];
 
-        snprintf(str, sizeof(str), "Cal %u", lineSensors.getCalibErrorInfo());
+        Util::uintToStr(valueStr, sizeof(valueStr), lineSensors.getCalibErrorInfo());
+
+        strncpy(str, "Cal=", sizeof(str) - 1);
+        str[sizeof(str) - 1] = '\0';
+
+        strncat(str, valueStr, sizeof(str) - strlen(valueStr) - 1);
 
         ErrorState::getInstance().setErrorMsg(str);
         sm.setState(&ErrorState::getInstance());

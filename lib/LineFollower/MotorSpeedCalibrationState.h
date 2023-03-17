@@ -45,7 +45,8 @@
  *****************************************************************************/
 #include <IState.h>
 #include <SimpleTimer.h>
-#include <RelativeEncoder.h>
+#include <Board.h>
+#include <RelativeEncoders.h>
 
 /******************************************************************************
  * Macros
@@ -112,17 +113,21 @@ private:
      */
     static const uint32_t CALIB_DURATION = 1000;
 
-    SimpleTimer     m_timer; /**< Timer used to wait, until the calibration drive starts and for drive duration. */
-    Phase           m_phase; /**< Current calibration phase */
-    int16_t         m_maxSpeedLeft;  /**< Max. determined left motor speed [steps/s]. */
-    int16_t         m_maxSpeedRight; /**< Max. determined right motor speed [steps/s]. */
-    RelativeEncoder m_relEncLeft;    /**< Relative encoder left */
-    RelativeEncoder m_relEncRight;   /**< Relative encoder right */
+    SimpleTimer      m_timer; /**< Timer used to wait, until the calibration drive starts and for drive duration. */
+    Phase            m_phase; /**< Current calibration phase */
+    int16_t          m_maxSpeedLeft;  /**< Max. determined left motor speed [steps/s]. */
+    int16_t          m_maxSpeedRight; /**< Max. determined right motor speed [steps/s]. */
+    RelativeEncoders m_relEncoders;   /**< Relative encoders left/right. */
 
     /**
      * Default constructor.
      */
-    MotorSpeedCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_maxSpeedLeft(0), m_maxSpeedRight(0), m_relEncLeft(), m_relEncRight()
+    MotorSpeedCalibrationState() :
+        m_timer(),
+        m_phase(PHASE_1_WAIT),
+        m_maxSpeedLeft(0),
+        m_maxSpeedRight(0),
+        m_relEncoders(Board::getInstance().getEncoders())
     {
     }
 

@@ -25,17 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Odometry
+ * @brief  Relative encoders
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Odometry.h>
-#include <Board.h>
-#include <RobotConstants.h>
-#include <FPMath.h>
+#include "RelativeEncoders.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -57,68 +54,58 @@
  * Local Variables
  *****************************************************************************/
 
-const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(2 * RobotConstants::ENCODER_STEPS_PER_MM);
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void Odometry::process()
+void RelativeEncoders::clear()
 {
-    IMotors& motors        = Board::getInstance().getMotors();
-    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();
-    int16_t  relStepsRight = m_relEncoders.getCountsRight();
-    uint16_t absStepsLeft  = abs(relStepsLeft);
-    uint16_t absStepsRight = abs(relStepsRight);
-
-    /* Calculate absolute accumulated number steps for the left encoder. */
-    m_absEncStepsLeft += absStepsLeft - m_lastAbsRelEncStepsLeft;
-    m_lastAbsRelEncStepsLeft = absStepsLeft;
-
-    /* Calculate absolute accumulated number steps for the right encoder. */
-    m_absEncStepsRight += absStepsRight - m_lastAbsRelEncStepsRight;
-    m_lastAbsRelEncStepsRight = absStepsRight;
-
-    /* Orientation shall not be calculated from stand still to driving,
-     * because there can not be any orientation change before.
-     */
-    if ((0 == m_lastMotorSpeedLeft) && (0 == m_lastMotorSpeedRight))
-    {
-        /* Calculate it with the next motor speed change. */
-        m_lastMotorSpeedLeft  = motors.getLeftSpeed();
-        m_lastMotorSpeedRight = motors.getRightSpeed();
-    }
-    /* The calculation of the orientation/movement depends on the driven distance.
-     * If a distance threshold is exceeded, it will be calculated.
-     */
-    else if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
-    {
-        int16_t alpha       = 0;
-        int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
-        int16_t dX          = 0;
-        int16_t dY          = 0;
-
-        m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
-
-        calculateDeltaPos(stepsCenter, alpha, dX, dY);
-        m_posX += dX;
-        m_posY += dY;
-
-        /* Reset to be able to calculate the next delta. */
-        m_lastMotorSpeedLeft      = motors.getLeftSpeed();
-        m_lastMotorSpeedRight     = motors.getRightSpeed();
-        m_lastAbsRelEncStepsLeft  = 0;
-        m_lastAbsRelEncStepsRight = 0;
-
-        m_relEncoders.clear();
-    }
+    m_referencePointLeft       = m_absEncoders.getCountsLeft();
+    m_referencePointRight      = m_absEncoders.getCountsRight();
+    m_lastRelEncoderStepsLeft  = 0;
+    m_lastRelEncoderStepsRight = 0;
 }
 
-uint32_t Odometry::getMileageCenter() const
+void RelativeEncoders::clearLeft()
 {
-    uint32_t encoderSteps = (m_absEncStepsLeft + m_absEncStepsRight) / 2;
+    m_referencePointLeft      = m_absEncoders.getCountsLeft();
+    m_lastRelEncoderStepsLeft = 0;
+}
 
-    return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
+void RelativeEncoders::clearRight()
+{
+    m_referencePointRight      = m_absEncoders.getCountsRight();
+    m_lastRelEncoderStepsRight = 0;
+}
+
+int16_t RelativeEncoders::getCountsLeft() const
+{
+    return calculate(m_absEncoders.getCountsLeft(), m_referencePointLeft);
+}
+
+int16_t RelativeEncoders::getCountsRight() const
+{
+    return calculate(m_absEncoders.getCountsRight(), m_referencePointRight);
+}
+
+RelativeEncoders::Direction RelativeEncoders::getDirectionLeft()
+{
+    int16_t   diffSteps = getCountsLeft();
+    Direction direction = getDirection(m_lastRelEncoderStepsLeft, diffSteps);
+
+    m_lastRelEncoderStepsLeft = diffSteps;
+
+    return direction;
+}
+
+RelativeEncoders::Direction RelativeEncoders::getDirectionRight()
+{
+    int16_t   diffSteps = getCountsRight();
+    Direction direction = getDirection(m_lastRelEncoderStepsRight, diffSteps);
+
+    m_lastRelEncoderStepsRight = diffSteps;
+
+    return direction;
 }
 
 /******************************************************************************
@@ -129,27 +116,59 @@ uint32_t Odometry::getMileageCenter() const
  * Private Methods
  *****************************************************************************/
 
-int16_t Odometry::calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const
+int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
 {
-    /* The alpha is approximated for performance reason. */
-    alpha = 1000 * (stepsRight - stepsLeft);
-    alpha /= static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-    alpha /= static_cast<int16_t>(RobotConstants::WHEEL_BASE); /* [mrad] */
-    alpha %= FP_2PI();                                         /* -2*PI < alpha < +2*PI */
+    int16_t diffSteps = 0;
 
-    /* Calculate orientation */
-    orientation += alpha;
-    orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
+    /* Wrap around in positive direction: -MAX to +MAX
+     * Wrap around in negative direction: +MAX to -MAX
+     */
 
-    return orientation;
+    /* Wrap around in from negative to positive direction?
+     * Reference point is in the last half negative part.
+     * Current steps are in the last half positive part.
+     */
+    if (((INT16_MIN / 2) > refPoint) && ((INT16_MAX / 2) < absSteps))
+    {
+        /* Drives forward */
+        diffSteps = absSteps + (refPoint - INT16_MIN);
+    }
+    /* Wrap around in negative direction?
+     * Reference point is in the last half positive part.
+     * Current steps are in the last half negative part.
+     */
+    else if (((INT16_MAX / 2) < refPoint) && ((INT16_MIN / 2) > absSteps))
+    {
+        /* Drives backward */
+        diffSteps = absSteps + (refPoint - INT16_MAX);
+    }
+    /* No wrap around */
+    else
+    {
+        diffSteps = absSteps - refPoint;
+    }
+
+    return diffSteps;
 }
 
-void Odometry::calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const
+RelativeEncoders::Direction RelativeEncoders::getDirection(int16_t lastRelSteps, int16_t currentRelSteps) const
 {
-    int16_t distCenter = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
+    Direction direction = DIRECTION_STOPPED;
 
-    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(alpha));
-    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(alpha));
+    if (lastRelSteps < currentRelSteps)
+    {
+        direction = DIRECTION_POSTIVE;
+    }
+    else if (lastRelSteps > currentRelSteps)
+    {
+        direction = DIRECTION_NEGATIVE;
+    }
+    else
+    {
+        ;
+    }
+
+    return direction;
 }
 
 /******************************************************************************
