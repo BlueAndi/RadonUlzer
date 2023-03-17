@@ -74,8 +74,10 @@ public:
 
     /**
      * Initialize the SocketServer.
+     * @param[in] port Port number to set the Socket to.
+     * @returns true if server has been succesfully set-up.
      */
-    bool init();
+    bool init(uint16_t port);
 
     /**
      * Send a message to the socket.

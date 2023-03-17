@@ -35,13 +35,13 @@
 
 #include "SocketServer.h"
 #include <stdio.h>
+#include <string>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 #define DEFAULT_BUFLEN  512
-#define DEFAULT_PORT    "65432"
 #define MAX_CONNECTIONS 1
 
 /******************************************************************************
@@ -66,7 +66,7 @@ SocketServer::~SocketServer()
     WSACleanup();
 }
 
-bool SocketServer::init()
+bool SocketServer::init(uint16_t port)
 {
     bool             success = true;
     WSADATA          wsaData;
@@ -89,7 +89,7 @@ bool SocketServer::init()
     }
 
     // Resolve the server address and port
-    iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+    iResult = getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &result);
     if (iResult != 0)
     {
         printf("getaddrinfo failed with error: %d\n", iResult);
