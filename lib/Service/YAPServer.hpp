@@ -186,6 +186,12 @@ private:
 
         switch (cmdByte)
         {
+            
+        case COMMANDS::SYNC:
+        {
+            break;
+        }
+
         case COMMANDS::SYNC_RSP:
         {
             uint32_t rcvTimestamp = ((uint32_t)rcvData[1] << 24) | ((uint32_t)rcvData[2] << 16) |
@@ -220,6 +226,11 @@ private:
                 }
             }
 
+            break;
+        }
+
+        case COMMANDS::SCRB_RSP:
+        {
             break;
         }
 
