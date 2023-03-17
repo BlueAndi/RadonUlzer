@@ -81,7 +81,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     if (result != 0)
     {
         printf("WSAStartup failed with error: %d\n", result);
-        success = false;
+        return false;
     }
 
     // Resolve the server address and port
@@ -90,7 +90,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     {
         printf("getaddrinfo failed with error: %d\n", result);
         WSACleanup();
-        success = false;
+        return false;
     }
 
     // Create a SOCKET for the server to listen for client connections.
@@ -100,7 +100,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
         printf("socket failed with error: %ld\n", WSAGetLastError());
         freeaddrinfo(addrInfo);
         WSACleanup();
-        success = false;
+        return false;
     }
 
     // Setup the TCP listening socket
@@ -111,7 +111,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
         freeaddrinfo(addrInfo);
         closesocket(m_listenSocket);
         WSACleanup();
-        success = false;
+        return false;
     }
 
     freeaddrinfo(addrInfo);
@@ -122,10 +122,10 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
         printf("listen failed with error: %d\n", WSAGetLastError());
         closesocket(m_listenSocket);
         WSACleanup();
-        success = false;
+        return false;
     }
 
-    return success;
+    return true;
 }
 
 void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
