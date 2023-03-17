@@ -84,7 +84,7 @@ public:
      * @param[in] buf Byte buffer to send
      * @param[in] length Number of bytes to send
      */
-    void sendMessage(const uint8_t* buf, int length);
+    void sendMessage(const uint8_t* buf, uint16_t length);
 
     /**
      * Check if any data has been received.

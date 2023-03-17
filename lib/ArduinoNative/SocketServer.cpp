@@ -132,7 +132,7 @@ bool SocketServer::init(uint16_t port)
     return success;
 }
 
-void SocketServer::sendMessage(const uint8_t* buf, int length)
+void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
 {
     // Echo the buffer back to the sender
     if (m_clientSocket != INVALID_SOCKET)
