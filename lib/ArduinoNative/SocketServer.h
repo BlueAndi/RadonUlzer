@@ -81,6 +81,8 @@ public:
 
     /**
      * Send a message to the socket.
+     * @param[in] buf Byte buffer to send
+     * @param[in] length Number of bytes to send
      */
     void sendMessage(const uint8_t* buf, int length);
 
