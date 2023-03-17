@@ -58,7 +58,9 @@
 
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 
-// #define PSTR
+#ifndef PSTR
+#define PSTR
+#endif
 
 #define PI  M_PI
 
@@ -81,6 +83,7 @@ public:
     void begin(unsigned long baudrate)
     {
         (void)baudrate;
+        m_socketServer.init();
     }
 
     void end()
@@ -159,12 +162,12 @@ public:
 
     void write(const uint8_t* buffer, size_t length)
     {
-        SocketServer::getInstance().sendMessage(buffer, length);
+        m_socketServer.sendMessage(buffer, length);
     }
 
     int available()
     {
-        return SocketServer::getInstance().available();
+        return m_socketServer.available();
     }
 
     size_t readBytes(uint8_t* buffer, size_t length)
@@ -173,7 +176,7 @@ public:
 
         for (count = 0; count < length; count++)
         {
-            int rcv = SocketServer::getInstance().getByte();
+            int rcv = m_socketServer.getByte();
 
             if (rcv == -1)
             {
@@ -189,7 +192,8 @@ public:
     }
 
 private:
-
+    /** Instance of the Socket Server */
+    SocketServer m_socketServer;
 };
 
 extern Serial_ Serial;

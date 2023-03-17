@@ -1,4 +1,5 @@
 #include "SocketServer.h"
+#include <stdio.h>
 
 #ifdef _WIN32
 #undef UNICODE
@@ -15,13 +16,16 @@
 #define MAX_CONNECTIONS 1
 
 static std::queue<uint8_t> m_rcvQueue;
-static SOCKET m_clientSocket = INVALID_SOCKET;
-static SOCKET m_listenSocket = INVALID_SOCKET;
+static SOCKET              m_clientSocket = INVALID_SOCKET;
+static SOCKET              m_listenSocket = INVALID_SOCKET;
 
-SocketServer& SocketServer::getInstance()
+SocketServer::SocketServer()
 {
-    static SocketServer instance;
-    return instance;
+}
+
+SocketServer::~SocketServer()
+{
+    WSACleanup();
 }
 
 bool SocketServer::init()
@@ -90,7 +94,7 @@ bool SocketServer::init()
     return success;
 }
 
-void SocketServer::process()
+void SocketServer::processRx()
 {
     if (m_listenSocket != INVALID_SOCKET)
     {
@@ -99,7 +103,7 @@ void SocketServer::process()
         struct timeval tv;
 
         tv.tv_sec  = 0;
-        tv.tv_usec = 1000;
+        tv.tv_usec = 10;
 
         FD_ZERO(&fr);
         FD_ZERO(&fw);
@@ -138,7 +142,6 @@ void SocketServer::process()
 
                 if (iResult > 0)
                 {
-                    // Received Bytes
                     for (int i = 0; i < iResult; i++)
                     {
                         m_rcvQueue.push(recvbuf[i]);
@@ -176,6 +179,7 @@ void SocketServer::sendMessage(const uint8_t* buf, int length)
 
 int SocketServer::available()
 {
+    this->processRx();
     return m_rcvQueue.size();
 }
 
