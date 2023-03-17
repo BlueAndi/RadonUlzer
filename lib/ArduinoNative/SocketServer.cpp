@@ -41,8 +41,6 @@
  * Macros
  *****************************************************************************/
 
-#define DEFAULT_BUFLEN  512
-
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
@@ -211,8 +209,9 @@ void SocketServer::processRx()
             // Client Ready to read
             if (FD_ISSET(m_clientSocket, &fr))
             {
-                char recvbuf[DEFAULT_BUFLEN];
-                int  iResult = recv(m_clientSocket, recvbuf, DEFAULT_BUFLEN, 0);
+                uint16_t bufferLength = 300U;
+                char recvbuf[bufferLength];
+                int  iResult = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
                 if (iResult > 0)
                 {
