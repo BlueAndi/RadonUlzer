@@ -242,8 +242,19 @@ private:
             Frame rcvFrame;
             Serial.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
 
+            // Differenciate between Control and Data Channels
+            if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
+            {
+                // Read Payload
+                Serial.readBytes(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+                if (isFrameValid(rcvFrame, CONTROL_CHANNEL_PAYLOAD_LENGTH))
+                {
+                    callbackControlChannel(rcvFrame.fields.payload.m_data);
+                }
+            }
             // Determine which callback to call, if any.
-            if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel].m_callback)
+            else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
             {
                 uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel].m_dlc;
 
@@ -253,11 +264,6 @@ private:
                 if (isFrameValid(rcvFrame, payloadLength))
                 {
                     // Callback
-                    if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
-                    {
-                        callbackControlChannel(rcvFrame.fields.payload.m_data);
-                    }
-                    else
                     {
                         m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
                             rcvFrame.fields.payload.m_data);
