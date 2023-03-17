@@ -60,7 +60,6 @@ SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET),
 
 SocketServer::~SocketServer()
 {
-    WSACleanup();
 }
 
 bool SocketServer::init(uint16_t port, uint8_t maxConnections)
