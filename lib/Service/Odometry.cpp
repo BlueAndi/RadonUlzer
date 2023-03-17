@@ -65,18 +65,17 @@ const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(2 * RobotConstant
 
 void Odometry::process()
 {
-    IEncoders& encoders      = Board::getInstance().getEncoders();
-    IMotors&   motors        = Board::getInstance().getMotors();
-    int16_t    relStepsLeft  = m_relEncLeft.calculate(encoders.getCountsLeft());
-    int16_t    relStepsRight = m_relEncRight.calculate(encoders.getCountsRight());
-    uint16_t   absStepsLeft  = abs(relStepsLeft);
-    uint16_t   absStepsRight = abs(relStepsRight);
+    IMotors& motors        = Board::getInstance().getMotors();
+    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();
+    int16_t  relStepsRight = m_relEncoders.getCountsRight();
+    uint16_t absStepsLeft  = abs(relStepsLeft);
+    uint16_t absStepsRight = abs(relStepsRight);
 
     /* Calculate absolute accumulated number steps for the left encoder. */
     m_absEncStepsLeft += absStepsLeft - m_lastAbsRelEncStepsLeft;
     m_lastAbsRelEncStepsLeft = absStepsLeft;
 
-    /* Calculate absolute accumulated number steps for the left encoder. */
+    /* Calculate absolute accumulated number steps for the right encoder. */
     m_absEncStepsRight += absStepsRight - m_lastAbsRelEncStepsRight;
     m_lastAbsRelEncStepsRight = absStepsRight;
 
@@ -110,8 +109,8 @@ void Odometry::process()
         m_lastMotorSpeedRight     = motors.getRightSpeed();
         m_lastAbsRelEncStepsLeft  = 0;
         m_lastAbsRelEncStepsRight = 0;
-        m_relEncLeft.setSteps(encoders.getCountsLeft());
-        m_relEncRight.setSteps(encoders.getCountsRight());
+
+        m_relEncoders.clear();
     }
 }
 

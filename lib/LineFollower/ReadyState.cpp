@@ -37,6 +37,7 @@
 #include <StateMachine.h>
 #include "ReleaseTrackState.h"
 #include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -57,6 +58,11 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
+
+/**
+ * Logging source.
+ */
+static const char* TAG = "ReadyState";
 
 /******************************************************************************
  * Public Methods
@@ -97,27 +103,29 @@ void ReadyState::process(StateMachine& sm)
         uint8_t         index        = 0;
         int16_t         position     = lineSensors.readLine();
         const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            msg[80U];
-        char            tmp[10U];
-        msg[0] = '\0';
-        tmp[0] = '\0';
+        char valueStr[10];
+
+        LOG_DEBUG_HEAD(TAG);
 
         /* Print line sensor value on console for debug purposes. */
         for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
         {
             if (0 < index)
             {
-                strncat(msg, " / ", (sizeof(msg) - strlen(msg) - 1));
+                LOG_DEBUG_MSG(" / ");
             }
 
-            snprintf(tmp, sizeof(tmp), "%u", sensorValues[index]);
-            strncat(msg, tmp, (sizeof(msg) - strlen(msg) - 1));
+            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
+            
+            LOG_DEBUG_MSG(valueStr);
         }
-        strncat(msg, " -> ", (sizeof(msg) - strlen(msg) - 1));
-        snprintf(tmp, sizeof(tmp), "%u", position);
-        strncat(msg, tmp, (sizeof(msg) - strlen(msg) - 1));
 
-        LOG_DEBUG("ReadyState", msg);
+        LOG_DEBUG_MSG(" -> ");
+        
+        Util::intToStr(valueStr, sizeof(valueStr), position);
+        LOG_DEBUG_MSG(valueStr);
+
+        LOG_DEBUG_TAIL();
 
         m_timer.restart();
     }

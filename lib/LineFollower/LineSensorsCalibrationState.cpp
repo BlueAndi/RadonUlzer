@@ -37,6 +37,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <StateMachine.h>
+#include <Util.h>
 #include "ReadyState.h"
 #include "ErrorState.h"
 
@@ -198,8 +199,14 @@ void LineSensorsCalibrationState::phase5Finished(StateMachine& sm)
     if (false == lineSensors.isCalibrationSuccessful())
     {
         char str[10];
+        char valueStr[10];
 
-        snprintf(str, sizeof(str), "Cal %u", lineSensors.getCalibErrorInfo());
+        Util::uintToStr(valueStr, sizeof(valueStr), lineSensors.getCalibErrorInfo());
+
+        strncpy(str, "Cal=", sizeof(str) - 1);
+        str[sizeof(str) - 1] = '\0';
+
+        strncat(str, valueStr, sizeof(str) - strlen(valueStr) - 1);
 
         ErrorState::getInstance().setErrorMsg(str);
         sm.setState(&ErrorState::getInstance());

@@ -37,9 +37,10 @@
 #include <RobotConstants.h>
 #include <DifferentialDrive.h>
 #include <StateMachine.h>
+#include <Logging.h>
+#include <Util.h>
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
-#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -61,14 +62,18 @@
  * Local Variables
  *****************************************************************************/
 
+/**
+ * Logging source.
+ */
+const char* TAG = "MotorSpeedCalibrationState";
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
 void MotorSpeedCalibrationState::entry()
 {
-    IDisplay&  display  = Board::getInstance().getDisplay();
-    IEncoders& encoders = Board::getInstance().getEncoders();
+    IDisplay& display = Board::getInstance().getDisplay();
 
     display.clear();
     display.print("Calib");
@@ -76,8 +81,7 @@ void MotorSpeedCalibrationState::entry()
     display.print("MSpeed");
 
     /* Setup relative encoders */
-    m_relEncLeft.setSteps(encoders.getCountsLeft());
-    m_relEncRight.setSteps(encoders.getCountsRight());
+    m_relEncoders.clear();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
@@ -145,17 +149,16 @@ void MotorSpeedCalibrationState::phase2Back()
 {
     if (true == m_timer.isTimeout())
     {
-        IEncoders& encoders   = Board::getInstance().getEncoders();
-        IMotors&   motors     = Board::getInstance().getMotors();
-        int32_t    stepsLeft  = 0;
-        int32_t    stepsRight = 0;
+        IMotors& motors     = Board::getInstance().getMotors();
+        int32_t  stepsLeft  = 0;
+        int32_t  stepsRight = 0;
 
         /* Stop motors immediately */
         motors.setSpeeds(0, 0);
 
         /* Determine max. speed backward. */
-        stepsLeft  = abs(m_relEncLeft.calculate(encoders.getCountsLeft()));
-        stepsRight = abs(m_relEncRight.calculate(encoders.getCountsRight()));
+        stepsLeft  = abs(m_relEncoders.getCountsLeft());
+        stepsRight = abs(m_relEncoders.getCountsRight());
 
         /* Convert number of steps to [steps/s] */
         stepsLeft *= 1000;
@@ -163,12 +166,18 @@ void MotorSpeedCalibrationState::phase2Back()
         stepsRight *= 1000;
         stepsRight /= CALIB_DURATION;
 
-        m_maxSpeedLeft  = stepsLeft;
-        m_maxSpeedRight = stepsRight;
+        if (INT16_MAX >= stepsLeft)
+        {
+            m_maxSpeedLeft  = static_cast<int16_t>(stepsLeft);
+        }
+
+        if (INT16_MAX >= stepsRight)
+        {
+            m_maxSpeedRight = static_cast<int16_t>(stepsRight);
+        }
 
         /* Clear relative encoders */
-        m_relEncLeft.setSteps(encoders.getCountsLeft());
-        m_relEncRight.setSteps(encoders.getCountsRight());
+        m_relEncoders.clear();
 
         /* Full forward */
         m_phase = PHASE_3_FORWARD;
@@ -181,17 +190,16 @@ void MotorSpeedCalibrationState::phase3Forward()
 {
     if (true == m_timer.isTimeout())
     {
-        IEncoders& encoders   = Board::getInstance().getEncoders();
-        IMotors&   motors     = Board::getInstance().getMotors();
-        int32_t    stepsLeft  = 0;
-        int32_t    stepsRight = 0;
+        IMotors& motors     = Board::getInstance().getMotors();
+        int32_t  stepsLeft  = 0;
+        int32_t  stepsRight = 0;
 
         /* Stop motors immediately */
         motors.setSpeeds(0, 0);
 
         /* Determine max. speed forward. */
-        stepsLeft  = abs(m_relEncLeft.calculate(encoders.getCountsLeft()));
-        stepsRight = abs(m_relEncRight.calculate(encoders.getCountsRight()));
+        stepsLeft  = abs(m_relEncoders.getCountsLeft());
+        stepsRight = abs(m_relEncoders.getCountsRight());
 
         /* Convert number of steps to [steps/s] */
         stepsLeft *= 1000;
@@ -216,8 +224,7 @@ void MotorSpeedCalibrationState::phase3Forward()
         }
 
         /* Clear relative encoders */
-        m_relEncLeft.setSteps(encoders.getCountsLeft());
-        m_relEncRight.setSteps(encoders.getCountsRight());
+        m_relEncoders.clear();
 
         /* Finished */
         m_phase = PHASE_4_FINISHED;
@@ -241,17 +248,26 @@ void MotorSpeedCalibrationState::phase4Finished(StateMachine& sm)
 
     if (0 == maxSpeed)
     {
-        char str[10];
-
-        snprintf(str, sizeof(str), "MS=0");
-
-        ErrorState::getInstance().setErrorMsg(str);
+        ErrorState::getInstance().setErrorMsg("MS=0");
         sm.setState(&ErrorState::getInstance());
     }
     else
     {
-        LOG_DEBUG("SpeedCal", "Calibrated max. speed: %d steps/s (= %d mm/s)", maxSpeed,
-                  (maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM));
+        char valueStr[10];
+
+        LOG_DEBUG_HEAD(TAG);
+        LOG_DEBUG_MSG("Calibrated max. speed:");
+
+        Util::intToStr(valueStr, sizeof(valueStr), maxSpeed);
+        LOG_DEBUG_MSG(valueStr);
+
+        LOG_DEBUG_MSG(" steps/s (= ");
+
+        Util::intToStr(valueStr, sizeof(valueStr), maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
+        LOG_DEBUG_MSG(valueStr);
+
+        LOG_DEBUG_MSG(" mm/s)");
+        LOG_DEBUG_TAIL();
 
         sm.setState(&LineSensorsCalibrationState::getInstance());
     }

@@ -44,7 +44,8 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
-#include <RelativeEncoder.h>
+#include <Board.h>
+#include <RelativeEncoders.h>
 #include <RobotConstants.h>
 
 /******************************************************************************
@@ -97,13 +98,6 @@ public:
     int16_t getLinearSpeedRight() const;
 
 private:
-    /** Possible drive directions */
-    enum DriveDirection
-    {
-        DRIVE_DIRECTION_STOPPED = 0, /**< No movement */
-        DRIVE_DIRECTION_FORWARD,     /**< Moves forward */
-        DRIVE_DIRECTION_BACKWARD     /**< Moves backward */
-    };
 
     /**
      * The minimum number of counted encoder steps until the speed is measured.
@@ -114,11 +108,8 @@ private:
     /** Speedometer instance */
     static Speedometer m_instance;
 
-    /** Relative encoder left */
-    RelativeEncoder m_relEncLeft;
-
-    /** Relative encoder right */
-    RelativeEncoder m_relEncRight;
+    /** Relative encoder left/right */
+    RelativeEncoders m_relEncoders;
 
     /** Timestamp of last left speed calculation. */
     uint32_t m_timestampLeft;
@@ -132,20 +123,27 @@ private:
     /** Linear speed right in steps/s */
     int16_t m_linearSpeedRight;
 
-    /** Current drive direction */
-    DriveDirection m_driveDirection;
+    /**
+     * Last determined driving direction left.
+     */
+    RelativeEncoders::Direction m_lastDirectionLeft;
+
+    /**
+     * Last determined driving direction left.
+     */
+    RelativeEncoders::Direction m_lastDirectionRight;
 
     /**
      * Construct the mileage instance.
      */
     Speedometer() :
-        m_relEncLeft(),
-        m_relEncRight(),
+        m_relEncoders(Board::getInstance().getEncoders()),
         m_timestampLeft(0),
         m_timestampRight(0),
         m_linearSpeedLeft(0),
         m_linearSpeedRight(0),
-        m_driveDirection(DRIVE_DIRECTION_STOPPED)
+        m_lastDirectionLeft(RelativeEncoders::DIRECTION_STOPPED),
+        m_lastDirectionRight(RelativeEncoders::DIRECTION_STOPPED)
     {
     }
 

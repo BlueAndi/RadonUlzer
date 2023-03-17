@@ -64,40 +64,44 @@ Speedometer Speedometer::m_instance;
 
 void Speedometer::process()
 {
-    IMotors&       motors           = Board::getInstance().getMotors();
-    IEncoders&     encoders         = Board::getInstance().getEncoders();
-    uint32_t       timestamp        = millis();                                  /* [ms] */
-    int16_t        absEncStepsLeft  = encoders.getCountsLeft();                  /* [steps] */
-    int16_t        absEncStepsRight = encoders.getCountsRight();                 /* [steps] */
-    int32_t        diffStepsLeft    = m_relEncLeft.calculate(absEncStepsLeft);   /* [steps] */
-    int32_t        diffStepsRight   = m_relEncRight.calculate(absEncStepsRight); /* [steps] */
-    DriveDirection driveDirection   = DRIVE_DIRECTION_STOPPED;
-    const int32_t  ONE_SECOND       = 1000; /* 1s in ms */
+    IMotors&      motors         = Board::getInstance().getMotors();
+    uint32_t      timestamp      = millis();                       /* [ms] */
+    int32_t       diffStepsLeft  = m_relEncoders.getCountsLeft();  /* [steps] */
+    int32_t       diffStepsRight = m_relEncoders.getCountsRight(); /* [steps] */
+    const int32_t ONE_SECOND     = 1000;                           /* 1s in ms */
+    bool          resetLeft      = false;
+    bool          resetRight     = false;
 
-    /* Determine current drive direction.
-     *
-     * TODO Consider inertia by calibration. The motor voltage must be higher than a
-     * certain threshold to move the robot. This threshold must be determined.
-     */
-    if ((0 == motors.getLeftSpeed()) && (0 == motors.getRightSpeed()))
+    if (0 == motors.getLeftSpeed())
     {
-        driveDirection = DRIVE_DIRECTION_STOPPED;
-    }
-    else if (motors.getLeftSpeed() == (-motors.getRightSpeed()))
-    {
-        driveDirection = DRIVE_DIRECTION_STOPPED;
-    }
-    else if ((-motors.getLeftSpeed()) == motors.getRightSpeed())
-    {
-        driveDirection = DRIVE_DIRECTION_STOPPED;
-    }
-    else if ((0 <= motors.getLeftSpeed()) && (0 <= motors.getRightSpeed()))
-    {
-        driveDirection = DRIVE_DIRECTION_FORWARD;
+        resetLeft = true;
     }
     else
     {
-        driveDirection = DRIVE_DIRECTION_BACKWARD;
+        RelativeEncoders::Direction currentDrivingDirection = m_relEncoders.getDirectionLeft();
+
+        if (currentDrivingDirection != m_lastDirectionLeft)
+        {
+            resetLeft = true;
+        }
+
+        m_lastDirectionLeft = currentDrivingDirection;
+    }
+
+    if (0 == motors.getRightSpeed())
+    {
+        resetRight = true;
+    }
+    else
+    {
+        RelativeEncoders::Direction currentDrivingDirection = m_relEncoders.getDirectionRight();
+
+        if (currentDrivingDirection != m_lastDirectionRight)
+        {
+            resetLeft = true;
+        }
+
+        m_lastDirectionRight = currentDrivingDirection;
     }
 
     /* If a motor is stopped, it is assumed that the robot has no movement on the
@@ -109,13 +113,12 @@ void Speedometer::process()
      * If the driving direction changed, the relative encoders will be reset to
      * avoid using a invalid driving distance for speed calculation.
      */
-
-    if ((0 == motors.getLeftSpeed()) || (m_driveDirection != driveDirection))
+    if (true == resetLeft)
     {
         m_linearSpeedLeft = 0;
         m_timestampLeft   = timestamp;
 
-        m_relEncLeft.setSteps(absEncStepsLeft);
+        m_relEncoders.clearLeft();
     }
     /* Moved long enough to be able to calculate the linear speed? */
     else if (MIN_ENCODER_COUNT <= abs(diffStepsLeft))
@@ -125,19 +128,19 @@ void Speedometer::process()
         m_linearSpeedLeft = diffStepsLeft * ONE_SECOND / static_cast<int32_t>(dTimeLeft);
         m_timestampLeft   = timestamp;
 
-        m_relEncLeft.setSteps(absEncStepsLeft);
+        m_relEncoders.clearLeft();
     }
     else
     {
         ;
     }
 
-    if ((0 == motors.getRightSpeed()) || (m_driveDirection != driveDirection))
+    if (true == resetRight)
     {
         m_linearSpeedRight = 0;
         m_timestampRight   = timestamp;
 
-        m_relEncRight.setSteps(absEncStepsRight);
+        m_relEncoders.clearRight();
     }
     /* Moved long enough to be able to calculate the linear speed? */
     else if (MIN_ENCODER_COUNT <= abs(diffStepsRight))
@@ -147,14 +150,12 @@ void Speedometer::process()
         m_linearSpeedRight = diffStepsRight * ONE_SECOND / static_cast<int32_t>(dTimeRight);
         m_timestampRight   = timestamp;
 
-        m_relEncRight.setSteps(absEncStepsRight);
+        m_relEncoders.clearRight();
     }
     else
     {
         ;
     }
-
-    m_driveDirection = driveDirection;
 }
 
 int16_t Speedometer::getLinearSpeedCenter() const

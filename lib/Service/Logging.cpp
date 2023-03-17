@@ -33,8 +33,6 @@
  * Includes
  *****************************************************************************/
 #include "Logging.h"
-#include <stdarg.h>
-#include <stdint.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -51,8 +49,6 @@
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
-
-static void printHead(const char* filename, int lineNumber, Logging::LogLevel level);
 
 /******************************************************************************
  * Local Variables
@@ -74,37 +70,9 @@ static void printHead(const char* filename, int lineNumber, Logging::LogLevel le
  * External Functions
  *****************************************************************************/
 
-void Logging::print(const char* filename, int lineNumber, Logging::LogLevel level, const char* format, ...)
+void Logging::printHead(const char* filename, int lineNumber, Logging::LogLevel level)
 {
-    const size_t MESSAGE_BUFFER_SIZE = 80;
-    char         buffer[MESSAGE_BUFFER_SIZE];
-    va_list      args;
-
-    printHead(filename, lineNumber, level);
-
-    va_start(args, format);
-    vsnprintf(buffer, MESSAGE_BUFFER_SIZE, format, args);
-    va_end(args);
-
-    Serial.println(buffer);
-}
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
-
-/**
- * Print the head or metadata of the log message.
- * @param[in] filename Name of the file where the message originates.
- * @param[in] lineNumber Number of the line where the message originates.
- * @param[in] level Serverity level of the message.
- */
-static void printHead(const char* filename, int lineNumber, Logging::LogLevel level)
-{
-    uint8_t     HEAD_BUFFER_SIZE         = 40U;
-    char        buffer[HEAD_BUFFER_SIZE] = {0};
-    uint16_t    written                  = 0;
-    const char* levelStr                 = "U";
+    const char* levelStr = "U";
 
     switch (level)
     {
@@ -132,16 +100,32 @@ static void printHead(const char* filename, int lineNumber, Logging::LogLevel le
         break;
     }
 
-    written = snprintf(buffer,
-                       HEAD_BUFFER_SIZE,
-                       "%6lu [%1s] %10s:%04u |   ",
-                       millis(),
-                       levelStr,
-                       filename,
-                       lineNumber);
-
-    if (0U < written)
-    {
-        Serial.print(buffer);
-    }
+    Serial.print(static_cast<uint32_t>(millis()));
+    Serial.print(" ");
+    Serial.print(levelStr);
+    Serial.print(" ");
+    Serial.print(filename);
+    Serial.print("(");
+    Serial.print(lineNumber);
+    Serial.print("): ");
 }
+
+void Logging::printMsg(const char* message)
+{
+    Serial.print(message);
+}
+
+void Logging::printTail()
+{
+    Serial.print("\n");
+}
+
+void Logging::print(const char* filename, int lineNumber, Logging::LogLevel level, const char* message)
+{
+    printHead(filename, lineNumber, level);
+    Serial.println(message);
+}
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

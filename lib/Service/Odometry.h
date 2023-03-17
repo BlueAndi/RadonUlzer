@@ -44,7 +44,8 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
-#include <RelativeEncoder.h>
+#include <Board.h>
+#include <RelativeEncoders.h>
 
 /******************************************************************************
  * Macros
@@ -138,11 +139,8 @@ private:
     /** Absolute number of encoder steps right. Used to determine the mileage. */
     uint32_t m_absEncStepsRight;
 
-    /** Relative encoder left. */
-    RelativeEncoder m_relEncLeft;
-
-    /** Relative encoder right. */
-    RelativeEncoder m_relEncRight;
+    /** Relative encoders left/right. */
+    RelativeEncoders m_relEncoders;
 
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
     int16_t m_orientation;
@@ -167,8 +165,7 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_absEncStepsLeft(0),
         m_absEncStepsRight(0),
-        m_relEncLeft(),
-        m_relEncRight(),
+        m_relEncoders(Board::getInstance().getEncoders()),
         m_orientation(0),
         m_lastMotorSpeedLeft(0),
         m_lastMotorSpeedRight(0),

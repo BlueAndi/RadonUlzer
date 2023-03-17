@@ -117,8 +117,7 @@ void DifferentialDrive::process(uint32_t period)
     /* The differential drive must be enabled.
      * The calibration is essential! The max. motor speed in [steps/s] is needed for closed-loop-control.
      */
-    if ((true == m_isEnabled) &&
-        (0 < m_maxMotorSpeed))
+    if ((true == m_isEnabled) && (0 < m_maxMotorSpeed))
     {
         Speedometer& speedometer        = Speedometer::getInstance();
         IMotors&     motors             = Board::getInstance().getMotors();
@@ -126,6 +125,8 @@ void DifferentialDrive::process(uint32_t period)
         int32_t      pwmMaxMotorSpeed   = static_cast<int32_t>(motors.getMaxSpeed()); /* [digits] */
         int16_t      pwmMotorSpeedLeft  = 0;                                          /* [digits] */
         int16_t      pwmMotorSpeedRight = 0;                                          /* [digits] */
+        int16_t      linearSpeedLeft    = speedometer.getLinearSpeedLeft();           /* [steps/s] */
+        int16_t      linearSpeedRight   = speedometer.getLinearSpeedRight();          /* [steps/s] */
 
         m_motorSpeedLeftPID.setSampleTime(period);
         m_motorSpeedRightPID.setSampleTime(period);
@@ -139,7 +140,6 @@ void DifferentialDrive::process(uint32_t period)
         /* Handle left motor PID control. */
         else
         {
-            int16_t linearSpeedLeft = speedometer.getLinearSpeedLeft();
             int32_t motorSpeedLeft =
                 m_lastLinearSpeedLeft +
                 m_motorSpeedLeftPID.calculate(m_linearSpeedLeftSetPoint, linearSpeedLeft); /* [steps/s] */
@@ -163,7 +163,6 @@ void DifferentialDrive::process(uint32_t period)
         /* Handle right motor PID control. */
         else
         {
-            int16_t linearSpeedRight = speedometer.getLinearSpeedRight();
             int32_t motorSpeedRight =
                 m_lastLinearSpeedRight +
                 m_motorSpeedRightPID.calculate(m_linearSpeedRightSetPoint, linearSpeedRight); /* [steps/s] */

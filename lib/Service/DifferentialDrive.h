@@ -46,7 +46,6 @@
 #include <stdint.h>
 #include <SimpleTimer.h>
 #include <PIDController.h>
-#include <RelativeEncoder.h>
 
 /******************************************************************************
  * Macros

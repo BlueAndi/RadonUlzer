@@ -32,7 +32,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "RelativeEncoder.h"
+#include "RelativeEncoders.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -58,33 +58,54 @@
  * Public Methods
  *****************************************************************************/
 
-int16_t RelativeEncoder::calculate(int16_t steps)
+void RelativeEncoders::clear()
 {
-    int16_t diffSteps = 0;
+    m_referencePointLeft       = m_absEncoders.getCountsLeft();
+    m_referencePointRight      = m_absEncoders.getCountsRight();
+    m_lastRelEncoderStepsLeft  = 0;
+    m_lastRelEncoderStepsRight = 0;
+}
 
-    /* Wrap around in positive direction: +MAX to -MAX
-     * Wrap around in negative direction: -MAX to +MAX
-     */
+void RelativeEncoders::clearLeft()
+{
+    m_referencePointLeft      = m_absEncoders.getCountsLeft();
+    m_lastRelEncoderStepsLeft = 0;
+}
 
-    /* Wrap around in positive direction? */
-    if (((INT16_MAX / 2) < (-m_lastSteps)) && ((INT16_MAX / 2) < steps))
-    {
-        /* Drives forward */
-        diffSteps = steps + (m_lastSteps - INT16_MIN);
-    }
-    /* Wrap around in negative direction? */
-    else if (((INT16_MAX / 2) < m_lastSteps) && ((INT16_MAX / 2) < (-steps)))
-    {
-        /* Drives backward */
-        diffSteps = steps + (m_lastSteps - INT16_MAX);
-    }
-    /* No wrap around */
-    else
-    {
-        diffSteps = steps - m_lastSteps;
-    }
+void RelativeEncoders::clearRight()
+{
+    m_referencePointRight      = m_absEncoders.getCountsRight();
+    m_lastRelEncoderStepsRight = 0;
+}
 
-    return diffSteps;
+int16_t RelativeEncoders::getCountsLeft() const
+{
+    return calculate(m_absEncoders.getCountsLeft(), m_referencePointLeft);
+}
+
+int16_t RelativeEncoders::getCountsRight() const
+{
+    return calculate(m_absEncoders.getCountsRight(), m_referencePointRight);
+}
+
+RelativeEncoders::Direction RelativeEncoders::getDirectionLeft()
+{
+    int16_t   diffSteps = getCountsLeft();
+    Direction direction = getDirection(m_lastRelEncoderStepsLeft, diffSteps);
+
+    m_lastRelEncoderStepsLeft = diffSteps;
+
+    return direction;
+}
+
+RelativeEncoders::Direction RelativeEncoders::getDirectionRight()
+{
+    int16_t   diffSteps = getCountsRight();
+    Direction direction = getDirection(m_lastRelEncoderStepsRight, diffSteps);
+
+    m_lastRelEncoderStepsRight = diffSteps;
+
+    return direction;
 }
 
 /******************************************************************************
@@ -94,6 +115,61 @@ int16_t RelativeEncoder::calculate(int16_t steps)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
+{
+    int16_t diffSteps = 0;
+
+    /* Wrap around in positive direction: -MAX to +MAX
+     * Wrap around in negative direction: +MAX to -MAX
+     */
+
+    /* Wrap around in from negative to positive direction?
+     * Reference point is in the last half negative part.
+     * Current steps are in the last half positive part.
+     */
+    if (((INT16_MIN / 2) > refPoint) && ((INT16_MAX / 2) < absSteps))
+    {
+        /* Drives forward */
+        diffSteps = absSteps + (refPoint - INT16_MIN);
+    }
+    /* Wrap around in negative direction?
+     * Reference point is in the last half positive part.
+     * Current steps are in the last half negative part.
+     */
+    else if (((INT16_MAX / 2) < refPoint) && ((INT16_MIN / 2) > absSteps))
+    {
+        /* Drives backward */
+        diffSteps = absSteps + (refPoint - INT16_MAX);
+    }
+    /* No wrap around */
+    else
+    {
+        diffSteps = absSteps - refPoint;
+    }
+
+    return diffSteps;
+}
+
+RelativeEncoders::Direction RelativeEncoders::getDirection(int16_t lastRelSteps, int16_t currentRelSteps) const
+{
+    Direction direction = DIRECTION_STOPPED;
+
+    if (lastRelSteps < currentRelSteps)
+    {
+        direction = DIRECTION_POSTIVE;
+    }
+    else if (lastRelSteps > currentRelSteps)
+    {
+        direction = DIRECTION_NEGATIVE;
+    }
+    else
+    {
+        ;
+    }
+
+    return direction;
+}
 
 /******************************************************************************
  * External Functions

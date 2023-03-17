@@ -64,13 +64,9 @@ Mileage Mileage::m_instance;
 
 void Mileage::clear()
 {
-    IEncoders& encoders = Board::getInstance().getEncoders();
-
     m_encoderStepsLeft  = 0;
     m_encoderStepsRight = 0;
-
-    m_relEncLeft.setSteps(encoders.getCountsLeft());
-    m_relEncRight.setSteps(encoders.getCountsRight());
+    m_relEncoders.clear();
 }
 
 void Mileage::process()
@@ -81,11 +77,10 @@ void Mileage::process()
     }
     else if (true == m_timer.isTimeout())
     {
-        IEncoders& encoders      = Board::getInstance().getEncoders();
-        int16_t    stepsLeft     = m_relEncLeft.calculate(encoders.getCountsLeft());
-        int16_t    stepsRight    = m_relEncRight.calculate(encoders.getCountsRight());
-        uint16_t   absStepsLeft  = abs(stepsLeft);
-        uint16_t   absStepsRight = abs(stepsRight);
+        int16_t  stepsLeft     = m_relEncoders.getCountsLeft();
+        int16_t  stepsRight    = m_relEncoders.getCountsRight();
+        uint16_t absStepsLeft  = abs(stepsLeft);
+        uint16_t absStepsRight = abs(stepsRight);
 
         /* Calculate absolute accumulated number steps for the left encoder. */
         m_encoderStepsLeft += absStepsLeft;
@@ -94,8 +89,7 @@ void Mileage::process()
         m_encoderStepsRight += absStepsRight;
 
         /* Clear relative encoders */
-        m_relEncLeft.setSteps(encoders.getCountsLeft());
-        m_relEncRight.setSteps(encoders.getCountsRight());
+        m_relEncoders.clear();
 
         m_timer.restart();
     }
