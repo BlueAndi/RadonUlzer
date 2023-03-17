@@ -22,7 +22,7 @@
  */
 
 /**
- * @author  Write here the name of the author.
+ * @author  Andreas Merkle <web@blue-andi.de>
  * @brief   This module contains the program entry point for the tests.
  */
 
