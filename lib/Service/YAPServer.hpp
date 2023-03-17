@@ -236,7 +236,7 @@ private:
     void processRxData()
     {
         // Check for received data
-        if (Serial.available())
+        if (HEADER_LEN < Serial.available())
         {
             // Create Frame and read header
             Frame rcvFrame;
