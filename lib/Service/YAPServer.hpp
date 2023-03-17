@@ -186,9 +186,12 @@ private:
 
         switch (cmdByte)
         {
-            
+
         case COMMANDS::SYNC:
         {
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1], rcvData[2], rcvData[3],
+                                                           rcvData[4]};
+            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
             break;
         }
 
