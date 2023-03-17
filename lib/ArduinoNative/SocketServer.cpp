@@ -1,25 +1,63 @@
+/* MIT License
+ *
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+/*******************************************************************************
+    DESCRIPTION
+*******************************************************************************/
+/**
+ *  @brief  Socket Server for Inter-Process Communication
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ */
+
+/******************************************************************************
+ * Includes
+ *****************************************************************************/
+
 #include "SocketServer.h"
 #include <stdio.h>
 
-#ifdef _WIN32
-#undef UNICODE
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
-#include <ws2tcpip.h>
-#include <queue>
-#pragma comment(lib, "Ws2_32.lib")
-#endif
+/******************************************************************************
+ * Macros
+ *****************************************************************************/
 
 #define DEFAULT_BUFLEN  512
 #define DEFAULT_PORT    "65432"
 #define MAX_CONNECTIONS 1
 
-static std::queue<uint8_t> m_rcvQueue;
-static SOCKET              m_clientSocket = INVALID_SOCKET;
-static SOCKET              m_listenSocket = INVALID_SOCKET;
+/******************************************************************************
+ * Prototypes
+ *****************************************************************************/
 
-SocketServer::SocketServer()
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET),
+                               m_listenSocket(INVALID_SOCKET)
 {
 }
 
@@ -94,6 +132,43 @@ bool SocketServer::init()
     return success;
 }
 
+void SocketServer::sendMessage(const uint8_t* buf, int length)
+{
+    // Echo the buffer back to the sender
+    if (m_clientSocket != INVALID_SOCKET)
+    {
+        int iSendResult = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
+        if (iSendResult == SOCKET_ERROR)
+        {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(m_clientSocket);
+        }
+    }
+}
+
+uint32_t SocketServer::available()
+{
+    this->processRx();
+    return m_rcvQueue.size();
+}
+
+int8_t SocketServer::getByte()
+{
+    int8_t byte = -1;
+
+    if (!m_rcvQueue.empty())
+    {
+        byte = m_rcvQueue.front();
+        m_rcvQueue.pop();
+    }
+
+    return byte;
+}
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
 void SocketServer::processRx()
 {
     if (m_listenSocket != INVALID_SOCKET)
@@ -163,35 +238,6 @@ void SocketServer::processRx()
     }
 }
 
-void SocketServer::sendMessage(const uint8_t* buf, int length)
-{
-    // Echo the buffer back to the sender
-    if (m_clientSocket != INVALID_SOCKET)
-    {
-        int iSendResult = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
-        if (iSendResult == SOCKET_ERROR)
-        {
-            printf("send failed with error: %d\n", WSAGetLastError());
-            closesocket(m_clientSocket);
-        }
-    }
-}
-
-uint32_t SocketServer::available()
-{
-    this->processRx();
-    return m_rcvQueue.size();
-}
-
-int8_t SocketServer::getByte()
-{
-    int8_t byte = -1;
-
-    if (!m_rcvQueue.empty())
-    {
-        byte = m_rcvQueue.front();
-        m_rcvQueue.pop();
-    }
-
-    return byte;
-}
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/
