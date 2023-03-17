@@ -21,7 +21,6 @@
  * SOFTWARE.
  */
 
-
 /**
  * @author  Write here the name of the author.
  * @brief   This module contains the program entry point for the tests.
@@ -38,6 +37,7 @@
 #include <unity.h>
 #include <SimpleTimer.h>
 #include <PIDController.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -57,6 +57,7 @@
 
 static void testSimpleTimer();
 static void testPIDController();
+static void testUtil();
 
 /******************************************************************************
  * Local Variables
@@ -86,7 +87,7 @@ void setup()
 #ifndef TARGET_NATIVE
     /* https://docs.platformio.org/en/latest/plus/unit-testing.html#demo */
     delay(2000);
-#endif  /* Not defined TARGET_NATIVE */
+#endif /* Not defined TARGET_NATIVE */
 }
 
 /**
@@ -98,6 +99,7 @@ void loop()
 
     RUN_TEST(testSimpleTimer);
     RUN_TEST(testPIDController);
+    RUN_TEST(testUtil);
 
     UNITY_END();
 
@@ -105,10 +107,10 @@ void loop()
     /* Don't exit on the robot to avoid a endless test loop.
      * If the test runs on the pc, it must exit.
      */
-    for(;;)
+    for (;;)
     {
     }
-#endif  /* Not defined TARGET_NATIVE */
+#endif /* Not defined TARGET_NATIVE */
 }
 
 /**
@@ -136,9 +138,9 @@ extern void tearDown(void)
  */
 static void testSimpleTimer()
 {
-    const uint32_t  WAIT_TIME   = 100;
-    const uint32_t  DELTA_MIN   = 1;
-    SimpleTimer     testTimer;
+    const uint32_t WAIT_TIME = 100;
+    const uint32_t DELTA_MIN = 1;
+    SimpleTimer    testTimer;
 
     /* If timer is not running, it shall not signal timeout. */
     TEST_ASSERT_FALSE(testTimer.isTimeout());
@@ -176,10 +178,10 @@ static void testSimpleTimer()
  */
 static void testPIDController()
 {
-    PIDController<int16_t>  pidCtrl;
-    uint8_t                 index               = 0;
-    int16_t                 output              = 0;
-    const uint32_t          TEST_SAMPLE_TIME    = 0;    /* Every PID calculate() call shall be processed */
+    PIDController<int16_t> pidCtrl;
+    uint8_t                index            = 0;
+    int16_t                output           = 0;
+    const uint32_t         TEST_SAMPLE_TIME = 0; /* Every PID calculate() call shall be processed */
 
     /* Sample time for all tests shall be set once. */
     pidCtrl.setSampleTime(TEST_SAMPLE_TIME);
@@ -192,7 +194,7 @@ static void testPIDController()
 
     /* Output must follow error */
     output = 0;
-    for(index = 0; index < 10; ++index)
+    for (index = 0; index < 10; ++index)
     {
         output = 0 - index;
         TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
@@ -206,7 +208,7 @@ static void testPIDController()
 
     /* Output must increase per error */
     output = 0;
-    for(index = 0; index < 10; ++index)
+    for (index = 0; index < 10; ++index)
     {
         output += (0 - index);
         TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
@@ -220,9 +222,69 @@ static void testPIDController()
 
     /* Output must be equal to error deviation from previous error */
     output = 0;
-    for(index = 1; index < 10; ++index)
+    for (index = 1; index < 10; ++index)
     {
         output = -1;
         TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
+    }
+}
+
+/**
+ * Test the utilities.
+ */
+static void testUtil()
+{
+    uint32_t    testVectorUInt[]     = {0, UINT32_MAX / 2, UINT32_MAX};
+    const char* expectedResultUInt[] = {"0", "2147483647", "4294967295"};
+    int32_t     testVectorInt[]      = {INT32_MIN, INT32_MIN / 2, 0, INT32_MAX / 2, INT32_MAX};
+    const char* expectedResultInt[]  = {"-2147483647", "-1073741824", "0", "1073741823", "2147483647"};
+    uint8_t     idx                  = 0;
+
+    /* Standard use case */
+    while (sizeof(testVectorUInt) / sizeof(testVectorUInt[0]) > idx)
+    {
+        char result[12];
+
+        Util::uintToStr(result, sizeof(result), testVectorUInt[idx]);
+
+        TEST_ASSERT_EQUAL_STRING(expectedResultUInt[idx], result);
+
+        ++idx;
+    }
+
+    /* With limited result buffer. */
+    while (sizeof(testVectorUInt) / sizeof(testVectorUInt[0]) > idx)
+    {
+        char result[4];
+
+        Util::uintToStr(result, sizeof(result), testVectorUInt[idx]);
+
+        TEST_ASSERT_EQUAL_STRING_ARRAY(expectedResultUInt[idx], result, sizeof(result) - 1);
+
+        ++idx;
+    }
+
+    /* Standard use case */
+    while (sizeof(testVectorInt) / sizeof(testVectorInt[0]) > idx)
+    {
+        char result[12];
+
+        Util::intToStr(result, sizeof(result), testVectorInt[idx]);
+
+        TEST_ASSERT_EQUAL_STRING(expectedResultInt[idx], result);
+
+        ++idx;
+    }
+
+    /* With limited result buffer. */
+    while (sizeof(testVectorInt) / sizeof(testVectorInt[0]) > idx)
+    {
+        char result[4];
+
+        Util::intToStr(result, sizeof(result), testVectorInt[idx]);
+
+        TEST_ASSERT_EQUAL_STRING_ARRAY(expectedResultInt[idx], result, sizeof(result) - 1);
+
+        ++idx;
     }
 }
