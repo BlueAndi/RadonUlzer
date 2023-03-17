@@ -177,13 +177,13 @@ void SocketServer::sendMessage(const uint8_t* buf, int length)
     }
 }
 
-int SocketServer::available()
+uint32_t SocketServer::available()
 {
     this->processRx();
     return m_rcvQueue.size();
 }
 
-int SocketServer::getByte()
+int8_t SocketServer::getByte()
 {
     int8_t byte = -1;
 

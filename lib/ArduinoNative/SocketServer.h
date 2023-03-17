@@ -11,9 +11,9 @@ public:
 
     void sendMessage(const uint8_t* buf, int length);
 
-    int available();
+    uint32_t available();
 
-    int getByte();
+    int8_t getByte();
 
 private:
     void processRx();
