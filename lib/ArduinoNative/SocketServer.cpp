@@ -66,9 +66,9 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 {
     bool             success = true;
     WSADATA          wsaData;
-    int              iResult;
+    int              result;
     struct addrinfo  hints;
-    struct addrinfo* result = NULL;
+    struct addrinfo* addrInfo = NULL;
 
     ZeroMemory(&hints, sizeof(hints));
     hints.ai_family   = AF_INET;
@@ -77,47 +77,47 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     hints.ai_flags    = AI_PASSIVE;
 
     // Initialize Winsock
-    iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (iResult != 0)
+    result = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (result != 0)
     {
-        printf("WSAStartup failed with error: %d\n", iResult);
+        printf("WSAStartup failed with error: %d\n", result);
         success = false;
     }
 
     // Resolve the server address and port
-    iResult = getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &result);
-    if (iResult != 0)
+    result = getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &addrInfo);
+    if (result != 0)
     {
-        printf("getaddrinfo failed with error: %d\n", iResult);
+        printf("getaddrinfo failed with error: %d\n", result);
         WSACleanup();
         success = false;
     }
 
     // Create a SOCKET for the server to listen for client connections.
-    m_listenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+    m_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
     if (m_listenSocket == INVALID_SOCKET)
     {
         printf("socket failed with error: %ld\n", WSAGetLastError());
-        freeaddrinfo(result);
+        freeaddrinfo(addrInfo);
         WSACleanup();
         success = false;
     }
 
     // Setup the TCP listening socket
-    iResult = bind(m_listenSocket, result->ai_addr, (int)result->ai_addrlen);
-    if (iResult == SOCKET_ERROR)
+    result = bind(m_listenSocket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
+    if (result == SOCKET_ERROR)
     {
         printf("bind failed with error: %d\n", WSAGetLastError());
-        freeaddrinfo(result);
+        freeaddrinfo(addrInfo);
         closesocket(m_listenSocket);
         WSACleanup();
         success = false;
     }
 
-    freeaddrinfo(result);
+    freeaddrinfo(addrInfo);
 
-    iResult = listen(m_listenSocket, maxConnections);
-    if (iResult == SOCKET_ERROR)
+    result = listen(m_listenSocket, maxConnections);
+    if (result == SOCKET_ERROR)
     {
         printf("listen failed with error: %d\n", WSAGetLastError());
         closesocket(m_listenSocket);
@@ -169,33 +169,33 @@ void SocketServer::processRx()
 {
     if (m_listenSocket != INVALID_SOCKET)
     {
-        fd_set         fr, fw, fe;
-        int            nRet;
-        struct timeval tv;
+        fd_set         readFDS, writeFDS, exceptFDS;
+        int            ret;
+        struct timeval timeout;
 
-        tv.tv_sec  = 0;
-        tv.tv_usec = 10;
+        timeout.tv_sec  = 0;
+        timeout.tv_usec = 10;
 
-        FD_ZERO(&fr);
-        FD_ZERO(&fw);
-        FD_ZERO(&fe);
+        FD_ZERO(&readFDS);
+        FD_ZERO(&writeFDS);
+        FD_ZERO(&exceptFDS);
 
-        FD_SET(m_listenSocket, &fr);
-        FD_SET(m_listenSocket, &fe);
+        FD_SET(m_listenSocket, &readFDS);
+        FD_SET(m_listenSocket, &exceptFDS);
 
         // If there is a client connected
         if (m_clientSocket != INVALID_SOCKET)
         {
-            FD_SET(m_clientSocket, &fr);
-            FD_SET(m_clientSocket, &fe);
+            FD_SET(m_clientSocket, &readFDS);
+            FD_SET(m_clientSocket, &exceptFDS);
         }
 
-        nRet = select(m_listenSocket + 1, &fr, &fw, &fe, &tv);
+        ret = select(m_listenSocket + 1, &readFDS, &writeFDS, &exceptFDS, &timeout);
 
-        if (0 < nRet)
+        if (0 < ret)
         {
             // New Client Connection available
-            if (FD_ISSET(m_listenSocket, &fr))
+            if (FD_ISSET(m_listenSocket, &readFDS))
             {
                 // Accept a client socket
                 m_clientSocket = accept(m_listenSocket, NULL, NULL);
@@ -206,20 +206,20 @@ void SocketServer::processRx()
             }
 
             // Client Ready to read
-            if (FD_ISSET(m_clientSocket, &fr))
+            if (FD_ISSET(m_clientSocket, &readFDS))
             {
                 uint16_t bufferLength = 300U;
                 char recvbuf[bufferLength];
-                int  iResult = recv(m_clientSocket, recvbuf, bufferLength, 0);
+                int  result = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
-                if (iResult > 0)
+                if (result > 0)
                 {
-                    for (int i = 0; i < iResult; i++)
+                    for (int i = 0; i < result; i++)
                     {
                         m_rcvQueue.push(recvbuf[i]);
                     }
                 }
-                else if (iResult == 0)
+                else if (result == 0)
                 {
                     closesocket(m_clientSocket);
                     m_clientSocket = INVALID_SOCKET;
