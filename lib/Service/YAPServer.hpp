@@ -270,7 +270,7 @@ private:
             // Determine which callback to call, if any.
             else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
             {
-                uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel].m_dlc;
+                uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel-1].m_dlc;
 
                 // Read Payload
                 Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
