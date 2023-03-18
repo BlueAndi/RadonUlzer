@@ -83,11 +83,11 @@ public:
      */
     void process()
     {
-        // Process RX data
-        processRxData();
-
         // Periodic Heartbeat
         heartbeat();
+        
+        // Process RX data
+        processRxData();
     }
 
     /**
