@@ -148,17 +148,15 @@ uint32_t SocketServer::available()
     return m_rcvQueue.size();
 }
 
-int8_t SocketServer::getByte()
+bool SocketServer::getByte(uint8_t* byte)
 {
-    int8_t byte = -1;
-
     if (!m_rcvQueue.empty())
     {
-        byte = m_rcvQueue.front();
+        byte[0] = m_rcvQueue.front();
         m_rcvQueue.pop();
+        return true;
     }
-
-    return byte;
+    return false;
 }
 
 /******************************************************************************
@@ -216,7 +214,7 @@ void SocketServer::processRx()
                 {
                     for (int i = 0; i < result; i++)
                     {
-                        m_rcvQueue.push(recvbuf[i]);
+                        m_rcvQueue.push((uint8_t) recvbuf[i]);
                     }
                 }
                 else

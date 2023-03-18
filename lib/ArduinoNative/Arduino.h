@@ -176,15 +176,14 @@ public:
 
         for (count = 0; count < length; count++)
         {
-            int rcv = m_socketServer.getByte();
-
-            if (rcv == -1)
+            uint8_t rcv[1];
+            if (!m_socketServer.getByte(rcv))
             {
                 break;
             }
             else
             {
-                buffer[count] = rcv;
+                buffer[count] = rcv[0];
             }
         }
 

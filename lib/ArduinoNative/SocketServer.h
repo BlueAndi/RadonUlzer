@@ -95,10 +95,10 @@ public:
 
     /**
      * Get a Byte.
-     * @returns Received byte.
-     * @returns -1 if no bytes available
+     * @param[out] byte buffer to write byte to.
+     * @returns false is value is not valid. true if valid.
      */
-    int8_t getByte();
+    bool getByte(uint8_t* byte);
 
 private:
     /**
