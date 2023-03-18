@@ -83,7 +83,7 @@ void Logging::printHead(const char* filename, int lineNumber, Logging::LogLevel 
     case Logging::LOG_LEVEL_ERROR:
         levelStr = "E";
         break;
-    
+
     case Logging::LOG_LEVEL_WARNING:
         levelStr = "W";
         break;
