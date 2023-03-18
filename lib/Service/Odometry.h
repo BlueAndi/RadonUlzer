@@ -112,6 +112,11 @@ public:
         posY = m_posY;
     }
 
+    /**
+     * Clear mileage.
+     */
+    void clearMileage();
+
 private:
     /**
      * If at least one side moved about 2 mm, a new calculation shall be done.
@@ -183,6 +188,14 @@ private:
 
     Odometry(const Odometry& value);
     Odometry& operator=(const Odometry& value);
+
+    /**
+     * Update mileage left/right.
+     * 
+     * @param[in] relStepsLeft      Relative absolute steps left
+     * @param[in] relStepsRight     Relative absolute steps right
+     */
+    void updateMileage(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
      * Calculate the orientation in mrad.
