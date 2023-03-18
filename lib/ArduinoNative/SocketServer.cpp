@@ -53,8 +53,7 @@
  * Public Methods
  *****************************************************************************/
 
-SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET),
-                               m_listenSocket(INVALID_SOCKET)
+SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET), m_listenSocket(INVALID_SOCKET)
 {
 }
 
@@ -207,14 +206,14 @@ void SocketServer::processRx()
             if (FD_ISSET(m_clientSocket, &readFDS))
             {
                 uint16_t bufferLength = 300U;
-                char recvbuf[bufferLength];
-                int  result = recv(m_clientSocket, recvbuf, bufferLength, 0);
+                char     recvbuf[bufferLength];
+                int      result = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
                 if (result > 0)
                 {
                     for (int i = 0; i < result; i++)
                     {
-                        m_rcvQueue.push((uint8_t) recvbuf[i]);
+                        m_rcvQueue.push((uint8_t)recvbuf[i]);
                     }
                 }
                 else

@@ -85,7 +85,7 @@ void App::loop()
          * the speedometer.
          */
         DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-        
+
         /* The odometry unit needs to detect motor speed changes to be able to
          * calculate correct values. Therefore it shall be processed right after
          * the differential drive control.
