@@ -34,7 +34,6 @@
  *****************************************************************************/
 #include "App.h"
 #include <Board.h>
-#include <Mileage.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 
@@ -71,7 +70,6 @@ void App::setup()
 
 void App::loop()
 {
-    Mileage::getInstance().process();
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())

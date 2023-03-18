@@ -36,11 +36,10 @@
 #include <Board.h>
 #include <Sound.h>
 #include <DifferentialDrive.h>
-
 #include <StateMachine.h>
+#include <Odometry.h>
 #include "ReadyState.h"
 #include "ParameterSets.h"
-#include "Mileage.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -167,7 +166,7 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
         /* Set mileage to 0, to be able to measure the max. distance, till
          * the track must be found again.
          */
-        Mileage::getInstance().clear();
+        Odometry::getInstance().clearMileage();
 
         /* Show the operator that the track is lost visual. */
         Board::getInstance().getYellowLed().enable(true);
@@ -247,7 +246,7 @@ void DrivingState::processTrackLost(int16_t position, const uint16_t* lineSensor
         Board::getInstance().getYellowLed().enable(false);
     }
     /* Max. distance driven, but track still not found? */
-    else if (MAX_DISTANCE < Mileage::getInstance().getMileageCenter())
+    else if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
     {
         /* Stop motors immediately. Don't move this to a later position,
          * as this would extend the driven length.

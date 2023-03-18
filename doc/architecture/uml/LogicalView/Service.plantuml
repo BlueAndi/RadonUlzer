@@ -19,12 +19,13 @@ package "Service" as serviceLayer {
         the Arduino millis().
     end note
 
-    class Mileage <<service>>
+    class Odometry <<service>>
 
-    note top of Mileage
-        Provides a mileage counter, used
-        in case of a lost track. Must be
-        driven in the main loop.
+    note top of Odometry
+        Provides odometry information:
+            * Absolute position
+            * Orientation
+            * Mileage
     end note
 
     class PIDController <<service>>
@@ -64,7 +65,7 @@ package "Service" as serviceLayer {
     end note
 
     DifferentialDrive -[hidden]-- MovAvg
-    Speedometer -[hidden]-- Mileage
+    Speedometer -[hidden]-- Odometry
     RelativeEncoder -[hidden]-- PIDController
     SimpleTimer -[hidden]-- Sound
 }
