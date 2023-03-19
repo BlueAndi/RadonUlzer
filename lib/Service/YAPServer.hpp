@@ -165,7 +165,7 @@ public:
         Serial.print("Channel:");
         Serial.println(frame.fields.header.headerFields.m_channel);
         Serial.print("Valid Checksum:");
-        Serial.println(isFrameValid(frame, payloadLength));
+        Serial.println(isFrameValid(frame));
         Serial.print("Data:");
 
         for (uint8_t i = 0; i < payloadLength; i++)
@@ -267,7 +267,7 @@ private:
                 // Read Payload
                 Serial.readBytes(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
 
-                if (isFrameValid(rcvFrame, CONTROL_CHANNEL_PAYLOAD_LENGTH))
+                if (isFrameValid(rcvFrame))
                 {
                     callbackControlChannel(rcvFrame.fields.payload.m_data);
                 }
@@ -280,7 +280,7 @@ private:
                 // Read Payload
                 Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
 
-                if (isFrameValid(rcvFrame, payloadLength))
+                if (isFrameValid(rcvFrame))
                 {
                     // Callback
                     {
@@ -344,16 +344,14 @@ private:
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
-            uint32_t      sum                             = channel;
             newFrame.fields.header.headerFields.m_channel = channel;
 
             for (uint8_t i = 0; i < payloadLength; i++)
             {
                 newFrame.fields.payload.m_data[i] = data[i];
-                sum += data[i];
             }
 
-            newFrame.fields.header.headerFields.m_checksum = (sum % UINT8_MAX);
+            newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
             Serial.write(newFrame.raw, frameLength);
         }
@@ -364,17 +362,10 @@ private:
      * @param[in] frame Frame to be checked.
      * @returns true if the Frame's checksum is correct.
      */
-    bool isFrameValid(const Frame& frame, uint8_t payloadLength)
+    bool isFrameValid(const Frame& frame)
     {
-        uint32_t sum = frame.fields.header.headerFields.m_channel;
-
-        for (uint8_t i = 0; i < payloadLength; i++)
-        {
-            sum += frame.fields.payload.m_data[i];
-        }
-
         // Frame is valid when both checksums are the same.
-        return ((sum % 255) == frame.fields.header.headerFields.m_checksum);
+        return (checksum(frame) == frame.fields.header.headerFields.m_checksum);
     }
 
     uint8_t getChannelDLC(uint8_t channel)
@@ -391,6 +382,18 @@ private:
         }
 
         return channelDLC;
+    }
+
+    uint8_t checksum(const Frame& frame)
+    {
+        uint32_t sum = frame.fields.header.headerFields.m_channel;
+
+        for (size_t i = 0; i < getChannelDLC(frame.fields.header.headerFields.m_channel); i++)
+        {
+            sum += frame.fields.payload.m_data[i];
+        }
+
+        return (sum % 255);
     }
 
 private:
