@@ -64,7 +64,7 @@
 static const char* TAG = "Odometry";
 
 /* Initialize static constant data. */
-const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
 
 /******************************************************************************
  * Public Methods
@@ -72,18 +72,16 @@ const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(RobotConstants::E
 
 void Odometry::process()
 {
-    IMotors& motors        = Board::getInstance().getMotors();
     int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();
     int16_t  relStepsRight = m_relEncoders.getCountsRight();
     uint16_t absStepsLeft  = abs(relStepsLeft);  /* Positive amount of delta steps left */
     uint16_t absStepsRight = abs(relStepsRight); /* Positive amount of delta steps right*/
-
-    updateMileage(absStepsLeft, absStepsRight);
+    bool     isNoMovement  = detectStandStill(absStepsLeft, absStepsRight);
 
     /* Orientation shall not be calculated from stand still to driving,
      * because there can not be any orientation change before.
      */
-    if ((0 < m_lastMotorSpeedLeft) || (0 < m_lastMotorSpeedRight))
+    if (false == isNoMovement)
     {
         /* The calculation of the orientation/movement depends on the driven distance.
          * If a distance threshold is exceeded, it will be calculated.
@@ -94,6 +92,9 @@ void Odometry::process()
             int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
             int16_t dX          = 0;
             int16_t dY          = 0;
+
+            /* Mileage accuracy depends on STEPS_THRESHOLD. */
+            m_mileage += abs(stepsCenter);
 
             m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
 
@@ -111,25 +112,23 @@ void Odometry::process()
             m_relEncoders.clear();
         }
     }
-
-    /* Remember current motor speeds to be able to check next time whether
-     * the robot just started or not.
-     */
-    m_lastMotorSpeedLeft  = motors.getLeftSpeed();
-    m_lastMotorSpeedRight = motors.getRightSpeed();
 }
 
 uint32_t Odometry::getMileageCenter() const
 {
-    uint32_t encoderSteps = (m_absEncStepsLeft + m_absEncStepsRight) / 2;
+    return m_mileage / RobotConstants::ENCODER_STEPS_PER_MM;
+}
 
-    return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
+void Odometry::clearPositionAndOrientation()
+{
+    m_posX        = 0;
+    m_posY        = 0;
+    m_orientation = 0;
 }
 
 void Odometry::clearMileage()
 {
-    m_absEncStepsLeft  = 0;
-    m_absEncStepsRight = 0;
+    m_mileage = 0;
 }
 
 /******************************************************************************
@@ -140,15 +139,47 @@ void Odometry::clearMileage()
  * Private Methods
  *****************************************************************************/
 
-void Odometry::updateMileage(uint16_t absStepsLeft, uint16_t absStepsRight)
+bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
 {
-    /* Calculate absolute accumulated number steps for the left encoder. */
-    m_absEncStepsLeft += absStepsLeft - m_lastAbsRelEncStepsLeft;
-    m_lastAbsRelEncStepsLeft = absStepsLeft;
+    bool isStandStill = false;
 
-    /* Calculate absolute accumulated number steps for the right encoder. */
-    m_absEncStepsRight += absStepsRight - m_lastAbsRelEncStepsRight;
-    m_lastAbsRelEncStepsRight = absStepsRight;
+    /* No encoder (left/right) change detected? */
+    if (absStepsLeft == m_lastAbsRelEncStepsLeft)
+    {
+        if (absStepsRight == m_lastAbsRelEncStepsRight)
+        {
+            isStandStill = true;
+        }
+    }
+
+    /* Is robot moving? */
+    if (false == isStandStill)
+    {
+        m_isStandstill = false;
+        m_timer.stop();
+    }
+    /* Robot seems to not to move anymore, lets debounce. */
+    else if (false == m_isStandstill)
+    {
+        /* The first time of no movement, start the debounce timer. */
+        if (false == m_timer.isRunning())
+        {
+            m_timer.start(STANDSTILL_DETECTION_PERIOD);
+        }
+        /* If over the while debounce time there is no movement, it will be considered as standstill. */
+        else if (true == m_timer.isTimeout())
+        {
+            m_isStandstill = true;
+        }
+    }
+    /* Robot standstill. */
+    else
+    {
+        /* Nothing to do. */
+        ;
+    }
+
+    return m_isStandstill;
 }
 
 int16_t Odometry::calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const
