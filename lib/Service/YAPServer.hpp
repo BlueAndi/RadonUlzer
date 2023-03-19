@@ -114,16 +114,19 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
-        uint8_t itr = 0;
+        uint8_t itr = maxChannels;
 
-        for (itr = 0; itr < maxChannels; itr++)
+        if (MAX_DATA_LEN >= dlc)
         {
-            if (nullptr == m_dataChannels[itr].m_callback)
+            for (itr = 0; itr < maxChannels; itr++)
             {
-                m_dataChannels[itr].m_name     = channelName;
-                m_dataChannels[itr].m_dlc      = dlc;
-                m_dataChannels[itr].m_callback = cb;
-                break;
+                if (nullptr == m_dataChannels[itr].m_callback)
+                {
+                    m_dataChannels[itr].m_name     = channelName;
+                    m_dataChannels[itr].m_dlc      = dlc;
+                    m_dataChannels[itr].m_callback = cb;
+                    break;
+                }
             }
         }
 
@@ -223,7 +226,7 @@ private:
                 if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
                 {
                     // Channel name found. Send SRCB_RSP
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, itr, m_dataChannels[itr].m_dlc};
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, (itr + 1), m_dataChannels[itr].m_dlc};
                     send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     break;
                 }
@@ -270,7 +273,7 @@ private:
             // Determine which callback to call, if any.
             else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
             {
-                uint8_t payloadLength = m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_dlc;
+                uint8_t payloadLength = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
 
                 // Read Payload
                 Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
@@ -333,9 +336,11 @@ private:
      */
     void send(uint8_t channel, const uint8_t* data, uint8_t payloadLength)
     {
-        if ((MAX_DATA_LEN >= payloadLength) && (m_isSynced || (CONTROL_CHANNEL_NUMBER == channel)))
+        uint8_t channelDLC = getChannelDLC(channel);
+
+        if ((channelDLC >= payloadLength) && (m_isSynced || (CONTROL_CHANNEL_NUMBER == channel)))
         {
-            const uint8_t frameLength = HEADER_LEN + payloadLength;
+            const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
             uint32_t      sum                             = channel;
             newFrame.fields.header.headerFields.m_channel = channel;
@@ -368,6 +373,22 @@ private:
 
         // Frame is valid when both checksums are the same.
         return ((sum % 255) == frame.fields.header.headerFields.m_checksum);
+    }
+
+    uint8_t getChannelDLC(uint8_t channel)
+    {
+        uint8_t channelDLC = 0U;
+
+        if (CONTROL_CHANNEL_NUMBER == channel)
+        {
+            channelDLC = CONTROL_CHANNEL_PAYLOAD_LENGTH;
+        }
+        else
+        {
+            channelDLC = m_dataChannels[channel - 1].m_dlc;
+        }
+
+        return channelDLC;
     }
 
 private:
