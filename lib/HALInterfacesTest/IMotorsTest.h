@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Motors realization
+ * @brief  Abstract motors test interface
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup HALTarget
+ * 
+ * @addtogroup HALInterfaces
  *
  * @{
  */
-
-#ifndef MOTORS_H
-#define MOTORS_H
+#ifndef IMOTORSTEST_H
+#define IMOTORSTEST_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,8 +42,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IMotors.h"
-#include "IMotorsTest.h"
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
@@ -54,104 +52,44 @@
  * Types and Classes
  *****************************************************************************/
 
-/** This class provides access to the Zumo target motors. */
-class Motors : public IMotors, public IMotorsTest
+/** The abstract motors test interface. */
+class IMotorsTest
 {
 public:
     /**
-     * Constructs the motors adapter.
+     * Destroys the interface.
      */
-    Motors() : IMotors()
+    virtual ~IMotorsTest()
     {
     }
-
-    /**
-     * Destroys the motors adapter.
-     */
-    ~Motors()
-    {
-    }
-
-    /**
-     * Sets the speeds for both motors.
-     *
-     * @param[in] leftSpeed A number from -400 to 400 representing the speed and
-     * direction of the right motor. Values of -400 or less result in full speed
-     * reverse, and values of 400 or more result in full speed forward.
-     * @param[in] rightSpeed A number from -400 to 400 representing the speed and
-     * direction of the right motor. Values of -400 or less result in full speed
-     * reverse, and values of 400 or more result in full speed forward.
-     */
-    void setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
-    {
-        m_speedLeft  = leftSpeed;
-        m_speedRight = rightSpeed;
-    }
-
-    /**
-     * Get maximum speed of the motors in digits.
-     *
-     * @return Max. speed in digits
-     */
-    int16_t getMaxSpeed() const final
-    {
-        return MAX_SPEED;
-    }
-
-    /**
-     * Get the current speed of the left motor.
-     *
-     * @return The left motor speed in digits.
-     */
-    int16_t getLeftSpeed() final
-    {
-        return m_speedLeft;
-    }
-
-    /**
-     * Get the current speed of the right motor.
-     *
-     * @return The right motor speed in digits.
-     */
-    int16_t getRightSpeed() final
-    {
-        return m_speedRight;
-    }
-
-    /* ---------- Test Interface ---------- */
 
     /**
      * Set speed of the left motor.
-     *
+     * 
      * @param[in] speed Speed in digits.
      */
-    void setLeftSpeed(int16_t speed) final
-    {
-        m_speedLeft = speed;
-    }
+    virtual void setLeftSpeed(int16_t speed) = 0;
 
     /**
      * Set speed of the right motor.
-     *
+     * 
      * @param[in] speed Speed in digits.
      */
-    void setRightSpeed(int16_t speed) final
+    virtual void setRightSpeed(int16_t speed) = 0;
+
+protected:
+    /**
+     * Constructs the interface.
+     */
+    IMotorsTest()
     {
-        m_speedRight = speed;
     }
 
 private:
-    /**
-     * The maximum speed of a single motor in PWM digits.
-     */
-    static const int16_t MAX_SPEED = 400;
-
-    int16_t m_speedLeft;  /**< Left motor speed in digits. */
-    int16_t m_speedRight; /**< Right motor speed in digits. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* MOTORS_H */
+#endif /* IMOTORSTEST_H */

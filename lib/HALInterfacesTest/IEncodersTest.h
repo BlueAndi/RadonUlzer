@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Motors realization
+ * @brief  Abstract encoders test interface
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALTarget
+ * @addtogroup HALInterfaces
  *
  * @{
  */
-
-#ifndef MOTORS_H
-#define MOTORS_H
+#ifndef IENCODERSTEST_H
+#define IENCODERSTEST_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,8 +42,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "IMotors.h"
-#include "IMotorsTest.h"
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
@@ -54,104 +52,44 @@
  * Types and Classes
  *****************************************************************************/
 
-/** This class provides access to the Zumo target motors. */
-class Motors : public IMotors, public IMotorsTest
+/**
+ * Encoders test interface used to simulate the encoders.
+ */
+class IEncodersTest
 {
 public:
     /**
-     * Constructs the motors adapter.
+     * Destroy the test interface.
      */
-    Motors() : IMotors()
+    ~IEncodersTest()
     {
     }
 
     /**
-     * Destroys the motors adapter.
-     */
-    ~Motors()
-    {
-    }
-
-    /**
-     * Sets the speeds for both motors.
+     * Set encoder steps left.
      *
-     * @param[in] leftSpeed A number from -400 to 400 representing the speed and
-     * direction of the right motor. Values of -400 or less result in full speed
-     * reverse, and values of 400 or more result in full speed forward.
-     * @param[in] rightSpeed A number from -400 to 400 representing the speed and
-     * direction of the right motor. Values of -400 or less result in full speed
-     * reverse, and values of 400 or more result in full speed forward.
+     * @param[in] steps Encoder steps
      */
-    void setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
-    {
-        m_speedLeft  = leftSpeed;
-        m_speedRight = rightSpeed;
-    }
+    virtual void setCountsLeft(int16_t steps) = 0;
 
     /**
-     * Get maximum speed of the motors in digits.
+     * Set encoder steps right.
      *
-     * @return Max. speed in digits
+     * @param[in] steps Encoder steps
      */
-    int16_t getMaxSpeed() const final
-    {
-        return MAX_SPEED;
-    }
+    virtual void setCountsRight(int16_t steps) = 0;
 
+protected:
     /**
-     * Get the current speed of the left motor.
-     *
-     * @return The left motor speed in digits.
+     * Construct the test interface.
      */
-    int16_t getLeftSpeed() final
+    IEncodersTest()
     {
-        return m_speedLeft;
     }
-
-    /**
-     * Get the current speed of the right motor.
-     *
-     * @return The right motor speed in digits.
-     */
-    int16_t getRightSpeed() final
-    {
-        return m_speedRight;
-    }
-
-    /* ---------- Test Interface ---------- */
-
-    /**
-     * Set speed of the left motor.
-     *
-     * @param[in] speed Speed in digits.
-     */
-    void setLeftSpeed(int16_t speed) final
-    {
-        m_speedLeft = speed;
-    }
-
-    /**
-     * Set speed of the right motor.
-     *
-     * @param[in] speed Speed in digits.
-     */
-    void setRightSpeed(int16_t speed) final
-    {
-        m_speedRight = speed;
-    }
-
-private:
-    /**
-     * The maximum speed of a single motor in PWM digits.
-     */
-    static const int16_t MAX_SPEED = 400;
-
-    int16_t m_speedLeft;  /**< Left motor speed in digits. */
-    int16_t m_speedRight; /**< Right motor speed in digits. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* MOTORS_H */
+#endif /* IENCODERSTEST_H */
