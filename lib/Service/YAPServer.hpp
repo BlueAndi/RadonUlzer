@@ -226,7 +226,9 @@ private:
                 if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
                 {
                     // Channel name found. Send SRCB_RSP
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, (itr + 1), m_dataChannels[itr].m_dlc};
+                    uint8_t channelNumber                       = itr + 1;
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
+                                                                   m_dataChannels[itr].m_dlc};
                     send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     break;
                 }
