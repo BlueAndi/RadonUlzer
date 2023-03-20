@@ -28,35 +28,35 @@ The following part contains the specific details of the LineFollower application
 
 ### Application
 
-![application](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/Application.plantuml)
+![application](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/Application.plantuml)
 
 #### Startup
 
-![startup](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/StartupState.plantuml)
+![startup](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/StartupState.plantuml)
 
 #### LineSensorsCalibration
 
-![lineSensorsCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
+![lineSensorsCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
 
 #### Ready
 
-![ready](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/ReadyState.plantuml)
+![ready](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/ReadyState.plantuml)
 
 #### Release Track
 
-![releaseTrack](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/ReleaseTrackState.plantuml)
+![releaseTrack](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/ReleaseTrackState.plantuml)
 
 #### Driving
 
-![driving](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/DrivingState.plantuml)
+![driving](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/DrivingState.plantuml)
 
 #### Error
 
-![error](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/LineFollower/ErrorState.plantuml)
+![error](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/LineFollower/ErrorState.plantuml)
 
 ## Process View
 
-![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/ProcessView/LineFollower/SystemStates2.plantuml)
+![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/ProcessView/LineFollower/SystemStates2.plantuml)
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonAlcer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.

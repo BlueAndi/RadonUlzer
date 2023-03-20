@@ -21,7 +21,7 @@
 # SW Architecture
 The Radon Alcer repository contains several applications. Each application is described according to the 4+1 architectural view.
 
-![architecturalView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/ViewModels.plantuml)
+![architecturalView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/ViewModels.plantuml)
 
 # Abbreviations
 
@@ -32,13 +32,13 @@ The Radon Alcer repository contains several applications. Each application is de
 ## Physical View
 The physical view shows the deployment which is equal to all applications. But not every application may use all of the provided sensors and actors.
 
-![physicalView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/PhysicalView/Deployment.plantuml)
+![physicalView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/PhysicalView/Deployment.plantuml)
 
 ## Development View
 
 ### Layers
 
-![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/DevelopmentView/Layers.plantuml)
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/DevelopmentView/Layers.plantuml)
 
 ## Logical View
 
@@ -50,15 +50,15 @@ The following applications are supported:
 
 ### Service
 
-![service](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Service.plantuml)
+![service](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/Service.plantuml)
 
 #### Differential Drive
 
-![differentialDrive](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/DifferentialDrive.plantuml)
+![differentialDrive](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/DifferentialDrive.plantuml)
 
 #### Odometry
 
-![odometry](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Odometry.plantuml)
+![odometry](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/Odometry.plantuml)
 
 Base equations:
 * $alpha [rad] = \frac{distanceRight [mm] - distanceLeft [mm]}{wheelBase [mm]}$
@@ -77,18 +77,18 @@ Improvement for better accuracy:
 
 #### Speedometer
 
-![speedometer](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Speedometer.plantuml)
+![speedometer](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/Speedometer.plantuml)
 
 ### HAL
 The hardware abstraction layer (HAL) for the target is shown. For the simulation and the test only the realization part is different and may base on other 3rd party components.
 
-![hal](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/HAL.plantuml)
+![hal](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/HAL.plantuml)
 
 ## Process View
 
 ### Differential Drive
 
-![differentialDrive](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/ProcessView/DifferentialDrive.plantuml)
+![differentialDrive](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/ProcessView/DifferentialDrive.plantuml)
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonAlcer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
