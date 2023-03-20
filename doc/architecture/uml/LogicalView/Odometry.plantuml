@@ -1,7 +1,8 @@
 @startuml
 
 package "Service" {
-    class "Odometry" as odometry
+    class "Odometry" as odometry <<service>>
+    class "RelativeEncoders" as relativeEncoders <<service>>
 
     note left of odometry
         Provides the:
@@ -9,6 +10,8 @@ package "Service" {
         * orientation in mrad
         * mileage in mm
     end note
+
+    odometry --> relativeEncoders
 }
 
 package "HAL" {
@@ -18,6 +21,7 @@ package "HAL" {
     iEncoders <|.. encoders: <<realize>>
 }
 
-odometry ..> iEncoders: <<use>>
+odometry ...> iEncoders: <<use>>
+relativeEncoders ..> iEncoders: <<use>>
 
 @enduml

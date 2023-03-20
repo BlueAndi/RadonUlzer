@@ -51,6 +51,7 @@ The following applications are supported:
 ![service](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Service.plantuml)
 
 #### Differential Drive
+TODO
 
 #### Odometry
 
@@ -72,6 +73,8 @@ Improvement for better accuracy:
 * $alpha [mrad] = \frac{1000 \cdot (encoderStepsRight [steps] - encoderStepsLeft [steps])}{encoderStepsPerMM [\frac{steps}{mm}] \cdot wheelBase [mm]}$
 
 #### Speedometer
+
+![speedometer](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/LogicalView/Speedometer.plantuml)
 
 ### HAL
 The hardware abstraction layer (HAL) for the target is shown. For the simulation and the test only the realization part is different and may base on other 3rd party components.
