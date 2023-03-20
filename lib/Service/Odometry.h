@@ -46,6 +46,7 @@
 #include <Arduino.h>
 #include <Board.h>
 #include <RelativeEncoders.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -112,14 +113,41 @@ public:
         posY = m_posY;
     }
 
+    /**
+     * Clear position and orientation.
+     */
+    void clearPositionAndOrientation();
+
+    /**
+     * Clear mileage.
+     */
+    void clearMileage();
+
+    /**
+     * Is standstill detected?
+     *
+     * @return If standstill, it will return true otherwise false.
+     */
+    bool isStandStill()
+    {
+        return m_isStandstill;
+    }
+
 private:
     /**
      * If at least one side moved about 2 mm, a new calculation shall be done.
-     * 
+     *
      * Use a multiple of RobotConstants::ENCODER_STEPS_PER_MM for better
      * accuracy.
      */
-    static const int16_t STEPS_THRESHOLD;
+    static const uint16_t STEPS_THRESHOLD;
+
+    /**
+     * Time period in ms for standstill detection.
+     * If there is no encoder change during this period, it is assumed that
+     * the robot stopped.
+     */
+    static const uint32_t STANDSTILL_DETECTION_PERIOD = 10;
 
     /**
      * Last number of relative encoder steps left. Its used to avoid permanent
@@ -133,11 +161,8 @@ private:
      */
     uint16_t m_lastAbsRelEncStepsRight;
 
-    /** Absolute number of encoder steps left. Used to determine the mileage. */
-    uint32_t m_absEncStepsLeft;
-
-    /** Absolute number of encoder steps right. Used to determine the mileage. */
-    uint32_t m_absEncStepsRight;
+    /** Mileage in encoder steps. */
+    uint32_t m_mileage;
 
     /** Relative encoders left/right. */
     RelativeEncoders m_relEncoders;
@@ -145,17 +170,17 @@ private:
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
     int16_t m_orientation;
 
-    /** Last motor speed value left in digits. Necessary to determine delta calculation. */
-    int16_t m_lastMotorSpeedLeft;
-
-    /** Last motor speed value right in digits. Necessary to determine delta calculation. */
-    int16_t m_lastMotorSpeedRight;
-
     /** Absolute position on x-axis. Unit is mm. */
     int32_t m_posX;
 
     /** Absolute position on y-axis. Unit is mm. */
     int32_t m_posY;
+
+    /** Timer used to detect standstill. */
+    SimpleTimer m_timer;
+
+    /** Is robot stopped? */
+    bool m_isStandstill;
 
     /**
      * Construct the odometry instance.
@@ -163,14 +188,13 @@ private:
     Odometry() :
         m_lastAbsRelEncStepsLeft(0),
         m_lastAbsRelEncStepsRight(0),
-        m_absEncStepsLeft(0),
-        m_absEncStepsRight(0),
+        m_mileage(0),
         m_relEncoders(Board::getInstance().getEncoders()),
         m_orientation(0),
-        m_lastMotorSpeedLeft(0),
-        m_lastMotorSpeedRight(0),
         m_posX(0),
-        m_posY(0)
+        m_posY(0),
+        m_timer(),
+        m_isStandstill(true)
     {
     }
 
@@ -183,6 +207,15 @@ private:
 
     Odometry(const Odometry& value);
     Odometry& operator=(const Odometry& value);
+
+    /**
+     * Is the robot standstill?
+     *
+     * @param[in] relStepsLeft      Relative absolute steps left
+     * @param[in] relStepsRight     Relative absolute steps right
+     */
+
+    bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
      * Calculate the orientation in mrad.

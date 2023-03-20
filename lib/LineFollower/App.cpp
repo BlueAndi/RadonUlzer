@@ -35,7 +35,6 @@
 #include "App.h"
 #include "StartupState.h"
 #include <Board.h>
-#include <Mileage.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
@@ -75,7 +74,6 @@ void App::setup()
 void App::loop()
 {
     m_yapServer.process();
-    Mileage::getInstance().process();
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())

@@ -36,6 +36,7 @@
 #include <Board.h>
 #include <RobotConstants.h>
 #include <FPMath.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -57,7 +58,13 @@
  * Local Variables
  *****************************************************************************/
 
-const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(2 * RobotConstants::ENCODER_STEPS_PER_MM);
+/**
+ * Logging source.
+ */
+static const char* TAG = "Odometry";
+
+/* Initialize static constant data. */
+const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
 
 /******************************************************************************
  * Public Methods
@@ -65,60 +72,63 @@ const int16_t Odometry::STEPS_THRESHOLD = static_cast<int16_t>(2 * RobotConstant
 
 void Odometry::process()
 {
-    IMotors& motors        = Board::getInstance().getMotors();
     int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();
     int16_t  relStepsRight = m_relEncoders.getCountsRight();
-    uint16_t absStepsLeft  = abs(relStepsLeft);
-    uint16_t absStepsRight = abs(relStepsRight);
-
-    /* Calculate absolute accumulated number steps for the left encoder. */
-    m_absEncStepsLeft += absStepsLeft - m_lastAbsRelEncStepsLeft;
-    m_lastAbsRelEncStepsLeft = absStepsLeft;
-
-    /* Calculate absolute accumulated number steps for the right encoder. */
-    m_absEncStepsRight += absStepsRight - m_lastAbsRelEncStepsRight;
-    m_lastAbsRelEncStepsRight = absStepsRight;
+    uint16_t absStepsLeft  = abs(relStepsLeft);  /* Positive amount of delta steps left */
+    uint16_t absStepsRight = abs(relStepsRight); /* Positive amount of delta steps right*/
+    bool     isNoMovement  = detectStandStill(absStepsLeft, absStepsRight);
 
     /* Orientation shall not be calculated from stand still to driving,
      * because there can not be any orientation change before.
      */
-    if ((0 == m_lastMotorSpeedLeft) && (0 == m_lastMotorSpeedRight))
+    if (false == isNoMovement)
     {
-        /* Calculate it with the next motor speed change. */
-        m_lastMotorSpeedLeft  = motors.getLeftSpeed();
-        m_lastMotorSpeedRight = motors.getRightSpeed();
-    }
-    /* The calculation of the orientation/movement depends on the driven distance.
-     * If a distance threshold is exceeded, it will be calculated.
-     */
-    else if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
-    {
-        int16_t alpha       = 0;
-        int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
-        int16_t dX          = 0;
-        int16_t dY          = 0;
+        /* The calculation of the orientation/movement depends on the driven distance.
+         * If a distance threshold is exceeded, it will be calculated.
+         */
+        if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
+        {
+            int16_t alpha       = 0;
+            int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
+            int16_t dX          = 0;
+            int16_t dY          = 0;
 
-        m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
+            /* Mileage accuracy depends on STEPS_THRESHOLD. */
+            m_mileage += abs(stepsCenter);
 
-        calculateDeltaPos(stepsCenter, alpha, dX, dY);
-        m_posX += dX;
-        m_posY += dY;
+            m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
 
-        /* Reset to be able to calculate the next delta. */
-        m_lastMotorSpeedLeft      = motors.getLeftSpeed();
-        m_lastMotorSpeedRight     = motors.getRightSpeed();
-        m_lastAbsRelEncStepsLeft  = 0;
-        m_lastAbsRelEncStepsRight = 0;
+            calculateDeltaPos(stepsCenter, alpha, dX, dY);
+            m_posX += dX;
+            m_posY += dY;
 
-        m_relEncoders.clear();
+            LOG_DEBUG_VAL(TAG, "Steps left : ", relStepsLeft);
+            LOG_DEBUG_VAL(TAG, "Steps right: ", relStepsRight);
+            LOG_DEBUG_VAL(TAG, "Orientation (deg): ", MRAD2DEG(m_orientation));
+
+            /* Reset to be able to calculate the next delta. */
+            m_lastAbsRelEncStepsLeft  = 0;
+            m_lastAbsRelEncStepsRight = 0;
+            m_relEncoders.clear();
+        }
     }
 }
 
 uint32_t Odometry::getMileageCenter() const
 {
-    uint32_t encoderSteps = (m_absEncStepsLeft + m_absEncStepsRight) / 2;
+    return m_mileage / RobotConstants::ENCODER_STEPS_PER_MM;
+}
 
-    return encoderSteps / RobotConstants::ENCODER_STEPS_PER_MM;
+void Odometry::clearPositionAndOrientation()
+{
+    m_posX        = 0;
+    m_posY        = 0;
+    m_orientation = 0;
+}
+
+void Odometry::clearMileage()
+{
+    m_mileage = 0;
 }
 
 /******************************************************************************
@@ -129,19 +139,68 @@ uint32_t Odometry::getMileageCenter() const
  * Private Methods
  *****************************************************************************/
 
+bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
+{
+    bool isStandStill = false;
+
+    /* No encoder (left/right) change detected? */
+    if (absStepsLeft == m_lastAbsRelEncStepsLeft)
+    {
+        if (absStepsRight == m_lastAbsRelEncStepsRight)
+        {
+            isStandStill = true;
+        }
+    }
+
+    /* Is robot moving? */
+    if (false == isStandStill)
+    {
+        m_isStandstill = false;
+        m_timer.stop();
+    }
+    /* Robot seems to not to move anymore, lets debounce. */
+    else if (false == m_isStandstill)
+    {
+        /* The first time of no movement, start the debounce timer. */
+        if (false == m_timer.isRunning())
+        {
+            m_timer.start(STANDSTILL_DETECTION_PERIOD);
+        }
+        /* If over the while debounce time there is no movement, it will be considered as standstill. */
+        else if (true == m_timer.isTimeout())
+        {
+            m_isStandstill = true;
+        }
+    }
+    /* Robot standstill. */
+    else
+    {
+        /* Nothing to do. */
+        ;
+    }
+
+    return m_isStandstill;
+}
+
 int16_t Odometry::calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const
 {
     /* The alpha is approximated for performance reason. */
-    alpha = 1000 * (stepsRight - stepsLeft);
-    alpha /= static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-    alpha /= static_cast<int16_t>(RobotConstants::WHEEL_BASE); /* [mrad] */
-    alpha %= FP_2PI();                                         /* -2*PI < alpha < +2*PI */
+    int32_t orientation32 = static_cast<int32_t>(orientation);
+    int32_t stepsLeft32   = static_cast<int32_t>(stepsLeft);
+    int32_t stepsRight32  = static_cast<int32_t>(stepsRight);
+    int32_t alpha32       = (stepsRight32 - stepsLeft32) * 1000; /* 1000 * [steps] */
+
+    alpha32 /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* 1000 * [mm] */
+    alpha32 /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);           /* [mrad] */
+    alpha32 %= FP_2PI();                                                   /* -2*PI < alpha < +2*PI */
+
+    alpha = static_cast<int16_t>(alpha32);
 
     /* Calculate orientation */
-    orientation += alpha;
-    orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
+    orientation32 += alpha32;
+    orientation32 %= FP_2PI(); /* -2*PI < orientation < +2*PI */
 
-    return orientation;
+    return static_cast<int16_t>(orientation32);
 }
 
 void Odometry::calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const

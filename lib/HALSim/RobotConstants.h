@@ -84,7 +84,7 @@ namespace RobotConstants
      * Wheel base in mm.
      * Distance between the left wheel center to the right wheel center.
      */
-    static const uint32_t   WHEEL_BASE              = 90;
+    static const uint32_t   WHEEL_BASE              = 85;
 
     /**
      * Number of encoder steps per mm.

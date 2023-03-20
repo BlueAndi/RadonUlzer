@@ -131,7 +131,7 @@ int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
     if (((INT16_MIN / 2) > refPoint) && ((INT16_MAX / 2) < absSteps))
     {
         /* Drives forward */
-        diffSteps = absSteps + (refPoint - INT16_MIN);
+        diffSteps = (INT16_MIN - refPoint) - (INT16_MAX - absSteps);
     }
     /* Wrap around in negative direction?
      * Reference point is in the last half positive part.
@@ -140,7 +140,7 @@ int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
     else if (((INT16_MAX / 2) < refPoint) && ((INT16_MIN / 2) > absSteps))
     {
         /* Drives backward */
-        diffSteps = absSteps + (refPoint - INT16_MAX);
+        diffSteps = (INT16_MAX - refPoint) - (INT16_MIN - absSteps);
     }
     /* No wrap around */
     else

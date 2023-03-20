@@ -207,7 +207,27 @@ public:
     {
         return m_proximitySensors;
     }
-    
+
+    /**
+     * Get encoders test interface.
+     *
+     * @return Encoders test interface.
+     */
+    IEncodersTest& getEncodersTest()
+    {
+        return m_encoders;
+    }
+
+    /**
+     * Get motors test interface.
+     *
+     * @return Motors test interface.
+     */
+    IMotorsTest& getMotorsTest()
+    {
+        return m_motors;
+    }
+
 protected:
 
 private:

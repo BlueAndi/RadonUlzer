@@ -27,7 +27,7 @@
 /**
  * @brief  Motors realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -44,6 +44,7 @@
  * Includes
  *****************************************************************************/
 #include "IMotors.h"
+#include "IMotorsTest.h"
 
 /******************************************************************************
  * Macros
@@ -54,7 +55,7 @@
  *****************************************************************************/
 
 /** This class provides access to the Zumo target motors. */
-class Motors : public IMotors
+class Motors : public IMotors, public IMotorsTest
 {
 public:
     /**
@@ -83,6 +84,8 @@ public:
      */
     void setSpeeds(int16_t leftSpeed, int16_t rightSpeed) final
     {
+        m_speedLeft  = leftSpeed;
+        m_speedRight = rightSpeed;
     }
 
     /**
@@ -102,7 +105,7 @@ public:
      */
     int16_t getLeftSpeed() final
     {
-        return 0;
+        return m_speedLeft;
     }
 
     /**
@@ -112,7 +115,29 @@ public:
      */
     int16_t getRightSpeed() final
     {
-        return 0;
+        return m_speedRight;
+    }
+
+    /* ---------- Test Interface ---------- */
+
+    /**
+     * Set speed of the left motor.
+     *
+     * @param[in] speed Speed in digits.
+     */
+    void setLeftSpeed(int16_t speed) final
+    {
+        m_speedLeft = speed;
+    }
+
+    /**
+     * Set speed of the right motor.
+     *
+     * @param[in] speed Speed in digits.
+     */
+    void setRightSpeed(int16_t speed) final
+    {
+        m_speedRight = speed;
     }
 
 private:
@@ -120,6 +145,9 @@ private:
      * The maximum speed of a single motor in PWM digits.
      */
     static const int16_t MAX_SPEED = 400;
+
+    int16_t m_speedLeft;  /**< Left motor speed in digits. */
+    int16_t m_speedRight; /**< Right motor speed in digits. */
 };
 
 /******************************************************************************

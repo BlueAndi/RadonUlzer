@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Mileage
+ * @brief  Abstract motors test interface
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup Service
+ * 
+ * @addtogroup HALInterfaces
  *
  * @{
  */
-
-#ifndef MILEAGE_H
-#define MILEAGE_H
+#ifndef IMOTORSTEST_H
+#define IMOTORSTEST_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,10 +42,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Arduino.h>
-#include <SimpleTimer.h>
-#include <Board.h>
-#include <RelativeEncoders.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
@@ -56,81 +52,44 @@
  * Types and Classes
  *****************************************************************************/
 
-/** This class provides the mileage, based on the encoder informations. */
-class Mileage
+/** The abstract motors test interface. */
+class IMotorsTest
 {
 public:
     /**
-     * Get mileage instance.
-     *
-     * @return Mileage instance.
+     * Destroys the interface.
      */
-    static Mileage& getInstance()
+    virtual ~IMotorsTest()
     {
-        return m_instance;
     }
 
     /**
-     * Clear mileage.
+     * Set speed of the left motor.
+     * 
+     * @param[in] speed Speed in digits.
      */
-    void clear();
+    virtual void setLeftSpeed(int16_t speed) = 0;
 
     /**
-     * Update mileage, based on the measured encoder steps.
-     * Call this function cyclic.
+     * Set speed of the right motor.
+     * 
+     * @param[in] speed Speed in digits.
      */
-    void process();
+    virtual void setRightSpeed(int16_t speed) = 0;
 
+protected:
     /**
-     * Get center mileage in mm.
-     *
-     * @return Mileage in mm
+     * Constructs the interface.
      */
-    uint32_t getMileageCenter() const;
+    IMotorsTest()
+    {
+    }
 
 private:
-    /** Min. period in ms, after which the mileage shall be calculated. */
-    static const uint32_t MIN_PERIOD = 5;
-
-    /** Mileage instance */
-    static Mileage m_instance;
-
-    /** Timer used to control processing of encoders. */
-    SimpleTimer m_timer;
-
-    /** Mileage left in encoder steps. */
-    uint32_t m_encoderStepsLeft;
-
-    /** Mileage right in encoder steps. */
-    uint32_t m_encoderStepsRight;
-
-    /** Relative encoders left/right */
-    RelativeEncoders m_relEncoders;
-
-    /**
-     * Construct the mileage instance.
-     */
-    Mileage() :
-        m_timer(),
-        m_encoderStepsLeft(0),
-        m_encoderStepsRight(0),
-        m_relEncoders(Board::getInstance().getEncoders())
-    {
-    }
-
-    /**
-     * Destroy the mileage instance.
-     */
-    ~Mileage()
-    {
-    }
-
-    Mileage(const Mileage& value);
-    Mileage& operator=(const Mileage& value);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* MILEAGE_H */
+#endif /* IMOTORSTEST_H */

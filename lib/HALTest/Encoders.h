@@ -27,7 +27,7 @@
 /**
  * @brief  Encoders realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -44,6 +44,7 @@
  * Includes
  *****************************************************************************/
 #include "IEncoders.h"
+#include "IEncodersTest.h"
 
 /******************************************************************************
  * Macros
@@ -54,13 +55,13 @@
  *****************************************************************************/
 
 /** This class provides access to the Zumo target encoders. */
-class Encoders : public IEncoders
+class Encoders : public IEncoders, public IEncodersTest
 {
 public:
     /**
      * Constructs the encoders adapter.
      */
-    Encoders() : IEncoders()
+    Encoders() : IEncoders(), m_stepsLeft(0), m_stepsRight(0)
     {
     }
 
@@ -80,12 +81,12 @@ public:
      * The count is returned as a signed 16-bit integer. When the count goes
      * over 32767, it will overflow down to -32768.  When the count goes below
      * -32768, it will overflow up to 32767.
-     * 
+     *
      * @return Encoder steps left
      */
     int16_t getCountsLeft() final
     {
-        return 0;
+        return m_stepsLeft;
     }
 
     /**
@@ -97,40 +98,71 @@ public:
      * The count is returned as a signed 16-bit integer. When the count goes
      * over 32767, it will overflow down to -32768.  When the count goes below
      * -32768, it will overflow up to 32767.
-     * 
+     *
      * @return Encoder steps right
      */
     int16_t getCountsRight() final
     {
-        return 0;
+        return m_stepsRight;
     }
 
     /**
      * This function is just like getCountsLeft() except it also clears the
      * counts before returning. If you call this frequently enough, you will
      * not have to worry about the count overflowing.
-     * 
+     *
      * @return Encoder steps left
      */
     int16_t getCountsAndResetLeft() final
     {
-        return 0;
+        int16_t stepsLeft = m_stepsLeft;
+
+        m_stepsLeft = 0;
+
+        return stepsLeft;
     }
 
     /**
      * This function is just like getCountsRight() except it also clears the
      * counts before returning. If you call this frequently enough, you will
      * not have to worry about the count overflowing.
-     * 
+     *
      * @return Encoder steps right
      */
     int16_t getCountsAndResetRight() final
     {
-        return 0;
+        int16_t stepsRight = m_stepsRight;
+
+        m_stepsRight = 0;
+
+        return stepsRight;
+    }
+
+    /* ---------- Test Interface ---------- */
+
+    /**
+     * Set encoder steps left.
+     *
+     * @param[in] steps Encoder steps
+     */
+    void setCountsLeft(int16_t steps) final
+    {
+        m_stepsLeft = steps;
+    }
+
+    /**
+     * Set encoder steps right.
+     *
+     * @param[in] steps Encoder steps
+     */
+    void setCountsRight(int16_t steps) final
+    {
+        m_stepsRight = steps;
     }
 
 private:
-
+    int16_t m_stepsLeft;  /**< Encoder steps left */
+    int16_t m_stepsRight; /**< Encoder steps right*/
 };
 
 /******************************************************************************

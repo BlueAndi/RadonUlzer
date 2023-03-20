@@ -44,11 +44,11 @@ package "Service" as serviceLayer {
         + playBeep() : void
     }
 
-    class Mileage <<service>> {
-        + {static} getInstance() : Mileage&
-        + clear() : void
+    class Odometry <<service>> {
+        + {static} getInstance() : Odometry&
         + process() : void
         + getMileageCenter() : uint32_t
+        + clearMileage() : void
     }
 
     class PIDController < T > <<service>> {
@@ -121,7 +121,7 @@ package "HAL" as hal {
 
 DrivingState *--> SimpleTimer
 DrivingState *--> Sound
-DrivingState *--> Mileage
+DrivingState *--> Odometry
 DrivingState *--> PIDController
 DrivingState *--> MovAvg
 DrivingState ...> IDisplay: <<use>>

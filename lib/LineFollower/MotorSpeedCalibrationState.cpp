@@ -65,7 +65,7 @@
 /**
  * Logging source.
  */
-const char* TAG = "MotorSpeedCalibrationState";
+static const char* TAG = "MotorSpeedCalibrationState";
 
 /******************************************************************************
  * Public Methods
@@ -253,21 +253,8 @@ void MotorSpeedCalibrationState::phase4Finished(StateMachine& sm)
     }
     else
     {
-        char valueStr[10];
-
-        LOG_DEBUG_HEAD(TAG);
-        LOG_DEBUG_MSG("Calibrated max. speed:");
-
-        Util::intToStr(valueStr, sizeof(valueStr), maxSpeed);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_MSG(" steps/s (= ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_MSG(" mm/s)");
-        LOG_DEBUG_TAIL();
+        LOG_DEBUG_VAL(TAG, "Calibrated max. speed (steps/s): ", maxSpeed);
+        LOG_DEBUG_VAL(TAG, "Calibrated max. speed (mm/s): ", maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
 
         sm.setState(&LineSensorsCalibrationState::getInstance());
     }

@@ -25,74 +25,71 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Abstract encoders test interface
  * @author Andreas Merkle <web@blue-andi.de>
+ *
+ * @addtogroup HALInterfaces
+ *
+ * @{
  */
+#ifndef IENCODERSTEST_H
+#define IENCODERSTEST_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "App.h"
-#include <Board.h>
-#include <Speedometer.h>
-#include <DifferentialDrive.h>
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void App::setup()
+/**
+ * Encoders test interface used to simulate the encoders.
+ */
+class IEncodersTest
 {
-    Board::getInstance().init();
-    /* m_systemStateMachine.setState(&StartupState::getInstance()); */
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-}
-
-void App::loop()
-{
-    Speedometer::getInstance().process();
-
-    if (true == m_controlInterval.isTimeout())
+public:
+    /**
+     * Destroy the test interface.
+     */
+    ~IEncodersTest()
     {
-        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-        m_controlInterval.restart();
     }
 
-    m_systemStateMachine.process();
-}
+    /**
+     * Set encoder steps left.
+     *
+     * @param[in] steps Encoder steps
+     */
+    virtual void setCountsLeft(int16_t steps) = 0;
+
+    /**
+     * Set encoder steps right.
+     *
+     * @param[in] steps Encoder steps
+     */
+    virtual void setCountsRight(int16_t steps) = 0;
+
+protected:
+    /**
+     * Construct the test interface.
+     */
+    IEncodersTest()
+    {
+    }
+};
 
 /******************************************************************************
- * Protected Methods
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* IENCODERSTEST_H */
