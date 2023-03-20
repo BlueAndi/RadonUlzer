@@ -1,0 +1,29 @@
+@startuml
+
+package "Service" {
+    class "DifferentialDrive" as differentialDrive <<service>>
+    class "SimpleTimer" as simpleTimer <<service>>
+    class "PIDController" as pidController <<service>>
+    class "Speedometer" as speedometer <<service>>
+
+    note left of differentialDrive
+        Steering the robot with linear (steps/s) and
+        angular speed [mrad/s] by controlling the
+        speed with PID controllers.
+    end note
+
+    differentialDrive --> simpleTimer
+    differentialDrive *--> "2" pidController
+    differentialDrive ..> speedometer: <<use>>
+}
+
+package "HAL" {
+    class "IMotors" as iMotors
+    class "Motors" as motors
+
+    iMotors <|.. motors: <<realize>>
+}
+
+differentialDrive ...> iMotors: <<use>>
+
+@enduml

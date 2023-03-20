@@ -1,0 +1,39 @@
+@startuml
+
+start
+
+if (Is differential drive enabled?) then (yes)
+
+    if (Is max. motor speed available?) then (yes)
+
+        :Get measured motor speeds [steps/s] left and right.;
+
+        if (Is linear speed set point left 0 steps/s?) then (yes)
+            :Clear left PID conroller;
+        else
+            :Calculate next motor speed [steps/s] by last motor speed [steps/s]\n+ PID with speed set point [steps/s] and measured speed [steps/s].;
+            note right: Velocity PID controller
+            :Limit calculated motor speed by max. motor speed.;
+            :Store calculated motor speed for next calculation.;
+            :Convert calculated motor speed [steps/s] to motor speed PWM [digits].;
+        endif
+
+        if (Is linear speed set point right 0 steps/s?) then (yes)
+            :Clear right PID conroller;
+        else
+            :Calculate next motor speed [steps/s] by last motor speed [steps/s]\n+ PID with speed set point [steps/s] and measured speed [steps/s].;
+            note right: Velocity PID controller
+            :Limit calculated motor speed by max. motor speed.;
+            :Store calculated motor speed for next calculation.;
+            :Convert calculated motor speed [steps/s] to motor speed PWM [digits].;
+        endif
+
+        :Update motor speed PWM [digits] of left and right motor.;
+
+    endif
+
+endif
+
+stop
+
+@enduml
