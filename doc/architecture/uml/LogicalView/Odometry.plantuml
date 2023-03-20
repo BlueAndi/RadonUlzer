@@ -1,0 +1,23 @@
+@startuml
+
+package "Service" {
+    class "Odometry" as odometry
+
+    note left of odometry
+        Provides the:
+        * position in mm
+        * orientation in mrad
+        * mileage in mm
+    end note
+}
+
+package "HAL" {
+    class "IEncoders" as iEncoders
+    class "Encoders" as encoders
+
+    iEncoders <|.. encoders: <<realize>>
+}
+
+odometry ..> iEncoders: <<use>>
+
+@enduml
