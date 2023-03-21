@@ -98,7 +98,7 @@ public:
      */
     void sendData(uint8_t channel, const uint8_t* data, uint8_t length)
     {
-        if (CONTROL_CHANNEL_NUMBER != channel)
+        if ((CONTROL_CHANNEL_NUMBER != channel) && (nullptr != data))
         {
             send(channel, data, length);
         }
@@ -112,7 +112,10 @@ public:
      */
     void sendData(const char* channelName, const uint8_t* data, uint8_t length)
     {
-        sendData(getChannelNumber(channelName), data, length);
+        if (nullptr != channelName)
+        {
+            sendData(getChannelNumber(channelName), data, length);
+        }
     }
 
     /**
@@ -122,13 +125,16 @@ public:
      */
     uint8_t getChannelNumber(const char* channelName)
     {
-        uint8_t itr;
+        uint8_t itr = maxChannels;
 
-        for (itr = 0; itr < maxChannels; itr++)
+        if (nullptr != channelName)
         {
-            if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
+            for (itr = 0; itr < maxChannels; itr++)
             {
-                break;
+                if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
+                {
+                    break;
+                }
             }
         }
 
@@ -147,7 +153,8 @@ public:
     {
         uint8_t itr = maxChannels;
 
-        if ((MAX_DATA_LEN >= dlc) && (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
+        if ((nullptr != channelName) && (nullptr != cb) && (MAX_DATA_LEN >= dlc) &&
+            (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
         {
             for (itr = 0; itr < maxChannels; itr++)
             {
@@ -171,22 +178,24 @@ public:
      */
     void subscribeToChannel(const char* channelName, ChannelCallback callback)
     {
-        bool    isSuccess  = false;
-        uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-
-        if (CHANNEL_NAME_MAX_LEN >= nameLength)
+        if ((nullptr != channelName) && (nullptr != callback))
         {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
-            buf[0] = COMMANDS::SCRB;
+            uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
 
-            for (uint8_t i = 0; i < nameLength; i++)
+            if (CHANNEL_NAME_MAX_LEN >= nameLength)
             {
-                buf[i + 1] = channelName[i];
-            }
+                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
+                buf[0] = COMMANDS::SCRB;
 
-            m_pendingSuscribeChannel.m_name     = channelName;
-            m_pendingSuscribeChannel.m_callback = callback;
-            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+                for (uint8_t i = 0; i < nameLength; i++)
+                {
+                    buf[i + 1] = channelName[i];
+                }
+
+                m_pendingSuscribeChannel.m_name     = channelName;
+                m_pendingSuscribeChannel.m_callback = callback;
+                send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+            }
         }
     }
 
@@ -246,6 +255,11 @@ private:
      */
     void callbackControlChannel(const uint8_t* rcvData, const uint8_t payloadLength)
     {
+        if (nullptr == rcvData)
+        {
+            return;
+        }
+        
         uint8_t cmdByte = rcvData[0];
 
         switch (cmdByte)
@@ -407,7 +421,7 @@ private:
     {
         uint8_t channelDLC = getChannelDLC(channel);
 
-        if ((channelDLC >= payloadLength) && (m_isSynced || (CONTROL_CHANNEL_NUMBER == channel)))
+        if ((nullptr != data) && (channelDLC >= payloadLength) && (m_isSynced || (CONTROL_CHANNEL_NUMBER == channel)))
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
