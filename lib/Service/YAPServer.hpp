@@ -105,6 +105,37 @@ public:
     }
 
     /**
+     * Send a frame with the selected bytes.
+     * @param[in] channelName Channel to send frame to.
+     * @param[in] data Byte buffer to be sent.
+     * @param[in] length Amount of bytes to send.
+     */
+    void sendData(const char* channelName, const uint8_t* data, uint8_t length)
+    {
+        sendData(getChannelNumber(channelName), data, length);
+    }
+
+    /**
+     * Get Number of a channel by its name.
+     * @param[in] channelName Name of Channel
+     * @returns Number of the Channel, or 0 if not channel with the name is present.
+     */
+    uint8_t getChannelNumber(const char* channelName)
+    {
+        uint8_t itr;
+
+        for (itr = 0; itr < maxChannels; itr++)
+        {
+            if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
+            {
+                break;
+            }
+        }
+
+        return (itr == maxChannels) ? 0U : (itr + 1);
+    }
+
+    /**
      * Creates a new channel on the server.
      * @param[in] channelName Name of the channel.
      * It will not be checked if the name already exists.
@@ -249,19 +280,12 @@ private:
             memcpy(channelName, &rcvData[1], CHANNEL_NAME_MAX_LEN);
             channelName[CHANNEL_NAME_MAX_LEN] = '\0';
 
-            uint8_t itr;
+            uint8_t channelNumber = getChannelNumber(channelName);
 
-            for (itr = 0; itr < maxChannels; itr++)
+            if (CONTROL_CHANNEL_NUMBER != channelNumber)
             {
-                if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
-                {
-                    // Channel name found. Send SRCB_RSP
-                    uint8_t channelNumber                       = itr + 1;
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
-                                                                   m_dataChannels[itr].m_dlc};
-                    send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
-                    break;
-                }
+                uint8_t buf[3] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
+                send(CONTROL_CHANNEL_NUMBER, buf, 3U);
             }
 
             break;
