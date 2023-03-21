@@ -183,7 +183,7 @@ private:
      * Callback for the Control Channel
      * @param[in] rcvData Payload of received frame.
      */
-    void callbackControlChannel(const uint8_t* rcvData)
+    void callbackControlChannel(const uint8_t* rcvData, const uint8_t payloadLength)
     {
         uint8_t cmdByte = rcvData[0];
 
@@ -269,7 +269,7 @@ private:
 
                 if (isFrameValid(rcvFrame))
                 {
-                    callbackControlChannel(rcvFrame.fields.payload.m_data);
+                    callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                 }
             }
             // Determine which callback to call, if any.
@@ -285,7 +285,7 @@ private:
                     // Callback
                     {
                         m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
-                            rcvFrame.fields.payload.m_data);
+                            rcvFrame.fields.payload.m_data, payloadLength);
                     }
                 }
             }

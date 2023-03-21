@@ -81,7 +81,7 @@ SOFTWARE.
  * Channel Notification Prototype Callback.
  * Provides the received data in the respective channel to the application.
  */
-typedef void (*ChannelCallback)(const uint8_t* rcvData);
+typedef void (*ChannelCallback)(const uint8_t* rcvData, const uint8_t payloadLength);
 
 /**
  * Channel Definition.
