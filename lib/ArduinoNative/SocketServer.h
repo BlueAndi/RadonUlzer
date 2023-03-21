@@ -37,6 +37,7 @@
  *****************************************************************************/
 
 #include <stdint.h>
+#include <queue>
 
 #ifdef _WIN32
 #undef UNICODE
@@ -44,8 +45,18 @@
 #include <winsock2.h>
 #include <windows.h>
 #include <ws2tcpip.h>
-#include <queue>
 #pragma comment(lib, "Ws2_32.lib")
+#else
+#include <arpa/inet.h>  /* definition of inet_ntoa */
+#include <netdb.h>      /* definition of gethostbyname */
+#include <netinet/in.h> /* definition of struct sockaddr_in */
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h> /* definition of close */
+typedef unsigned int UINT_PTR;
+typedef UINT_PTR	SOCKET;
+#define INVALID_SOCKET	(SOCKET)(~0)
+#define SOCKET_ERROR	(-1)
 #endif
 
 /******************************************************************************

@@ -36,6 +36,7 @@
 #include "SocketServer.h"
 #include <stdio.h>
 #include <string>
+#include <cstring>
 
 /******************************************************************************
  * Macros
@@ -64,16 +65,23 @@ SocketServer::~SocketServer()
 bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 {
     bool             success = true;
-    WSADATA          wsaData;
     int              result;
     struct addrinfo  hints;
     struct addrinfo* addrInfo = NULL;
 
+#ifdef _WIN32
     ZeroMemory(&hints, sizeof(hints));
+#else
+    memset(&hints, 0, sizeof(struct addrinfo));
+#endif
+
     hints.ai_family   = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
     hints.ai_flags    = AI_PASSIVE;
+
+#ifdef _WIN32
+    WSADATA wsaData;
 
     // Initialize Winsock
     result = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -83,12 +91,16 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
         return false;
     }
 
+#endif
+
     // Resolve the server address and port
     result = getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &addrInfo);
     if (result != 0)
     {
         printf("getaddrinfo failed with error: %d\n", result);
+#ifdef _WIN32
         WSACleanup();
+#endif
         return false;
     }
 
@@ -96,9 +108,11 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     m_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
     if (m_listenSocket == INVALID_SOCKET)
     {
-        printf("socket failed with error: %ld\n", WSAGetLastError());
+        printf("socket failed\n");
         freeaddrinfo(addrInfo);
+#ifdef _WIN32
         WSACleanup();
+#endif
         return false;
     }
 
@@ -106,10 +120,14 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     result = bind(m_listenSocket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
     if (result == SOCKET_ERROR)
     {
-        printf("bind failed with error: %d\n", WSAGetLastError());
+        printf("bind failed\n");
         freeaddrinfo(addrInfo);
+#ifdef _WIN32
         closesocket(m_listenSocket);
         WSACleanup();
+#else
+        close(m_listenSocket);
+#endif
         return false;
     }
 
@@ -118,9 +136,13 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     result = listen(m_listenSocket, maxConnections);
     if (result == SOCKET_ERROR)
     {
-        printf("listen failed with error: %d\n", WSAGetLastError());
+        printf("listen failed\n");
+#ifdef _WIN32
         closesocket(m_listenSocket);
         WSACleanup();
+#else
+        close(m_listenSocket);
+#endif
         return false;
     }
 
@@ -135,8 +157,12 @@ void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
         int iSendResult = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
         if (iSendResult == SOCKET_ERROR)
         {
-            printf("send failed with error: %d\n", WSAGetLastError());
-            closesocket(m_clientSocket);
+            printf("send failed\n");
+#ifdef _WIN32
+            closesocket(m_listenSocket);
+#else
+            close(m_listenSocket);
+#endif
         }
     }
 }
@@ -198,7 +224,7 @@ void SocketServer::processRx()
                 m_clientSocket = accept(m_listenSocket, NULL, NULL);
                 if (m_clientSocket == INVALID_SOCKET)
                 {
-                    printf("accept failed with error: %d\n", WSAGetLastError());
+                    printf("accept failed\n");
                 }
             }
 
@@ -218,7 +244,11 @@ void SocketServer::processRx()
                 }
                 else
                 {
-                    closesocket(m_clientSocket);
+#ifdef _WIN32
+                    closesocket(m_listenSocket);
+#else
+                    close(m_listenSocket);
+#endif
                     m_clientSocket = INVALID_SOCKET;
                 }
             }
