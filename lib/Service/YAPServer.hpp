@@ -66,7 +66,7 @@ public:
     /**
      * Construct the YAP Server.
      */
-    YAPServer() : m_isSynced(false), m_lastSyncCommand(0U), m_lastSyncResponse(0U)
+    YAPServer() : m_isSynced(false), m_lastSyncCommand(0U), m_lastSyncResponse(0U), m_pendingSuscribeChannel()
     {
     }
 
@@ -131,6 +131,32 @@ public:
         }
 
         return (itr == maxChannels) ? 0U : (itr + 1);
+    }
+
+    /**
+     * Suscribe to a Channel to receive the incoming data.
+     * @param[in] channelName Name of the Channel to suscribe to.
+     * @param[in] callback Callback to return the incoming data.
+     */
+    void subscribeToChannel(const char* channelName, ChannelCallback callback)
+    {
+        bool    isSuccess  = false;
+        uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
+
+        if (CHANNEL_NAME_MAX_LEN >= nameLength)
+        {
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
+            buf[0] = COMMANDS::SCRB;
+
+            for (uint8_t i = 0; i < nameLength; i++)
+            {
+                buf[i + 1] = channelName[i];
+            }
+
+            m_pendingSuscribeChannel.m_name     = channelName;
+            m_pendingSuscribeChannel.m_callback = callback;
+            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+        }
     }
 
     /**
@@ -239,6 +265,19 @@ private:
 
         case COMMANDS::SCRB_RSP:
         {
+            // Check if a SCRB is pending
+            if (nullptr != m_pendingSuscribeChannel.m_callback)
+            {
+                uint8_t channelNumber = rcvData[1];
+                uint8_t channelDLC    = rcvData[2];
+
+                m_dataChannels[channelNumber - 1].m_name     = m_pendingSuscribeChannel.m_name;
+                m_dataChannels[channelNumber - 1].m_dlc      = channelDLC;
+                m_dataChannels[channelNumber - 1].m_callback = m_pendingSuscribeChannel.m_callback;
+
+                m_pendingSuscribeChannel.m_callback = nullptr;
+            }
+
             break;
         }
 
@@ -416,6 +455,11 @@ private:
      * Last sync response timestamp.
      */
     uint32_t m_lastSyncResponse;
+
+    /**
+     * Channel used to store the name and the Callback of a pending suscription.
+     */
+    Channel m_pendingSuscribeChannel;
 
 private:
     /** Prevent instance copying */
