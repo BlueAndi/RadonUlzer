@@ -185,6 +185,9 @@ public:
         Serial.println("--------------------------");
     }
 
+    /**
+     * Debug Function. Print Frame info.
+     */
     void printFrame(const Frame& frame, uint8_t payloadLength)
     {
         Serial.println("=== Begin Frame ===");
@@ -208,6 +211,7 @@ private:
     /**
      * Callback for the Control Channel
      * @param[in] rcvData Payload of received frame.
+     * @param[in] payloadLength Length of rcvData
      */
     void callbackControlChannel(const uint8_t* rcvData, const uint8_t payloadLength)
     {
@@ -407,6 +411,11 @@ private:
         return (checksum(frame) == frame.fields.header.headerFields.m_checksum);
     }
 
+    /**
+     * Get the Payload Length of a channel
+     * @param[in] channel Channel number to check
+     * @returns DLC of the channel, or 0 if channel is not found.
+     */
     uint8_t getChannelDLC(uint8_t channel)
     {
         uint8_t channelDLC = 0U;
@@ -423,6 +432,11 @@ private:
         return channelDLC;
     }
 
+    /**
+     * Performs the checksum of a Frame.
+     * @param[in] frame Frame to calculate checksum
+     * @returns checksum value
+     */
     uint8_t checksum(const Frame& frame)
     {
         uint32_t sum = frame.fields.header.headerFields.m_channel;
