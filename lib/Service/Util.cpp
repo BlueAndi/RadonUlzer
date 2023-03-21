@@ -150,6 +150,19 @@ void Util::intToStr(char* str, size_t size, int32_t value)
     }
 }
 
+void Util::int32ToByteArray(uint8_t* buffer, size_t size, int32_t value)
+{
+    if ((nullptr != buffer) && (4U <= size))
+    {
+        uint16_t hiBytes  = ((value & 0xFFFF0000) >> 16U);
+        uint16_t lowBytes = (value & 0x0000FFFF);
+        buffer[0] = ((hiBytes & 0xFF00) >> 8U);
+        buffer[1] = (hiBytes & 0x00FF);
+        buffer[2] = ((lowBytes & 0xFF00) >> 8U);
+        buffer[3] = (lowBytes & 0x00FF);        
+    }
+}
+
 /******************************************************************************
  * Local Functions
  *****************************************************************************/

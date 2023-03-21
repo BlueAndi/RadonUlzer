@@ -82,6 +82,14 @@ void uintToStr(char* str, size_t size, uint32_t value);
  */
 void intToStr(char* str, size_t size, int32_t value);
 
+/**
+ * Signed 32-bit integer to byte array.
+ * @param[out]  buffer  Destination array
+ * @param[in]   size    Size of the destination buffer in byte
+ * @param[in]   value   Value
+ */
+void int32ToByteArray(uint8_t* buffer, size_t size, int32_t value);
+
 }
 
 #endif /* UTIL_H */
