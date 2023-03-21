@@ -100,6 +100,15 @@ private:
     /** YAP Server Instance */
     YAPServer<10> m_yapServer;
 
+    /** Name of Channel to send Position Data to. */
+    const char* POSITION_CHANNEL = "POSITION";
+
+    /**
+     * Report the current position of the robot using the Odometry data.
+     * Sends data through the YAPServer.
+     */
+    void reportPosition();
+
     App(const App& app);
     App& operator=(const App& app);
 };

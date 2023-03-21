@@ -38,6 +38,7 @@
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -55,6 +56,8 @@
  * Prototypes
  *****************************************************************************/
 
+static void positionCallback(const uint8_t* rcvData, const uint8_t payloadLength);
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -69,6 +72,7 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+    m_yapServer.createChannel(POSITION_CHANNEL, 8U, positionCallback);
 }
 
 void App::loop()
@@ -90,6 +94,9 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
+        /** Send Position to YAP Client */
+        reportPosition();
+
         m_controlInterval.restart();
     }
 
@@ -104,6 +111,20 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
+void App::reportPosition()
+{
+    int32_t xPos, yPos;
+    uint8_t positionLength = 8U;
+    uint8_t outBuf[positionLength];
+
+    Odometry::getInstance().getPosition(xPos, yPos);
+
+    Util::int32ToByteArray(&outBuf[0], sizeof(outBuf), xPos);
+    Util::int32ToByteArray(&outBuf[4], sizeof(outBuf), yPos);
+
+    m_yapServer.sendData(POSITION_CHANNEL, outBuf, positionLength);
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/
@@ -111,3 +132,12 @@ void App::loop()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Callback for incoming data from the Position Channel.
+ * @param[in] rcvData Byte buffer containing incomming data.
+ * @param[in] payloadLength Number of bytes received.
+ */
+void positionCallback(const uint8_t* rcvData, const uint8_t payloadLength)
+{
+}
