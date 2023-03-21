@@ -116,7 +116,7 @@ public:
     {
         uint8_t itr = maxChannels;
 
-        if (MAX_DATA_LEN >= dlc)
+        if ((MAX_DATA_LEN >= dlc) && (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
         {
             for (itr = 0; itr < maxChannels; itr++)
             {
