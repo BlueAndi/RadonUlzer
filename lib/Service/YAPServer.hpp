@@ -342,32 +342,23 @@ private:
             Frame rcvFrame;
             Serial.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
 
-            // Differenciate between Control and Data Channels
-            if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
-            {
-                // Read Payload
-                Serial.readBytes(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+            uint8_t payloadLength = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
 
-                if (isFrameValid(rcvFrame))
+            // Read Payload
+            Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
+
+            if (isFrameValid(rcvFrame))
+            {
+                // Differenciate between Control and Data Channels
+                if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
                 {
                     callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                 }
-            }
-            // Determine which callback to call, if any.
-            else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
-            {
-                uint8_t payloadLength = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
-
-                // Read Payload
-                Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
-
-                if (isFrameValid(rcvFrame))
+                else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
                 {
                     // Callback
-                    {
-                        m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
-                            rcvFrame.fields.payload.m_data, payloadLength);
-                    }
+                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
+                        rcvFrame.fields.payload.m_data, payloadLength);
                 }
             }
         }
