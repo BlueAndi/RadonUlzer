@@ -88,23 +88,22 @@ void Odometry::process()
          */
         if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
         {
-            int16_t alpha       = 0;
-            int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2;
-            int16_t dX          = 0;
-            int16_t dY          = 0;
+            int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2; /* [steps] */
+            int16_t dX          = 0;                                  /* [mm] */
+            int16_t dY          = 0;                                  /* [mm] */
 
             /* Mileage accuracy depends on STEPS_THRESHOLD. */
             m_mileage += abs(stepsCenter);
 
-            m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight, alpha);
+            m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight);
 
-            calculateDeltaPos(stepsCenter, alpha, dX, dY);
+            calculateDeltaPos(stepsCenter, m_orientation, dX, dY);
             m_posX += dX;
             m_posY += dY;
 
-            LOG_DEBUG_VAL(TAG, "Steps left : ", relStepsLeft);
-            LOG_DEBUG_VAL(TAG, "Steps right: ", relStepsRight);
-            LOG_DEBUG_VAL(TAG, "Orientation (deg): ", MRAD2DEG(m_orientation));
+            LOG_DEBUG_VAL(TAG, "x: ", m_posX);
+            LOG_DEBUG_VAL(TAG, "y: ", m_posY);
+            LOG_DEBUG_VAL(TAG, "O: ", MRAD2DEG(m_orientation));
 
             /* Reset to be able to calculate the next delta. */
             m_lastAbsRelEncStepsLeft  = 0;
@@ -182,33 +181,31 @@ bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
     return m_isStandstill;
 }
 
-int16_t Odometry::calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const
+int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, int16_t stepsRight) const
 {
     /* The alpha is approximated for performance reason. */
-    int32_t orientation32 = static_cast<int32_t>(orientation);
-    int32_t stepsLeft32   = static_cast<int32_t>(stepsLeft);
-    int32_t stepsRight32  = static_cast<int32_t>(stepsRight);
-    int32_t alpha32       = (stepsRight32 - stepsLeft32) * 1000; /* 1000 * [steps] */
+    int32_t stepsLeft32  = static_cast<int32_t>(stepsLeft);
+    int32_t stepsRight32 = static_cast<int32_t>(stepsRight);
+    int32_t alpha        = (stepsRight32 - stepsLeft32) * 1000; /* 1000 * [steps] */
 
-    alpha32 /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* 1000 * [mm] */
-    alpha32 /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);           /* [mrad] */
-    alpha32 %= FP_2PI();                                                   /* -2*PI < alpha < +2*PI */
-
-    alpha = static_cast<int16_t>(alpha32);
+    alpha /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* 1000 * [mm] */
+    alpha /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);           /* [mrad] */
+    alpha %= FP_2PI();                                                   /* -2*PI < alpha < +2*PI */
 
     /* Calculate orientation */
-    orientation32 += alpha32;
-    orientation32 %= FP_2PI(); /* -2*PI < orientation < +2*PI */
+    orientation += alpha;
+    orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
 
-    return static_cast<int16_t>(orientation32);
+    return orientation;
 }
 
-void Odometry::calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const
+void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dX, int16_t& dY) const
 {
-    int16_t distCenter = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
+    int16_t distCenter   = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
+    float   fOrientation = static_cast<float>(orientation) / 1000.0f;                                /* [rad] */
 
-    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(alpha));
-    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(alpha));
+    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(fOrientation));
+    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(fOrientation));
 }
 
 /******************************************************************************

@@ -61,19 +61,26 @@ The following applications are supported:
 ![odometry](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/architecture/uml/LogicalView/Odometry.plantuml)
 
 Base equations:
-* $alpha [rad] = \frac{distanceRight [mm] - distanceLeft [mm]}{wheelBase [mm]}$
 * $distanceLeft [mm] = \frac{encoderStepsLeft [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
 * $distanceRight [mm] = \frac{encoderStepsRight [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
-* $orientation [rad] = \sum{}{} alpha$
 * $stepsCenter [steps] = \frac{encoderStepsLeft - encoderStepsRight}{2}$
 * $distanceCenter [mm] = \frac{stepsCenter [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
-* $dX [mm] = -distanceCenter [mm] \cdot sin(alpha)$ <- Approximation for performance reason
-* $dY [mm] = distanceCenter [mm] \cdot cos(alpha)$ <- Approximation for performance reason
-* $x [mm] = \sum{}{} dX$
-* $y [mm] = \sum{}{} dY$
+
+Orientation:
+* $alpha [rad] = \frac{distanceRight [mm] - distanceLeft [mm]}{wheelBase [mm]}$
+* $orientation' [rad] = orientation [rad] + alpha [rad]$
+
+Position:
+* $dX [mm] = -distanceCenter [mm] \cdot sin(orientation' [rad])$ <- Approximation for performance reason
+* $dY [mm] = distanceCenter [mm] \cdot cos(orientation' [rad])$ <- Approximation for performance reason
+* $x' [mm] = x [mm] + dX [mm]$
+* $y' [mm] = y [mm] + dY [mm]$
 
 Improvement for better accuracy:
 * $alpha [mrad] = \frac{1000 \cdot (encoderStepsRight [steps] - encoderStepsLeft [steps])}{encoderStepsPerMM [\frac{steps}{mm}] \cdot wheelBase [mm]}$
+* $orientation' [mrad] = orientation [mrad] + alpha [mrad]$
+* $dX [mm] = -distanceCenter [mm] \cdot sin(\frac{orientation' [mrad]}{1000})$
+* $dY [mm] = distanceCenter [mm] \cdot cos(\frac{orientation' [mrad]}{1000})$
 
 #### Speedometer
 

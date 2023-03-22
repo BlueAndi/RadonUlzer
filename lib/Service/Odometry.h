@@ -95,7 +95,7 @@ public:
      *
      * @return Orientation in mrad
      */
-    int16_t getOrientation() const
+    int32_t getOrientation() const
     {
         return m_orientation;
     }
@@ -168,7 +168,7 @@ private:
     RelativeEncoders m_relEncoders;
 
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
-    int16_t m_orientation;
+    int32_t m_orientation;
 
     /** Absolute position on x-axis. Unit is mm. */
     int32_t m_posX;
@@ -220,24 +220,23 @@ private:
     /**
      * Calculate the orientation in mrad.
      *
-     * @param[in] orientation   Current orientation in mrad
+     * @param[in] orientation   Orientation in mrad
      * @param[in] stepsLeft     Number of encoder steps left
      * @param[in] stepsRight    Number of encoder steps right
-     * @param[out] alpha        Delta angle in mrad
      *
      * @return Orientation in mrad
      */
-    int16_t calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const;
+    int32_t calculateOrientation(int32_t orientation, int16_t stepsLeft, int16_t stepsRight) const;
 
     /**
      * Calculate the vector from last position to new position.
      *
      * @param[in]   stepsCenter Number of steps center
-     * @param[in]   alpha       Delta angle in mrad
+     * @param[in]   orientation Orientation in mrad
      * @param[out]  dX          Delta x-position on x-axis
      * @param[out]  dY          Delta y-position on y-axis
      */
-    void calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const;
+    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dX, int16_t& dY) const;
 };
 
 /******************************************************************************
