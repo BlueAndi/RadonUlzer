@@ -35,7 +35,6 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <RobotConstants.h>
-#include <FPMath.h>
 #include <Logging.h>
 
 /******************************************************************************
@@ -103,7 +102,7 @@ void Odometry::process()
 
             LOG_DEBUG_VAL(TAG, "x: ", m_posX);
             LOG_DEBUG_VAL(TAG, "y: ", m_posY);
-            LOG_DEBUG_VAL(TAG, "O: ", MRAD2DEG(m_orientation));
+            LOG_DEBUG_VAL(TAG, "O (deg): ", MRAD2DEG(m_orientation));
 
             /* Reset to be able to calculate the next delta. */
             m_lastAbsRelEncStepsLeft  = 0;
@@ -118,11 +117,10 @@ uint32_t Odometry::getMileageCenter() const
     return m_mileage / RobotConstants::ENCODER_STEPS_PER_MM;
 }
 
-void Odometry::clearPositionAndOrientation()
+void Odometry::clearPosition()
 {
-    m_posX        = 0;
-    m_posY        = 0;
-    m_orientation = 0;
+    m_posX = 0;
+    m_posY = 0;
 }
 
 void Odometry::clearMileage()
@@ -207,10 +205,31 @@ int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, i
 void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dX, int16_t& dY) const
 {
     int16_t distCenter   = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
+    float   fDistCenter  = static_cast<float>(distCenter);                                           /* [mm] */
     float   fOrientation = static_cast<float>(orientation) / 1000.0f;                                /* [rad] */
+    float   fDeltaPosX   = fDistCenter * cosf(fOrientation);                                         /* [mm] */
+    float   fDeltaPosY   = fDistCenter * sinf(fOrientation);                                         /* [mm] */
 
-    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(fOrientation)); /* [mm] */
-    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(fOrientation));    /* [mm] */
+    if (0.0f <= fDeltaPosX)
+    {
+        fDeltaPosX += 0.5f;
+    }
+    else
+    {
+        fDeltaPosX -= 0.5f;
+    }
+
+    if (0.0f <= fDeltaPosY)
+    {
+        fDeltaPosY += 0.5f;
+    }
+    else
+    {
+        fDeltaPosY -= 0.5f;
+    }
+
+    dX = static_cast<int16_t>(fDeltaPosX); /* [mm] */
+    dY = static_cast<int16_t>(fDeltaPosY); /* [mm] */
 }
 
 /******************************************************************************

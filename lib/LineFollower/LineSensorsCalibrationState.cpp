@@ -69,6 +69,7 @@ void LineSensorsCalibrationState::entry()
 {
     IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    Odometry&          odometry  = Odometry::getInstance();
 
     display.clear();
     display.print("Calib");
@@ -77,6 +78,7 @@ void LineSensorsCalibrationState::entry()
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
+    m_orientation      = odometry.getOrientation();
     diffDrive.enable();
 
     /* Wait some time, before starting the calibration drive. */
@@ -145,10 +147,11 @@ void LineSensorsCalibrationState::phase2TurnLeft()
 {
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
     Odometry&     odometry    = Odometry::getInstance();
+    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
 
     lineSensors.calibrate();
 
-    if (CALIB_ANGLE <= odometry.getOrientation())
+    if (CALIB_ANGLE <= alpha)
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -162,10 +165,11 @@ void LineSensorsCalibrationState::phase3TurnRight()
 {
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
     Odometry&     odometry    = Odometry::getInstance();
+    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
 
     lineSensors.calibrate();
 
-    if ((-CALIB_ANGLE) >= odometry.getOrientation())
+    if ((-CALIB_ANGLE) >= alpha)
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -179,10 +183,11 @@ void LineSensorsCalibrationState::phase4TurnOrigin()
 {
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
     Odometry&     odometry    = Odometry::getInstance();
+    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
 
     lineSensors.calibrate();
 
-    if (0 <= odometry.getOrientation())
+    if (0 <= alpha)
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 

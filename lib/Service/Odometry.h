@@ -47,6 +47,7 @@
 #include <Board.h>
 #include <RelativeEncoders.h>
 #include <SimpleTimer.h>
+#include <FPMath.h>
 
 /******************************************************************************
  * Macros
@@ -59,9 +60,21 @@
 /**
  * This class provides odometry data, based on the encoder informations.
  * Odometry data:
- * - orientation and delta orientation
- * - position and delta position
- * - mileage
+ * - Orientation
+ * - Position
+ * - Mileage
+ * 
+ * Its following the REP-103: https://ros.org/reps/rep-0103.html
+ * 
+ * That means the cartesian representation of geographic locations use the
+ * east-north-up (ENU) convention:
+ * - X east
+ * - Y north
+ * - Z up
+ * 
+ * Rotation only about the Z axis (yaw) is supported.
+ * The yaw relates to the X axis. That means if the robot is heading to the
+ * north, the yaw will be 90°.
  */
 class Odometry
 {
@@ -114,12 +127,24 @@ public:
     }
 
     /**
-     * Clear position and orientation.
+     * Set the orientation.
+     * Use this to align the Y axis to north.
+     * 
+     * @param[in] orientation   The orientation in mrad.
      */
-    void clearPositionAndOrientation();
+    void setOrientation(int32_t orientation)
+    {
+        m_orientation = orientation;
+        m_orientation %= FP_2PI();
+    }
 
     /**
-     * Clear mileage.
+     * Clear the position by setting (x, y) to (0, 0) mm.
+     */
+    void clearPosition();
+
+    /**
+     * Clear mileage by setting it to 0 mm.
      */
     void clearMileage();
 
@@ -190,7 +215,7 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_mileage(0),
         m_relEncoders(Board::getInstance().getEncoders()),
-        m_orientation(0),
+        m_orientation(FP_PI() / 2), /* 90° - heading to north */
         m_posX(0),
         m_posY(0),
         m_timer(),
