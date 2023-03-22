@@ -218,6 +218,16 @@ private:
     bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
+     * Calculate the mileage in mm.
+     * 
+     * @param[in]   mileage     Mileage in mm
+     * @param[in]   stepsCenter Number of steps center
+     * 
+     * @return Mileage in mm
+     */
+    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter);
+
+    /**
      * Calculate the orientation in mrad.
      *
      * @param[in] orientation   Orientation in mrad

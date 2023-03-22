@@ -93,7 +93,7 @@ void Odometry::process()
             int16_t dY          = 0;                                  /* [mm] */
 
             /* Mileage accuracy depends on STEPS_THRESHOLD. */
-            m_mileage += abs(stepsCenter);
+            m_mileage = calculateMileage(m_mileage, stepsCenter);
 
             m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight);
 
@@ -181,6 +181,11 @@ bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
     return m_isStandstill;
 }
 
+int32_t Odometry::calculateMileage(uint32_t mileage, int16_t stepsCenter)
+{
+    return mileage + static_cast<uint32_t>(abs(stepsCenter));
+}
+
 int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, int16_t stepsRight) const
 {
     /* The alpha is approximated for performance reason. */
@@ -204,8 +209,8 @@ void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16
     int16_t distCenter   = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
     float   fOrientation = static_cast<float>(orientation) / 1000.0f;                                /* [rad] */
 
-    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(fOrientation));
-    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(fOrientation));
+    dX = static_cast<int16_t>((-static_cast<float>(distCenter)) * sinf(fOrientation)); /* [mm] */
+    dY = static_cast<int16_t>(static_cast<float>(distCenter) * cosf(fOrientation));    /* [mm] */
 }
 
 /******************************************************************************
