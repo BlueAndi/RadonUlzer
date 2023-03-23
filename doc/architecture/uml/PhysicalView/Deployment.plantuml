@@ -18,9 +18,11 @@ node "Pololu Zumo32U4" as zumo32u4 {
         component "Motors" as motors
         component "Encoders" as encoders
         component "LEDs" as leds
+        component "ProximitySensors" as proximitySensors
 
         software -u- buttons
         software -u- leds
+        software -u- proximitySensors
         software -- buzzer
         software -- motors
         software -- encoders

@@ -47,6 +47,7 @@
 #include <Board.h>
 #include <RelativeEncoders.h>
 #include <SimpleTimer.h>
+#include <FPMath.h>
 
 /******************************************************************************
  * Macros
@@ -59,9 +60,21 @@
 /**
  * This class provides odometry data, based on the encoder informations.
  * Odometry data:
- * - orientation and delta orientation
- * - position and delta position
- * - mileage
+ * - Orientation
+ * - Position
+ * - Mileage
+ * 
+ * Its following the REP-103: https://ros.org/reps/rep-0103.html
+ * 
+ * That means the cartesian representation of geographic locations use the
+ * east-north-up (ENU) convention:
+ * - X east
+ * - Y north
+ * - Z up
+ * 
+ * Rotation only about the Z axis (yaw) is supported.
+ * The yaw relates to the X axis. That means if the robot is heading to the
+ * north, the yaw will be 90°.
  */
 class Odometry
 {
@@ -95,7 +108,7 @@ public:
      *
      * @return Orientation in mrad
      */
-    int16_t getOrientation() const
+    int32_t getOrientation() const
     {
         return m_orientation;
     }
@@ -114,12 +127,24 @@ public:
     }
 
     /**
-     * Clear position and orientation.
+     * Set the orientation.
+     * Use this to align the Y axis to north.
+     * 
+     * @param[in] orientation   The orientation in mrad.
      */
-    void clearPositionAndOrientation();
+    void setOrientation(int32_t orientation)
+    {
+        m_orientation = orientation;
+        m_orientation %= FP_2PI();
+    }
 
     /**
-     * Clear mileage.
+     * Clear the position by setting (x, y) to (0, 0) mm.
+     */
+    void clearPosition();
+
+    /**
+     * Clear mileage by setting it to 0 mm.
      */
     void clearMileage();
 
@@ -168,7 +193,7 @@ private:
     RelativeEncoders m_relEncoders;
 
     /** Absolute orientation in mrad. 0 mrad means the robot drives parallel to the y-axis.  */
-    int16_t m_orientation;
+    int32_t m_orientation;
 
     /** Absolute position on x-axis. Unit is mm. */
     int32_t m_posX;
@@ -190,7 +215,7 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_mileage(0),
         m_relEncoders(Board::getInstance().getEncoders()),
-        m_orientation(0),
+        m_orientation(FP_PI() / 2), /* 90° - heading to north */
         m_posX(0),
         m_posY(0),
         m_timer(),
@@ -218,26 +243,35 @@ private:
     bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
+     * Calculate the mileage in mm.
+     * 
+     * @param[in]   mileage     Mileage in mm
+     * @param[in]   stepsCenter Number of steps center
+     * 
+     * @return Mileage in mm
+     */
+    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter);
+
+    /**
      * Calculate the orientation in mrad.
      *
-     * @param[in] orientation   Current orientation in mrad
+     * @param[in] orientation   Orientation in mrad
      * @param[in] stepsLeft     Number of encoder steps left
      * @param[in] stepsRight    Number of encoder steps right
-     * @param[out] alpha        Delta angle in mrad
      *
      * @return Orientation in mrad
      */
-    int16_t calculateOrientation(int16_t orientation, int16_t stepsLeft, int16_t stepsRight, int16_t& alpha) const;
+    int32_t calculateOrientation(int32_t orientation, int16_t stepsLeft, int16_t stepsRight) const;
 
     /**
      * Calculate the vector from last position to new position.
      *
      * @param[in]   stepsCenter Number of steps center
-     * @param[in]   alpha       Delta angle in mrad
+     * @param[in]   orientation Orientation in mrad
      * @param[out]  dX          Delta x-position on x-axis
      * @param[out]  dY          Delta y-position on y-axis
      */
-    void calculateDeltaPos(int16_t stepsCenter, int16_t alpha, int16_t& dX, int16_t& dY) const;
+    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dX, int16_t& dY) const;
 };
 
 /******************************************************************************

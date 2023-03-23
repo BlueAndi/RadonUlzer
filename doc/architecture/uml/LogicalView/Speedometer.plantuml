@@ -1,0 +1,29 @@
+@startuml
+
+package "Service" {
+    class "Speedometer" as speedometer <<service>>
+    class "RelativeEncoders" as relativeEncoders <<service>>
+
+    note left of speedometer
+        Determines the linear speed left/right/center
+        in [steps/s].
+    end note
+
+    speedometer --> relativeEncoders
+}
+
+package "HAL" {
+    class "IEncoders" as iEncoders
+    class "IMotors" as iMotors
+    class "Encoders" as encoders
+    class "Motors" as motors
+
+    iEncoders <|.. encoders: <<realize>>
+    iMotors <|.. motors: <<realize>>
+}
+
+speedometer ...> iEncoders: <<use>>
+speedometer ...> iMotors: <<use>>
+relativeEncoders ..> iEncoders: <<use>>
+
+@enduml

@@ -110,16 +110,17 @@ private:
     /**
      * Calibration turn angle in mrad (corresponds to 60°).
      */
-    static const int16_t CALIB_ANGLE = (FP_2PI() / 6);
+    static const int32_t CALIB_ANGLE = (FP_2PI() / 6);
 
     SimpleTimer m_timer;            /**< Timer used to wait, until the calibration drive starts. */
     Phase       m_phase;            /**< Current calibration phase */
     int16_t     m_calibrationSpeed; /**< Speed in steps/s for the calibration drive. */
+    int32_t     m_orientation;      /**< Orientation at the begin of the calibration in [mrad]. */
 
     /**
      * Default constructor.
      */
-    LineSensorsCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_calibrationSpeed(0)
+    LineSensorsCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_calibrationSpeed(0), m_orientation(0)
     {
     }
 
