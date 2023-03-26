@@ -74,7 +74,7 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, 8U, positionCallback);
+    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC, positionCallback);
 }
 
 void App::loop()
@@ -117,14 +117,14 @@ void App::reportPosition()
 {
     int32_t xPos, yPos;
     uint8_t positionLength = 8U;
-    uint8_t outBuf[positionLength];
+    uint8_t outBuf[POSITION_CHANNEL_DLC];
 
     Odometry::getInstance().getPosition(xPos, yPos);
 
     Util::int32ToByteArray(&outBuf[0U], sizeof(outBuf), xPos);
     Util::int32ToByteArray(&outBuf[4U], sizeof(outBuf), yPos);
 
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, positionLength);
+    m_yapServer.sendData(POSITION_CHANNEL, outBuf, POSITION_CHANNEL_DLC);
 }
 
 /******************************************************************************
