@@ -129,7 +129,7 @@ public:
 
         if (nullptr != channelName)
         {
-            for (itr = 0; itr < maxChannels; itr++)
+            for (itr = 0U; itr < maxChannels; itr++)
             {
                 if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
                 {
@@ -138,7 +138,7 @@ public:
             }
         }
 
-        return (itr == maxChannels) ? 0U : (itr + 1);
+        return (itr == maxChannels) ? 0U : (itr + 1U);
     }
 
     /**
@@ -156,7 +156,7 @@ public:
         if ((nullptr != channelName) && (nullptr != cb) && (MAX_DATA_LEN >= dlc) &&
             (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
         {
-            for (itr = 0; itr < maxChannels; itr++)
+            for (itr = 0U; itr < maxChannels; itr++)
             {
                 if (nullptr == m_dataChannels[itr].m_callback)
                 {
@@ -168,7 +168,7 @@ public:
             }
         }
 
-        return (itr == maxChannels) ? 0U : (itr + 1);
+        return (itr == maxChannels) ? 0U : (itr + 1U);
     }
 
     /**
@@ -185,11 +185,11 @@ public:
             if (CHANNEL_NAME_MAX_LEN >= nameLength)
             {
                 uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
-                buf[0] = COMMANDS::SCRB;
+                buf[0U] = COMMANDS::SCRB;
 
-                for (uint8_t i = 0; i < nameLength; i++)
+                for (uint8_t i = 0U; i < nameLength; i++)
                 {
-                    buf[i + 1] = channelName[i];
+                    buf[i + 1U] = channelName[i];
                 }
 
                 m_pendingSuscribeChannel.m_name     = channelName;
@@ -204,18 +204,18 @@ public:
      */
     void printChannels()
     {
-        for (uint8_t i = 0; i < maxChannels; i++)
+        for (uint8_t i = 0U; i < maxChannels; i++)
         {
             if (nullptr == m_dataChannels[i].m_callback)
             {
                 Serial.print("Channel ");
-                Serial.print(i + 1);
+                Serial.print(i + 1U);
                 Serial.println(": Nullptr");
             }
             else
             {
                 Serial.print("Channel ");
-                Serial.print(i + 1);
+                Serial.print(i + 1U);
                 Serial.print(": ");
                 Serial.print(m_dataChannels[i].m_name);
                 Serial.print(" --- DLC: ");
@@ -237,7 +237,7 @@ public:
         Serial.println(isFrameValid(frame));
         Serial.print("Data:");
 
-        for (uint8_t i = 0; i < payloadLength; i++)
+        for (uint8_t i = 0U; i < payloadLength; i++)
         {
             Serial.print(frame.fields.payload.m_data[i]);
             Serial.print(" ");
@@ -260,23 +260,22 @@ private:
             return;
         }
         
-        uint8_t cmdByte = rcvData[0];
+        uint8_t cmdByte = rcvData[0U];
 
         switch (cmdByte)
         {
 
         case COMMANDS::SYNC:
         {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1], rcvData[2], rcvData[3],
-                                                           rcvData[4]};
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1U], rcvData[2U], rcvData[3U], rcvData[4U]};
             send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
             break;
         }
 
         case COMMANDS::SYNC_RSP:
         {
-            uint32_t rcvTimestamp = ((uint32_t)rcvData[1] << 24) | ((uint32_t)rcvData[2] << 16) |
-                                    ((uint32_t)rcvData[3] << 8) | ((uint32_t)rcvData[4]);
+            uint32_t rcvTimestamp = ((uint32_t)rcvData[1U] << 24U) | ((uint32_t)rcvData[2U] << 16U) |
+                                    ((uint32_t)rcvData[3U] << 8U) | ((uint32_t)rcvData[4U]);
 
             // Check Timestamp with m_lastSyncCommand
             if (rcvTimestamp == m_lastSyncCommand)
@@ -290,15 +289,15 @@ private:
 
         case COMMANDS::SCRB:
         {
-            char channelName[CHANNEL_NAME_MAX_LEN + 1];
-            memcpy(channelName, &rcvData[1], CHANNEL_NAME_MAX_LEN);
+            char channelName[CHANNEL_NAME_MAX_LEN + 1U];
+            memcpy(channelName, &rcvData[1U], CHANNEL_NAME_MAX_LEN);
             channelName[CHANNEL_NAME_MAX_LEN] = '\0';
 
             uint8_t channelNumber = getChannelNumber(channelName);
 
             if (CONTROL_CHANNEL_NUMBER != channelNumber)
             {
-                uint8_t buf[3] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
+                uint8_t buf[3U] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
                 send(CONTROL_CHANNEL_NUMBER, buf, 3U);
             }
 
@@ -354,10 +353,10 @@ private:
                 {
                     callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                 }
-                else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback)
+                else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback)
                 {
                     // Callback
-                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1].m_callback(
+                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback(
                         rcvFrame.fields.payload.m_data, payloadLength);
                 }
             }
@@ -418,7 +417,7 @@ private:
             Frame         newFrame;
             newFrame.fields.header.headerFields.m_channel = channel;
 
-            for (uint8_t i = 0; i < payloadLength; i++)
+            for (uint8_t i = 0U; i < payloadLength; i++)
             {
                 newFrame.fields.payload.m_data[i] = data[i];
             }
@@ -455,7 +454,7 @@ private:
         }
         else
         {
-            channelDLC = m_dataChannels[channel - 1].m_dlc;
+            channelDLC = m_dataChannels[channel - 1U].m_dlc;
         }
 
         return channelDLC;
@@ -470,12 +469,12 @@ private:
     {
         uint32_t sum = frame.fields.header.headerFields.m_channel;
 
-        for (size_t i = 0; i < getChannelDLC(frame.fields.header.headerFields.m_channel); i++)
+        for (size_t i = 0U; i < getChannelDLC(frame.fields.header.headerFields.m_channel); i++)
         {
             sum += frame.fields.payload.m_data[i];
         }
 
-        return (sum % 255);
+        return (sum % 255U);
     }
 
 private:

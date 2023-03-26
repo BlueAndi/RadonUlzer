@@ -62,13 +62,15 @@ static void positionCallback(const uint8_t* rcvData, const uint8_t payloadLength
  * Local Variables
  *****************************************************************************/
 
+static const uint8_t POSITION_CHANNEL_DLC = 8U;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
 void App::setup()
 {
-    Serial.begin(9600);
+    Serial.begin(9600U);
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
@@ -119,8 +121,8 @@ void App::reportPosition()
 
     Odometry::getInstance().getPosition(xPos, yPos);
 
-    Util::int32ToByteArray(&outBuf[0], sizeof(outBuf), xPos);
-    Util::int32ToByteArray(&outBuf[4], sizeof(outBuf), yPos);
+    Util::int32ToByteArray(&outBuf[0U], sizeof(outBuf), xPos);
+    Util::int32ToByteArray(&outBuf[4U], sizeof(outBuf), yPos);
 
     m_yapServer.sendData(POSITION_CHANNEL, outBuf, positionLength);
 }

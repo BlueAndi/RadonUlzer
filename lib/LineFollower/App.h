@@ -89,7 +89,7 @@ public:
 private:
 
     /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -98,7 +98,7 @@ private:
     SimpleTimer m_controlInterval;
 
     /** YAP Server Instance */
-    YAPServer<10> m_yapServer;
+    YAPServer<10U> m_yapServer;
 
     /** Name of Channel to send Position Data to. */
     const char* POSITION_CHANNEL = "POSITION";

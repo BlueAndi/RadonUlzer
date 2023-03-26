@@ -71,7 +71,7 @@ SOFTWARE.
 #define HEATBEAT_PERIOD_UNSYNCED (1000U)
 
 /** Max length of channel name */
-#define CHANNEL_NAME_MAX_LEN (CONTROL_CHANNEL_PAYLOAD_LENGTH - 1)
+#define CHANNEL_NAME_MAX_LEN (CONTROL_CHANNEL_PAYLOAD_LENGTH - 1U)
 
 /******************************************************************************
  * Types and Classes
@@ -97,7 +97,7 @@ struct Channel
      */
     Channel() :
         m_name(""),
-        m_dlc(0),
+        m_dlc(0U),
         m_callback(nullptr)
     {
     }
@@ -137,7 +137,7 @@ typedef union _Frame
     } __attribute__((packed)) fields;
 
     /** Raw Frame Data */
-    uint8_t raw[MAX_FRAME_LEN] = {0};
+    uint8_t raw[MAX_FRAME_LEN] = {0U};
 
 } __attribute__((packed)) Frame;
 
