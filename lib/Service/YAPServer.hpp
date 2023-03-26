@@ -57,9 +57,9 @@
 
 /**
  * Class for the YAP Server.
- * @tparam maxChannels Maximum number of channels
+ * @tparam tMaxChannels Maximum number of channels
  */
-template<uint8_t maxChannels>
+template<uint8_t tMaxChannels>
 class YAPServer
 {
 public:
@@ -125,11 +125,11 @@ public:
      */
     uint8_t getChannelNumber(const char* channelName)
     {
-        uint8_t itr = maxChannels;
+        uint8_t itr = tMaxChannels;
 
         if (nullptr != channelName)
         {
-            for (itr = 0U; itr < maxChannels; itr++)
+            for (itr = 0U; itr < tMaxChannels; itr++)
             {
                 if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
                 {
@@ -138,7 +138,7 @@ public:
             }
         }
 
-        return (itr == maxChannels) ? 0U : (itr + 1U);
+        return (itr == tMaxChannels) ? 0U : (itr + 1U);
     }
 
     /**
@@ -151,12 +151,12 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
-        uint8_t itr = maxChannels;
+        uint8_t itr = tMaxChannels;
 
         if ((nullptr != channelName) && (nullptr != cb) && (MAX_DATA_LEN >= dlc) &&
             (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
         {
-            for (itr = 0U; itr < maxChannels; itr++)
+            for (itr = 0U; itr < tMaxChannels; itr++)
             {
                 if (nullptr == m_dataChannels[itr].m_callback)
                 {
@@ -168,7 +168,7 @@ public:
             }
         }
 
-        return (itr == maxChannels) ? 0U : (itr + 1U);
+        return (itr == tMaxChannels) ? 0U : (itr + 1U);
     }
 
     /**
@@ -197,7 +197,7 @@ public:
      */
     void printChannels()
     {
-        for (uint8_t i = 0U; i < maxChannels; i++)
+        for (uint8_t i = 0U; i < tMaxChannels; i++)
         {
             if (nullptr == m_dataChannels[i].m_callback)
             {
@@ -291,7 +291,8 @@ private:
 
             if (CONTROL_CHANNEL_NUMBER != channelNumber)
             {
-                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
+                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
+                                                               getChannelDLC(channelNumber)};
                 send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             }
 
@@ -473,7 +474,7 @@ private:
     /**
      *  Array of Data Channels.
      */
-    Channel m_dataChannels[maxChannels];
+    Channel m_dataChannels[tMaxChannels];
 
     /**
      * Current Sync state.
