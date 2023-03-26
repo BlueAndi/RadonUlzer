@@ -125,20 +125,20 @@ public:
      */
     uint8_t getChannelNumber(const char* channelName)
     {
-        uint8_t itr = tMaxChannels;
+        uint8_t idx = tMaxChannels;
 
         if (nullptr != channelName)
         {
-            for (itr = 0U; itr < tMaxChannels; itr++)
+            for (idx = 0U; idx < tMaxChannels; idx++)
             {
-                if (0U == strncmp(channelName, m_dataChannels[itr].m_name, CHANNEL_NAME_MAX_LEN))
+                if (0U == strncmp(channelName, m_dataChannels[idx].m_name, CHANNEL_NAME_MAX_LEN))
                 {
                     break;
                 }
             }
         }
 
-        return (itr == tMaxChannels) ? 0U : (itr + 1U);
+        return (idx == tMaxChannels) ? 0U : (idx + 1U);
     }
 
     /**
@@ -151,24 +151,24 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
-        uint8_t itr = tMaxChannels;
+        uint8_t idx = tMaxChannels;
 
         if ((nullptr != channelName) && (nullptr != cb) && (MAX_DATA_LEN >= dlc) &&
             (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
         {
-            for (itr = 0U; itr < tMaxChannels; itr++)
+            for (idx = 0U; idx < tMaxChannels; idx++)
             {
-                if (nullptr == m_dataChannels[itr].m_callback)
+                if (nullptr == m_dataChannels[idx].m_callback)
                 {
-                    memcpy(m_dataChannels[itr].m_name, channelName, CHANNEL_NAME_MAX_LEN);
-                    m_dataChannels[itr].m_dlc      = dlc;
-                    m_dataChannels[itr].m_callback = cb;
+                    memcpy(m_dataChannels[idx].m_name, channelName, CHANNEL_NAME_MAX_LEN);
+                    m_dataChannels[idx].m_dlc      = dlc;
+                    m_dataChannels[idx].m_callback = cb;
                     break;
                 }
             }
         }
 
-        return (itr == tMaxChannels) ? 0U : (itr + 1U);
+        return (idx == tMaxChannels) ? 0U : (idx + 1U);
     }
 
     /**
@@ -410,9 +410,9 @@ private:
     {
         uint32_t sum = frame.fields.header.headerFields.m_channel;
 
-        for (size_t i = 0U; i < getChannelDLC(frame.fields.header.headerFields.m_channel); i++)
+        for (size_t idx = 0U; idx < getChannelDLC(frame.fields.header.headerFields.m_channel); idx++)
         {
-            sum += frame.fields.payload.m_data[i];
+            sum += frame.fields.payload.m_data[idx];
         }
 
         return (sum % 255U);
