@@ -411,13 +411,9 @@ private:
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
+
             newFrame.fields.header.headerFields.m_channel = channelNumber;
-
-            for (uint8_t i = 0U; i < channelDLC; i++)
-            {
-                newFrame.fields.payload.m_data[i] = payload[i];
-            }
-
+            memcpy(newFrame.fields.payload.m_data, payload, channelDLC);
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
             Serial.write(newFrame.raw, frameLength);
