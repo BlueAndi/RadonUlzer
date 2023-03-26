@@ -115,8 +115,8 @@ void App::loop()
 
 void App::reportPosition()
 {
-    int32_t xPos, yPos;
-    uint8_t positionLength = 8U;
+    int32_t xPos;
+    int32_t yPos;
     uint8_t outBuf[POSITION_CHANNEL_DLC];
 
     Odometry::getInstance().getPosition(xPos, yPos);
