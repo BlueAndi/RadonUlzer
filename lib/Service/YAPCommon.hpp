@@ -53,7 +53,7 @@ SOFTWARE.
 #define HEADER_LEN (CHANNEL_LEN + CHECKSUM_LEN)
 
 /** Data Field Length in Bytes */
-#define MAX_DATA_LEN (UINT8_MAX)
+#define MAX_DATA_LEN (32U)
 
 /** Total Frame Length in Bytes */
 #define MAX_FRAME_LEN (HEADER_LEN + MAX_DATA_LEN)
