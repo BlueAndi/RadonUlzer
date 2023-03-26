@@ -184,7 +184,7 @@ public:
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
             buf[0U] = COMMANDS::SCRB;
             memcpy(&buf[1U], channelName, CHANNEL_NAME_MAX_LEN);
-            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
 
             // Save Name and Callback for channel creation after response.
             memcpy(m_pendingSuscribeChannel.m_name, channelName, CHANNEL_NAME_MAX_LEN);
@@ -262,7 +262,7 @@ private:
         {
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[1U], payload[2U], payload[3U],
                                                            payload[4U]};
-            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             break;
         }
 
@@ -291,8 +291,8 @@ private:
 
             if (CONTROL_CHANNEL_NUMBER != channelNumber)
             {
-                uint8_t buf[3U] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
-                send(CONTROL_CHANNEL_NUMBER, buf, 3U);
+                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber, getChannelDLC(channelNumber)};
+                send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             }
 
             break;
@@ -391,7 +391,7 @@ private:
 
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC, hiMSB, hiLSB, lowMSB, lowLSB};
 
-            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             m_lastSyncCommand = currentTimestamp;
         }
     }
@@ -406,14 +406,14 @@ private:
     {
         uint8_t channelDLC = getChannelDLC(channelNumber);
 
-        if ((nullptr != payload) && (channelDLC >= payloadSize) &&
+        if ((nullptr != payload) && (channelDLC == payloadSize) &&
             (m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
             newFrame.fields.header.headerFields.m_channel = channelNumber;
 
-            for (uint8_t i = 0U; i < payloadSize; i++)
+            for (uint8_t i = 0U; i < channelDLC; i++)
             {
                 newFrame.fields.payload.m_data[i] = payload[i];
             }

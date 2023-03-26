@@ -103,6 +103,9 @@ private:
     /** Name of Channel to send Position Data to. */
     const char* POSITION_CHANNEL = "POSITION";
 
+    /** DLC of Position Channel */
+    static const uint8_t POSITION_CHANNEL_DLC = 8U;
+
     /**
      * Report the current position of the robot using the Odometry data.
      * Sends data through the YAPServer.

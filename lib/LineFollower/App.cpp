@@ -62,8 +62,6 @@ static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
  * Local Variables
  *****************************************************************************/
 
-static const uint8_t POSITION_CHANNEL_DLC = 8U;
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -124,7 +122,7 @@ void App::reportPosition()
     Util::int32ToByteArray(&outBuf[0U], sizeof(outBuf), xPos);
     Util::int32ToByteArray(&outBuf[4U], sizeof(outBuf), yPos);
 
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, POSITION_CHANNEL_DLC);
+    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
 }
 
 /******************************************************************************
