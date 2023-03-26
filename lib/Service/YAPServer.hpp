@@ -252,7 +252,7 @@ private:
         {
             return;
         }
-        
+
         uint8_t cmdByte = rcvData[0U];
 
         switch (cmdByte)
@@ -260,7 +260,8 @@ private:
 
         case COMMANDS::SYNC:
         {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1U], rcvData[2U], rcvData[3U], rcvData[4U]};
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1U], rcvData[2U], rcvData[3U],
+                                                           rcvData[4U]};
             send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
             break;
         }
