@@ -309,12 +309,12 @@ private:
             // Check if a SCRB is pending
             if (nullptr != m_pendingSuscribeChannel.m_callback)
             {
-                uint8_t channelNumber = rcvData[1];
-                uint8_t channelDLC    = rcvData[2];
+                uint8_t channelNumber = rcvData[1U];
+                uint8_t channelDLC    = rcvData[2U];
 
-                m_dataChannels[channelNumber - 1].m_name     = m_pendingSuscribeChannel.m_name;
-                m_dataChannels[channelNumber - 1].m_dlc      = channelDLC;
-                m_dataChannels[channelNumber - 1].m_callback = m_pendingSuscribeChannel.m_callback;
+                m_dataChannel[channelNumber - 1U].m_name     = m_pendingSuscribeChannel.m_name;
+                m_dataChannels[channelNumber - 1U].m_dlc      = channelDLC;
+                m_dataChannels[channelNumber - 1U].m_callback = m_pendingSuscribeChannel.m_callback;
 
                 m_pendingSuscribeChannel.m_callback = nullptr;
             }
