@@ -122,7 +122,7 @@ void Motors::initMotor(webots::Motor* motor)
         motor->setPosition(std::numeric_limits<double>::infinity());
 
         /* Stop motor, note velocity in m/s */
-        motor->setVelocity(0.0f);
+        motor->setVelocity(0.0F);
     }
 }
 

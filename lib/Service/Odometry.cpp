@@ -206,26 +206,26 @@ void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16
 {
     int16_t distCenter   = stepsCenter / static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* [mm] */
     float   fDistCenter  = static_cast<float>(distCenter);                                           /* [mm] */
-    float   fOrientation = static_cast<float>(orientation) / 1000.0f;                                /* [rad] */
+    float   fOrientation = static_cast<float>(orientation) / 1000.0F;                                /* [rad] */
     float   fDeltaPosX   = fDistCenter * cosf(fOrientation);                                         /* [mm] */
     float   fDeltaPosY   = fDistCenter * sinf(fOrientation);                                         /* [mm] */
 
-    if (0.0f <= fDeltaPosX)
+    if (0.0F <= fDeltaPosX)
     {
-        fDeltaPosX += 0.5f;
+        fDeltaPosX += 0.5F;
     }
     else
     {
-        fDeltaPosX -= 0.5f;
+        fDeltaPosX -= 0.5F;
     }
 
-    if (0.0f <= fDeltaPosY)
+    if (0.0F <= fDeltaPosY)
     {
-        fDeltaPosY += 0.5f;
+        fDeltaPosY += 0.5F;
     }
     else
     {
-        fDeltaPosY -= 0.5f;
+        fDeltaPosY -= 0.5F;
     }
 
     dX = static_cast<int16_t>(fDeltaPosX); /* [mm] */

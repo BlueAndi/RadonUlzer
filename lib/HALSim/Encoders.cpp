@@ -122,8 +122,9 @@ int16_t Encoders::calculateSteps(double lastPos, double pos) const
     /* Position sensor provides NAN until the first simulation step was perfomed. */
     if (false == isnan(pos))
     {
-        double deltaPos     = (pos - lastPos) * 1000.0f;                                            /* [mm] */
-        double encoderSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
+        const double CONV_FACTOR_M_TO_MM = 1000.0F;
+        double       deltaPos            = (pos - lastPos) * CONV_FACTOR_M_TO_MM;                         /* [mm] */
+        double       encoderSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
 
         /* Simulate int16_t wrap around. */
         if (static_cast<double>(INT16_MAX) < encoderSteps)
