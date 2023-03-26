@@ -160,7 +160,7 @@ public:
             {
                 if (nullptr == m_dataChannels[itr].m_callback)
                 {
-                    m_dataChannels[itr].m_name     = channelName;
+                    memcpy(m_dataChannels[itr].m_name, channelName, CHANNEL_NAME_MAX_LEN);
                     m_dataChannels[itr].m_dlc      = dlc;
                     m_dataChannels[itr].m_callback = cb;
                     break;
@@ -180,22 +180,15 @@ public:
     {
         if ((nullptr != channelName) && (nullptr != callback))
         {
-            uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
+            // Suscribe to channel.
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
+            buf[0U] = COMMANDS::SCRB;
+            memcpy(&buf[1U], channelName, CHANNEL_NAME_MAX_LEN);
+            send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
 
-            if (CHANNEL_NAME_MAX_LEN >= nameLength)
-            {
-                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
-                buf[0U] = COMMANDS::SCRB;
-
-                for (uint8_t i = 0U; i < nameLength; i++)
-                {
-                    buf[i + 1U] = channelName[i];
-                }
-
-                m_pendingSuscribeChannel.m_name     = channelName;
-                m_pendingSuscribeChannel.m_callback = callback;
-                send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
-            }
+            // Save Name and Callback for channel creation after response.
+            memcpy(m_pendingSuscribeChannel.m_name, channelName, CHANNEL_NAME_MAX_LEN);
+            m_pendingSuscribeChannel.m_callback = callback;
         }
     }
 
@@ -312,7 +305,8 @@ private:
                 uint8_t channelNumber = rcvData[1U];
                 uint8_t channelDLC    = rcvData[2U];
 
-                m_dataChannel[channelNumber - 1U].m_name     = m_pendingSuscribeChannel.m_name;
+                memcpy(m_dataChannels[channelNumber - 1U].m_name, m_pendingSuscribeChannel.m_name,
+                       CHANNEL_NAME_MAX_LEN);
                 m_dataChannels[channelNumber - 1U].m_dlc      = channelDLC;
                 m_dataChannels[channelNumber - 1U].m_callback = m_pendingSuscribeChannel.m_callback;
 

@@ -88,17 +88,14 @@ typedef void (*ChannelCallback)(const uint8_t* rcvData, const uint8_t payloadLen
  */
 struct Channel
 {
-    const char*     m_name;     /**< Name of the channel. */
-    uint8_t         m_dlc;      /**< Payload length of channel */
-    ChannelCallback m_callback; /**< Callback to provide received data to the application. */
+    char            m_name[CHANNEL_NAME_MAX_LEN]; /**< Name of the channel. */
+    uint8_t         m_dlc;                        /**< Payload length of channel */
+    ChannelCallback m_callback;                   /**< Callback to provide received data to the application. */
 
     /**
      * Channel Constructor.
      */
-    Channel() :
-        m_name(""),
-        m_dlc(0U),
-        m_callback(nullptr)
+    Channel() : m_name(""), m_dlc(0U), m_callback(nullptr)
     {
     }
 };
