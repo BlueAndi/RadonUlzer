@@ -151,16 +151,17 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
+        // Using strnlen in case the name is not null-terminated.
+        uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
         uint8_t idx = tMaxChannels;
 
-        if ((nullptr != channelName) && (nullptr != cb) && (MAX_DATA_LEN >= dlc) &&
-            (CHANNEL_NAME_MAX_LEN >= strnlen(channelName, CHANNEL_NAME_MAX_LEN)))
+        if ((nullptr != channelName) && (MAX_DATA_LEN >= dlc) && (nullptr != cb))
         {
             for (idx = 0U; idx < tMaxChannels; idx++)
             {
                 if (nullptr == m_dataChannels[idx].m_callback)
                 {
-                    memcpy(m_dataChannels[idx].m_name, channelName, CHANNEL_NAME_MAX_LEN);
+                    memcpy(m_dataChannels[idx].m_name, channelName, nameLength);
                     m_dataChannels[idx].m_dlc      = dlc;
                     m_dataChannels[idx].m_callback = cb;
                     break;
