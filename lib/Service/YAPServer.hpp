@@ -192,54 +192,6 @@ public:
         }
     }
 
-    /**
-     * Debug Function. Print all channel info.
-     */
-    void printChannels()
-    {
-        for (uint8_t i = 0U; i < tMaxChannels; i++)
-        {
-            if (nullptr == m_dataChannels[i].m_callback)
-            {
-                Serial.print("Channel ");
-                Serial.print(i + 1U);
-                Serial.println(": Nullptr");
-            }
-            else
-            {
-                Serial.print("Channel ");
-                Serial.print(i + 1U);
-                Serial.print(": ");
-                Serial.print(m_dataChannels[i].m_name);
-                Serial.print(" --- DLC: ");
-                Serial.println(m_dataChannels[i].m_dlc);
-            }
-        }
-        Serial.println("--------------------------");
-    }
-
-    /**
-     * Debug Function. Print Frame info.
-     */
-    void printFrame(const Frame& frame, uint8_t payloadSize)
-    {
-        Serial.println("=== Begin Frame ===");
-        Serial.print("Channel:");
-        Serial.println(frame.fields.header.headerFields.m_channel);
-        Serial.print("Valid Checksum:");
-        Serial.println(isFrameValid(frame));
-        Serial.print("Data:");
-
-        for (uint8_t i = 0U; i < payloadSize; i++)
-        {
-            Serial.print(frame.fields.payload.m_data[i]);
-            Serial.print(" ");
-        }
-
-        Serial.println("");
-        Serial.println("=== End Frame ===");
-    }
-
 private:
     /**
      * Callback for the Control Channel
