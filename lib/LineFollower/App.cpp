@@ -56,7 +56,7 @@
  * Prototypes
  *****************************************************************************/
 
-static void positionCallback(const uint8_t* rcvData, const uint8_t payloadLength);
+static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
 
 /******************************************************************************
  * Local Variables
@@ -137,9 +137,9 @@ void App::reportPosition()
 
 /**
  * Callback for incoming data from the Position Channel.
- * @param[in] rcvData Byte buffer containing incomming data.
- * @param[in] payloadLength Number of bytes received.
+ * @param[in] payload Byte buffer containing incomming data.
+ * @param[in] payloadSize Number of bytes received.
  */
-void positionCallback(const uint8_t* rcvData, const uint8_t payloadLength)
+void positionCallback(const uint8_t* payload, const uint8_t payloadSize)
 {
 }

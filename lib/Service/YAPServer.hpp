@@ -92,29 +92,29 @@ public:
 
     /**
      * Send a frame with the selected bytes.
-     * @param[in] channel Channel to send frame to.
-     * @param[in] data Byte buffer to be sent.
-     * @param[in] length Amount of bytes to send.
+     * @param[in] channelNumber Channel to send frame to.
+     * @param[in] payload Byte buffer to be sent.
+     * @param[in] payloadSize Amount of bytes to send.
      */
-    void sendData(uint8_t channel, const uint8_t* data, uint8_t length)
+    void sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
-        if ((CONTROL_CHANNEL_NUMBER != channel) && (nullptr != data))
+        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != payload))
         {
-            send(channel, data, length);
+            send(channelNumber, payload, payloadSize);
         }
     }
 
     /**
      * Send a frame with the selected bytes.
      * @param[in] channelName Channel to send frame to.
-     * @param[in] data Byte buffer to be sent.
-     * @param[in] length Amount of bytes to send.
+     * @param[in] payload Byte buffer to be sent.
+     * @param[in] payloadSize Amount of bytes to send.
      */
-    void sendData(const char* channelName, const uint8_t* data, uint8_t length)
+    void sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize)
     {
         if (nullptr != channelName)
         {
-            sendData(getChannelNumber(channelName), data, length);
+            sendData(getChannelNumber(channelName), payload, payloadSize);
         }
     }
 
@@ -221,7 +221,7 @@ public:
     /**
      * Debug Function. Print Frame info.
      */
-    void printFrame(const Frame& frame, uint8_t payloadLength)
+    void printFrame(const Frame& frame, uint8_t payloadSize)
     {
         Serial.println("=== Begin Frame ===");
         Serial.print("Channel:");
@@ -230,7 +230,7 @@ public:
         Serial.println(isFrameValid(frame));
         Serial.print("Data:");
 
-        for (uint8_t i = 0U; i < payloadLength; i++)
+        for (uint8_t i = 0U; i < payloadSize; i++)
         {
             Serial.print(frame.fields.payload.m_data[i]);
             Serial.print(" ");
@@ -243,33 +243,33 @@ public:
 private:
     /**
      * Callback for the Control Channel
-     * @param[in] rcvData Payload of received frame.
-     * @param[in] payloadLength Length of rcvData
+     * @param[in] payload Payload of received frame.
+     * @param[in] payloadSize Length of Payload
      */
-    void callbackControlChannel(const uint8_t* rcvData, const uint8_t payloadLength)
+    void callbackControlChannel(const uint8_t* payload, const uint8_t payloadSize)
     {
-        if (nullptr == rcvData)
+        if (nullptr == payload)
         {
             return;
         }
 
-        uint8_t cmdByte = rcvData[0U];
+        uint8_t cmdByte = payload[0U];
 
         switch (cmdByte)
         {
 
         case COMMANDS::SYNC:
         {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, rcvData[1U], rcvData[2U], rcvData[3U],
-                                                           rcvData[4U]};
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[1U], payload[2U], payload[3U],
+                                                           payload[4U]};
             send(CONTROL_CHANNEL_NUMBER, buf, CONTROL_CHANNEL_PAYLOAD_LENGTH);
             break;
         }
 
         case COMMANDS::SYNC_RSP:
         {
-            uint32_t rcvTimestamp = ((uint32_t)rcvData[1U] << 24U) | ((uint32_t)rcvData[2U] << 16U) |
-                                    ((uint32_t)rcvData[3U] << 8U) | ((uint32_t)rcvData[4U]);
+            uint32_t rcvTimestamp = ((uint32_t)payload[1U] << 24U) | ((uint32_t)payload[2U] << 16U) |
+                                    ((uint32_t)payload[3U] << 8U) | ((uint32_t)payload[4U]);
 
             // Check Timestamp with m_lastSyncCommand
             if (rcvTimestamp == m_lastSyncCommand)
@@ -284,7 +284,7 @@ private:
         case COMMANDS::SCRB:
         {
             char channelName[CHANNEL_NAME_MAX_LEN + 1U];
-            memcpy(channelName, &rcvData[1U], CHANNEL_NAME_MAX_LEN);
+            memcpy(channelName, &payload[1U], CHANNEL_NAME_MAX_LEN);
             channelName[CHANNEL_NAME_MAX_LEN] = '\0';
 
             uint8_t channelNumber = getChannelNumber(channelName);
@@ -303,8 +303,8 @@ private:
             // Check if a SCRB is pending
             if (nullptr != m_pendingSuscribeChannel.m_callback)
             {
-                uint8_t channelNumber = rcvData[1U];
-                uint8_t channelDLC    = rcvData[2U];
+                uint8_t channelNumber = payload[1U];
+                uint8_t channelDLC    = payload[2U];
 
                 memcpy(m_dataChannels[channelNumber - 1U].m_name, m_pendingSuscribeChannel.m_name,
                        CHANNEL_NAME_MAX_LEN);
@@ -336,10 +336,10 @@ private:
             Frame rcvFrame;
             Serial.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
 
-            uint8_t payloadLength = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
+            uint8_t dlc = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
 
             // Read Payload
-            Serial.readBytes(rcvFrame.fields.payload.m_data, payloadLength);
+            Serial.readBytes(rcvFrame.fields.payload.m_data, dlc);
 
             if (isFrameValid(rcvFrame))
             {
@@ -352,7 +352,7 @@ private:
                 {
                     // Callback
                     m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback(
-                        rcvFrame.fields.payload.m_data, payloadLength);
+                        rcvFrame.fields.payload.m_data, dlc);
                 }
             }
         }
@@ -398,23 +398,24 @@ private:
 
     /**
      * Send a frame with the selected bytes.
-     * @param[in] channel Channel to send frame to.
-     * @param[in] data Byte buffer to be sent.
-     * @param[in] length Amount of bytes to send.
+     * @param[in] channelNumber Channel to send frame to.
+     * @param[in] payload Byte buffer to be sent.
+     * @param[in] payloadSize Amount of bytes to send.
      */
-    void send(uint8_t channel, const uint8_t* data, uint8_t payloadLength)
+    void send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
-        uint8_t channelDLC = getChannelDLC(channel);
+        uint8_t channelDLC = getChannelDLC(channelNumber);
 
-        if ((nullptr != data) && (channelDLC >= payloadLength) && (m_isSynced || (CONTROL_CHANNEL_NUMBER == channel)))
+        if ((nullptr != payload) && (channelDLC >= payloadSize) &&
+            (m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
-            newFrame.fields.header.headerFields.m_channel = channel;
+            newFrame.fields.header.headerFields.m_channel = channelNumber;
 
-            for (uint8_t i = 0U; i < payloadLength; i++)
+            for (uint8_t i = 0U; i < payloadSize; i++)
             {
-                newFrame.fields.payload.m_data[i] = data[i];
+                newFrame.fields.payload.m_data[i] = payload[i];
             }
 
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
