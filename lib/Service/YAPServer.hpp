@@ -235,11 +235,7 @@ private:
 
         case COMMANDS::SCRB:
         {
-            char channelName[CHANNEL_NAME_MAX_LEN + 1U];
-            memcpy(channelName, &payload[1U], CHANNEL_NAME_MAX_LEN);
-            channelName[CHANNEL_NAME_MAX_LEN] = '\0';
-
-            uint8_t channelNumber = getChannelNumber(channelName);
+            uint8_t channelNumber = getChannelNumber((const char*)&payload[1U]);
 
             if (CONTROL_CHANNEL_NUMBER != channelNumber)
             {
