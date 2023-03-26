@@ -46,6 +46,7 @@
 
 #include <YAPCommon.hpp>
 #include <Arduino.h>
+#include <Util.h>
 
 /******************************************************************************
  * Macros
@@ -221,16 +222,18 @@ private:
 
         case COMMANDS::SYNC_RSP:
         {
-            uint32_t rcvTimestamp = ((uint32_t)payload[1U] << 24U) | ((uint32_t)payload[2U] << 16U) |
-                                    ((uint32_t)payload[3U] << 8U) | ((uint32_t)payload[4U]);
+            uint32_t rcvTimestamp = 0;
 
-            // Check Timestamp with m_lastSyncCommand
-            if (rcvTimestamp == m_lastSyncCommand)
+            // Using (payloadSize - 1U) as CMD Byte is not passed.
+            if (Util::byteArrayToUint32(&payload[1], (payloadSize - 1U), rcvTimestamp))
             {
-                m_lastSyncResponse = m_lastSyncCommand;
-                m_isSynced         = true;
+                // Check Timestamp with m_lastSyncCommand
+                if (rcvTimestamp == m_lastSyncCommand)
+                {
+                    m_lastSyncResponse = m_lastSyncCommand;
+                    m_isSynced         = true;
+                }
             }
-
             break;
         }
 
@@ -331,15 +334,10 @@ private:
             }
 
             // Send SYNC Command
-            uint16_t hiBytes  = ((currentTimestamp & 0xFFFF0000) >> 16U);
-            uint16_t lowBytes = (currentTimestamp & 0x0000FFFF);
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC};
 
-            uint8_t hiMSB  = ((hiBytes & 0xFF00) >> 8U);
-            uint8_t hiLSB  = (hiBytes & 0x00FF);
-            uint8_t lowMSB = ((lowBytes & 0xFF00) >> 8U);
-            uint8_t lowLSB = (lowBytes & 0x00FF);
-
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC, hiMSB, hiLSB, lowMSB, lowLSB};
+            // Using (sizeof(buf) - 1U) as CMD Byte is not passed.
+            Util::uint32ToByteArray(&buf[1], (sizeof(buf) - 1), currentTimestamp);
 
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             m_lastSyncCommand = currentTimestamp;
