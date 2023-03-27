@@ -73,6 +73,9 @@ SOFTWARE.
 /** Max length of channel name */
 #define CHANNEL_NAME_MAX_LEN (CONTROL_CHANNEL_PAYLOAD_LENGTH - 1U)
 
+/** Max number of attempts at receiving a Frame before resetting RX Buffer */
+#define MAX_RX_ATTEMPTS (MAX_FRAME_LEN)
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/

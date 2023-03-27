@@ -72,7 +72,10 @@ public:
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
         m_pendingSuscribeChannel(),
-        m_stream(stream)
+        m_stream(stream),
+        m_receiveFrame(),
+        m_receivedBytes(0U),
+        m_rxAttempts(0U)
     {
     }
 
@@ -287,33 +290,76 @@ private:
      */
     void processRxData()
     {
-        // Check for received data
-        if (HEADER_LEN < m_stream.available())
+        uint8_t expectedBytes = 0;
+        uint8_t dlc           = 0;
+
+        // Determine how many bytes to read
+        if (HEADER_LEN > m_receivedBytes)
         {
-            // Create Frame and read header
-            Frame rcvFrame;
-            m_stream.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
+            // Header must be read
+            expectedBytes = (HEADER_LEN - m_receivedBytes);
+        }
+        else
+        {
+            // Header has been read.
+            // Get DLC using Header
+            dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel);
 
-            uint8_t dlc = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
-
-            // Read Payload
-            m_stream.readBytes(rcvFrame.fields.payload.m_data, dlc);
-
-            if (isFrameValid(rcvFrame))
+            // DLC = 0 means that the channel does not exist.
+            if ((0U != dlc) && (MAX_RX_ATTEMPTS >= m_rxAttempts))
             {
-                // Differenciate between Control and Data Channels
-                if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
-                {
-                    callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
-                }
-                else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback)
-                {
-                    // Callback
-                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback(
-                        rcvFrame.fields.payload.m_data, dlc);
-                }
+                expectedBytes = (dlc - (m_receivedBytes - HEADER_LEN));
+                m_rxAttempts++;
             }
         }
+
+        // Are we expecting to read anything?
+        if (0U != expectedBytes)
+        {
+            // Read the required amount of bytes, if available.
+            if (expectedBytes <= m_stream.available())
+            {
+                m_receivedBytes += m_stream.readBytes(&m_receiveFrame.raw[m_receivedBytes], expectedBytes);
+            }
+
+            // Frame has been received.
+            if ((0U != dlc) && ((HEADER_LEN + dlc) == m_receivedBytes))
+            {
+                if (isFrameValid(m_receiveFrame))
+                {
+                    // Differenciate between Control and Data Channels
+                    if (CONTROL_CHANNEL_NUMBER == m_receiveFrame.fields.header.headerFields.m_channel)
+                    {
+                        callbackControlChannel(m_receiveFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+                    }
+                    else if (nullptr !=
+                             m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback)
+                    {
+                        // Callback
+                        m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback(
+                            m_receiveFrame.fields.payload.m_data, dlc);
+                    }
+                }
+
+                // Frame received. Cleaning!
+                flushRx();
+            }
+        }
+        else
+        {
+            // Invalid header. Delete Frame.
+            flushRx();
+        }
+    }
+
+    /**
+     * Clear RX Buffer and counters.
+     */
+    void flushRx()
+    {
+        memset(m_receiveFrame.raw, 0U, MAX_FRAME_LEN);
+        m_receivedBytes = 0U;
+        m_rxAttempts    = 0U;
     }
 
     /**
@@ -452,6 +498,22 @@ private:
      * Stream for input and output of data.
      */
     Stream& m_stream;
+
+    /**
+     * Frame buffer for received Bytes.
+     * Allows direct access to Frame Fields once bytes are in the raw buffer.
+     */
+    Frame m_receiveFrame;
+
+    /**
+     * Number of bytes that have been correctly received.
+     */
+    uint8_t m_receivedBytes;
+
+    /**
+     * Number of attempts performed at receiving a Frame.
+     */
+    uint8_t m_rxAttempts;
 
 private:
     /* Not allowed. */
