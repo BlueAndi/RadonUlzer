@@ -287,32 +287,71 @@ private:
      */
     void processRxData()
     {
-        // Check for received data
-        if (HEADER_LEN < m_stream.available())
+        static Frame   rcvFrame;
+        static uint8_t readBytes     = 0;
+        static uint8_t attempts      = 0;
+        uint8_t        expectedBytes = 0;
+        uint8_t        dlc           = 0;
+
+        // Determine how many bytes to read
+        if (HEADER_LEN > readBytes)
         {
-            // Create Frame and read header
-            Frame rcvFrame;
-            m_stream.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
+            // Header must be read
+            expectedBytes = (HEADER_LEN - readBytes);
+        }
+        else
+        {
+            // Header has been read.
+            // Get DLC using Header
+            dlc = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
 
-            uint8_t dlc = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
-
-            // Read Payload
-            m_stream.readBytes(rcvFrame.fields.payload.m_data, dlc);
-
-            if (isFrameValid(rcvFrame))
+            // DLC = 0 means that the channel does not exist.
+            if ((0U != dlc) && (MAX_RX_ATTEMPTS >= attempts))
             {
-                // Differenciate between Control and Data Channels
-                if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
-                {
-                    callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
-                }
-                else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback)
-                {
-                    // Callback
-                    m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback(
-                        rcvFrame.fields.payload.m_data, dlc);
-                }
+                expectedBytes = (dlc - (readBytes - HEADER_LEN));
+                attempts++;
             }
+        }
+
+        // Are we expecting to read anything?
+        if (0U != expectedBytes)
+        {
+            // Read the required amount of bytes, if available.
+            if (expectedBytes <= m_stream.available())
+            {
+                readBytes += m_stream.readBytes(&rcvFrame.raw[readBytes], expectedBytes);
+            }
+
+            // Frame has been received.
+            if ((0U != dlc) && ((HEADER_LEN + dlc) == readBytes))
+            {
+                if (isFrameValid(rcvFrame))
+                {
+                    // Differenciate between Control and Data Channels
+                    if (CONTROL_CHANNEL_NUMBER == rcvFrame.fields.header.headerFields.m_channel)
+                    {
+                        callbackControlChannel(rcvFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
+                    }
+                    else if (nullptr != m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback)
+                    {
+                        // Callback
+                        m_dataChannels[rcvFrame.fields.header.headerFields.m_channel - 1U].m_callback(
+                            rcvFrame.fields.payload.m_data, dlc);
+                    }
+                }
+
+                // Frame received. Cleaning!
+                readBytes = 0U;
+                attempts  = 0U;
+                memset(rcvFrame.raw, 0U, MAX_FRAME_LEN);
+            }
+        }
+        else
+        {
+            // Invalid header. Delete Frame.
+            readBytes = 0U;
+            attempts  = 0U;
+            memset(rcvFrame.raw, 0U, MAX_FRAME_LEN);
         }
     }
 
