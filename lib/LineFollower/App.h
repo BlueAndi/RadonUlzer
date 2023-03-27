@@ -46,6 +46,7 @@
 #include <StateMachine.h>
 #include <SimpleTimer.h>
 #include <YAPServer.hpp>
+#include <Arduino.h>
 
 /******************************************************************************
  * Macros
@@ -65,7 +66,8 @@ public:
      */
     App() :
         m_systemStateMachine(),
-        m_controlInterval()
+        m_controlInterval(),
+        m_yapServer(Serial)
     {
     }
 

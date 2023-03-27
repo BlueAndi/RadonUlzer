@@ -67,7 +67,12 @@ public:
     /**
      * Construct the YAP Server.
      */
-    YAPServer() : m_isSynced(false), m_lastSyncCommand(0U), m_lastSyncResponse(0U), m_pendingSuscribeChannel()
+    YAPServer(Stream& stream) :
+        m_isSynced(false),
+        m_lastSyncCommand(0U),
+        m_lastSyncResponse(0U),
+        m_pendingSuscribeChannel(),
+        m_stream(stream)
     {
     }
 
@@ -283,16 +288,16 @@ private:
     void processRxData()
     {
         // Check for received data
-        if (HEADER_LEN < Serial.available())
+        if (HEADER_LEN < m_stream.available())
         {
             // Create Frame and read header
             Frame rcvFrame;
-            Serial.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
+            m_stream.readBytes(rcvFrame.fields.header.rawHeader, HEADER_LEN);
 
             uint8_t dlc = getChannelDLC(rcvFrame.fields.header.headerFields.m_channel);
 
             // Read Payload
-            Serial.readBytes(rcvFrame.fields.payload.m_data, dlc);
+            m_stream.readBytes(rcvFrame.fields.payload.m_data, dlc);
 
             if (isFrameValid(rcvFrame))
             {
@@ -364,7 +369,7 @@ private:
             memcpy(newFrame.fields.payload.m_data, payload, channelDLC);
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
-            Serial.write(newFrame.raw, frameLength);
+            m_stream.write(newFrame.raw, frameLength);
         }
     }
 
@@ -443,8 +448,14 @@ private:
      */
     Channel m_pendingSuscribeChannel;
 
+    /**
+     * Stream for input and output of data.
+     */
+    Stream& m_stream;
+
 private:
-    /** Prevent instance copying */
+    /* Not allowed. */
+    YAPServer();
     YAPServer(const YAPServer& avg);
     YAPServer& operator=(const YAPServer& avg);
 };
