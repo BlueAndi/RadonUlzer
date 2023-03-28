@@ -51,6 +51,7 @@
 #include <math.h>
 #include <string.h>
 #include "SocketServer.h"
+#include "Stream.h"
 
 /******************************************************************************
  * Macros
@@ -67,44 +68,6 @@
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
-
-/**
- * Class for definition of data Streams
- */
-class Stream
-{
-public:
-    /** Construct Stream */
-    Stream()
-    {
-    }
-
-    /** Destruct Stream */
-    ~Stream()
-    {
-    }
-
-    /**
-     * Write bytes to stream.
-     * @param[in] buffer Byte Array to send.
-     * @param[in] length Length of Buffer.
-     */
-    virtual void write(const uint8_t* buffer, size_t length) = 0;
-
-    /**
-     * Check if there are available bytes in the Stream.
-     * @returns Number of available bytes.
-     */
-    virtual int available() = 0;
-
-    /**
-     * Read bytes into a buffer.
-     * @param[in] buffer Array to write bytes to.
-     * @param[in] length number of bytes to be read.
-     * @returns Number of bytes read from Stream.
-     */
-    virtual size_t readBytes(uint8_t* buffer, size_t length) = 0;
-};
 
 class Serial_ : public Stream
 {
