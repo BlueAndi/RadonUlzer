@@ -173,11 +173,11 @@ uint32_t SocketServer::available()
     return m_rcvQueue.size();
 }
 
-bool SocketServer::getByte(uint8_t* byte)
+bool SocketServer::getByte(uint8_t& byte)
 {
     if (!m_rcvQueue.empty())
     {
-        byte[0] = m_rcvQueue.front();
+        byte = m_rcvQueue.front();
         m_rcvQueue.pop();
         return true;
     }

@@ -109,7 +109,7 @@ public:
      * @param[out] byte buffer to write byte to.
      * @returns false is value is not valid. true if valid.
      */
-    bool getByte(uint8_t* byte);
+    bool getByte(uint8_t& byte);
 
 private:
     /**
