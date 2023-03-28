@@ -43,6 +43,8 @@
 #include <Odometry.h>
 #include <RobotConstants.h>
 #include <FPMath.h>
+#include "TestStream.h"
+#include <YAPServer.hpp>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,6 +66,7 @@ static void testSimpleTimer();
 static void testPIDController();
 static void testUtil();
 static void testOdometry();
+static void testYAP();
 
 /******************************************************************************
  * Local Variables
@@ -107,6 +110,7 @@ void loop()
     RUN_TEST(testPIDController);
     RUN_TEST(testUtil);
     RUN_TEST(testOdometry);
+    RUN_TEST(testYAP);
 
     UNITY_END();
 
@@ -453,4 +457,44 @@ static void testOdometry()
     TEST_ASSERT_EQUAL_INT32(0, posX);
     TEST_ASSERT_EQUAL_INT32(0, posY);
     TEST_ASSERT_FALSE(odometry.isStandStill());
+}
+
+/**
+ * Test functionalities of YAP Server.
+ */
+static void testYAP()
+{
+    TestStream_ TestStream;
+    YAPServer<2U> yapServer(TestStream);
+    uint8_t expectedUnsyncedHeartbeatFrameCases[5U][MAX_FRAME_LEN] = {
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8},
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0xD7, 0x00, 0x00, 0x00, 0x07, 0xD0},
+        {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF}};
+
+    // Initial process.
+    yapServer.process(0U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[0U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
+
+    // Unsynced Heartbeat after 1000 milliseconds
+    yapServer.process(1000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[1U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
+
+    // Unsynced Heartbeat after 1500 milliseconds
+    yapServer.process(1500U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[2U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
+
+    // Unsynced Heartbeat after 2000 milliseconds
+    yapServer.process(2000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[3U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
+
+    // Unsynced Heartbeat after 0xFFFFFFFF milliseconds
+    yapServer.process(0xFFFFFFFF);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[4U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
 }
