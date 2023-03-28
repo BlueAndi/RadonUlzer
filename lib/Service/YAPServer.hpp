@@ -45,7 +45,8 @@
  *****************************************************************************/
 
 #include <YAPCommon.hpp>
-#include <Arduino.h>
+#include <Stream.h>
+#include <string.h>
 #include <Util.h>
 
 /******************************************************************************
@@ -89,11 +90,12 @@ public:
     /**
      * Manage the Server functions.
      * Call this function cyclic.
+     * @param[in] currentTimestamp Time in milliseconds.
      */
-    void process()
+    void process(const uint32_t currentTimestamp)
     {
         // Periodic Heartbeat
-        heartbeat();
+        heartbeat(currentTimestamp);
 
         // Process RX data
         processRxData();
@@ -365,11 +367,11 @@ private:
     /**
      * Periodic heartbeat.
      * Sends SYNC Command depending on the current Sync state.
+     * @param[in] currentTimestamp Time in milliseconds.
      */
-    void heartbeat()
+    void heartbeat(const uint32_t currentTimestamp)
     {
         uint32_t heartbeatPeriod  = HEATBEAT_PERIOD_UNSYNCED;
-        uint32_t currentTimestamp = millis();
 
         if (m_isSynced)
         {

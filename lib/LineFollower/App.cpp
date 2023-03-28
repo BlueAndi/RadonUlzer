@@ -77,7 +77,7 @@ void App::setup()
 
 void App::loop()
 {
-    m_yapServer.process();
+    m_yapServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
