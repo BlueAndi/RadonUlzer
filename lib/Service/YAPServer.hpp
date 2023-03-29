@@ -204,6 +204,14 @@ public:
         }
     }
 
+    /**
+     * Returns current Sync state of th YAP Server.
+     */
+    bool isSynced()
+    {
+        return m_isSynced;
+    }
+
 private:
     /**
      * Callback for the Control Channel

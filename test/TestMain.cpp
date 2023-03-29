@@ -66,7 +66,8 @@ static void testSimpleTimer();
 static void testPIDController();
 static void testUtil();
 static void testOdometry();
-static void testYAP();
+static void YAPTests();
+static void testYAPSync();
 
 /******************************************************************************
  * Local Variables
@@ -110,7 +111,7 @@ void loop()
     RUN_TEST(testPIDController);
     RUN_TEST(testUtil);
     RUN_TEST(testOdometry);
-    RUN_TEST(testYAP);
+    YAPTests();
 
     UNITY_END();
 
@@ -462,39 +463,118 @@ static void testOdometry()
 /**
  * Test functionalities of YAP Server.
  */
-static void testYAP()
+static void YAPTests()
+{
+    RUN_TEST(testYAPSync);
+}
+
+/**
+ * Test SYNC functionality of YAP Server.
+ */
+static void testYAPSync()
 {
     TestStream_ TestStream;
-    YAPServer<2U> yapServer(TestStream);
-    uint8_t expectedUnsyncedHeartbeatFrameCases[5U][MAX_FRAME_LEN] = {
-        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-        {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8},
-        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
-        {0x00, 0xD7, 0x00, 0x00, 0x00, 0x07, 0xD0},
-        {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF}};
+    YAPServer<2U> testYapServer(TestStream);
+    uint8_t emptyOutputBuffer[MAX_FRAME_LEN] = {0x00};
+    uint8_t expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* SYNC 0ms*/
+        {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8}, /* SYNC 1000ms*/
+        {0x00, 0xD7, 0x00, 0x00, 0x00, 0x07, 0xD0}, /* SYNC 2000ms*/
+        {0x00, 0x73, 0x00, 0x00, 0x00, 0x1B, 0x58}, /* SYNC 7000ms*/
+        {0x00, 0x0F, 0x00, 0x00, 0x00, 0x2E, 0xE0}, /* SYNC 12000ms*/
+        {0x00, 0xAA, 0x00, 0x00, 0x00, 0x42, 0x68}  /* SYNC 17000ms*/
+    };
+    uint8_t inputReceiveBufferVector[2U][MAX_FRAME_LEN] = {
+        {0x00, 0xD8, 0x01, 0x00, 0x00, 0x07, 0xD0},
+        {0x00, 0x74, 0x01, 0x00, 0x00, 0x1B, 0x58}
+    };
 
-    // Initial process.
-    yapServer.process(0U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[0U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    /*
+     * Case: Unsynced Heartbeat.
+     */
+
+    /** Unsynced Heartbeat at 0 milliseconds */
+    testYapServer.process(0U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 
-    // Unsynced Heartbeat after 1000 milliseconds
-    yapServer.process(1000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[1U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    /* Unsynced Heartbeat after 1000 milliseconds */
+    testYapServer.process(1000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 
-    // Unsynced Heartbeat after 1500 milliseconds
-    yapServer.process(1500U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[2U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    /* No Heartbeat expected */
+    testYapServer.process(1500U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 
-    // Unsynced Heartbeat after 2000 milliseconds
-    yapServer.process(2000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[3U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    /* Unsynced Heartbeat after 2000 milliseconds */
+    testYapServer.process(2000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 
-    // Unsynced Heartbeat after 0xFFFFFFFF milliseconds
-    yapServer.process(0xFFFFFFFF);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedUnsyncedHeartbeatFrameCases[4U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+
+    /*
+     * Case: Sync
+     */
+
+    /* Put Data in RX Queue */
+    TestStream.pushToQueue(inputReceiveBufferVector[0], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+    /* Two process calls required */
+    testYapServer.process(2500U); /* Read Frame Header */
+    testYapServer.process(2700U); /* Read Frame Payload */
+    TEST_ASSERT_TRUE(testYapServer.isSynced());
+
+    /* No output expected */
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushInputBuffer();
+    
+    /*
+     * Case: Synced Heartbeat.
+     * Last Sync = 2000 ms
+     * isSynced = true
+     * Next Sync = 7000 ms
+     */
+    
+    /* No output expected. Would be Heartbeat if Unsynced. */
+    testYapServer.process(3000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    
+    /* Synced Heartbeat. */
+    testYapServer.process(7000U);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushOutputBuffer();
+
+
+    /**
+     * Case: Maintain Sync
+     */
+
+    /* Put SYNC_RSP in RX Queue. Otherwise will fall out of Sync. */
+    TestStream.pushToQueue(inputReceiveBufferVector[1], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+    /* Two process calls required */
+    testYapServer.process(9000U); /* Read Frame Header */
+    testYapServer.process(11000U); /* Read Frame Payload */
+    TEST_ASSERT_TRUE(testYapServer.isSynced());
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    
+    /* Synced Heartbeat */
+    testYapServer.process(12000U);
+    TEST_ASSERT_TRUE(testYapServer.isSynced());
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[4U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+    TestStream.flushInputBuffer();
+    TestStream.flushOutputBuffer();
+
+    /**
+     * Case: Fall out of Sync.
+     * No data passed to RX Queue.
+     */
+    
+    /* Synced Heartbeat. Fall out fo sync, as last Heartbeat was not Acknowledged. */
+    testYapServer.process(17000U);
+    TEST_ASSERT_FALSE(testYapServer.isSynced());
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[5U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 }
