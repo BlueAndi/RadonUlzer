@@ -473,7 +473,7 @@ static void YAPTests()
  */
 static void testYAPSync()
 {
-    TestStream_ TestStream;
+    TestStream_   TestStream;
     YAPServer<2U> testYapServer(TestStream);
     uint8_t emptyOutputBuffer[MAX_FRAME_LEN] = {0x00};
     uint8_t expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
@@ -493,7 +493,7 @@ static void testYAPSync()
      * Case: Unsynced Heartbeat.
      */
 
-    /** Unsynced Heartbeat at 0 milliseconds */
+    /* Unsynced Heartbeat at 0 milliseconds */
     testYapServer.process(0U);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
@@ -513,7 +513,6 @@ static void testYAPSync()
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
 
-
     /*
      * Case: Sync
      */
@@ -529,23 +528,22 @@ static void testYAPSync()
     /* No output expected */
     TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushInputBuffer();
-    
+
     /*
      * Case: Synced Heartbeat.
      * Last Sync = 2000 ms
      * isSynced = true
      * Next Sync = 7000 ms
      */
-    
+
     /* No output expected. Would be Heartbeat if Unsynced. */
     testYapServer.process(3000U);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
-    
+
     /* Synced Heartbeat. */
     testYapServer.process(7000U);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
-
 
     /**
      * Case: Maintain Sync
@@ -555,11 +553,11 @@ static void testYAPSync()
     TestStream.pushToQueue(inputReceiveBufferVector[1], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
 
     /* Two process calls required */
-    testYapServer.process(9000U); /* Read Frame Header */
+    testYapServer.process(9000U);  /* Read Frame Header */
     testYapServer.process(11000U); /* Read Frame Payload */
     TEST_ASSERT_TRUE(testYapServer.isSynced());
     TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, MAX_FRAME_LEN);
-    
+
     /* Synced Heartbeat */
     testYapServer.process(12000U);
     TEST_ASSERT_TRUE(testYapServer.isSynced());
@@ -571,7 +569,7 @@ static void testYAPSync()
      * Case: Fall out of Sync.
      * No data passed to RX Queue.
      */
-    
+
     /* Synced Heartbeat. Fall out fo sync, as last Heartbeat was not Acknowledged. */
     testYapServer.process(17000U);
     TEST_ASSERT_FALSE(testYapServer.isSynced());

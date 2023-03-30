@@ -164,7 +164,7 @@ public:
     {
         /* Using strnlen in case the name is not null-terminated. */
         uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-        uint8_t idx = tMaxChannels;
+        uint8_t idx        = tMaxChannels;
 
         if ((nullptr != channelName) && (MAX_DATA_LEN >= dlc) && (0U != dlc) && (nullptr != cb))
         {
@@ -402,7 +402,7 @@ private:
      */
     void heartbeat(const uint32_t currentTimestamp)
     {
-        uint32_t heartbeatPeriod  = HEATBEAT_PERIOD_UNSYNCED;
+        uint32_t heartbeatPeriod = HEATBEAT_PERIOD_UNSYNCED;
 
         if (m_isSynced)
         {
@@ -417,7 +417,7 @@ private:
                 m_isSynced = false;
             }
 
-            /* Send SYNC Command. */ 
+            /* Send SYNC Command. */
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC};
 
             /* Using (sizeof(buf) - 1U) as CMD Byte is not passed. */
