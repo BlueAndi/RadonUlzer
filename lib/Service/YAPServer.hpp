@@ -351,20 +351,20 @@ private:
                 }
 
                 /* Frame received. Cleaning! */
-                flushRx();
+                clearLocalRxBuffers();
             }
         }
         else
         {
             /* Invalid header. Delete Frame. */
-            flushRx();
+            clearLocalRxBuffers();
         }
     }
 
     /**
      * Clear RX Buffer and counters.
      */
-    void flushRx()
+    void clearLocalRxBuffers()
     {
         memset(m_receiveFrame.raw, 0U, MAX_FRAME_LEN);
         m_receivedBytes = 0U;
