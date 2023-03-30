@@ -214,13 +214,81 @@ public:
 
 private:
     /**
+     * Control Channel Command: SYNC
+     * @param[in] payload Incomming Command data
+     */
+    void cmdSYNC(const uint8_t* payload)
+    {
+        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[0U], payload[1U], payload[2U],
+                                                       payload[3U]};
+        send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+    }
+
+    /**
+     * Control Channel Command: SYNC_RSP
+     * @param[in] payload Incomming Command data
+     */
+    void cmdSYNC_RSP(const uint8_t* payload)
+    {
+        uint32_t rcvTimestamp = 0;
+
+        /* Using (payloadSize - 1U) as CMD Byte is not passed. */
+        if (Util::byteArrayToUint32(payload, sizeof(uint32_t), rcvTimestamp))
+        {
+            /* Check Timestamp with m_lastSyncCommand */
+            if (rcvTimestamp == m_lastSyncCommand)
+            {
+                m_lastSyncResponse = m_lastSyncCommand;
+                m_isSynced         = true;
+            }
+        }
+    }
+
+    /**
+     * Control Channel Command: SCRB
+     * @param[in] payload Incomming Command data
+     */
+    void cmdSCRB(const uint8_t* payload)
+    {
+        uint8_t channelNumber = getChannelNumber((const char*)payload);
+
+        if (CONTROL_CHANNEL_NUMBER != channelNumber)
+        {
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
+                                                           getChannelDLC(channelNumber)};
+            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+        }
+    }
+
+    /**
+     * Control Channel Command: SCRB_RSP
+     * @param[in] payload Incomming Command data
+     */
+    void cmdSCRB_RSP(const uint8_t* payload)
+    {
+        /* Check if a SCRB is pending. */
+        if (nullptr != m_pendingSuscribeChannel.m_callback)
+        {
+            uint8_t channelNumber     = payload[0U];
+            uint8_t channelDLC        = payload[1U];
+            uint8_t channelArrayIndex = (channelNumber - 1U);
+
+            memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
+            m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
+            m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
+
+            m_pendingSuscribeChannel.m_callback = nullptr;
+        }
+    }
+
+    /**
      * Callback for the Control Channel
      * @param[in] payload Payload of received frame.
      * @param[in] payloadSize Length of Payload
      */
     void callbackControlChannel(const uint8_t* payload, const uint8_t payloadSize)
     {
-        if (nullptr == payload)
+        if ((nullptr == payload) || (0U == payloadSize))
         {
             return;
         }
@@ -231,67 +299,23 @@ private:
         {
 
         case COMMANDS::SYNC:
-        {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[1U], payload[2U], payload[3U],
-                                                           payload[4U]};
-            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+            cmdSYNC(&payload[1U]);
             break;
-        }
 
         case COMMANDS::SYNC_RSP:
-        {
-            uint32_t rcvTimestamp = 0;
-
-            /* Using (payloadSize - 1U) as CMD Byte is not passed. */
-            if (Util::byteArrayToUint32(&payload[1], (payloadSize - 1U), rcvTimestamp))
-            {
-                /* Check Timestamp with m_lastSyncCommand */
-                if (rcvTimestamp == m_lastSyncCommand)
-                {
-                    m_lastSyncResponse = m_lastSyncCommand;
-                    m_isSynced         = true;
-                }
-            }
+            cmdSYNC_RSP(&payload[1U]);
             break;
-        }
 
         case COMMANDS::SCRB:
-        {
-            uint8_t channelNumber = getChannelNumber((const char*)&payload[1U]);
-
-            if (CONTROL_CHANNEL_NUMBER != channelNumber)
-            {
-                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
-                                                               getChannelDLC(channelNumber)};
-                send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
-            }
-
+            cmdSCRB(&payload[1U]);
             break;
-        }
 
         case COMMANDS::SCRB_RSP:
-        {
-            /* Check if a SCRB is pending. */
-            if (nullptr != m_pendingSuscribeChannel.m_callback)
-            {
-                uint8_t channelNumber     = payload[1U];
-                uint8_t channelDLC        = payload[2U];
-                uint8_t channelArrayIndex = (channelNumber - 1U);
-
-                memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
-                m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
-                m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
-
-                m_pendingSuscribeChannel.m_callback = nullptr;
-            }
-
+            cmdSYNC_RSP(&payload[1]);
             break;
-        }
 
         default:
-        {
             break;
-        }
         }
     }
 
