@@ -274,13 +274,13 @@ private:
             /* Check if a SCRB is pending. */
             if (nullptr != m_pendingSuscribeChannel.m_callback)
             {
-                uint8_t channelNumber = payload[1U];
-                uint8_t channelDLC    = payload[2U];
+                uint8_t channelNumber     = payload[1U];
+                uint8_t channelDLC        = payload[2U];
+                uint8_t channelArrayIndex = (channelNumber - 1U);
 
-                memcpy(m_dataChannels[channelNumber - 1U].m_name, m_pendingSuscribeChannel.m_name,
-                       CHANNEL_NAME_MAX_LEN);
-                m_dataChannels[channelNumber - 1U].m_dlc      = channelDLC;
-                m_dataChannels[channelNumber - 1U].m_callback = m_pendingSuscribeChannel.m_callback;
+                memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
+                m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
+                m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
 
                 m_pendingSuscribeChannel.m_callback = nullptr;
             }
@@ -336,17 +336,17 @@ private:
             {
                 if (isFrameValid(m_receiveFrame))
                 {
+                    uint8_t channelArrayIndex = (m_receiveFrame.fields.header.headerFields.m_channel - 1U);
+
                     /* Differenciate between Control and Data Channels. */
                     if (CONTROL_CHANNEL_NUMBER == m_receiveFrame.fields.header.headerFields.m_channel)
                     {
                         callbackControlChannel(m_receiveFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     }
-                    else if (nullptr !=
-                             m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback)
+                    else if (nullptr != m_dataChannels[channelArrayIndex].m_callback)
                     {
                         /* Callback */
-                        m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback(
-                            m_receiveFrame.fields.payload.m_data, dlc);
+                        m_dataChannels[channelArrayIndex].m_callback(m_receiveFrame.fields.payload.m_data, dlc);
                     }
                 }
 
