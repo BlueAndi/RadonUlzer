@@ -94,10 +94,10 @@ public:
      */
     void process(const uint32_t currentTimestamp)
     {
-        // Periodic Heartbeat
+        /* Periodic Heartbeat */
         heartbeat(currentTimestamp);
 
-        // Process RX data
+        /* Process RX data */
         processRxData();
     }
 
@@ -162,7 +162,7 @@ public:
      */
     uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
     {
-        // Using strnlen in case the name is not null-terminated.
+        /* Using strnlen in case the name is not null-terminated. */
         uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
         uint8_t idx = tMaxChannels;
 
@@ -192,13 +192,13 @@ public:
     {
         if ((nullptr != channelName) && (nullptr != callback))
         {
-            // Suscribe to channel.
+            /* Suscribe to channel. */
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
             buf[0U] = COMMANDS::SCRB;
             memcpy(&buf[1U], channelName, CHANNEL_NAME_MAX_LEN);
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
 
-            // Save Name and Callback for channel creation after response.
+            /* Save Name and Callback for channel creation after response */
             memcpy(m_pendingSuscribeChannel.m_name, channelName, CHANNEL_NAME_MAX_LEN);
             m_pendingSuscribeChannel.m_callback = callback;
         }
@@ -242,10 +242,10 @@ private:
         {
             uint32_t rcvTimestamp = 0;
 
-            // Using (payloadSize - 1U) as CMD Byte is not passed.
+            /* Using (payloadSize - 1U) as CMD Byte is not passed. */
             if (Util::byteArrayToUint32(&payload[1], (payloadSize - 1U), rcvTimestamp))
             {
-                // Check Timestamp with m_lastSyncCommand
+                /* Check Timestamp with m_lastSyncCommand */
                 if (rcvTimestamp == m_lastSyncCommand)
                 {
                     m_lastSyncResponse = m_lastSyncCommand;
@@ -271,7 +271,7 @@ private:
 
         case COMMANDS::SCRB_RSP:
         {
-            // Check if a SCRB is pending
+            /* Check if a SCRB is pending. */
             if (nullptr != m_pendingSuscribeChannel.m_callback)
             {
                 uint8_t channelNumber = payload[1U];
@@ -303,19 +303,18 @@ private:
         uint8_t expectedBytes = 0;
         uint8_t dlc           = 0;
 
-        // Determine how many bytes to read
+        /* Determine how many bytes to read. */
         if (HEADER_LEN > m_receivedBytes)
         {
-            // Header must be read
+            /* Header must be read. */
             expectedBytes = (HEADER_LEN - m_receivedBytes);
         }
         else
         {
-            // Header has been read.
-            // Get DLC using Header
+            /* Header has been read. Get DLC using Header. */
             dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel);
 
-            // DLC = 0 means that the channel does not exist.
+            /* DLC = 0 means that the channel does not exist. */
             if ((0U != dlc) && (MAX_RX_ATTEMPTS >= m_rxAttempts))
             {
                 expectedBytes = (dlc - (m_receivedBytes - HEADER_LEN));
@@ -323,21 +322,21 @@ private:
             }
         }
 
-        // Are we expecting to read anything?
+        /* Are we expecting to read anything? */
         if (0U != expectedBytes)
         {
-            // Read the required amount of bytes, if available.
+            /* Read the required amount of bytes, if available. */
             if (expectedBytes <= m_stream.available())
             {
                 m_receivedBytes += m_stream.readBytes(&m_receiveFrame.raw[m_receivedBytes], expectedBytes);
             }
 
-            // Frame has been received.
+            /* Frame has been received. */
             if ((0U != dlc) && ((HEADER_LEN + dlc) == m_receivedBytes))
             {
                 if (isFrameValid(m_receiveFrame))
                 {
-                    // Differenciate between Control and Data Channels
+                    /* Differenciate between Control and Data Channels. */
                     if (CONTROL_CHANNEL_NUMBER == m_receiveFrame.fields.header.headerFields.m_channel)
                     {
                         callbackControlChannel(m_receiveFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
@@ -345,19 +344,19 @@ private:
                     else if (nullptr !=
                              m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback)
                     {
-                        // Callback
+                        /* Callback */
                         m_dataChannels[m_receiveFrame.fields.header.headerFields.m_channel - 1U].m_callback(
                             m_receiveFrame.fields.payload.m_data, dlc);
                     }
                 }
 
-                // Frame received. Cleaning!
+                /* Frame received. Cleaning! */
                 flushRx();
             }
         }
         else
         {
-            // Invalid header. Delete Frame.
+            /* Invalid header. Delete Frame. */
             flushRx();
         }
     }
@@ -388,16 +387,16 @@ private:
 
         if ((currentTimestamp - m_lastSyncCommand) >= heartbeatPeriod)
         {
-            // Timeout
+            /* Timeout. */
             if (m_lastSyncCommand != m_lastSyncResponse)
             {
                 m_isSynced = false;
             }
 
-            // Send SYNC Command
+            /* Send SYNC Command. */ 
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC};
 
-            // Using (sizeof(buf) - 1U) as CMD Byte is not passed.
+            /* Using (sizeof(buf) - 1U) as CMD Byte is not passed. */
             Util::uint32ToByteArray(&buf[1], (sizeof(buf) - 1), currentTimestamp);
 
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
@@ -436,7 +435,7 @@ private:
      */
     bool isFrameValid(const Frame& frame)
     {
-        // Frame is valid when both checksums are the same.
+        /* Frame is valid when both checksums are the same. */
         return (checksum(frame) == frame.fields.header.headerFields.m_checksum);
     }
 
