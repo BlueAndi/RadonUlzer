@@ -325,7 +325,7 @@ private:
             break;
 
         case COMMANDS::SCRB_RSP:
-            cmdSYNC_RSP(&payload[1]);
+            cmdSCRB_RSP(&payload[1U]);
             break;
 
         default:
