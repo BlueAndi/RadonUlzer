@@ -193,13 +193,15 @@ public:
         if ((nullptr != channelName) && (nullptr != callback))
         {
             /* Suscribe to channel. */
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH];
+            /* Using strnlen in case the name is not null-terminated. */
+            uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
+            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
             buf[0U] = COMMANDS::SCRB;
-            memcpy(&buf[1U], channelName, CHANNEL_NAME_MAX_LEN);
+            memcpy(&buf[1U], channelName, nameLength);
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
 
             /* Save Name and Callback for channel creation after response */
-            memcpy(m_pendingSuscribeChannel.m_name, channelName, CHANNEL_NAME_MAX_LEN);
+            memcpy(m_pendingSuscribeChannel.m_name, &buf[1U], CHANNEL_NAME_MAX_LEN);
             m_pendingSuscribeChannel.m_callback = callback;
         }
     }
