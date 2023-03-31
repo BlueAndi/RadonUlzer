@@ -127,7 +127,7 @@ public:
      */
     void flushOutputBuffer()
     {
-        memset(m_outputBuffer, 0x00, MAX_FRAME_LEN);
+        memset(m_outputBuffer, 0xA5, MAX_FRAME_LEN);
     }
 
     /**

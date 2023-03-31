@@ -477,7 +477,8 @@ static void testYAPSync()
 {
     TestStream_   TestStream;
     YAPServer<2U> testYapServer(TestStream);
-    uint8_t emptyOutputBuffer[MAX_FRAME_LEN] = {0x00};
+    uint8_t emptyOutputBuffer[MAX_FRAME_LEN];
+    memset(emptyOutputBuffer, 0xA5, MAX_FRAME_LEN);
     uint8_t expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
         {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* SYNC 0ms*/
         {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8}, /* SYNC 1000ms*/
@@ -588,7 +589,8 @@ static void testYAPSyncRsp()
     YAPServer<2U> testYapServer(TestStream);
     uint8_t       testTime                                                 = 0U;
     uint8_t       numberOfCases                                            = 3U;
-    uint8_t       emptyOutputBuffer[MAX_FRAME_LEN]                         = {0x00};
+    uint8_t emptyOutputBuffer[MAX_FRAME_LEN];
+    memset(emptyOutputBuffer, 0xA5, MAX_FRAME_LEN);
     uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
         {0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00},
         {0x00, 0x16, 0x01, 0x12, 0x34, 0x56, 0x78},
