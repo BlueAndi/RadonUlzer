@@ -666,7 +666,7 @@ static void testYAPScrb()
     /*
      * Case: Subscribe to Known Channel
      */
-    TEST_ASSERT_EQUAL_INT8(1U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
+    TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
 
     TestStream.pushToQueue(inputReceiveBufferVector[0], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
     testYapServer.process(testTime++);
@@ -679,7 +679,7 @@ static void testYAPScrb()
     /*
      * Case: Subscribe to a Duplicate Channel
      */
-    TEST_ASSERT_EQUAL_INT8(2U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
+    TEST_ASSERT_EQUAL_UINT8(2U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
 
     TestStream.pushToQueue(inputReceiveBufferVector[0], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
     testYapServer.process(testTime++);
