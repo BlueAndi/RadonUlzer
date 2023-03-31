@@ -282,10 +282,10 @@ private:
         {
             uint8_t channelNumber     = payload[0U];
             uint8_t channelDLC        = payload[1U];
-            uint8_t channelArrayIndex = (channelNumber - 1U);
 
             if ((0U != channelNumber) && (0U != channelDLC))
             {
+                uint8_t channelArrayIndex = (channelNumber - 1U);
                 memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
                 m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
                 m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
