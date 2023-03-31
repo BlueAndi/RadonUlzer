@@ -695,4 +695,62 @@ static void testYAPScrb()
  */
 static void testYAPScrbRsp()
 {
+    TestStream_   TestStream;
+    YAPServer<2U> testYapServer(TestStream);
+    uint8_t       testTime      = 0U;
+    uint8_t       numberOfCases = 2U;
+    uint8_t       emptyOutputBuffer[MAX_FRAME_LEN];
+    memset(emptyOutputBuffer, 0xA5, MAX_FRAME_LEN);
+    uint8_t expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
+        {0x00, 0x43, 0x02, 'T', 'E', 'S', 'T', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+    uint8_t inputReceiveBufferVector[numberOfCases][MAX_FRAME_LEN] = {{0x00, 0x03, 0x03, 0x00, 0x00},
+                                                                      {0x00, 0x0C, 0x03, 0x01, 0x08}};
+
+    /* Ignore SYNC */
+    testYapServer.process(testTime++);
+    TestStream.flushOutputBuffer();
+
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+
+    /*
+     * Case: Suscribe to Unknown Channel
+     */
+    TestStream.pushToQueue(inputReceiveBufferVector[0], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+    testYapServer.subscribeToChannel("TEST", testChannelCallback);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer,
+                                  HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+    testYapServer.process(testTime++);
+    testYapServer.process(testTime++);
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+    TestStream.flushInputBuffer();
+    TestStream.flushOutputBuffer();
+
+    /*
+     * Case: Suscribe to Known Channel
+     */
+    TestStream.pushToQueue(inputReceiveBufferVector[1], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+    testYapServer.subscribeToChannel("TEST", testChannelCallback);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer,
+                                  HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+    testYapServer.process(testTime++);
+    testYapServer.process(testTime++);
+    TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfChannels());
+    TestStream.flushInputBuffer();
+    TestStream.flushOutputBuffer();
+
+    /*
+     * Case: Suscribe again to Known Channel
+     */
+    TestStream.pushToQueue(inputReceiveBufferVector[1], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+
+    testYapServer.subscribeToChannel("TEST", testChannelCallback);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer,
+                                  HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+    testYapServer.process(testTime++);
+    testYapServer.process(testTime++);
+    TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfChannels());
+    TestStream.flushInputBuffer();
+    TestStream.flushOutputBuffer();
 }
