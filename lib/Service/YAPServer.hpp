@@ -251,13 +251,22 @@ private:
     void cmdSCRB(const uint8_t* payload)
     {
         uint8_t channelNumber = getChannelNumber((const char*)payload);
+        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
+        buf[0U] = COMMANDS::SCRB_RSP;
 
         if (CONTROL_CHANNEL_NUMBER != channelNumber)
         {
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP, channelNumber,
-                                                           getChannelDLC(channelNumber)};
-            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+            buf[1U] = channelNumber;
+            buf[2U] = getChannelDLC(channelNumber);
         }
+        else
+        {
+            /* No channel found. Invalid Response: Channel 0 with DLC = 0 */
+            buf[1U] = 0U;
+            buf[2U] = 0U;
+        }
+        
+        send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
     }
 
     /**
@@ -273,9 +282,12 @@ private:
             uint8_t channelDLC        = payload[1U];
             uint8_t channelArrayIndex = (channelNumber - 1U);
 
-            memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
-            m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
-            m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
+            if ((0U != channelNumber) && (0U != channelDLC))
+            {
+                memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
+                m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
+                m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
+            }
 
             m_pendingSuscribeChannel.m_callback = nullptr;
         }
