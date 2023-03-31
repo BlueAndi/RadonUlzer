@@ -37,6 +37,7 @@
  *****************************************************************************/
 
 #include <queue>
+#include <cstring>
 #include <Stream.h>
 #include <YAPCommon.hpp>
 
