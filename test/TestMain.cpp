@@ -68,6 +68,7 @@ static void testUtil();
 static void testOdometry();
 static void YAPTests();
 static void testYAPSync();
+static void testYAPSyncRsp();
 
 /******************************************************************************
  * Local Variables
@@ -466,6 +467,7 @@ static void testOdometry()
 static void YAPTests()
 {
     RUN_TEST(testYAPSync);
+    RUN_TEST(testYAPSyncRsp);
 }
 
 /**
@@ -575,4 +577,41 @@ static void testYAPSync()
     TEST_ASSERT_FALSE(testYapServer.isSynced());
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[5U], TestStream.m_outputBuffer, MAX_FRAME_LEN);
     TestStream.flushOutputBuffer();
+}
+
+/**
+ * Test SYNC_RSP Command of YAP Server.
+ */
+static void testYAPSyncRsp()
+{
+    TestStream_   TestStream;
+    YAPServer<2U> testYapServer(TestStream);
+    uint8_t       testTime                                                 = 0U;
+    uint8_t       numberOfCases                                            = 3U;
+    uint8_t       emptyOutputBuffer[MAX_FRAME_LEN]                         = {0x00};
+    uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
+        {0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0x16, 0x01, 0x12, 0x34, 0x56, 0x78},
+        {0x00, 0x01, 0x01, 0xFF, 0xFF, 0xFF, 0xFF}
+    };
+    uint8_t       inputReceiveBufferVector[numberOfCases][MAX_FRAME_LEN]   = {
+        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
+        {0x00, 0x15, 0x00, 0x12, 0x34, 0x56, 0x78},
+        {0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF, 0xFF}
+    };
+
+    /* Ignore SYNC */
+    testYapServer.process(testTime++);
+    TestStream.flushOutputBuffer();
+
+    /* Test for SYNC_RSP */
+    for (uint8_t testCase = 0; testCase < numberOfCases; testCase++)
+    {
+        TestStream.pushToQueue(inputReceiveBufferVector[testCase], HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+        testYapServer.process(testTime++);
+        testYapServer.process(testTime++);
+        TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[testCase], TestStream.m_outputBuffer, MAX_FRAME_LEN);
+        TestStream.flushInputBuffer();
+        TestStream.flushOutputBuffer();
+    }
 }
