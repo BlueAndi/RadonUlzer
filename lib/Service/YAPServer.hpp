@@ -214,6 +214,24 @@ public:
         return m_isSynced;
     }
 
+    /**
+     * Get the number of configured channels.
+     */
+    uint8_t getNumberOfChannels()
+    {
+        uint8_t count = 0U;
+
+        for (uint8_t idx = 0; idx < tMaxChannels; idx++)
+        {
+            if (nullptr != m_dataChannels[idx].m_callback)
+            {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
 private:
     /**
      * Control Channel Command: SYNC
