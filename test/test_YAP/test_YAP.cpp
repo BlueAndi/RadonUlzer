@@ -60,6 +60,7 @@ static void testCmdSyncRsp();
 static void testCmdScrb();
 static void testCmdScrbRsp();
 static void testChannelCreation();
+static void testDataSend();
 
 /******************************************************************************
  * Local Variables
@@ -68,6 +69,7 @@ static void testChannelCreation();
 static uint8_t       emptyOutputBuffer[MAX_FRAME_LEN];
 static TestStream_   TestStream;
 static const uint8_t controlChannelFrameLength = (HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
+static const uint8_t testPayload[4U]           = {0x12, 0x34, 0x56, 0x78};
 
 /******************************************************************************
  * Public Methods
@@ -109,6 +111,7 @@ void loop()
     RUN_TEST(testCmdScrb);
     RUN_TEST(testCmdScrbRsp);
     RUN_TEST(testChannelCreation);
+    RUN_TEST(testDataSend);
 
     UNITY_END();
 
@@ -442,4 +445,57 @@ static void testChannelCreation()
 
     TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.createChannel("TEST", 1U, testChannelCallback));
     TEST_ASSERT_EQUAL_UINT8(maxChannels, testYapServer.getNumberOfChannels());
+}
+
+/**
+ * Test data send on YAP Server.
+ */
+static void testDataSend()
+{
+    YAPServer<1U> testYapServer(TestStream);
+    uint8_t       expectedOutputBufferVector[1U][MAX_FRAME_LEN] = {{0x01, 0x16, 0x12, 0x34, 0x56, 0x78}};
+    uint8_t       inputQueueVector[1U][MAX_FRAME_LEN]           = {{0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00}};
+
+    /* Flush Stream */
+    TestStream.flushInputBuffer();
+    TestStream.flushOutputBuffer();
+
+    /*
+     * Case: Send data on Control Channel.
+     */
+    testYapServer.sendData((uint8_t)CONTROL_CHANNEL_NUMBER, testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+
+    /*
+     * Case: Send on non-existent channel while unsynced.
+     */
+    testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+
+    /* Create a Channel */
+    TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.createChannel("TEST", sizeof(testPayload), testChannelCallback));
+
+    /*
+     * Case: Send on existent channel while unsynced.
+     */
+    testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+
+    /* Sync */
+    TestStream.pushToQueue(inputQueueVector[0U], controlChannelFrameLength);
+    testYapServer.process(0U);
+    testYapServer.process(1U);
+    TEST_ASSERT_TRUE(testYapServer.isSynced());
+
+    /*
+     * Case: Send on non-existent channel.
+     */
+    testYapServer.sendData("HELLO", testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+
+    /*
+     * Case: Send on existent channel.
+     */
+    testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], TestStream.m_outputBuffer, sizeof(testPayload));
 }
