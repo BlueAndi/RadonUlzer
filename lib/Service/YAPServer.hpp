@@ -508,7 +508,7 @@ private:
         {
             channelDLC = CONTROL_CHANNEL_PAYLOAD_LENGTH;
         }
-        else
+        else if (tMaxChannels >= channel)
         {
             channelDLC = m_dataChannels[channel - 1U].m_dlc;
         }
