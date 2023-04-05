@@ -166,7 +166,7 @@ public:
         uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
         uint8_t idx        = tMaxChannels;
 
-        if ((nullptr != channelName) && (MAX_DATA_LEN >= dlc) && (0U != dlc) && (nullptr != cb))
+        if ((nullptr != channelName) && (0U != nameLength) && (MAX_DATA_LEN >= dlc) && (0U != dlc) && (nullptr != cb))
         {
             for (idx = 0U; idx < tMaxChannels; idx++)
             {
