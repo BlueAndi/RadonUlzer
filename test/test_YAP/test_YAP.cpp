@@ -59,6 +59,7 @@ static void testCmdSync();
 static void testCmdSyncRsp();
 static void testCmdScrb();
 static void testCmdScrbRsp();
+static void testChannelCreation();
 
 /******************************************************************************
  * Local Variables
@@ -107,6 +108,7 @@ void loop()
     RUN_TEST(testCmdSyncRsp);
     RUN_TEST(testCmdScrb);
     RUN_TEST(testCmdScrbRsp);
+    RUN_TEST(testChannelCreation);
 
     UNITY_END();
 
@@ -395,4 +397,49 @@ static void testCmdScrbRsp()
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfChannels());
     TestStream.flushInputBuffer();
     TestStream.flushOutputBuffer();
+}
+
+/**
+ * Test Channel Creation on a YAP Server.
+ */
+static void testChannelCreation()
+{
+    const uint8_t          maxChannels = 5U;
+    YAPServer<maxChannels> testYapServer(TestStream);
+
+    /* No Channels Configured on Start */
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+
+    /*
+     * Case: Try to configure invalid channels.
+     */
+
+    /* Channel Name is empty */
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.createChannel("", 1U, testChannelCallback));
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+
+    /* DLC = 0U */
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.createChannel("TEST", 0U, testChannelCallback));
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+
+    /* Callback is nullptr */
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.createChannel("TEST", 1U, nullptr));
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
+
+    /*
+     * Case: Configure maximum valid channels.
+     */
+    for (uint8_t channelNumber = 0; channelNumber < maxChannels; channelNumber++)
+    {
+        TEST_ASSERT_EQUAL_UINT8(channelNumber, testYapServer.getNumberOfChannels());
+        TEST_ASSERT_EQUAL_UINT8((channelNumber + 1U), testYapServer.createChannel("TEST", 1U, testChannelCallback));
+        TEST_ASSERT_EQUAL_UINT8((channelNumber + 1U), testYapServer.getNumberOfChannels());
+    }
+
+    /*
+     * Case: Try to configure more than the maximum number of channels.
+     */
+
+    TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.createChannel("TEST", 1U, testChannelCallback));
+    TEST_ASSERT_EQUAL_UINT8(maxChannels, testYapServer.getNumberOfChannels());
 }
