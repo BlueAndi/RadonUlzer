@@ -92,7 +92,7 @@ static const uint8_t testPayload[4U]           = {0x12, 0x34, 0x56, 0x78};
  */
 void setup()
 {
-    memset(emptyOutputBuffer, 0xA5, MAX_FRAME_LEN);
+    memset(emptyOutputBuffer, 0xA5, sizeof(emptyOutputBuffer));
 #ifndef TARGET_NATIVE
     /* https://docs.platformio.org/en/latest/plus/unit-testing.html#demo */
     delay(2000);
