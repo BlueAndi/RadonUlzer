@@ -55,10 +55,10 @@
  *****************************************************************************/
 
 static void testChannelCallback(const uint8_t* payload, uint8_t payloadSize);
-static void testYAPSync();
-static void testYAPSyncRsp();
-static void testYAPScrb();
-static void testYAPScrbRsp();
+static void testCmdSync();
+static void testCmdSyncRsp();
+static void testCmdScrb();
+static void testCmdScrbRsp();
 
 /******************************************************************************
  * Local Variables
@@ -103,10 +103,10 @@ void loop()
 {
     UNITY_BEGIN();
 
-    RUN_TEST(testYAPSync);
-    RUN_TEST(testYAPSyncRsp);
-    RUN_TEST(testYAPScrb);
-    RUN_TEST(testYAPScrbRsp);
+    RUN_TEST(testCmdSync);
+    RUN_TEST(testCmdSyncRsp);
+    RUN_TEST(testCmdScrb);
+    RUN_TEST(testCmdScrbRsp);
 
     UNITY_END();
 
@@ -152,7 +152,7 @@ static void testChannelCallback(const uint8_t* payload, uint8_t payloadSize)
 /**
  * Test SYNC Command of YAP Server.
  */
-static void testYAPSync()
+static void testCmdSync()
 {
     YAPServer<2U> testYapServer(TestStream);
     uint8_t       expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
@@ -257,7 +257,7 @@ static void testYAPSync()
 /**
  * Test SYNC_RSP Command of YAP Server.
  */
-static void testYAPSyncRsp()
+static void testCmdSyncRsp()
 {
     YAPServer<2U> testYapServer(TestStream);
     uint8_t       testTime                                           = 0U;
@@ -289,7 +289,7 @@ static void testYAPSyncRsp()
 /**
  * Test SCRB Command of YAP Server.
  */
-static void testYAPScrb()
+static void testCmdScrb()
 {
     YAPServer<2U> testYapServer(TestStream);
     uint8_t       testTime                                                 = 0U;
@@ -341,7 +341,7 @@ static void testYAPScrb()
 /**
  * Test SCRB_RSP Command of YAP Server.
  */
-static void testYAPScrbRsp()
+static void testCmdScrbRsp()
 {
     YAPServer<2U> testYapServer(TestStream);
     uint8_t       testTime                                                 = 0U;
