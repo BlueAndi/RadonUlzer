@@ -455,6 +455,23 @@ Robot {
           type "infra-red"
           aperture 0.35
         }
+        DistanceSensor {
+          translation 0.055 0 -0.01
+          name "proxim_sensor_front"
+          lookupTable [
+            0.008 6 0
+            0.050 6 0
+            0.100 5 0
+            0.150 6 0
+            0.200 3 0
+            0.250 2 0
+            0.300 1 0
+            0.301 0 0
+          ]
+          type "infra-red"
+          numberOfRays 2
+          aperture 0.5
+        }
       ]
     }
     DEF LEDS Group {

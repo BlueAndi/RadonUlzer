@@ -272,6 +272,9 @@ private:
     /** Name of the green LED in the robot simulation. */
     static const char* LED_GREEN_NAME;
 
+    /* Name of the front proximity sensor in the robot simulation. */
+    static const char* PROXIMITY_SENSOR_FRONT_NAME;
+
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 

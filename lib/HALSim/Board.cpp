@@ -111,6 +111,9 @@ const char* Board::LED_YELLOW_NAME = "led_yellow";
 /* Name of the green LED in the robot simulation. */
 const char* Board::LED_GREEN_NAME = "led_green";
 
+/* Name of the front proximity sensor in the robot simulation. */
+const char* Board::PROXIMITY_SENSOR_FRONT_NAME = "proxim_sensor_front";
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
