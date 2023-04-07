@@ -42,8 +42,11 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include "IProximitySensors.h"
+#include "SimTime.h"
+
+#include <webots/Emitter.hpp>
+#include <webots/DistanceSensor.hpp>
 
 /******************************************************************************
  * Macros
@@ -60,8 +63,15 @@ public:
     /**
      * Constructs the interface.
      */
-    ProximitySensors() : IProximitySensors()
+    ProximitySensors(const SimTime& simTime, webots::DistanceSensor* frontSensor) :
+        IProximitySensors(),
+        m_frontSensor{frontSensor},
+        m_sensorValueU8(0U)
     {
+        if (nullptr != m_frontSensor)
+        {
+            m_frontSensor->enable(simTime.getTimeStep());
+        }
     }
 
     /**
@@ -76,6 +86,7 @@ public:
      */
     void initFrontSensor() final
     {
+        /* Nothing to do. */
     }
 
     /**
@@ -93,6 +104,10 @@ public:
      */
     void read() final
     {
+        if (nullptr != m_frontSensor)
+        {
+            m_sensorValueU8 = static_cast<uint8_t>(m_frontSensor->getValue());
+        }
     }
 
     /**
@@ -103,7 +118,7 @@ public:
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
-        return 0;
+        return m_sensorValueU8;
     }
 
     /**
@@ -114,11 +129,23 @@ public:
      */
     uint8_t countsFrontWithRightLeds() const final
     {
-        return 0;
+        return m_sensorValueU8;
     }
 
 protected:
 private:
+    /**
+     * Max. value of a single proximity sensor in digits.
+     * It depends on the Zumo32U4ProximitySensors implementation,
+     * specifically the number of brightness levels.
+     */
+    static const int16_t SENSOR_MAX_VALUE = 6;
+
+    webots::DistanceSensor* m_frontSensor;   /**< The frontal proximity sensor*/
+    uint8_t                 m_sensorValueU8; /**< The last value read of the sensor as unsigned 8-bit values. */
+
+    /* Default constructor not allowed. */
+    ProximitySensors();
 };
 
 /******************************************************************************

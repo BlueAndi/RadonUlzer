@@ -344,7 +344,7 @@ private:
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors()
+        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_NAME))
     {
     }
 

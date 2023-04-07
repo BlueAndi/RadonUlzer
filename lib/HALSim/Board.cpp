@@ -129,6 +129,7 @@ const char* Board::PROXIMITY_SENSOR_FRONT_NAME = "proxim_sensor_front";
 void Board::init()
 {
     m_lineSensors.init();
+    m_proximitySensors.initFrontSensor();
 }
 
 /******************************************************************************
