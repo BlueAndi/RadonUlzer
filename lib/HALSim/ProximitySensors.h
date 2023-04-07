@@ -63,14 +63,18 @@ public:
     /**
      * Constructs the interface.
      */
-    ProximitySensors(const SimTime& simTime, webots::DistanceSensor* frontSensor) :
+    ProximitySensors(const SimTime& simTime, webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
         IProximitySensors(),
-        m_frontSensor{frontSensor},
-        m_sensorValueU8(0U)
+        m_proximitySensors{proxSensor0, proxSensor1}
     {
-        if (nullptr != m_frontSensor)
+        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
-            m_frontSensor->enable(simTime.getTimeStep());
+            m_sensorValuesU8[sensorIndex] = 0;
+
+            if (nullptr != m_proximitySensors[sensorIndex])
+            {
+                m_proximitySensors[sensorIndex]->enable(simTime.getTimeStep());
+            }
         }
     }
 
@@ -104,9 +108,12 @@ public:
      */
     void read() final
     {
-        if (nullptr != m_frontSensor)
+        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
-            m_sensorValueU8 = static_cast<uint8_t>(m_frontSensor->getValue());
+            if (nullptr != m_proximitySensors[sensorIndex])
+            {
+                m_sensorValuesU8[sensorIndex] = static_cast<uint8_t>(m_proximitySensors[sensorIndex]->getValue());
+            }
         }
     }
 
@@ -118,7 +125,7 @@ public:
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
-        return m_sensorValueU8;
+        return m_sensorValuesU8[0];
     }
 
     /**
@@ -129,7 +136,7 @@ public:
      */
     uint8_t countsFrontWithRightLeds() const final
     {
-        return m_sensorValueU8;
+        return m_sensorValuesU8[1];
     }
 
 protected:
@@ -141,8 +148,14 @@ private:
      */
     static const int16_t SENSOR_MAX_VALUE = 6;
 
-    webots::DistanceSensor* m_frontSensor;   /**< The frontal proximity sensor*/
-    uint8_t                 m_sensorValueU8; /**< The last value read of the sensor as unsigned 8-bit values. */
+    /**
+     * Number of sensors that make up the front of the robot in the simulation.
+     * Using more than one sensor allows for diferenciation between left and right side.
+     */
+    static const uint8_t MAX_SENSORS = 2;
+
+    webots::DistanceSensor* m_proximitySensors[MAX_SENSORS]; /**< The frontal proximity sensors (0: most left)*/
+    uint8_t m_sensorValuesU8[MAX_SENSORS]; /**< The last value read of the sensors as unsigned 8-bit values. */
 
     /* Default constructor not allowed. */
     ProximitySensors();

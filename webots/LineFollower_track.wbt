@@ -456,10 +456,10 @@ Robot {
           aperture 0.35
         }
         DistanceSensor {
-          translation 0.055 0 -0.01
-          name "proxim_sensor_front"
+          translation 0.055 0.02 0.02
+          name "proxim_sensor_fl"
           lookupTable [
-            0.008 6 0
+            0.000 6 0
             0.050 6 0
             0.100 5 0
             0.150 6 0
@@ -469,8 +469,25 @@ Robot {
             0.301 0 0
           ]
           type "infra-red"
-          numberOfRays 2
-          aperture 0.5
+          numberOfRays 4
+          aperture 0.7
+        }
+        DistanceSensor {
+          translation 0.055 -0.02 0.02
+          name "proxim_sensor_fr"
+          lookupTable [
+            0.000 6 0
+            0.050 6 0
+            0.100 5 0
+            0.150 6 0
+            0.200 3 0
+            0.250 2 0
+            0.300 1 0
+            0.301 0 0
+          ]
+          type "infra-red"
+          numberOfRays 4
+          aperture 0.7
         }
       ]
     }
