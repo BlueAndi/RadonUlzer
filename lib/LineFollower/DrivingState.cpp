@@ -92,14 +92,25 @@ void DrivingState::entry()
 
 void DrivingState::process(StateMachine& sm)
 {
-    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
-    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
-    int16_t            position    = 0;
+    ILineSensors&      lineSensors         = Board::getInstance().getLineSensors();
+    IProximitySensors& proxSensors         = Board::getInstance().getProximitySensors();
+    DifferentialDrive& diffDrive           = DifferentialDrive::getInstance();
+    int16_t            position            = 0;
+    const uint8_t      PROXIMITY_THRESHOLD = (proxSensors.getNumBrightnessLevels() - 1);
 
     /* Get the position of the line. */
     position = lineSensors.readLine();
 
     (void)m_posMovAvg.write(position);
+
+    /* Get the status of the proximity sensors. */
+    proxSensors.read();
+
+    if ((PROXIMITY_THRESHOLD <= proxSensors.countsFrontWithLeftLeds()) ||
+        (PROXIMITY_THRESHOLD <= proxSensors.countsFrontWithRightLeds()))
+    {
+        m_trackStatus = TRACK_STATUS_OBSTACLE_FOUND;
+    }
 
     switch (m_trackStatus)
     {
@@ -115,6 +126,9 @@ void DrivingState::process(StateMachine& sm)
         /* Change to ready state. */
         sm.setState(&ReadyState::getInstance());
         break;
+
+    case TRACK_STATUS_OBSTACLE_FOUND:
+        /* Nothing to do. Fallback to default case. */
 
     default:
         /* Fatal error */

@@ -109,9 +109,10 @@ private:
      */
     enum TrackStatus
     {
-        TRACK_STATUS_ON_TRACK = 0, /**< Robot is on track */
-        TRACK_STATUS_LOST,         /**< Robot lost track */
-        TRACK_STATUS_FINISHED      /**< Robot found the end line or a error happened */
+        TRACK_STATUS_ON_TRACK = 0,   /**< Robot is on track */
+        TRACK_STATUS_LOST,           /**< Robot lost track */
+        TRACK_STATUS_OBSTACLE_FOUND, /**< Robot encountered an obstacle in the track */
+        TRACK_STATUS_FINISHED        /**< Robot found the end line or a error happened */
     };
 
     /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
