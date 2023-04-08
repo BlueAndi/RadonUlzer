@@ -139,6 +139,16 @@ public:
         return m_sensorValuesU8[1];
     }
 
+    /**
+     * Returns the number of brightness levels.
+     * 
+     * @return Number of brightness levels.
+     */
+    uint8_t getNumBrightnessLevels() const
+    {
+        return SENSOR_MAX_VALUE;
+    }
+
 protected:
 private:
     /**
