@@ -146,7 +146,7 @@ private:
      * It depends on the Zumo32U4ProximitySensors implementation,
      * specifically the number of brightness levels.
      */
-    static const int16_t SENSOR_MAX_VALUE = 6;
+    static const uint8_t SENSOR_MAX_VALUE = 6;
 
     /**
      * Number of sensors that make up the front of the robot in the simulation.
