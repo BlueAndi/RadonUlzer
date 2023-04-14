@@ -535,7 +535,7 @@ private:
             sum += frame.fields.payload.m_data[idx];
         }
 
-        return (sum % 255U);
+        return (sum % UINT8_MAX);
     }
 
 private:
