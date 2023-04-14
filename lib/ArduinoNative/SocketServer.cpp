@@ -81,7 +81,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 
     // Initialize Winsock
     result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (result != 0)
+    if (0 != result)
     {
         printf("WSAStartup failed with error: %d\n", result);
         return false;
@@ -91,7 +91,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 
     // Resolve the server address and port
     result = getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addrInfo);
-    if (result != 0)
+    if (0 != result)
     {
         printf("getaddrinfo failed with error: %d\n", result);
 #ifdef _WIN32
@@ -102,7 +102,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 
     // Create a SOCKET for the server to listen for client connections.
     m_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
-    if (m_listenSocket == INVALID_SOCKET)
+    if (INVALID_SOCKET == m_listenSocket)
     {
         printf("socket failed\n");
         freeaddrinfo(addrInfo);
@@ -114,7 +114,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 
     // Setup the TCP listening socket
     result = bind(m_listenSocket, addrInfo->ai_addr, static_cast<int>(addrInfo->ai_addrlen));
-    if (result == SOCKET_ERROR)
+    if (SOCKET_ERROR == result)
     {
         printf("bind failed\n");
         freeaddrinfo(addrInfo);
@@ -130,7 +130,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     freeaddrinfo(addrInfo);
 
     result = listen(m_listenSocket, maxConnections);
-    if (result == SOCKET_ERROR)
+    if (SOCKET_ERROR == result)
     {
         printf("listen failed\n");
 #ifdef _WIN32
@@ -148,10 +148,10 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
 {
     // Echo the buffer back to the sender
-    if (m_clientSocket != INVALID_SOCKET)
+    if (INVALID_SOCKET != m_clientSocket)
     {
         int iSendResult = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
-        if (iSendResult == SOCKET_ERROR)
+        if (SOCKET_ERROR == iSendResult)
         {
             printf("send failed\n");
 #ifdef _WIN32
@@ -186,7 +186,7 @@ bool SocketServer::getByte(uint8_t& byte)
 
 void SocketServer::processRx()
 {
-    if (m_listenSocket != INVALID_SOCKET)
+    if (INVALID_SOCKET != m_listenSocket)
     {
         fd_set         readFDS, writeFDS, exceptFDS;
         int            ret;
@@ -203,7 +203,7 @@ void SocketServer::processRx()
         FD_SET(m_listenSocket, &exceptFDS);
 
         // If there is a client connected
-        if (m_clientSocket != INVALID_SOCKET)
+        if (INVALID_SOCKET != m_clientSocket)
         {
             FD_SET(m_clientSocket, &readFDS);
             FD_SET(m_clientSocket, &exceptFDS);
@@ -218,7 +218,7 @@ void SocketServer::processRx()
             {
                 // Accept a client socket
                 m_clientSocket = accept(m_listenSocket, nullptr, nullptr);
-                if (m_clientSocket == INVALID_SOCKET)
+                if (INVALID_SOCKET == m_clientSocket)
                 {
                     printf("accept failed\n");
                 }
@@ -231,7 +231,7 @@ void SocketServer::processRx()
                 char     recvbuf[bufferLength];
                 int      result = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
-                if (result > 0)
+                if (0 < ret)
                 {
                     for (uint8_t idx = 0; idx < result; idx++)
                     {
