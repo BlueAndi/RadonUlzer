@@ -136,8 +136,8 @@ void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
     // Echo the buffer back to the sender
     if (INVALID_SOCKET != m_clientSocket)
     {
-        int iSendResult = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
-        if (SOCKET_ERROR == iSendResult)
+        int result = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
+        if (SOCKET_ERROR == result)
         {
             printf("send failed\n");
             // Error on the socket. Client is now invalid.
@@ -172,7 +172,7 @@ void SocketServer::processRx()
     if (INVALID_SOCKET != m_listenSocket)
     {
         fd_set         readFDS, writeFDS, exceptFDS;
-        int            ret;
+        int            result;
         struct timeval timeout;
 
         timeout.tv_sec  = 0;
@@ -192,9 +192,9 @@ void SocketServer::processRx()
             FD_SET(m_clientSocket, &exceptFDS);
         }
 
-        ret = select(m_listenSocket + 1, &readFDS, &writeFDS, &exceptFDS, &timeout);
+        result = select(m_listenSocket + 1, &readFDS, &writeFDS, &exceptFDS, &timeout);
 
-        if (0 < ret)
+        if (0 < result)
         {
             // New Client Connection available
             if (FD_ISSET(m_listenSocket, &readFDS))
@@ -211,10 +211,10 @@ void SocketServer::processRx()
             if (FD_ISSET(m_clientSocket, &readFDS))
             {
                 const size_t bufferLength = 300U;
-                char     recvbuf[bufferLength];
-                int      result = recv(m_clientSocket, recvbuf, bufferLength, 0);
+                char         recvbuf[bufferLength];
+                int          result = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
-                if (0 < ret)
+                if (0 < result)
                 {
                     for (uint8_t idx = 0; idx < result; idx++)
                     {
