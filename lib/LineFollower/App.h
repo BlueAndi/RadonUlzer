@@ -114,6 +114,13 @@ private:
      */
     void reportPosition();
 
+    /**
+     * Callback for incoming data from the Position Channel.
+     * @param[in] payload Byte buffer containing incomming data.
+     * @param[in] payloadSize Number of bytes received.
+     */
+    static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
+
     App(const App& app);
     App& operator=(const App& app);
 };

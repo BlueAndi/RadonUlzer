@@ -56,8 +56,6 @@
  * Prototypes
  *****************************************************************************/
 
-static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
-
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -125,6 +123,10 @@ void App::reportPosition()
     m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
 }
 
+void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
+{
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/
@@ -132,12 +134,3 @@ void App::reportPosition()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-/**
- * Callback for incoming data from the Position Channel.
- * @param[in] payload Byte buffer containing incomming data.
- * @param[in] payloadSize Number of bytes received.
- */
-void positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
-}
