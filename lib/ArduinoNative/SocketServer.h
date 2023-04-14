@@ -116,11 +116,6 @@ public:
 
 private:
     /**
-     * Process the receiving of messages and client connections.
-     */
-    void processRx();
-
-    /**
      * File Descriptor of the Client Socket.
      */
     SOCKET m_clientSocket;
@@ -134,6 +129,11 @@ private:
      * Queue for the received bytes.
      */
     std::queue<uint8_t> m_rcvQueue;
+
+    /**
+     * Process the receiving of messages and client connections.
+     */
+    void processRx();
 };
 
 #endif /* SOCKET_SERVER_H_ */
