@@ -29,8 +29,8 @@
  *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
-#ifndef SOCKET_SERVER_H_
-#define SOCKET_SERVER_H_
+#ifndef SOCKET_SERVER_H
+#define SOCKET_SERVER_H
 
 /******************************************************************************
  * Includes

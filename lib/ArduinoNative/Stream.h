@@ -29,8 +29,8 @@
  *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
-#ifndef STREAM_H_
-#define STREAM_H_
+#ifndef STREAM_H
+#define STREAM_H
 
 /******************************************************************************
  * Includes
