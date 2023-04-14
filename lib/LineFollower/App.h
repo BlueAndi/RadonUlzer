@@ -105,7 +105,12 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
-    /** YAP Server Instance */
+    /**
+     * YAP Server Instance
+     *
+     * @tparam tMaxChannels set to 10, as App does not require
+     * more channels for external communication.
+     */
     YAPServer<10U> m_yapServer;
 
     /**
