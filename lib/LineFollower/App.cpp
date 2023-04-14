@@ -68,7 +68,7 @@ static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
 
 void App::setup()
 {
-    Serial.begin(9600U);
+    Serial.begin(115200U);
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
