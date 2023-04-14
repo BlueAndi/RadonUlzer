@@ -155,7 +155,7 @@ uint32_t SocketServer::available()
 
 bool SocketServer::getByte(uint8_t& byte)
 {
-    if (!m_rcvQueue.empty())
+    if (false == m_rcvQueue.empty())
     {
         byte = m_rcvQueue.front();
         m_rcvQueue.pop();

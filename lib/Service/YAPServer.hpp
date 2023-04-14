@@ -253,7 +253,7 @@ private:
         uint32_t rcvTimestamp = 0;
 
         /* Using (payloadSize - 1U) as CMD Byte is not passed. */
-        if (Util::byteArrayToUint32(payload, sizeof(uint32_t), rcvTimestamp))
+        if (true == Util::byteArrayToUint32(payload, sizeof(uint32_t), rcvTimestamp))
         {
             /* Check Timestamp with m_lastSyncCommand */
             if (rcvTimestamp == m_lastSyncCommand)
@@ -390,7 +390,7 @@ private:
             /* Frame has been received. */
             if ((0U != dlc) && ((HEADER_LEN + dlc) == m_receivedBytes))
             {
-                if (isFrameValid(m_receiveFrame))
+                if (true == isFrameValid(m_receiveFrame))
                 {
                     uint8_t channelArrayIndex = (m_receiveFrame.fields.header.headerFields.m_channel - 1U);
 
@@ -436,7 +436,7 @@ private:
     {
         uint32_t heartbeatPeriod = HEATBEAT_PERIOD_UNSYNCED;
 
-        if (m_isSynced)
+        if (true == m_isSynced)
         {
             heartbeatPeriod = HEATBEAT_PERIOD_SYNCED;
         }
@@ -471,7 +471,7 @@ private:
         uint8_t channelDLC = getChannelDLC(channelNumber);
 
         if ((nullptr != payload) && (channelDLC == payloadSize) &&
-            (m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
+            (true == m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
         {
             const uint8_t frameLength = HEADER_LEN + channelDLC;
             Frame         newFrame;
