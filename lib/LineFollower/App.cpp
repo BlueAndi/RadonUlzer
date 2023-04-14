@@ -94,7 +94,7 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-        /** Send Position to YAP Client */
+        /* Send Position to YAP Client */
         reportPosition();
 
         m_controlInterval.restart();
