@@ -22,7 +22,7 @@
  */
 
 /**
- * @author  Andreas Merkle <web@blue-andi.de>
+ * @author  Gabryel Reyes <gabryelrdiaz@gmail.com>
  * @brief   This module contains the YAP Server tests.
  */
 
