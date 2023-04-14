@@ -53,8 +53,6 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
-typedef unsigned int UINT_PTR;
-typedef UINT_PTR	SOCKET;
 #define INVALID_SOCKET	(SOCKET)(~0)
 #define SOCKET_ERROR	(-1)
 #endif
@@ -66,6 +64,11 @@ typedef UINT_PTR	SOCKET;
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
+
+#ifndef _WIN32
+typedef unsigned int UINT_PTR;
+typedef UINT_PTR	SOCKET;
+#endif
 
 /**
  * Socket Server for Inter-Process Communication.
