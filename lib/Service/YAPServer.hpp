@@ -512,6 +512,11 @@ private:
         {
             channelDLC = m_dataChannels[channel - 1U].m_dlc;
         }
+        else
+        {
+            /* Invalid channel, nothing to do. */
+            ;
+        }
 
         return channelDLC;
     }
