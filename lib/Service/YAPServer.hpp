@@ -528,9 +528,10 @@ private:
      */
     uint8_t checksum(const Frame& frame)
     {
-        uint32_t sum = frame.fields.header.headerFields.m_channel;
+        const uint8_t channelDLC = getChannelDLC(frame.fields.header.headerFields.m_channel);
+        uint32_t      sum        = frame.fields.header.headerFields.m_channel;
 
-        for (size_t idx = 0U; idx < getChannelDLC(frame.fields.header.headerFields.m_channel); idx++)
+        for (size_t idx = 0U; idx < channelDLC; idx++)
         {
             sum += frame.fields.payload.m_data[idx];
         }
