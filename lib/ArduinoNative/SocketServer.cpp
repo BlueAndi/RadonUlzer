@@ -117,7 +117,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     }
 
     // Setup the TCP listening socket
-    result = bind(m_listenSocket, addrInfo->ai_addr, (int)addrInfo->ai_addrlen);
+    result = bind(m_listenSocket, addrInfo->ai_addr, static_cast<int>(addrInfo->ai_addrlen));
     if (result == SOCKET_ERROR)
     {
         printf("bind failed\n");
@@ -239,7 +239,7 @@ void SocketServer::processRx()
                 {
                     for (uint8_t idx = 0; idx < result; idx++)
                     {
-                        m_rcvQueue.push((uint8_t)recvbuf[idx]);
+                        m_rcvQueue.push(static_cast<uint8_t>(recvbuf[idx]));
                     }
                 }
                 else
