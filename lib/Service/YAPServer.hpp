@@ -526,7 +526,7 @@ private:
      * @param[in] frame Frame to calculate checksum
      * @returns checksum value
      */
-    uint8_t checksum(const Frame& frame)
+    uint8_t checksum(const Frame& frame) const
     {
         const uint8_t channelDLC = getChannelDLC(frame.fields.header.headerFields.m_channel);
         uint32_t      sum        = frame.fields.header.headerFields.m_channel;
