@@ -52,20 +52,20 @@
 /**
  * Test Stream Class for Unit Testing
  */
-class TestStream_ : public Stream
+class TestStream : public Stream
 {
 public:
     /**
      * Stream Constructor.
      */
-    TestStream_()
+    TestStream() : m_outputBuffer{0U}
     {
     }
 
     /**
      * Stream Destructor.
      */
-    ~TestStream_()
+    ~TestStream()
     {
     }
 
@@ -145,7 +145,7 @@ public:
     /**
      * Buffer to write any output of the Stream
      */
-    uint8_t m_outputBuffer[MAX_FRAME_LEN] = {0U};
+    uint8_t m_outputBuffer[MAX_FRAME_LEN];
 
     /**
      * Byte Queue working as an RX Buffer.

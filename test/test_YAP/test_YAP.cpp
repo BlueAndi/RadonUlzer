@@ -68,7 +68,7 @@ static void testDataReceive();
  *****************************************************************************/
 
 static uint8_t       emptyOutputBuffer[MAX_FRAME_LEN];
-static TestStream_   TestStream;
+static TestStream    gTestStream;
 static const uint8_t controlChannelFrameLength = (HEADER_LEN + CONTROL_CHANNEL_PAYLOAD_LENGTH);
 static const uint8_t testPayload[4U]           = {0x12, 0x34, 0x56, 0x78};
 static bool          callbackCalled            = false;
@@ -164,7 +164,7 @@ static void testChannelCallback(const uint8_t* payload, uint8_t payloadSize)
  */
 static void testCmdSync()
 {
-    YAPServer<2U> testYapServer(TestStream);
+    YAPServer<2U> testYapServer(gTestStream);
     uint8_t       expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
         {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* SYNC 0ms*/
         {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8}, /* SYNC 1000ms*/
@@ -182,30 +182,30 @@ static void testCmdSync()
 
     /* Unsynced Heartbeat at 0 milliseconds */
     testYapServer.process(0U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 
     /* Unsynced Heartbeat after 1000 milliseconds */
     testYapServer.process(1000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 
     /* No Heartbeat expected */
     testYapServer.process(1500U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 
     /* Unsynced Heartbeat after 2000 milliseconds */
     testYapServer.process(2000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Sync
      */
 
     /* Put Data in RX Queue */
-    TestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
 
     /* Two process calls required */
     testYapServer.process(2500U); /* Read Frame Header */
@@ -213,8 +213,8 @@ static void testCmdSync()
     TEST_ASSERT_TRUE(testYapServer.isSynced());
 
     /* No output expected */
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushInputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushInputBuffer();
 
     /*
      * Case: Synced Heartbeat.
@@ -225,32 +225,32 @@ static void testCmdSync()
 
     /* No output expected. Would be Heartbeat if Unsynced. */
     testYapServer.process(3000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, controlChannelFrameLength);
 
     /* Synced Heartbeat. */
     testYapServer.process(7000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 
     /**
      * Case: Maintain Sync
      */
 
     /* Put SYNC_RSP in RX Queue. Otherwise will fall out of Sync. */
-    TestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
 
     /* Two process calls required */
     testYapServer.process(9000U);  /* Read Frame Header */
     testYapServer.process(11000U); /* Read Frame Payload */
     TEST_ASSERT_TRUE(testYapServer.isSynced());
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, controlChannelFrameLength);
 
     /* Synced Heartbeat */
     testYapServer.process(12000U);
     TEST_ASSERT_TRUE(testYapServer.isSynced());
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[4U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[4U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /**
      * Case: Fall out of Sync.
@@ -260,8 +260,8 @@ static void testCmdSync()
     /* Synced Heartbeat. Fall out fo sync, as last Heartbeat was not Acknowledged. */
     testYapServer.process(17000U);
     TEST_ASSERT_FALSE(testYapServer.isSynced());
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[5U], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[5U], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
 }
 
 /**
@@ -269,7 +269,7 @@ static void testCmdSync()
  */
 static void testCmdSyncRsp()
 {
-    YAPServer<2U> testYapServer(TestStream);
+    YAPServer<2U> testYapServer(gTestStream);
     uint8_t       testTime                                           = 0U;
     uint8_t       numberOfCases                                      = 3U;
     uint8_t expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {{0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00},
@@ -281,18 +281,18 @@ static void testCmdSyncRsp()
 
     /* Ignore SYNC */
     testYapServer.process(testTime++);
-    TestStream.flushOutputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /* Test for SYNC_RSP */
     for (uint8_t testCase = 0; testCase < numberOfCases; testCase++)
     {
-        TestStream.pushToQueue(inputQueueVector[testCase], controlChannelFrameLength);
+        gTestStream.pushToQueue(inputQueueVector[testCase], controlChannelFrameLength);
         testYapServer.process(testTime++);
         testYapServer.process(testTime++);
-        TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[testCase], TestStream.m_outputBuffer,
+        TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[testCase], gTestStream.m_outputBuffer,
                                       controlChannelFrameLength);
-        TestStream.flushInputBuffer();
-        TestStream.flushOutputBuffer();
+        gTestStream.flushInputBuffer();
+        gTestStream.flushOutputBuffer();
     }
 }
 
@@ -301,7 +301,7 @@ static void testCmdSyncRsp()
  */
 static void testCmdScrb()
 {
-    YAPServer<2U> testYapServer(TestStream);
+    YAPServer<2U> testYapServer(gTestStream);
     uint8_t       testTime                                                 = 0U;
     uint8_t       numberOfCases                                            = 2U;
     uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {{0x00, 0x03, 0x03, 0x00, 0x00},
@@ -311,41 +311,41 @@ static void testCmdScrb()
 
     /* Ignore SYNC */
     testYapServer.process(testTime++);
-    TestStream.flushOutputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Suscribe to Unknown Channel
      */
-    TestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
-    TestStream.flushInputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
 
     /*
      * Case: Subscribe to Known Channel
      */
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
 
-    TestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
-    TestStream.flushInputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
 
     /*
      * Case: Subscribe to a Duplicate Channel
      */
     TEST_ASSERT_EQUAL_UINT8(2U, testYapServer.createChannel("TEST", 8U, testChannelCallback));
 
-    TestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1], TestStream.m_outputBuffer, controlChannelFrameLength);
-    TestStream.flushOutputBuffer();
-    TestStream.flushInputBuffer();
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1], gTestStream.m_outputBuffer, controlChannelFrameLength);
+    gTestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
 }
 
 /**
@@ -353,7 +353,7 @@ static void testCmdScrb()
  */
 static void testCmdScrbRsp()
 {
-    YAPServer<2U> testYapServer(TestStream);
+    YAPServer<2U> testYapServer(gTestStream);
     uint8_t       testTime                                                 = 0U;
     uint8_t       numberOfCases                                            = 2U;
     uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
@@ -363,48 +363,48 @@ static void testCmdScrbRsp()
 
     /* Ignore SYNC */
     testYapServer.process(testTime++);
-    TestStream.flushOutputBuffer();
+    gTestStream.flushOutputBuffer();
 
     TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
 
     /*
      * Case: Suscribe to Unknown Channel
      */
-    TestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0], controlChannelFrameLength);
 
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer, controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Suscribe to Known Channel
      */
-    TestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
 
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer, controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfChannels());
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Suscribe again to Known Channel
      */
-    TestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[1], controlChannelFrameLength);
 
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], TestStream.m_outputBuffer, controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfChannels());
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 }
 
 /**
@@ -413,7 +413,7 @@ static void testCmdScrbRsp()
 static void testChannelCreation()
 {
     const uint8_t          maxChannels = 5U;
-    YAPServer<maxChannels> testYapServer(TestStream);
+    YAPServer<maxChannels> testYapServer(gTestStream);
 
     /* No Channels Configured on Start */
     TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfChannels());
@@ -457,25 +457,25 @@ static void testChannelCreation()
  */
 static void testDataSend()
 {
-    YAPServer<1U> testYapServer(TestStream);
+    YAPServer<1U> testYapServer(gTestStream);
     uint8_t       expectedOutputBufferVector[1U][MAX_FRAME_LEN] = {{0x01, 0x16, 0x12, 0x34, 0x56, 0x78}};
     uint8_t       inputQueueVector[1U][MAX_FRAME_LEN]           = {{0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00}};
 
     /* Flush Stream */
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Send data on Control Channel.
      */
     testYapServer.sendData((uint8_t)CONTROL_CHANNEL_NUMBER, testPayload, sizeof(testPayload));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, sizeof(testPayload));
 
     /*
      * Case: Send on non-existent channel while unsynced.
      */
     testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, sizeof(testPayload));
 
     /* Create a Channel */
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.createChannel("TEST", sizeof(testPayload), testChannelCallback));
@@ -484,10 +484,10 @@ static void testDataSend()
      * Case: Send on existent channel while unsynced.
      */
     testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, sizeof(testPayload));
 
     /* Sync */
-    TestStream.pushToQueue(inputQueueVector[0U], controlChannelFrameLength);
+    gTestStream.pushToQueue(inputQueueVector[0U], controlChannelFrameLength);
     testYapServer.process(0U);
     testYapServer.process(1U);
     TEST_ASSERT_TRUE(testYapServer.isSynced());
@@ -496,13 +496,13 @@ static void testDataSend()
      * Case: Send on non-existent channel.
      */
     testYapServer.sendData("HELLO", testPayload, sizeof(testPayload));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, TestStream.m_outputBuffer, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, sizeof(testPayload));
 
     /*
      * Case: Send on existent channel.
      */
     testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], TestStream.m_outputBuffer, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], gTestStream.m_outputBuffer, sizeof(testPayload));
 }
 
 /**
@@ -510,20 +510,20 @@ static void testDataSend()
  */
 static void testDataReceive()
 {
-    YAPServer<1U> testYapServer(TestStream);
+    YAPServer<1U> testYapServer(gTestStream);
     uint8_t       testTime                            = 0U;
     uint8_t       inputQueueVector[2U][MAX_FRAME_LEN] = {{0x01, 0x16, 0x12, 0x34, 0x56, 0x78},
                                                          {0x02, 0x17, 0x12, 0x34, 0x56, 0x78}};
 
     /* Flush Stream */
-    TestStream.flushInputBuffer();
-    TestStream.flushOutputBuffer();
+    gTestStream.flushInputBuffer();
+    gTestStream.flushOutputBuffer();
 
     /*
      * Case: Receive Data on non-existent channel.
      */
     callbackCalled = false;
-    TestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
+    gTestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_FALSE(callbackCalled);
@@ -535,8 +535,8 @@ static void testDataReceive()
      * Case: Receive Data on existent channel.
      */
     callbackCalled = false;
-    TestStream.flushInputBuffer();
-    TestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
+    gTestStream.flushInputBuffer();
+    gTestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_TRUE(callbackCalled);
@@ -545,7 +545,7 @@ static void testDataReceive()
      * Case: Receive Data on channel number greater than maxChannels.
      */
     callbackCalled = false;
-    TestStream.pushToQueue(inputQueueVector[1U], (HEADER_LEN + sizeof(testPayload)));
+    gTestStream.pushToQueue(inputQueueVector[1U], (HEADER_LEN + sizeof(testPayload)));
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_FALSE(callbackCalled);
