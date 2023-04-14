@@ -52,11 +52,6 @@
 class Stream
 {
 public:
-    /** Construct Stream */
-    Stream()
-    {
-    }
-
     /** Destruct Stream */
     virtual ~Stream()
     {
@@ -82,6 +77,12 @@ public:
      * @returns Number of bytes read from Stream.
      */
     virtual size_t readBytes(uint8_t* buffer, size_t length) = 0;
+
+protected:
+    /** Construct Stream */
+    Stream()
+    {
+    }
 };
 
 #endif /* STREAM_H_ */
