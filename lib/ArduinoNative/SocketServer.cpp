@@ -237,9 +237,9 @@ void SocketServer::processRx()
 
                 if (result > 0)
                 {
-                    for (int i = 0; i < result; i++)
+                    for (uint8_t idx = 0; idx < result; idx++)
                     {
-                        m_rcvQueue.push((uint8_t)recvbuf[i]);
+                        m_rcvQueue.push((uint8_t)recvbuf[idx]);
                     }
                 }
                 else
