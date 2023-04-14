@@ -67,7 +67,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     bool             success = true;
     int              result;
     struct addrinfo  hints;
-    struct addrinfo* addrInfo = NULL;
+    struct addrinfo* addrInfo = nullptr;
 
 #ifdef _WIN32
     ZeroMemory(&hints, sizeof(hints));
@@ -94,7 +94,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 #endif
 
     // Resolve the server address and port
-    result = getaddrinfo(NULL, std::to_string(port).c_str(), &hints, &addrInfo);
+    result = getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addrInfo);
     if (result != 0)
     {
         printf("getaddrinfo failed with error: %d\n", result);
@@ -221,7 +221,7 @@ void SocketServer::processRx()
             if (FD_ISSET(m_listenSocket, &readFDS))
             {
                 // Accept a client socket
-                m_clientSocket = accept(m_listenSocket, NULL, NULL);
+                m_clientSocket = accept(m_listenSocket, nullptr, nullptr);
                 if (m_clientSocket == INVALID_SOCKET)
                 {
                     printf("accept failed\n");
