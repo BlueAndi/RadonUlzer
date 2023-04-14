@@ -1,0 +1,33 @@
+@startuml RemoteControl System States
+
+title System States
+
+state StartupState: /entry Initialize HAL.
+state StartupState: /entry Show operator info on LCD.
+state StartupState: /do Wait for pushbutton A is triggered.
+
+state MotorSpeedCalibrationState: /entry Show operator info on LCD.
+state MotorSpeedCalibrationState: /do Perform calibration.
+
+state ErrorState: /entry Show error info on LCD.
+state ErrorState: /do Wait for pushbutton A is triggered.
+
+state ReadyState: /entry Show connection info on LCD.
+state ReadyState: /do Wait for operator to connect using Remote Control.
+
+state DrivingState: /entry Show connection status on LCD.
+state DrivingState: /do Follow commands from the operator.
+state DrivingState: /do Prevent crashing using proximity sensors.
+state DrivingState: /exit Full stop.
+
+[*] --> StartupState: Power up
+StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+MotorSpeedCalibrationState --> ReadyState: [Calibration finished]
+MotorSpeedCalibrationState --> ErrorState: [Calibration failed]
+ReadyState --> DrivingState: [Operator connects]
+DrivingState --> ReadyState: [Connection lost]
+ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+ReadyState --> ErrorState: [Connection Timeout]
+DrivingState --> ErrorState: [Fatal error]
+
+@enduml
