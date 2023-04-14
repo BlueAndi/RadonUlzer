@@ -320,7 +320,7 @@ private:
      */
     void callbackControlChannel(const uint8_t* payload, const uint8_t payloadSize)
     {
-        if ((nullptr == payload) || (0U == payloadSize))
+        if ((nullptr == payload) || (CONTROL_CHANNEL_PAYLOAD_LENGTH != payloadSize))
         {
             return;
         }
