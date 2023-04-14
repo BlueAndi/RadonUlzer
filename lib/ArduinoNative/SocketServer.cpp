@@ -231,7 +231,7 @@ void SocketServer::processRx()
             // Client Ready to read
             if (FD_ISSET(m_clientSocket, &readFDS))
             {
-                uint16_t bufferLength = 300U;
+                const size_t bufferLength = 300U;
                 char     recvbuf[bufferLength];
                 int      result = recv(m_clientSocket, recvbuf, bufferLength, 0);
 
