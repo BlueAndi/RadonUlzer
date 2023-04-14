@@ -108,9 +108,9 @@ public:
     uint32_t available();
 
     /**
-     * Get a Byte.
-     * @param[out] byte buffer to write byte to.
-     * @returns false is value is not valid. true if valid.
+     * Get a Byte from the receiving buffer, if any.
+     * @param[out] byte buffer to write the byte to.
+     * @returns If a received byte has been succesfully written to the buffer, returns true. Otherwise, false.
      */
     bool getByte(uint8_t& byte);
 
