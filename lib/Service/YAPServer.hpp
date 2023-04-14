@@ -106,13 +106,18 @@ public:
      * @param[in] channelNumber Channel to send frame to.
      * @param[in] payload Byte buffer to be sent.
      * @param[in] payloadSize Amount of bytes to send.
+     * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    void sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
+    bool sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
+        bool isSent = false;
+
         if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != payload))
         {
-            send(channelNumber, payload, payloadSize);
+            isSent = send(channelNumber, payload, payloadSize);
         }
+
+        return isSent;
     }
 
     /**
@@ -120,13 +125,18 @@ public:
      * @param[in] channelName Channel to send frame to.
      * @param[in] payload Byte buffer to be sent.
      * @param[in] payloadSize Amount of bytes to send.
+     * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    void sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize)
+    bool sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize)
     {
+        bool isSent = false;
+
         if (nullptr != channelName)
         {
-            sendData(getChannelNumber(channelName), payload, payloadSize);
+            isSent = sendData(getChannelNumber(channelName), payload, payloadSize);
         }
+
+        return isSent;
     }
 
     /**
@@ -198,11 +208,13 @@ public:
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
             buf[CONTROL_CHANNEL_COMMAND_INDEX] = COMMANDS::SCRB;
             memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
-            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
 
-            /* Save Name and Callback for channel creation after response */
-            memcpy(m_pendingSuscribeChannel.m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX], CHANNEL_NAME_MAX_LEN);
-            m_pendingSuscribeChannel.m_callback = callback;
+            if(true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+            {
+                /* Save Name and Callback for channel creation after response */
+                memcpy(m_pendingSuscribeChannel.m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX], CHANNEL_NAME_MAX_LEN);
+                m_pendingSuscribeChannel.m_callback = callback;
+            }
         }
     }
 
@@ -242,7 +254,8 @@ private:
     {
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[0U], payload[1U], payload[2U],
                                                        payload[3U]};
-        send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+        /* Ignore return as SYNC_RSP can fail */
+        (void) send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
     }
 
     /**
@@ -290,8 +303,9 @@ private:
             buf[1U] = 0U;
             buf[2U] = 0U;
         }
-        
-        send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+
+        /* Ignore return as SCRB_RSP can fail. */
+        (void) send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
     }
 
     /**
@@ -461,8 +475,10 @@ private:
             /* Using (sizeof(buf) - 1U) as CMD Byte is not passed. */
             Util::uint32ToByteArray(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], (sizeof(buf) - 1), currentTimestamp);
 
-            send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
-            m_lastSyncCommand = currentTimestamp;
+            if (true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+            {
+                m_lastSyncCommand = currentTimestamp;
+            }
         }
     }
 
@@ -471,23 +487,33 @@ private:
      * @param[in] channelNumber Channel to send frame to.
      * @param[in] payload Byte buffer to be sent.
      * @param[in] payloadSize Amount of bytes to send.
+     * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    void send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
+    bool send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
+        bool    frameSent  = false;
         uint8_t channelDLC = getChannelDLC(channelNumber);
 
         if ((nullptr != payload) && (channelDLC == payloadSize) &&
             (true == m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
         {
-            const uint8_t frameLength = HEADER_LEN + channelDLC;
+            const uint8_t frameLength  = HEADER_LEN + channelDLC;
+            uint8_t       writtenBytes = 0;
             Frame         newFrame;
 
             newFrame.fields.header.headerFields.m_channel = channelNumber;
             memcpy(newFrame.fields.payload.m_data, payload, channelDLC);
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
-            m_stream.write(newFrame.raw, frameLength);
+            writtenBytes = m_stream.write(newFrame.raw, frameLength);
+
+            if (frameLength == writtenBytes)
+            {
+                frameSent = true;
+            }
         }
+
+        return frameSent;
     }
 
     /**
