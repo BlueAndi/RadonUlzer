@@ -275,7 +275,7 @@ private:
      */
     void cmdSCRB(const uint8_t* payload)
     {
-        uint8_t channelNumber = getChannelNumber((const char*)payload);
+        uint8_t channelNumber = getChannelNumber(reinterpret_cast<const char*>(payload));
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
         buf[0U] = COMMANDS::SCRB_RSP;
 
