@@ -93,6 +93,12 @@ private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
+    /** Name of Channel to send Position Data to. */
+    static const char* POSITION_CHANNEL;
+
+    /** DLC of Position Channel */
+    static const uint8_t POSITION_CHANNEL_DLC = 8U;
+
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
@@ -101,12 +107,6 @@ private:
 
     /** YAP Server Instance */
     YAPServer<10U> m_yapServer;
-
-    /** Name of Channel to send Position Data to. */
-    const char* POSITION_CHANNEL = "POSITION";
-
-    /** DLC of Position Channel */
-    static const uint8_t POSITION_CHANNEL_DLC = 8U;
 
     /**
      * Report the current position of the robot using the Odometry data.
