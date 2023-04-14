@@ -216,6 +216,7 @@ public:
 
     /**
      * Get the number of configured channels.
+     * @returns Number of configured Data Channels. The Command Channel is ignored here.
      */
     uint8_t getNumberOfChannels()
     {
