@@ -69,11 +69,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     struct addrinfo  hints;
     struct addrinfo* addrInfo = nullptr;
 
-#ifdef _WIN32
-    ZeroMemory(&hints, sizeof(hints));
-#else
     memset(&hints, 0, sizeof(struct addrinfo));
-#endif
 
     hints.ai_family   = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
