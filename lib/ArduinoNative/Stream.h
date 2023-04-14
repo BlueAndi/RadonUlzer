@@ -58,7 +58,7 @@ public:
     }
 
     /** Destruct Stream */
-    ~Stream()
+    virtual ~Stream()
     {
     }
 
