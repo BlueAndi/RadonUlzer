@@ -60,6 +60,7 @@ SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET), m_listenSocket(IN
 
 SocketServer::~SocketServer()
 {
+    close();
 }
 
 bool SocketServer::init(uint16_t port, uint8_t maxConnections)
