@@ -261,6 +261,10 @@ private:
                 m_lastSyncResponse = m_lastSyncCommand;
                 m_isSynced         = true;
             }
+            else
+            {
+                m_isSynced = false;
+            }
         }
     }
 
