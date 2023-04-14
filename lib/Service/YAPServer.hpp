@@ -500,7 +500,7 @@ private:
      * @param[in] channel Channel number to check
      * @returns DLC of the channel, or 0 if channel is not found.
      */
-    uint8_t getChannelDLC(uint8_t channel)
+    uint8_t getChannelDLC(uint8_t channel) const
     {
         uint8_t channelDLC = 0U;
 
