@@ -98,7 +98,7 @@ struct Channel
     /**
      * Channel Constructor.
      */
-    Channel() : m_name(""), m_dlc(0U), m_callback(nullptr)
+    Channel() : m_name{0U}, m_dlc(0U), m_callback(nullptr)
     {
     }
 };
