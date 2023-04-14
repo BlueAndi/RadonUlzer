@@ -94,9 +94,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     if (0 != result)
     {
         printf("getaddrinfo failed with error: %d\n", result);
-#ifdef _WIN32
-        WSACleanup();
-#endif
+        close();
         return false;
     }
 
@@ -106,9 +104,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     {
         printf("socket failed\n");
         freeaddrinfo(addrInfo);
-#ifdef _WIN32
-        WSACleanup();
-#endif
+        close();
         return false;
     }
 
@@ -118,12 +114,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     {
         printf("bind failed\n");
         freeaddrinfo(addrInfo);
-#ifdef _WIN32
-        closesocket(m_listenSocket);
-        WSACleanup();
-#else
-        close(m_listenSocket);
-#endif
+        close();
         return false;
     }
 
@@ -133,12 +124,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     if (SOCKET_ERROR == result)
     {
         printf("listen failed\n");
-#ifdef _WIN32
-        closesocket(m_listenSocket);
-        WSACleanup();
-#else
-        close(m_listenSocket);
-#endif
+        close();
         return false;
     }
 
@@ -154,11 +140,8 @@ void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
         if (SOCKET_ERROR == iSendResult)
         {
             printf("send failed\n");
-#ifdef _WIN32
-            closesocket(m_listenSocket);
-#else
-            close(m_listenSocket);
-#endif
+            // Error on the socket. Client is now invalid.
+            m_clientSocket = INVALID_SOCKET;
         }
     }
 }
@@ -240,16 +223,30 @@ void SocketServer::processRx()
                 }
                 else
                 {
-#ifdef _WIN32
-                    closesocket(m_listenSocket);
-#else
-                    close(m_listenSocket);
-#endif
+                    // Client disconnected or error on the socket.
                     m_clientSocket = INVALID_SOCKET;
                 }
             }
         }
     }
+}
+
+void SocketServer::close()
+{
+    // Close the listening socket.
+    if (INVALID_SOCKET != m_listenSocket)
+    {
+#ifdef _WIN32
+        closesocket(m_listenSocket);
+#else
+        close(m_listenSocket);
+#endif
+    }
+
+#ifdef _WIN32
+    // Terminate the use of the Winsock 2 DLL.
+    WSACleanup();
+#endif
 }
 
 /******************************************************************************

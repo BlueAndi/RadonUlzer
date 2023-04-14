@@ -134,6 +134,11 @@ private:
      * Process the receiving of messages and client connections.
      */
     void processRx();
+
+    /**
+     * Close the listening socket connection.
+     */
+    void close();
 };
 
 #endif /* SOCKET_SERVER_H_ */
