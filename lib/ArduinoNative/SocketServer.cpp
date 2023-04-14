@@ -132,8 +132,10 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     return true;
 }
 
-void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
+size_t SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
 {
+    size_t bytesSent = 0;
+
     // Echo the buffer back to the sender
     if (INVALID_SOCKET != m_clientSocket)
     {
@@ -144,7 +146,13 @@ void SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
             // Error on the socket. Client is now invalid.
             m_clientSocket = INVALID_SOCKET;
         }
+        else
+        {
+            bytesSent = result;
+        }
     }
+
+    return bytesSent;
 }
 
 uint32_t SocketServer::available()

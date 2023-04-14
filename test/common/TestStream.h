@@ -74,12 +74,16 @@ public:
      * @param[in] buffer Byte Array to send.
      * @param[in] length Length of Buffer.
      */
-    void write(const uint8_t* buffer, size_t length) final
+    size_t write(const uint8_t* buffer, size_t length) final
     {
-        for (size_t idx = 0; idx < length; idx++)
+        size_t idx = 0;
+
+        for (idx = 0; idx < length; idx++)
         {
             m_outputBuffer[idx] = buffer[idx];
         }
+
+        return idx;
     }
 
     /**

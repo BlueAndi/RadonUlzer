@@ -98,8 +98,9 @@ public:
      * Send a message to the socket.
      * @param[in] buf Byte buffer to send
      * @param[in] length Number of bytes to send
+     * @returns Number of bytes written
      */
-    void sendMessage(const uint8_t* buf, uint16_t length);
+    size_t sendMessage(const uint8_t* buf, uint16_t length);
 
     /**
      * Check if any data has been received.

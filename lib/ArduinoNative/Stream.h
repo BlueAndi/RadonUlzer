@@ -61,8 +61,9 @@ public:
      * Write bytes to stream.
      * @param[in] buffer Byte Array to send.
      * @param[in] length Length of Buffer.
+     * @returns Number of bytes written
      */
-    virtual void write(const uint8_t* buffer, size_t length) = 0;
+    virtual size_t write(const uint8_t* buffer, size_t length) = 0;
 
     /**
      * Check if there are available bytes in the Stream.

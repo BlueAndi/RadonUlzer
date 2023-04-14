@@ -161,9 +161,9 @@ public:
         printf("%d\n", value);
     }
 
-    void write(const uint8_t* buffer, size_t length)
+    size_t write(const uint8_t* buffer, size_t length)
     {
-        m_socketServer.sendMessage(buffer, length);
+        return m_socketServer.sendMessage(buffer, length);
     }
 
     int available()
