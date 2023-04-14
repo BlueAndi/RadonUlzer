@@ -64,6 +64,12 @@ SOFTWARE.
 /** DLC of Heartbeat Command. */
 #define CONTROL_CHANNEL_PAYLOAD_LENGTH (11U)
 
+/** Index of the Command Byte of the Control Channel*/
+#define CONTROL_CHANNEL_COMMAND_INDEX (0U)
+
+/** Index of the start of the payload of the Control Channel*/
+#define CONTROL_CHANNEL_PAYLOAD_INDEX (1U)
+
 /** Period of Heartbeat when Synced. */
 #define HEATBEAT_PERIOD_SYNCED (5000U)
 

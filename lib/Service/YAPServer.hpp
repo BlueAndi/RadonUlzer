@@ -196,12 +196,12 @@ public:
             /* Using strnlen in case the name is not null-terminated. */
             uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
-            buf[0U] = COMMANDS::SCRB;
-            memcpy(&buf[1U], channelName, nameLength);
+            buf[CONTROL_CHANNEL_COMMAND_INDEX] = COMMANDS::SCRB;
+            memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
 
             /* Save Name and Callback for channel creation after response */
-            memcpy(m_pendingSuscribeChannel.m_name, &buf[1U], CHANNEL_NAME_MAX_LEN);
+            memcpy(m_pendingSuscribeChannel.m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX], CHANNEL_NAME_MAX_LEN);
             m_pendingSuscribeChannel.m_callback = callback;
         }
     }
@@ -325,25 +325,26 @@ private:
             return;
         }
 
-        uint8_t cmdByte = payload[0U];
+        uint8_t        cmdByte = payload[CONTROL_CHANNEL_COMMAND_INDEX];
+        const uint8_t* cmdData = &payload[CONTROL_CHANNEL_PAYLOAD_INDEX];
 
         switch (cmdByte)
         {
 
         case COMMANDS::SYNC:
-            cmdSYNC(&payload[1U]);
+            cmdSYNC(cmdData);
             break;
 
         case COMMANDS::SYNC_RSP:
-            cmdSYNC_RSP(&payload[1U]);
+            cmdSYNC_RSP(cmdData);
             break;
 
         case COMMANDS::SCRB:
-            cmdSCRB(&payload[1U]);
+            cmdSCRB(cmdData);
             break;
 
         case COMMANDS::SCRB_RSP:
-            cmdSCRB_RSP(&payload[1U]);
+            cmdSCRB_RSP(cmdData);
             break;
 
         default:
@@ -453,7 +454,7 @@ private:
             uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC};
 
             /* Using (sizeof(buf) - 1U) as CMD Byte is not passed. */
-            Util::uint32ToByteArray(&buf[1], (sizeof(buf) - 1), currentTimestamp);
+            Util::uint32ToByteArray(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], (sizeof(buf) - 1), currentTimestamp);
 
             send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
             m_lastSyncCommand = currentTimestamp;
