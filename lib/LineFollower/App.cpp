@@ -120,8 +120,8 @@ void App::reportPosition()
 
     Odometry::getInstance().getPosition(xPos, yPos);
 
-    Util::int32ToByteArray(&outBuf[0U], sizeof(outBuf), xPos);
-    Util::int32ToByteArray(&outBuf[4U], sizeof(outBuf), yPos);
+    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
+    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
 
     m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
 }
