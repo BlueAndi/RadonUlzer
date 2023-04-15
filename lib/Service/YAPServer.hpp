@@ -304,8 +304,11 @@ private:
             buf[2U] = 0U;
         }
 
-        /* Ignore return as SCRB_RSP can fail. */
-        (void) send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+        if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+        {
+            /* Fall out of sync if failed to send. */
+            m_isSynced = false;
+        }
     }
 
     /**
