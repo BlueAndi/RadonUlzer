@@ -25,63 +25,85 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Implementation of Arduino Serial
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  * 
  * @addtogroup HAL
  *
  * @{
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
+#ifndef SERIAL_H
+#define SERIAL_H
 
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
 
-#define _USE_MATH_DEFINES
-
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <string.h>
-#include <math.h>
-#include "Serial.h"
+
+#include "Stream.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#ifndef PSTR
-#define PSTR
-#endif
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
+
+class Serial_ : public Stream
+{
+public:
+    Serial_();
+
+    ~Serial_();
+
+    void begin(unsigned long baudrate);
+
+    void end();
+
+    void print(const char str[]);
+
+    void print(uint8_t value);
+
+    void print(uint16_t value);
+
+    void print(uint32_t value);
+
+    void print(int8_t value);
+
+    void print(int16_t value);
+
+    void print(int32_t value);
+
+    void println(const char str[]);
+
+    void println(uint8_t value);
+
+    void println(uint16_t value);
+
+    void println(uint32_t value);
+
+    void println(int8_t value);
+
+    void println(int16_t value);
+
+    void println(int32_t value);
+
+    size_t write(const uint8_t* buffer, size_t length) final;
+
+    int available() final;
+
+    size_t readBytes(uint8_t* buffer, size_t length) final;
+};
+
+extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-/**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
- */
-extern unsigned long millis();
-
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
-
-#endif  /* ARDUINO_H */
+#endif  /* SERIAL_H */
