@@ -38,6 +38,7 @@
 
 #include <stdint.h>
 #include <queue>
+#include "Stream.h"
 
 #ifdef _WIN32
 #undef UNICODE
@@ -53,8 +54,8 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
-#define INVALID_SOCKET	(SOCKET)(~0)
-#define SOCKET_ERROR	(-1)
+#define INVALID_SOCKET (SOCKET)(~0)
+#define SOCKET_ERROR   (-1)
 #endif
 
 /******************************************************************************
@@ -67,13 +68,13 @@
 
 #ifndef _WIN32
 typedef unsigned int UINT_PTR;
-typedef UINT_PTR	SOCKET;
+typedef UINT_PTR     SOCKET;
 #endif
 
 /**
  * Socket Server for Inter-Process Communication.
  */
-class SocketServer
+class SocketServer : public Stream
 {
 public:
     /**
@@ -95,25 +96,122 @@ public:
     bool init(uint16_t port, uint8_t maxConnections);
 
     /**
+     * Print argument to the Output Stream.
+     * @param[in] str Argument to print.
+     */
+    void print(const char str[]) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint8_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint16_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint32_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int8_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int16_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int32_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] str Argument to print.
+     */
+    void println(const char str[]) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint8_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint16_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint32_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int8_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int16_t value) final;
+
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int32_t value) final;
+
+    /**
      * Send a message to the socket.
      * @param[in] buf Byte buffer to send
      * @param[in] length Number of bytes to send
      * @returns Number of bytes written
      */
-    size_t sendMessage(const uint8_t* buf, uint16_t length);
+    size_t write(const uint8_t* buffer, size_t length) final;
 
     /**
      * Check if any data has been received.
      * @returns number of available bytes.
      */
-    uint32_t available();
+    int available() final;
 
     /**
-     * Get a Byte from the receiving buffer, if any.
-     * @param[out] byte buffer to write the byte to.
-     * @returns If a received byte has been succesfully written to the buffer, returns true. Otherwise, false.
+     * Read bytes into a buffer.
+     * @param[in] buffer Array to write bytes to.
+     * @param[in] length number of bytes to be read.
+     * @returns Number of bytes read from Stream.
      */
-    bool getByte(uint8_t& byte);
+    size_t readBytes(uint8_t* buffer, size_t length) final;
+
+    /**
+     * Process the receiving of messages and client connections.
+     */
+    void process();
 
 private:
     /**
@@ -132,14 +230,16 @@ private:
     std::queue<uint8_t> m_rcvQueue;
 
     /**
-     * Process the receiving of messages and client connections.
-     */
-    void processRx();
-
-    /**
      * Close the listening socket connection.
      */
     void close();
+
+    /**
+     * Get a Byte from the receiving buffer, if any.
+     * @param[out] byte buffer to write the byte to.
+     * @returns If a received byte has been succesfully written to the buffer, returns true. Otherwise, false.
+     */
+    bool getByte(uint8_t& byte);
 };
 
 #endif /* SOCKET_SERVER_H_ */

@@ -36,7 +36,6 @@
 #include "SocketServer.h"
 #include <stdio.h>
 #include <string>
-#include <cstring>
 
 /******************************************************************************
  * Macros
@@ -132,14 +131,98 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     return true;
 }
 
-size_t SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
+void SocketServer::print(const char str[])
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(uint8_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(uint16_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(uint32_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(int8_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(int16_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::print(int32_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(const char str[])
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(uint8_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(uint16_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(uint32_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(int8_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(int16_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+void SocketServer::println(int32_t value)
+{
+    /* Not implemented*/
+    ;
+}
+
+size_t SocketServer::write(const uint8_t* buffer, size_t length)
 {
     size_t bytesSent = 0;
 
     /* Echo the buffer back to the sender */
     if (INVALID_SOCKET != m_clientSocket)
     {
-        int result = send(m_clientSocket, reinterpret_cast<const char*>(buf), length, 0);
+        int result = send(m_clientSocket, reinterpret_cast<const char*>(buffer), length, 0);
         if (SOCKET_ERROR == result)
         {
             printf("send failed\n");
@@ -155,28 +238,32 @@ size_t SocketServer::sendMessage(const uint8_t* buf, uint16_t length)
     return bytesSent;
 }
 
-uint32_t SocketServer::available()
+int SocketServer::available()
 {
-    this->processRx();
     return m_rcvQueue.size();
 }
 
-bool SocketServer::getByte(uint8_t& byte)
+size_t SocketServer::readBytes(uint8_t* buffer, size_t length)
 {
-    if (false == m_rcvQueue.empty())
+    size_t count = 0;
+
+    for (count = 0; count < length; count++)
     {
-        byte = m_rcvQueue.front();
-        m_rcvQueue.pop();
-        return true;
+        uint8_t byte;
+        if (false == getByte(byte))
+        {
+            break;
+        }
+        else
+        {
+            buffer[count] = byte;
+        }
     }
-    return false;
+
+    return count;
 }
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-void SocketServer::processRx()
+void SocketServer::process()
 {
     if (INVALID_SOCKET != m_listenSocket)
     {
@@ -240,6 +327,10 @@ void SocketServer::processRx()
     }
 }
 
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
 void SocketServer::close()
 {
     /* Close the listening socket. */
@@ -256,6 +347,17 @@ void SocketServer::close()
     /* Terminate the use of the Winsock 2 DLL. */
     WSACleanup();
 #endif
+}
+
+bool SocketServer::getByte(uint8_t& byte)
+{
+    if (false == m_rcvQueue.empty())
+    {
+        byte = m_rcvQueue.front();
+        m_rcvQueue.pop();
+        return true;
+    }
+    return false;
 }
 
 /******************************************************************************

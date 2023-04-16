@@ -44,6 +44,7 @@
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
 #include "Terminal.h"
+#include "SocketServer.h"
 
 #endif
 
@@ -70,11 +71,14 @@ extern void loop();
  * Local Variables
  *****************************************************************************/
 
+/** SocketServer Stream. */
+SocketServer SocketStream;
+
 /** Terminal/Console Stream. */
 Terminal TerminalStream;
 
 /** Serial driver, used by Arduino applications. */
-Serial_ Serial(TerminalStream);
+Serial_ Serial(SocketStream);
 
 #ifndef UNIT_TEST
 
@@ -140,6 +144,7 @@ extern int main(int argc, char** argv)
 {
     int       status   = 0;
     Keyboard& keyboard = Board::getInstance().getKeyboard();
+    SocketStream.init(65432, 1);
     
     /* Get simulation time handler. It will be used by millis() and delay(). */
     gSimTime = &Board::getInstance().getSimTime();
@@ -166,6 +171,7 @@ extern int main(int argc, char** argv)
         {
             keyboard.getPressedButtons();
             loop();
+            SocketStream.process();
         }
 
         status = 0;
