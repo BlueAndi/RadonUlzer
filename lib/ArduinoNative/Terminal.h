@@ -25,18 +25,26 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- *  @brief  Data Stream class definition
- *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * @brief  Implementation of the Terminal/Console Stream
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * 
+ * @addtogroup HAL
+ *
+ * @{
  */
 
-#ifndef STREAM_H
-#define STREAM_H
+#ifndef TERMINAL_H
+#define TERMINAL_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
 
-#include <stdint.h>
+#include "Stream.h"
 
 /******************************************************************************
  * Macros
@@ -46,107 +54,110 @@
  * Types and Classes
  *****************************************************************************/
 
-/**
- * Class for definition of data Streams
- */
-class Stream
+/** Implementation of the Terminal/Console Stream. */
+class Terminal : public Stream
 {
 public:
-    /** Destruct Stream */
-    virtual ~Stream()
-    {
-    }
+    /**
+     * Construct Terminal.
+     */
+    Terminal();
+
+    /**
+     * Destroy Terminal.
+     */
+    ~Terminal();
 
     /**
      * Print argument to the Output Stream.
      * @param[in] str Argument to print.
      */
-    virtual void print(const char str[]) = 0;
+    void print(const char str[]) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(uint8_t value) = 0;
+    void print(uint8_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(uint16_t value) = 0;
+    void print(uint16_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(uint32_t value) = 0;
+    void print(uint32_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(int8_t value) = 0;
+    void print(int8_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(int16_t value) = 0;
+    void print(int16_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * @param[in] value Argument to print.
      */
-    virtual void print(int32_t value) = 0;
+    void print(int32_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] str Argument to print.
      */
-    virtual void println(const char str[]) = 0;
+    void println(const char str[]) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(uint8_t value) = 0;
+    void println(uint8_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(uint16_t value) = 0;
+    void println(uint16_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(uint32_t value) = 0;
+    void println(uint32_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(int8_t value) = 0;
+    void println(int8_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(int16_t value) = 0;
+    void println(int16_t value) final;
 
     /**
      * Print argument to the Output Stream.
      * Appends Carriage Return at the end of the argument.
      * @param[in] value Argument to print.
      */
-    virtual void println(int32_t value) = 0;
+    void println(int32_t value) final;
 
     /**
      * Write bytes to stream.
@@ -154,13 +165,13 @@ public:
      * @param[in] length Length of Buffer.
      * @returns Number of bytes written
      */
-    virtual size_t write(const uint8_t* buffer, size_t length) = 0;
+    size_t write(const uint8_t* buffer, size_t length) final;
 
     /**
      * Check if there are available bytes in the Stream.
      * @returns Number of available bytes.
      */
-    virtual int available() = 0;
+    int available() final;
 
     /**
      * Read bytes into a buffer.
@@ -168,13 +179,11 @@ public:
      * @param[in] length number of bytes to be read.
      * @returns Number of bytes read from Stream.
      */
-    virtual size_t readBytes(uint8_t* buffer, size_t length) = 0;
-
-protected:
-    /** Construct Stream */
-    Stream()
-    {
-    }
+    size_t readBytes(uint8_t* buffer, size_t length) final;
 };
 
-#endif /* STREAM_H_ */
+/******************************************************************************
+ * Functions
+ *****************************************************************************/
+
+#endif  /* TERMINAL_H */

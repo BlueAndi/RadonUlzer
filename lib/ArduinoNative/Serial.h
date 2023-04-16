@@ -27,7 +27,7 @@
 /**
  * @brief  Implementation of Arduino Serial
  * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
- * 
+ *
  * @addtogroup HAL
  *
  * @{
@@ -54,56 +54,160 @@
  * Types and Classes
  *****************************************************************************/
 
+/** Serial driver, used by Arduino applications. */
 class Serial_ : public Stream
 {
 public:
-    Serial_();
+    /**
+     * Construct Serial_.
+     * @param[in] stream Output Stream.
+     */
+    Serial_(Stream& stream);
 
+    /**
+     * Destroy Serial_.
+     */
     ~Serial_();
 
+    /**
+     * Begin Serial_ Communication.
+     * @param[in] baudrate Comm. Speed in bits per second
+     */
     void begin(unsigned long baudrate);
 
+    /**
+     * End the Serial_ Communication.
+     */
     void end();
 
-    void print(const char str[]);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] str Argument to print.
+     */
+    void print(const char str[]) final;
 
-    void print(uint8_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint8_t value) final;
 
-    void print(uint16_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint16_t value) final;
 
-    void print(uint32_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(uint32_t value) final;
 
-    void print(int8_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int8_t value) final;
 
-    void print(int16_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int16_t value) final;
 
-    void print(int32_t value);
+    /**
+     * Print argument to the Output Stream.
+     * @param[in] value Argument to print.
+     */
+    void print(int32_t value) final;
 
-    void println(const char str[]);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] str Argument to print.
+     */
+    void println(const char str[]) final;
 
-    void println(uint8_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint8_t value) final;
 
-    void println(uint16_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint16_t value) final;
 
-    void println(uint32_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(uint32_t value) final;
 
-    void println(int8_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int8_t value) final;
 
-    void println(int16_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int16_t value) final;
 
-    void println(int32_t value);
+    /**
+     * Print argument to the Output Stream.
+     * Appends Carriage Return at the end of the argument.
+     * @param[in] value Argument to print.
+     */
+    void println(int32_t value) final;
 
+    /**
+     * Write bytes to stream.
+     * @param[in] buffer Byte Array to send.
+     * @param[in] length Length of Buffer.
+     * @returns Number of bytes written
+     */
     size_t write(const uint8_t* buffer, size_t length) final;
 
+    /**
+     * Check if there are available bytes in the Stream.
+     * @returns Number of available bytes.
+     */
     int available() final;
 
+    /**
+     * Read bytes into a buffer.
+     * @param[in] buffer Array to write bytes to.
+     * @param[in] length number of bytes to be read.
+     * @returns Number of bytes read from Stream.
+     */
     size_t readBytes(uint8_t* buffer, size_t length) final;
+
+private:
+    /**
+     * Stream for input and output of data.
+     */
+    Stream& m_stream;
+
+    /* Prevent empty constructor*/
+    Serial_();
 };
 
+/* Serial driver, used by Arduino applications. */
 extern Serial_ Serial;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif  /* SERIAL_H */
+#endif /* SERIAL_H */

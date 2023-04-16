@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- *  @brief  Implementation of Arduino Serial
+ *  @brief  Implementation of the Terminal/Console Stream
  *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
@@ -33,7 +33,8 @@
  * Includes
  *****************************************************************************/
 
-#include "Serial.h"
+#include <stdio.h>
+#include "Terminal.h"
 
 /******************************************************************************
  * Macros
@@ -51,106 +52,97 @@
  * Public Methods
  *****************************************************************************/
 
-Serial_::Serial_(Stream& stream) : m_stream(stream)
+Terminal::Terminal()
 {
 }
 
-Serial_::~Serial_()
+Terminal::~Terminal()
 {
 }
 
-void Serial_::begin(unsigned long baudrate)
+void Terminal::print(const char str[])
 {
-    (void)baudrate;
+    printf("%s", str);
 }
 
-void Serial_::end()
+void Terminal::print(uint8_t value)
 {
+    printf("%u", value);
 }
 
-void Serial_::print(const char str[])
+void Terminal::print(uint16_t value)
 {
-    m_stream.print(str);
+    printf("%u", value);
 }
 
-void Serial_::print(uint8_t value)
+void Terminal::print(uint32_t value)
 {
-    m_stream.print(value);
+    printf("%u", value);
 }
 
-void Serial_::print(uint16_t value)
+void Terminal::print(int8_t value)
 {
-    m_stream.print(value);
+    printf("%d", value);
 }
 
-void Serial_::print(uint32_t value)
+void Terminal::print(int16_t value)
 {
-    m_stream.print(value);
+    printf("%d", value);
 }
 
-void Serial_::print(int8_t value)
+void Terminal::print(int32_t value)
 {
-    m_stream.print(value);
+    printf("%d", value);
 }
 
-void Serial_::print(int16_t value)
+void Terminal::println(const char str[])
 {
-    m_stream.print(value);
+    printf("%s\n", str);
 }
 
-void Serial_::print(int32_t value)
+void Terminal::println(uint8_t value)
 {
-    m_stream.print(value);
+    printf("%u\n", value);
 }
 
-void Serial_::println(const char str[])
+void Terminal::println(uint16_t value)
 {
-    m_stream.println(str);
+    printf("%u\n", value);
 }
 
-void Serial_::println(uint8_t value)
+void Terminal::println(uint32_t value)
 {
-    m_stream.println(value);
+    printf("%u\n", value);
 }
 
-void Serial_::println(uint16_t value)
+void Terminal::println(int8_t value)
 {
-    m_stream.println(value);
+    printf("%d\n", value);
 }
 
-void Serial_::println(uint32_t value)
+void Terminal::println(int16_t value)
 {
-    m_stream.println(value);
+    printf("%d\n", value);
 }
 
-void Serial_::println(int8_t value)
+void Terminal::println(int32_t value)
 {
-    m_stream.println(value);
+    printf("%d\n", value);
 }
 
-void Serial_::println(int16_t value)
+size_t Terminal::write(const uint8_t* buffer, size_t length)
 {
-    m_stream.println(value);
+    return 0;
 }
 
-void Serial_::println(int32_t value)
+int Terminal::available()
 {
-    m_stream.println(value);
+    return 0;
 }
 
-size_t Serial_::write(const uint8_t* buffer, size_t length)
+size_t Terminal::readBytes(uint8_t* buffer, size_t length)
 {
-    return m_stream.write(buffer, length);
-}
-
-int Serial_::available()
-{
-    return m_stream.available();
-}
-
-size_t Serial_::readBytes(uint8_t* buffer, size_t length)
-{
-    return m_stream.readBytes(buffer, length);
+    return 0;
 }
 
 /******************************************************************************

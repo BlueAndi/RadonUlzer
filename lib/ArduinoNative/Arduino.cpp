@@ -43,6 +43,7 @@
 #include <Board.h>
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
+#include "Terminal.h"
 
 #endif
 
@@ -69,8 +70,11 @@ extern void loop();
  * Local Variables
  *****************************************************************************/
 
+/** Terminal/Console Stream. */
+Terminal TerminalStream;
+
 /** Serial driver, used by Arduino applications. */
-Serial_ Serial;
+Serial_ Serial(TerminalStream);
 
 #ifndef UNIT_TEST
 
