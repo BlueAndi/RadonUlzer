@@ -143,7 +143,7 @@ size_t Serial_::write(const uint8_t* buffer, size_t length)
     return m_stream.write(buffer, length);
 }
 
-int Serial_::available()
+int Serial_::available() const
 {
     return m_stream.available();
 }

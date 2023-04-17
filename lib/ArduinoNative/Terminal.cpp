@@ -135,7 +135,7 @@ size_t Terminal::write(const uint8_t* buffer, size_t length)
     return 0;
 }
 
-int Terminal::available()
+int Terminal::available() const
 {
     return 0;
 }

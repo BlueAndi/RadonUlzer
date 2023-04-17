@@ -173,7 +173,7 @@ public:
      * Check if any data has been received.
      * @returns number of available bytes.
      */
-    int available() final;
+    int available() const final;
 
     /**
      * Read bytes into a buffer.

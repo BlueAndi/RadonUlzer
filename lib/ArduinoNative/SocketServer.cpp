@@ -296,7 +296,7 @@ size_t SocketServer::write(const uint8_t* buffer, size_t length)
     return bytesSent;
 }
 
-int SocketServer::available()
+int SocketServer::available() const
 {
     return (nullptr != m_members) ? m_members->m_rcvQueue.size() : 0;
 }

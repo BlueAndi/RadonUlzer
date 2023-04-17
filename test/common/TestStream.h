@@ -174,7 +174,7 @@ public:
      * Check if there are available bytes in the Stream.
      * @returns Number of available bytes.
      */
-    int available() final
+    int available() const final
     {
         return m_rcvQueue.size();
     }

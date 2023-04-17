@@ -160,7 +160,7 @@ public:
      * Check if there are available bytes in the Stream.
      * @returns Number of available bytes.
      */
-    virtual int available() = 0;
+    virtual int available() const = 0;
 
     /**
      * Read bytes into a buffer.
