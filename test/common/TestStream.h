@@ -69,6 +69,90 @@ public:
     {
     }
 
+    void print(const char str[])
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(uint8_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(uint16_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(uint32_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(int8_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(int16_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void print(int32_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(const char str[])
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(uint8_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(uint16_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(uint32_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(int8_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(int16_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
+    void println(int32_t value)
+    {
+        /* Not implemented*/
+        ;
+    }
+
     /**
      * Write bytes to stream.
      * @param[in] buffer Byte Array to send.
