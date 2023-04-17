@@ -71,6 +71,8 @@ extern void loop();
  * Local Variables
  *****************************************************************************/
 
+#ifndef UNIT_TEST
+
 /** SocketServer Stream. */
 SocketServer SocketStream;
 
@@ -80,7 +82,6 @@ Terminal TerminalStream;
 /** Serial driver, used by Arduino applications. */
 Serial_ Serial(SocketStream);
 
-#ifndef UNIT_TEST
 
 /**
  * The maximum duration a simulated time step can have.
