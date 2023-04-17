@@ -36,10 +36,34 @@
 #include "SocketServer.h"
 #include <stdio.h>
 #include <string>
+#include <queue>
+
+#ifdef _WIN32
+#undef UNICODE
+#define WIN32_LEAN_AND_MEAN
+#include <winsock2.h>
+#include <windows.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+#else
+#include <arpa/inet.h>  /* definition of inet_ntoa */
+#include <netdb.h>      /* definition of gethostbyname */
+#include <netinet/in.h> /* definition of struct sockaddr_in */
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <unistd.h> /* definition of close */
+#define INVALID_SOCKET (SOCKET)(~0)
+#define SOCKET_ERROR   (-1)
+#endif
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
+
+#ifndef _WIN32
+typedef unsigned int UINT_PTR;
+typedef UINT_PTR     SOCKET;
+#endif
 
 /******************************************************************************
  * Prototypes
@@ -49,16 +73,43 @@
  * Local Variables
  *****************************************************************************/
 
+/** SocketServer Members. PIMPL Idiom. */
+struct SocketServer::SocketServerImpl
+{
+    /**
+     * File Descriptor of the Client Socket.
+     */
+    SOCKET m_clientSocket;
+
+    /**
+     * File Descriptor of the Listening Socket.
+     */
+    SOCKET m_listenSocket;
+
+    /**
+     * Queue for the received bytes.
+     */
+    std::queue<uint8_t> m_rcvQueue;
+
+    /**
+     * Construct an SocketServerImpl instance.
+     */
+    SocketServerImpl() : m_clientSocket(INVALID_SOCKET), m_listenSocket(INVALID_SOCKET)
+    {
+    }
+};
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-SocketServer::SocketServer() : m_clientSocket(INVALID_SOCKET), m_listenSocket(INVALID_SOCKET)
+SocketServer::SocketServer() : m_members(new SocketServerImpl)
 {
 }
 
 SocketServer::~SocketServer()
 {
+    delete m_members;
     close();
 }
 
@@ -68,6 +119,11 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     int              result;
     struct addrinfo  hints;
     struct addrinfo* addrInfo = nullptr;
+
+    if (nullptr == m_members)
+    {
+        return false;
+    }
 
     memset(&hints, 0, sizeof(struct addrinfo));
 
@@ -99,8 +155,8 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     }
 
     /* Create a SOCKET for the server to listen for client connections. */
-    m_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
-    if (INVALID_SOCKET == m_listenSocket)
+    m_members->m_listenSocket = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
+    if (INVALID_SOCKET == m_members->m_listenSocket)
     {
         printf("socket failed\n");
         freeaddrinfo(addrInfo);
@@ -109,7 +165,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     }
 
     /* Setup the TCP listening socket */
-    result = bind(m_listenSocket, addrInfo->ai_addr, static_cast<int>(addrInfo->ai_addrlen));
+    result = bind(m_members->m_listenSocket, addrInfo->ai_addr, static_cast<int>(addrInfo->ai_addrlen));
     if (SOCKET_ERROR == result)
     {
         printf("bind failed\n");
@@ -120,7 +176,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 
     freeaddrinfo(addrInfo);
 
-    result = listen(m_listenSocket, maxConnections);
+    result = listen(m_members->m_listenSocket, maxConnections);
     if (SOCKET_ERROR == result)
     {
         printf("listen failed\n");
@@ -219,28 +275,30 @@ size_t SocketServer::write(const uint8_t* buffer, size_t length)
 {
     size_t bytesSent = 0;
 
-    /* Echo the buffer back to the sender */
-    if (INVALID_SOCKET != m_clientSocket)
+    if (nullptr != m_members)
     {
-        int result = send(m_clientSocket, reinterpret_cast<const char*>(buffer), length, 0);
-        if (SOCKET_ERROR == result)
+        /* Echo the buffer back to the sender */
+        if (INVALID_SOCKET != m_members->m_clientSocket)
         {
-            printf("send failed\n");
-            /* Error on the socket. Client is now invalid. */
-            m_clientSocket = INVALID_SOCKET;
-        }
-        else
-        {
-            bytesSent = result;
+            int result = send(m_members->m_clientSocket, reinterpret_cast<const char*>(buffer), length, 0);
+            if (SOCKET_ERROR == result)
+            {
+                printf("send failed\n");
+                /* Error on the socket. Client is now invalid. */
+                m_members->m_clientSocket = INVALID_SOCKET;
+            }
+            else
+            {
+                bytesSent = result;
+            }
         }
     }
-
     return bytesSent;
 }
 
 int SocketServer::available()
 {
-    return m_rcvQueue.size();
+    return (nullptr != m_members) ? m_members->m_rcvQueue.size() : 0;
 }
 
 size_t SocketServer::readBytes(uint8_t* buffer, size_t length)
@@ -265,62 +323,65 @@ size_t SocketServer::readBytes(uint8_t* buffer, size_t length)
 
 void SocketServer::process()
 {
-    if (INVALID_SOCKET != m_listenSocket)
+    if (nullptr != m_members)
     {
-        fd_set         readFDS, writeFDS, exceptFDS;
-        int            result;
-        struct timeval timeout;
-
-        timeout.tv_sec  = 0;
-        timeout.tv_usec = 10;
-
-        FD_ZERO(&readFDS);
-        FD_ZERO(&writeFDS);
-        FD_ZERO(&exceptFDS);
-
-        FD_SET(m_listenSocket, &readFDS);
-        FD_SET(m_listenSocket, &exceptFDS);
-
-        /* If there is a client connected */
-        if (INVALID_SOCKET != m_clientSocket)
+        if (INVALID_SOCKET != m_members->m_listenSocket)
         {
-            FD_SET(m_clientSocket, &readFDS);
-            FD_SET(m_clientSocket, &exceptFDS);
-        }
+            fd_set         readFDS, writeFDS, exceptFDS;
+            int            result;
+            struct timeval timeout;
 
-        result = select(m_listenSocket + 1, &readFDS, &writeFDS, &exceptFDS, &timeout);
+            timeout.tv_sec  = 0;
+            timeout.tv_usec = 10;
 
-        if (0 < result)
-        {
-            /* New Client Connection available */
-            if (FD_ISSET(m_listenSocket, &readFDS))
+            FD_ZERO(&readFDS);
+            FD_ZERO(&writeFDS);
+            FD_ZERO(&exceptFDS);
+
+            FD_SET(m_members->m_listenSocket, &readFDS);
+            FD_SET(m_members->m_listenSocket, &exceptFDS);
+
+            /* If there is a client connected */
+            if (INVALID_SOCKET != m_members->m_clientSocket)
             {
-                /* Accept a client socket */
-                m_clientSocket = accept(m_listenSocket, nullptr, nullptr);
-                if (INVALID_SOCKET == m_clientSocket)
-                {
-                    printf("accept failed\n");
-                }
+                FD_SET(m_members->m_clientSocket, &readFDS);
+                FD_SET(m_members->m_clientSocket, &exceptFDS);
             }
 
-            /* Client Ready to read */
-            if (FD_ISSET(m_clientSocket, &readFDS))
-            {
-                const size_t bufferLength = 300U;
-                char         recvbuf[bufferLength];
-                int          result = recv(m_clientSocket, recvbuf, bufferLength, 0);
+            result = select(m_members->m_listenSocket + 1, &readFDS, &writeFDS, &exceptFDS, &timeout);
 
-                if (0 < result)
+            if (0 < result)
+            {
+                /* New Client Connection available */
+                if (FD_ISSET(m_members->m_listenSocket, &readFDS))
                 {
-                    for (uint8_t idx = 0; idx < result; idx++)
+                    /* Accept a client socket */
+                    m_members->m_clientSocket = accept(m_members->m_listenSocket, nullptr, nullptr);
+                    if (INVALID_SOCKET == m_members->m_clientSocket)
                     {
-                        m_rcvQueue.push(static_cast<uint8_t>(recvbuf[idx]));
+                        printf("accept failed\n");
                     }
                 }
-                else
+
+                /* Client Ready to read */
+                if (FD_ISSET(m_members->m_clientSocket, &readFDS))
                 {
-                    /* Client disconnected or error on the socket. */
-                    m_clientSocket = INVALID_SOCKET;
+                    const size_t bufferLength = 300U;
+                    char         recvbuf[bufferLength];
+                    int          result = recv(m_members->m_clientSocket, recvbuf, bufferLength, 0);
+
+                    if (0 < result)
+                    {
+                        for (uint8_t idx = 0; idx < result; idx++)
+                        {
+                            m_members->m_rcvQueue.push(static_cast<uint8_t>(recvbuf[idx]));
+                        }
+                    }
+                    else
+                    {
+                        /* Client disconnected or error on the socket. */
+                        m_members->m_clientSocket = INVALID_SOCKET;
+                    }
                 }
             }
         }
@@ -333,14 +394,17 @@ void SocketServer::process()
 
 void SocketServer::close()
 {
-    /* Close the listening socket. */
-    if (INVALID_SOCKET != m_listenSocket)
+    if (nullptr != m_members)
     {
+        /* Close the listening socket. */
+        if (INVALID_SOCKET != m_members->m_listenSocket)
+        {
 #ifdef _WIN32
-        closesocket(m_listenSocket);
+            closesocket(m_members->m_listenSocket);
 #else
-        close(m_listenSocket);
+            close(m_members->m_listenSocket);
 #endif
+        }
     }
 
 #ifdef _WIN32
@@ -351,11 +415,14 @@ void SocketServer::close()
 
 bool SocketServer::getByte(uint8_t& byte)
 {
-    if (false == m_rcvQueue.empty())
+    if (nullptr != m_members)
     {
-        byte = m_rcvQueue.front();
-        m_rcvQueue.pop();
-        return true;
+        if (false == m_members->m_rcvQueue.empty())
+        {
+            byte = m_members->m_rcvQueue.front();
+            m_members->m_rcvQueue.pop();
+            return true;
+        }
     }
     return false;
 }

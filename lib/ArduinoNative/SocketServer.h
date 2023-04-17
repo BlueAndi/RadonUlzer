@@ -36,27 +36,7 @@
  * Includes
  *****************************************************************************/
 
-#include <stdint.h>
-#include <queue>
 #include "Stream.h"
-
-#ifdef _WIN32
-#undef UNICODE
-#define WIN32_LEAN_AND_MEAN
-#include <winsock2.h>
-#include <windows.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "Ws2_32.lib")
-#else
-#include <arpa/inet.h>  /* definition of inet_ntoa */
-#include <netdb.h>      /* definition of gethostbyname */
-#include <netinet/in.h> /* definition of struct sockaddr_in */
-#include <sys/socket.h>
-#include <sys/time.h>
-#include <unistd.h> /* definition of close */
-#define INVALID_SOCKET (SOCKET)(~0)
-#define SOCKET_ERROR   (-1)
-#endif
 
 /******************************************************************************
  * Macros
@@ -65,11 +45,6 @@
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
-
-#ifndef _WIN32
-typedef unsigned int UINT_PTR;
-typedef UINT_PTR     SOCKET;
-#endif
 
 /**
  * Socket Server for Inter-Process Communication.
@@ -214,20 +189,12 @@ public:
     void process();
 
 private:
-    /**
-     * File Descriptor of the Client Socket.
-     */
-    SOCKET m_clientSocket;
 
-    /**
-     * File Descriptor of the Listening Socket.
-     */
-    SOCKET m_listenSocket;
+    /** Struct for Implementation of PIMPL Idiom. */
+    struct SocketServerImpl;
 
-    /**
-     * Queue for the received bytes.
-     */
-    std::queue<uint8_t> m_rcvQueue;
+    /** SocketServer Members. PIMPL Idiom. */
+    SocketServerImpl *m_members;
 
     /**
      * Close the listening socket connection.
