@@ -136,16 +136,23 @@ void Terminal::println(int32_t value)
 
 size_t Terminal::write(const uint8_t* buffer, size_t length)
 {
+    /* Not implemented*/
+    (void) buffer;
+    (void) length;
     return 0;
 }
 
 int Terminal::available() const
 {
+    /* Not implemented*/
     return 0;
 }
 
 size_t Terminal::readBytes(uint8_t* buffer, size_t length)
 {
+    /* Not implemented*/
+    (void) buffer;
+    (void) length;
     return 0;
 }
 

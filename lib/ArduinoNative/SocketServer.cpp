@@ -197,85 +197,85 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 void SocketServer::print(const char str[])
 {
     /* Not implemented*/
-    ;
+    (void)str;
 }
 
 void SocketServer::print(uint8_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::print(uint16_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::print(uint32_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::print(int8_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::print(int16_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::print(int32_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(const char str[])
 {
     /* Not implemented*/
-    ;
+    (void)str;
 }
 
 void SocketServer::println(uint8_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(uint16_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(uint32_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(int8_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(int16_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 void SocketServer::println(int32_t value)
 {
     /* Not implemented*/
-    ;
+    (void)value;
 }
 
 size_t SocketServer::write(const uint8_t* buffer, size_t length)

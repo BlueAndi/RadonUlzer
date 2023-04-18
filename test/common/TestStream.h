@@ -72,85 +72,85 @@ public:
     void print(const char str[])
     {
         /* Not implemented*/
-        ;
+        (void)str;
     }
 
     void print(uint8_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void print(uint16_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void print(uint32_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void print(int8_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void print(int16_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void print(int32_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(const char str[])
     {
         /* Not implemented*/
-        ;
+        (void)str;
     }
 
     void println(uint8_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(uint16_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(uint32_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(int8_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(int16_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     void println(int32_t value)
     {
         /* Not implemented*/
-        ;
+        (void)value;
     }
 
     /**
