@@ -37,6 +37,7 @@
  *****************************************************************************/
 
 #include <stdint.h>
+#include "Print.h"
 
 /******************************************************************************
  * Macros
@@ -49,112 +50,13 @@
 /**
  * Class for definition of data Streams
  */
-class Stream
+class Stream : public Print
 {
 public:
     /** Destruct Stream */
     virtual ~Stream()
     {
     }
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] str Argument to print.
-     */
-    virtual void print(const char str[]) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(uint8_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(uint16_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(uint32_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(int8_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(int16_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * @param[in] value Argument to print.
-     */
-    virtual void print(int32_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] str Argument to print.
-     */
-    virtual void println(const char str[]) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(uint8_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(uint16_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(uint32_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(int8_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(int16_t value) = 0;
-
-    /**
-     * Print argument to the Output Stream.
-     * Appends Carriage Return at the end of the argument.
-     * @param[in] value Argument to print.
-     */
-    virtual void println(int32_t value) = 0;
-
-    /**
-     * Write bytes to stream.
-     * @param[in] buffer Byte Array to send.
-     * @param[in] length Length of Buffer.
-     * @returns Number of bytes written
-     */
-    virtual size_t write(const uint8_t* buffer, size_t length) = 0;
 
     /**
      * Check if there are available bytes in the Stream.
@@ -172,7 +74,7 @@ public:
 
 protected:
     /** Construct Stream */
-    Stream()
+    Stream() : Print()
     {
     }
 };
