@@ -116,8 +116,13 @@ SocketServer::SocketServer() : Stream(), m_members(new SocketServerImpl)
 
 SocketServer::~SocketServer()
 {
-    delete m_members;
+    /* Sockets are closed before deleting m_members. */
     close();
+
+    if (nullptr != m_members)
+    {
+        delete m_members;
+    }
 }
 
 bool SocketServer::init(uint16_t port, uint8_t maxConnections)
