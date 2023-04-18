@@ -136,10 +136,17 @@ void Terminal::println(int32_t value)
 
 size_t Terminal::write(const uint8_t* buffer, size_t length)
 {
-    /* Not implemented*/
-    (void) buffer;
-    (void) length;
-    return 0;
+    size_t count = 0;
+
+    if ((nullptr != buffer) && (0U != length))
+    {
+        for (count = 0; count < length; count++)
+        {
+            printf("%u", buffer[count]);
+        }
+    }
+
+    return count;
 }
 
 int Terminal::available() const
