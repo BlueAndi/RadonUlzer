@@ -127,7 +127,6 @@ SocketServer::~SocketServer()
 
 bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 {
-    bool             success = true;
     int              result;
     struct addrinfo  hints;
     struct addrinfo* addrInfo = nullptr;
