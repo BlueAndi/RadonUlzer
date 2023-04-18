@@ -74,10 +74,10 @@ extern void loop();
 #ifndef UNIT_TEST
 
 /** SocketServer Stream. */
-SocketServer SocketStream;
+static SocketServer SocketStream;
 
 /** Terminal/Console Stream. */
-Terminal TerminalStream;
+static Terminal TerminalStream;
 
 /** Serial driver, used by Arduino applications. */
 Serial_ Serial(SocketStream);
