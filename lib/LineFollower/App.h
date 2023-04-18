@@ -99,6 +99,9 @@ private:
     /** DLC of Position Channel */
     static const uint8_t POSITION_CHANNEL_DLC = 8U;
 
+    /** Baudrate for Serial Communication */
+    static const uint32_t SERIAL_BAUDRATE = 115200U;
+
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 

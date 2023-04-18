@@ -69,7 +69,7 @@ const char* App::POSITION_CHANNEL = "POSITION";
 
 void App::setup()
 {
-    Serial.begin(115200U);
+    Serial.begin(SERIAL_BAUDRATE);
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);

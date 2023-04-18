@@ -94,6 +94,16 @@ static const int MAX_TIME_STEP = 10;
  */
 static SimTime* gSimTime = nullptr;
 
+/**
+ * Port used for Socket Communications.
+ */
+static const uint16_t SOCKET_SERVER_PORT = 65432U;
+
+/**
+ * Maximum Number of Socket Connections.
+ */
+static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
+
 #endif
 
 /******************************************************************************
@@ -145,7 +155,7 @@ extern int main(int argc, char** argv)
 {
     int       status   = 0;
     Keyboard& keyboard = Board::getInstance().getKeyboard();
-    SocketStream.init(65432, 1);
+    SocketStream.init(SOCKET_SERVER_PORT, SOCKET_SERVER_MAX_CONNECTIONS);
     
     /* Get simulation time handler. It will be used by millis() and delay(). */
     gSimTime = &Board::getInstance().getSimTime();
