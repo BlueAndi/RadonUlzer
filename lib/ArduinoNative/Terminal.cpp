@@ -56,7 +56,7 @@
  * Public Methods
  *****************************************************************************/
 
-Terminal::Terminal()
+Terminal::Terminal() : Stream()
 {
 }
 

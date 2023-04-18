@@ -58,7 +58,7 @@ public:
     /**
      * Stream Constructor.
      */
-    TestStream() : m_outputBuffer{0U}
+    TestStream() : Stream(), m_outputBuffer{0U}, m_rcvQueue()
     {
     }
 

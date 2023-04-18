@@ -101,7 +101,7 @@ struct SocketServer::SocketServerImpl
     /**
      * Construct an SocketServerImpl instance.
      */
-    SocketServerImpl() : m_clientSocket(INVALID_SOCKET), m_listenSocket(INVALID_SOCKET)
+    SocketServerImpl() : m_clientSocket(INVALID_SOCKET), m_listenSocket(INVALID_SOCKET), m_rcvQueue()
     {
     }
 };
@@ -110,7 +110,7 @@ struct SocketServer::SocketServerImpl
  * Public Methods
  *****************************************************************************/
 
-SocketServer::SocketServer() : m_members(new SocketServerImpl)
+SocketServer::SocketServer() : Stream(), m_members(new SocketServerImpl)
 {
 }
 

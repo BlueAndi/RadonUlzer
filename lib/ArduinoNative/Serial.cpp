@@ -55,7 +55,7 @@
  * Public Methods
  *****************************************************************************/
 
-Serial_::Serial_(Stream& stream) : m_stream(stream)
+Serial_::Serial_(Stream& stream) : Stream(), m_stream(stream)
 {
 }
 
