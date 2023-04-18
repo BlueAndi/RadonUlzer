@@ -33,16 +33,11 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+
 #include <Arduino.h>
 #include <unity.h>
-#include <SimpleTimer.h>
-#include <PIDController.h>
-#include <Util.h>
-
-#include <Board.h>
 #include <Odometry.h>
 #include <RobotConstants.h>
-#include <FPMath.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -60,9 +55,6 @@
  * Prototypes
  *****************************************************************************/
 
-static void testSimpleTimer();
-static void testPIDController();
-static void testUtil();
 static void testOdometry();
 
 /******************************************************************************
@@ -103,9 +95,6 @@ void loop()
 {
     UNITY_BEGIN();
 
-    RUN_TEST(testSimpleTimer);
-    RUN_TEST(testPIDController);
-    RUN_TEST(testUtil);
     RUN_TEST(testOdometry);
 
     UNITY_END();
@@ -139,164 +128,6 @@ extern void tearDown(void)
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-/**
- * Test the SimpleTimer class.
- */
-static void testSimpleTimer()
-{
-    const uint32_t WAIT_TIME = 100;
-    const uint32_t DELTA_MIN = 1;
-    SimpleTimer    testTimer;
-
-    /* If timer is not running, it shall not signal timeout. */
-    TEST_ASSERT_FALSE(testTimer.isTimeout());
-
-    /* Start timer with 0. It must signal timeout immediately. */
-    testTimer.start(0);
-    TEST_ASSERT_TRUE(testTimer.isTimeout());
-
-    /* Stop timer. It must not signal timeout. */
-    testTimer.stop();
-    TEST_ASSERT_FALSE(testTimer.isTimeout());
-
-    /* Start timer with 100 ms. It must not signal timeout. */
-    testTimer.start(WAIT_TIME);
-    TEST_ASSERT_FALSE(testTimer.isTimeout());
-
-    /* Test timeout signalling. */
-    delay(WAIT_TIME + DELTA_MIN);
-    TEST_ASSERT_TRUE(testTimer.isTimeout());
-
-    /* Restart timer. It must not signal timeout. */
-    testTimer.restart();
-    TEST_ASSERT_FALSE(testTimer.isTimeout());
-
-    /* Test timeout signalling after a restart. */
-    delay(WAIT_TIME + DELTA_MIN);
-    TEST_ASSERT_TRUE(testTimer.isTimeout());
-
-    /* Verify timer duration till now. */
-    TEST_ASSERT_GREATER_OR_EQUAL(WAIT_TIME + DELTA_MIN, testTimer.getCurrentDuration());
-}
-
-/**
- * Test the PICController class.
- */
-static void testPIDController()
-{
-    PIDController<int16_t> pidCtrl;
-    uint8_t                index            = 0;
-    int16_t                output           = 0;
-    const uint32_t         TEST_SAMPLE_TIME = 0; /* Every PID calculate() call shall be processed */
-
-    /* Sample time for all tests shall be set once. */
-    pidCtrl.setSampleTime(TEST_SAMPLE_TIME);
-
-    /* Kp = 1, Ki = 0, Kd = 0 */
-    pidCtrl.setPFactor(1, 1);
-    pidCtrl.setIFactor(0, 1);
-    pidCtrl.setDFactor(0, 1);
-    pidCtrl.clear();
-
-    /* Output must follow error */
-    output = 0;
-    for (index = 0; index < 10; ++index)
-    {
-        output = 0 - index;
-        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
-    }
-
-    /* Kp = 0, Ki = 1, Kd = 0 */
-    pidCtrl.setPFactor(0, 1);
-    pidCtrl.setIFactor(1, 1);
-    pidCtrl.setDFactor(0, 1);
-    pidCtrl.clear();
-
-    /* Output must increase per error */
-    output = 0;
-    for (index = 0; index < 10; ++index)
-    {
-        output += (0 - index);
-        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
-    }
-
-    /* Kp = 0, Ki = 0, Kd = 1 */
-    pidCtrl.setPFactor(0, 1);
-    pidCtrl.setIFactor(0, 1);
-    pidCtrl.setDFactor(1, 1);
-    pidCtrl.clear();
-
-    /* Output must be equal to error deviation from previous error */
-    output = 0;
-    for (index = 1; index < 10; ++index)
-    {
-        output = -1;
-        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
-    }
-}
-
-/**
- * Test the utilities.
- */
-static void testUtil()
-{
-    uint32_t     testVectorUInt[]         = {0, UINT32_MAX / 2, UINT32_MAX};
-    const char*  expectedResultUInt[]     = {"0", "2147483647", "4294967295"};
-    int32_t      testVectorInt[]          = {INT32_MIN, INT32_MIN / 2, 0, INT32_MAX / 2, INT32_MAX};
-    const char*  expectedResultInt[]      = {"-2147483647", "-1073741824", "0", "1073741823", "2147483647"};
-    uint8_t      idx                      = 0;
-    const size_t RESULT_STD_BUFFER_SIZE   = 12;
-    const size_t RESULT_LIMIT_BUFFER_SIZE = 4;
-
-    /* Standard use case */
-    while (sizeof(testVectorUInt) / sizeof(testVectorUInt[0]) > idx)
-    {
-        char result[RESULT_STD_BUFFER_SIZE];
-
-        Util::uintToStr(result, sizeof(result), testVectorUInt[idx]);
-
-        TEST_ASSERT_EQUAL_STRING(expectedResultUInt[idx], result);
-
-        ++idx;
-    }
-
-    /* With limited result buffer. */
-    while (sizeof(testVectorUInt) / sizeof(testVectorUInt[0]) > idx)
-    {
-        char result[RESULT_LIMIT_BUFFER_SIZE];
-
-        Util::uintToStr(result, sizeof(result), testVectorUInt[idx]);
-
-        TEST_ASSERT_EQUAL_STRING_ARRAY(expectedResultUInt[idx], result, sizeof(result) - 1);
-
-        ++idx;
-    }
-
-    /* Standard use case */
-    while (sizeof(testVectorInt) / sizeof(testVectorInt[0]) > idx)
-    {
-        char result[RESULT_STD_BUFFER_SIZE];
-
-        Util::intToStr(result, sizeof(result), testVectorInt[idx]);
-
-        TEST_ASSERT_EQUAL_STRING(expectedResultInt[idx], result);
-
-        ++idx;
-    }
-
-    /* With limited result buffer. */
-    while (sizeof(testVectorInt) / sizeof(testVectorInt[0]) > idx)
-    {
-        char result[RESULT_LIMIT_BUFFER_SIZE];
-
-        Util::intToStr(result, sizeof(result), testVectorInt[idx]);
-
-        TEST_ASSERT_EQUAL_STRING_ARRAY(expectedResultInt[idx], result, sizeof(result) - 1);
-
-        ++idx;
-    }
-}
 
 /**
  * Test the odometry unit.
