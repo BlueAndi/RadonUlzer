@@ -21,24 +21,20 @@
  * SOFTWARE.
  */
 
-/*******************************************************************************
-    DESCRIPTION
-*******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author  Andreas Merkle <web@blue-andi.de>
+ * @brief   This module contains the PID Controller tests.
  */
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "App.h"
-#include "StartupState.h"
-#include <Board.h>
-#include <Speedometer.h>
-#include <DifferentialDrive.h>
-#include <Odometry.h>
-#include <Util.h>
+#include <unity.h>
+#include <PIDController.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -56,53 +52,15 @@
  * Prototypes
  *****************************************************************************/
 
+static void testPIDController();
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
 
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
-
-void App::setup()
-{
-    Serial.begin(SERIAL_BAUDRATE);
-    Board::getInstance().init();
-    m_systemStateMachine.setState(&StartupState::getInstance());
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC, positionCallback);
-}
-
-void App::loop()
-{
-    m_yapServer.process(millis());
-    Speedometer::getInstance().process();
-
-    if (true == m_controlInterval.isTimeout())
-    {
-        /* The differential drive control needs the measured speed of the
-         * left and right wheel. Therefore it shall be processed after
-         * the speedometer.
-         */
-        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-
-        /* The odometry unit needs to detect motor speed changes to be able to
-         * calculate correct values. Therefore it shall be processed right after
-         * the differential drive control.
-         */
-        Odometry::getInstance().process();
-
-        /* Send Position to YAP Client */
-        reportPosition();
-
-        m_controlInterval.restart();
-    }
-
-    m_systemStateMachine.process();
-}
 
 /******************************************************************************
  * Protected Methods
@@ -112,28 +70,114 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::reportPosition()
-{
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
-
-    Odometry::getInstance().getPosition(xPos, yPos);
-
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
-}
-
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
-}
-
 /******************************************************************************
  * External Functions
  *****************************************************************************/
 
+/**
+ * Program setup routine, which is called once at startup.
+ */
+void setup()
+{
+#ifndef TARGET_NATIVE
+    /* https://docs.platformio.org/en/latest/plus/unit-testing.html#demo */
+    delay(2000);
+#endif /* Not defined TARGET_NATIVE */
+}
+
+/**
+ * Main entry point.
+ */
+void loop()
+{
+    UNITY_BEGIN();
+
+    RUN_TEST(testPIDController);
+
+    UNITY_END();
+
+#ifndef TARGET_NATIVE
+    /* Don't exit on the robot to avoid a endless test loop.
+     * If the test runs on the pc, it must exit.
+     */
+    for (;;)
+    {
+    }
+#endif /* Not defined TARGET_NATIVE */
+}
+
+/**
+ * Initialize the test setup.
+ */
+extern void setUp(void)
+{
+    /* Not used. */
+}
+
+/**
+ * Clean up test setup.
+ */
+extern void tearDown(void)
+{
+    /* Not used. */
+}
+
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Test the PICController class.
+ */
+static void testPIDController()
+{
+    PIDController<int16_t> pidCtrl;
+    uint8_t                index            = 0;
+    int16_t                output           = 0;
+    const uint32_t         TEST_SAMPLE_TIME = 0; /* Every PID calculate() call shall be processed */
+
+    /* Sample time for all tests shall be set once. */
+    pidCtrl.setSampleTime(TEST_SAMPLE_TIME);
+
+    /* Kp = 1, Ki = 0, Kd = 0 */
+    pidCtrl.setPFactor(1, 1);
+    pidCtrl.setIFactor(0, 1);
+    pidCtrl.setDFactor(0, 1);
+    pidCtrl.clear();
+
+    /* Output must follow error */
+    output = 0;
+    for (index = 0; index < 10; ++index)
+    {
+        output = 0 - index;
+        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
+    }
+
+    /* Kp = 0, Ki = 1, Kd = 0 */
+    pidCtrl.setPFactor(0, 1);
+    pidCtrl.setIFactor(1, 1);
+    pidCtrl.setDFactor(0, 1);
+    pidCtrl.clear();
+
+    /* Output must increase per error */
+    output = 0;
+    for (index = 0; index < 10; ++index)
+    {
+        output += (0 - index);
+        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
+    }
+
+    /* Kp = 0, Ki = 0, Kd = 1 */
+    pidCtrl.setPFactor(0, 1);
+    pidCtrl.setIFactor(0, 1);
+    pidCtrl.setDFactor(1, 1);
+    pidCtrl.clear();
+
+    /* Output must be equal to error deviation from previous error */
+    output = 0;
+    for (index = 1; index < 10; ++index)
+    {
+        output = -1;
+        TEST_ASSERT_EQUAL_INT16(output, pidCtrl.calculate(0, index));
+    }
+}

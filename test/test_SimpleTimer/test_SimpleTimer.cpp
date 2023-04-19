@@ -21,32 +21,21 @@
  * SOFTWARE.
  */
 
-/*******************************************************************************
-    DESCRIPTION
-*******************************************************************************/
 /**
- * @brief  Arduino native
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author  Andreas Merkle <web@blue-andi.de>
+ * @brief   This module contains the SimpleTimer tests.
  */
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Arduino.h>
 
-#ifdef UNIT_TEST
-
-#include <time.h>
-
-#else
-
-#include <Board.h>
-#include <webots/Robot.hpp>
-#include <Keyboard.h>
-#include "Terminal.h"
-#include "SocketServer.h"
-
-#endif
+#include <unity.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,47 +53,11 @@
  * Prototypes
  *****************************************************************************/
 
-extern void setup();
-extern void loop();
+static void testSimpleTimer();
 
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-#ifndef UNIT_TEST
-
-/** SocketServer Stream. */
-static SocketServer SocketStream;
-
-/** Terminal/Console Stream. */
-static Terminal TerminalStream;
-
-/** Serial driver, used by Arduino applications. */
-Serial_ Serial(SocketStream);
-
-
-/**
- * The maximum duration a simulated time step can have.
- * Everything above would cause missbehaviour in the application.
- */
-static const int MAX_TIME_STEP = 10;
-
-/**
- * Simulation time handler, used by Arduino functions.
- */
-static SimTime* gSimTime = nullptr;
-
-/**
- * Port used for Socket Communications.
- */
-static const uint16_t SOCKET_SERVER_PORT = 65432U;
-
-/**
- * Maximum Number of Socket Connections.
- */
-static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
-
-#endif
 
 /******************************************************************************
  * Public Methods
@@ -122,95 +75,94 @@ static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
  * External Functions
  *****************************************************************************/
 
-#ifdef UNIT_TEST
-
-extern int main(int argc, char** argv)
+/**
+ * Program setup routine, which is called once at startup.
+ */
+void setup()
 {
-    setup(); /* Prepare test */
-    loop();  /* Run test once */
-
-    return 0;
+#ifndef TARGET_NATIVE
+    /* https://docs.platformio.org/en/latest/plus/unit-testing.html#demo */
+    delay(2000);
+#endif /* Not defined TARGET_NATIVE */
 }
 
-extern unsigned long millis()
+/**
+ * Main entry point.
+ */
+void loop()
 {
-    clock_t now = clock();
+    UNITY_BEGIN();
 
-    return (now * 1000UL) / CLOCKS_PER_SEC;
-}
+    RUN_TEST(testSimpleTimer);
 
-extern void delay(unsigned long ms)
-{
-    unsigned long timestamp = millis();
+    UNITY_END();
 
-    while ((millis() - timestamp) < ms)
+#ifndef TARGET_NATIVE
+    /* Don't exit on the robot to avoid a endless test loop.
+     * If the test runs on the pc, it must exit.
+     */
+    for (;;)
     {
-        ;
     }
+#endif /* Not defined TARGET_NATIVE */
 }
 
-#else
-
-extern int main(int argc, char** argv)
+/**
+ * Initialize the test setup.
+ */
+extern void setUp(void)
 {
-    int       status   = 0;
-    Keyboard& keyboard = Board::getInstance().getKeyboard();
-    SocketStream.init(SOCKET_SERVER_PORT, SOCKET_SERVER_MAX_CONNECTIONS);
-    
-    /* Get simulation time handler. It will be used by millis() and delay(). */
-    gSimTime = &Board::getInstance().getSimTime();
-
-    if ((0 == gSimTime->getTimeStep()) || (MAX_TIME_STEP < gSimTime->getTimeStep()))
-    {
-        printf("Simulation time step is too high!\n");
-        printf("This would cause missbehaviour in the application.\n");
-
-        status = -1;
-    }
-    else
-    {
-        /**
-         * Synchronization between the simulation steps and the control steps is done automatically
-         * by Webots (If the synchronization field in the robot node is set to TRUE).
-         * For a more detailed explanation see:
-         * https://cyberbotics.com/doc/reference/robot#synchronous-versus-asynchronous-controllers
-         */
-
-        setup();
-
-        while (true == gSimTime->step())
-        {
-            keyboard.getPressedButtons();
-            loop();
-            SocketStream.process();
-        }
-
-        status = 0;
-    }
-
-    return status;
+    /* Not used. */
 }
 
-extern unsigned long millis()
+/**
+ * Clean up test setup.
+ */
+extern void tearDown(void)
 {
-    return gSimTime->getElapsedTimeSinceReset();
+    /* Not used. */
 }
-
-extern void delay(unsigned long ms)
-{
-    unsigned long timestamp = millis();
-
-    while ((millis() - timestamp) < ms)
-    {
-        if (false == gSimTime->step())
-        {
-            break;
-        }
-    }
-}
-
-#endif
 
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Test the SimpleTimer class.
+ */
+static void testSimpleTimer()
+{
+    const uint32_t WAIT_TIME = 100;
+    const uint32_t DELTA_MIN = 1;
+    SimpleTimer    testTimer;
+
+    /* If timer is not running, it shall not signal timeout. */
+    TEST_ASSERT_FALSE(testTimer.isTimeout());
+
+    /* Start timer with 0. It must signal timeout immediately. */
+    testTimer.start(0);
+    TEST_ASSERT_TRUE(testTimer.isTimeout());
+
+    /* Stop timer. It must not signal timeout. */
+    testTimer.stop();
+    TEST_ASSERT_FALSE(testTimer.isTimeout());
+
+    /* Start timer with 100 ms. It must not signal timeout. */
+    testTimer.start(WAIT_TIME);
+    TEST_ASSERT_FALSE(testTimer.isTimeout());
+
+    /* Test timeout signalling. */
+    delay(WAIT_TIME + DELTA_MIN);
+    TEST_ASSERT_TRUE(testTimer.isTimeout());
+
+    /* Restart timer. It must not signal timeout. */
+    testTimer.restart();
+    TEST_ASSERT_FALSE(testTimer.isTimeout());
+
+    /* Test timeout signalling after a restart. */
+    delay(WAIT_TIME + DELTA_MIN);
+    TEST_ASSERT_TRUE(testTimer.isTimeout());
+
+    /* Verify timer duration till now. */
+    TEST_ASSERT_GREATER_OR_EQUAL(WAIT_TIME + DELTA_MIN, testTimer.getCurrentDuration());
+}

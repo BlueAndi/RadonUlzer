@@ -25,24 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ *  @brief  Implementation of the Terminal/Console Stream
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "App.h"
-#include "StartupState.h"
-#include <Board.h>
-#include <Speedometer.h>
-#include <DifferentialDrive.h>
-#include <Odometry.h>
-#include <Util.h>
 
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <stdio.h>
+#include "Terminal.h"
 
 /******************************************************************************
  * Macros
@@ -60,78 +52,119 @@
  * Local Variables
  *****************************************************************************/
 
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void App::setup()
+Terminal::Terminal() : Stream()
 {
-    Serial.begin(SERIAL_BAUDRATE);
-    Board::getInstance().init();
-    m_systemStateMachine.setState(&StartupState::getInstance());
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC, positionCallback);
 }
 
-void App::loop()
+Terminal::~Terminal()
 {
-    m_yapServer.process(millis());
-    Speedometer::getInstance().process();
+}
 
-    if (true == m_controlInterval.isTimeout())
+void Terminal::print(const char str[])
+{
+    printf("%s", str);
+}
+
+void Terminal::print(uint8_t value)
+{
+    printf("%u", value);
+}
+
+void Terminal::print(uint16_t value)
+{
+    printf("%u", value);
+}
+
+void Terminal::print(uint32_t value)
+{
+    printf("%u", value);
+}
+
+void Terminal::print(int8_t value)
+{
+    printf("%d", value);
+}
+
+void Terminal::print(int16_t value)
+{
+    printf("%d", value);
+}
+
+void Terminal::print(int32_t value)
+{
+    printf("%d", value);
+}
+
+void Terminal::println(const char str[])
+{
+    printf("%s\n", str);
+}
+
+void Terminal::println(uint8_t value)
+{
+    printf("%u\n", value);
+}
+
+void Terminal::println(uint16_t value)
+{
+    printf("%u\n", value);
+}
+
+void Terminal::println(uint32_t value)
+{
+    printf("%u\n", value);
+}
+
+void Terminal::println(int8_t value)
+{
+    printf("%d\n", value);
+}
+
+void Terminal::println(int16_t value)
+{
+    printf("%d\n", value);
+}
+
+void Terminal::println(int32_t value)
+{
+    printf("%d\n", value);
+}
+
+size_t Terminal::write(const uint8_t* buffer, size_t length)
+{
+    size_t count = 0;
+
+    if ((nullptr != buffer) && (0U != length))
     {
-        /* The differential drive control needs the measured speed of the
-         * left and right wheel. Therefore it shall be processed after
-         * the speedometer.
-         */
-        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-
-        /* The odometry unit needs to detect motor speed changes to be able to
-         * calculate correct values. Therefore it shall be processed right after
-         * the differential drive control.
-         */
-        Odometry::getInstance().process();
-
-        /* Send Position to YAP Client */
-        reportPosition();
-
-        m_controlInterval.restart();
+        for (count = 0; count < length; count++)
+        {
+            printf("%u", buffer[count]);
+        }
     }
 
-    m_systemStateMachine.process();
+    return count;
 }
 
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
+int Terminal::available() const
+{
+    /* Not implemented*/
+    return 0;
+}
+
+size_t Terminal::readBytes(uint8_t* buffer, size_t length)
+{
+    /* Not implemented*/
+    (void) buffer;
+    (void) length;
+    return 0;
+}
 
 /******************************************************************************
  * Private Methods
- *****************************************************************************/
-
-void App::reportPosition()
-{
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
-
-    Odometry::getInstance().getPosition(xPos, yPos);
-
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
-}
-
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
-}
-
-/******************************************************************************
- * External Functions
  *****************************************************************************/
 
 /******************************************************************************

@@ -45,6 +45,8 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
+#include <YAPServer.hpp>
+#include <Arduino.h>
 
 /******************************************************************************
  * Macros
@@ -64,7 +66,8 @@ public:
      */
     App() :
         m_systemStateMachine(),
-        m_controlInterval()
+        m_controlInterval(),
+        m_yapServer(Serial)
     {
     }
 
@@ -88,13 +91,43 @@ public:
 private:
 
     /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
+
+    /** Name of Channel to send Position Data to. */
+    static const char* POSITION_CHANNEL;
+
+    /** DLC of Position Channel */
+    static const uint8_t POSITION_CHANNEL_DLC = 8U;
+
+    /** Baudrate for Serial Communication */
+    static const uint32_t SERIAL_BAUDRATE = 115200U;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
+
+    /**
+     * YAP Server Instance
+     *
+     * @tparam tMaxChannels set to 10, as App does not require
+     * more channels for external communication.
+     */
+    YAPServer<10U> m_yapServer;
+
+    /**
+     * Report the current position of the robot using the Odometry data.
+     * Sends data through the YAPServer.
+     */
+    void reportPosition();
+
+    /**
+     * Callback for incoming data from the Position Channel.
+     * @param[in] payload Byte buffer containing incomming data.
+     * @param[in] payloadSize Number of bytes received.
+     */
+    static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
 
     App(const App& app);
     App& operator=(const App& app);

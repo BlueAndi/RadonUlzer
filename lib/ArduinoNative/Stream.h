@@ -25,63 +25,58 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
- * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup HAL
- *
- * @{
+ *  @brief  Data Stream class definition
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
-#ifndef ARDUINO_H
-#define ARDUINO_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
-
-#define _USE_MATH_DEFINES
+#ifndef STREAM_H
+#define STREAM_H
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <string.h>
-#include <math.h>
-#include "Serial.h"
+
+#include <stdint.h>
+#include "Print.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
-
-#ifndef PSTR
-#define PSTR
-#endif
-
-#define PI  M_PI
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Functions
- *****************************************************************************/
-
 /**
- * Returns the number of milliseconds passed since the system start.
- * 
- * @return The number of milliseconds.
+ * Class for definition of data Streams
  */
-extern unsigned long millis();
+class Stream : public Print
+{
+public:
+    /** Destruct Stream */
+    virtual ~Stream()
+    {
+    }
 
-/**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
- * simulation still steps to prevent an endless loop.
- * 
- * @param[in] ms The amount of milliseconds that the program should be delayed by.
- */
-extern void delay(unsigned long ms);
+    /**
+     * Check if there are available bytes in the Stream.
+     * @returns Number of available bytes.
+     */
+    virtual int available() const = 0;
 
-#endif  /* ARDUINO_H */
+    /**
+     * Read bytes into a buffer.
+     * @param[in] buffer Array to write bytes to.
+     * @param[in] length number of bytes to be read.
+     * @returns Number of bytes read from Stream.
+     */
+    virtual size_t readBytes(uint8_t* buffer, size_t length) = 0;
+
+protected:
+    /** Construct Stream */
+    Stream() : Print()
+    {
+    }
+};
+
+#endif /* STREAM_H_ */

@@ -25,24 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ *  @brief  Implementation of Arduino Serial
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "App.h"
-#include "StartupState.h"
-#include <Board.h>
-#include <Speedometer.h>
-#include <DifferentialDrive.h>
-#include <Odometry.h>
-#include <Util.h>
 
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include "Serial.h"
 
 /******************************************************************************
  * Macros
@@ -60,78 +51,114 @@
  * Local Variables
  *****************************************************************************/
 
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void App::setup()
+Serial_::Serial_(Stream& stream) : Stream(), m_stream(stream)
 {
-    Serial.begin(SERIAL_BAUDRATE);
-    Board::getInstance().init();
-    m_systemStateMachine.setState(&StartupState::getInstance());
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC, positionCallback);
 }
 
-void App::loop()
+Serial_::~Serial_()
 {
-    m_yapServer.process(millis());
-    Speedometer::getInstance().process();
-
-    if (true == m_controlInterval.isTimeout())
-    {
-        /* The differential drive control needs the measured speed of the
-         * left and right wheel. Therefore it shall be processed after
-         * the speedometer.
-         */
-        DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-
-        /* The odometry unit needs to detect motor speed changes to be able to
-         * calculate correct values. Therefore it shall be processed right after
-         * the differential drive control.
-         */
-        Odometry::getInstance().process();
-
-        /* Send Position to YAP Client */
-        reportPosition();
-
-        m_controlInterval.restart();
-    }
-
-    m_systemStateMachine.process();
 }
 
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
+void Serial_::begin(unsigned long baudrate)
+{
+    (void)baudrate;
+}
+
+void Serial_::end()
+{
+}
+
+void Serial_::print(const char str[])
+{
+    m_stream.print(str);
+}
+
+void Serial_::print(uint8_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::print(uint16_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::print(uint32_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::print(int8_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::print(int16_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::print(int32_t value)
+{
+    m_stream.print(value);
+}
+
+void Serial_::println(const char str[])
+{
+    m_stream.println(str);
+}
+
+void Serial_::println(uint8_t value)
+{
+    m_stream.println(value);
+}
+
+void Serial_::println(uint16_t value)
+{
+    m_stream.println(value);
+}
+
+void Serial_::println(uint32_t value)
+{
+    m_stream.println(value);
+}
+
+void Serial_::println(int8_t value)
+{
+    m_stream.println(value);
+}
+
+void Serial_::println(int16_t value)
+{
+    m_stream.println(value);
+}
+
+void Serial_::println(int32_t value)
+{
+    m_stream.println(value);
+}
+
+size_t Serial_::write(const uint8_t* buffer, size_t length)
+{
+    return m_stream.write(buffer, length);
+}
+
+int Serial_::available() const
+{
+    return m_stream.available();
+}
+
+size_t Serial_::readBytes(uint8_t* buffer, size_t length)
+{
+    return m_stream.readBytes(buffer, length);
+}
 
 /******************************************************************************
  * Private Methods
- *****************************************************************************/
-
-void App::reportPosition()
-{
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
-
-    Odometry::getInstance().getPosition(xPos, yPos);
-
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
-}
-
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
-}
-
-/******************************************************************************
- * External Functions
  *****************************************************************************/
 
 /******************************************************************************
