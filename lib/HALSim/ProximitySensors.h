@@ -45,7 +45,6 @@
 #include "IProximitySensors.h"
 #include "SimTime.h"
 
-#include <webots/Emitter.hpp>
 #include <webots/DistanceSensor.hpp>
 
 /******************************************************************************
@@ -65,7 +64,8 @@ public:
      */
     ProximitySensors(const SimTime& simTime, webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
         IProximitySensors(),
-        m_proximitySensors{proxSensor0, proxSensor1}
+        m_proximitySensors{proxSensor0, proxSensor1},
+        m_sensorValuesU8{0U}
     {
         for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
@@ -100,7 +100,8 @@ public:
      */
     uint8_t getNumSensors() const final
     {
-        return 1;
+        /* Front sensors are counted as one */
+        return 1U;
     }
 
     /**
@@ -108,7 +109,7 @@ public:
      */
     void read() final
     {
-        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+        for (uint8_t sensorIndex = 0U; sensorIndex < MAX_SENSORS; ++sensorIndex)
         {
             if (nullptr != m_proximitySensors[sensorIndex])
             {
@@ -125,7 +126,7 @@ public:
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
-        return m_sensorValuesU8[0];
+        return m_sensorValuesU8[0U];
     }
 
     /**
@@ -136,12 +137,12 @@ public:
      */
     uint8_t countsFrontWithRightLeds() const final
     {
-        return m_sensorValuesU8[1];
+        return m_sensorValuesU8[MAX_SENSORS - 1U];
     }
 
     /**
      * Returns the number of brightness levels.
-     * 
+     *
      * @return Number of brightness levels.
      */
     uint8_t getNumBrightnessLevels() const
