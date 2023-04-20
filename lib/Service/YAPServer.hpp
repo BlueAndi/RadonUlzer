@@ -297,13 +297,13 @@ private:
     void cmdSCRB(const uint8_t* payload)
     {
         uint8_t channelNumber = getChannelNumber(reinterpret_cast<const char*>(payload));
-        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
-        buf[0U] = COMMANDS::SCRB_RSP;
+        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP};
 
         if (CONTROL_CHANNEL_NUMBER != channelNumber)
         {
             buf[1U] = channelNumber;
             buf[2U] = getChannelDLC(channelNumber);
+            memcpy(&buf[3U], payload, CHANNEL_NAME_MAX_LEN);
         }
         else
         {
