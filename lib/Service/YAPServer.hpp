@@ -72,7 +72,6 @@ public:
         m_isSynced(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
-        m_pendingSuscribeChannel(),
         m_stream(stream),
         m_receiveFrame(),
         m_receivedBytes(0U),
@@ -202,18 +201,27 @@ public:
     {
         if ((nullptr != channelName) && (nullptr != callback))
         {
-            /* Suscribe to channel. */
-            /* Using strnlen in case the name is not null-terminated. */
-            uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
-            buf[CONTROL_CHANNEL_COMMAND_INDEX] = COMMANDS::SCRB;
-            memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
-
-            if(true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+            /* Check for free channel in m_pendingSubscribeChannels Array*/
+            for (uint8_t idx = 0U; idx < tMaxChannels; idx++)
             {
-                /* Save Name and Callback for channel creation after response */
-                memcpy(m_pendingSuscribeChannel.m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX], CHANNEL_NAME_MAX_LEN);
-                m_pendingSuscribeChannel.m_callback = callback;
+                if (nullptr == m_pendingSuscribeChannels[idx].m_callback)
+                {
+                    /* Suscribe to channel. */
+                    /* Using strnlen in case the name is not null-terminated. */
+                    uint8_t nameLength                          = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
+                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
+
+                    if (true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                    {
+                        /* Save Name and Callback for channel creation after response */
+                        memcpy(m_pendingSuscribeChannels[idx].m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX],
+                               CHANNEL_NAME_MAX_LEN);
+                        m_pendingSuscribeChannels[idx].m_callback = callback;
+                    }
+
+                    break;
+                }
             }
         }
     }
@@ -317,21 +325,33 @@ private:
      */
     void cmdSCRB_RSP(const uint8_t* payload)
     {
-        /* Check if a SCRB is pending. */
-        if (nullptr != m_pendingSuscribeChannel.m_callback)
+        uint8_t        channelNumber = payload[0U];
+        uint8_t        channelDLC    = payload[1U];
+        const uint8_t* channelName   = &payload[2U];
+
+        if ((0U != channelNumber) && (tMaxChannels >= channelNumber) && (0U != channelDLC) && (nullptr != channelName))
         {
-            uint8_t channelNumber     = payload[0U];
-            uint8_t channelDLC        = payload[1U];
-
-            if ((0U != channelNumber) && (0U != channelDLC))
+            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
             {
-                uint8_t channelArrayIndex = (channelNumber - 1U);
-                memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
-                m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
-                m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
-            }
+                /* Check if a SCRB is pending. */
+                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
+                {
+                    /* Check if its the correct channel. */
+                    if (0U == strncmp(reinterpret_cast<const char*>(channelName), m_pendingSuscribeChannels[idx].m_name, CHANNEL_NAME_MAX_LEN))
+                    {
+                        /* Set Channel in DataChannels Array. */
+                        uint8_t channelArrayIndex = (channelNumber - 1U);
+                        memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannels[idx].m_name,
+                               CHANNEL_NAME_MAX_LEN);
+                        m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
+                        m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannels[idx].m_callback;
 
-            m_pendingSuscribeChannel.m_callback = nullptr;
+                        /* Channel is no longer pending. */
+                        m_pendingSuscribeChannels[idx].m_callback = nullptr;
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -598,7 +618,7 @@ private:
     /**
      * Channel used to store the name and the Callback of a pending suscription.
      */
-    Channel m_pendingSuscribeChannel;
+    Channel m_pendingSuscribeChannels[tMaxChannels];
 
     /**
      * Stream for input and output of data.
