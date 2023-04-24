@@ -139,7 +139,7 @@ jobs:
         pip install --upgrade platformio
 
     - name: Run tests on native environment
-      run: platformio test --environment test -vvv
+      run: platformio test --environment Test -vvv
 
   # Build documentation
   doc:
