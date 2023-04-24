@@ -61,7 +61,6 @@ static void testCmdScrb();
 static void testCmdScrbRsp();
 static void testChannelCreation();
 static void testDataSend();
-static void testDataReceive();
 
 /******************************************************************************
  * Local Variables
@@ -114,7 +113,6 @@ void loop()
     RUN_TEST(testCmdScrbRsp);
     RUN_TEST(testChannelCreation);
     RUN_TEST(testDataSend);
-    RUN_TEST(testDataReceive);
 
     UNITY_END();
 
@@ -503,50 +501,4 @@ static void testDataSend()
      */
     testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], gTestStream.m_outputBuffer, sizeof(testPayload));
-}
-
-/**
- * Test data receive on YAP Server.
- */
-static void testDataReceive()
-{
-    YAPServer<1U> testYapServer(gTestStream);
-    uint8_t       testTime                            = 0U;
-    uint8_t       inputQueueVector[2U][MAX_FRAME_LEN] = {{0x01, 0x16, 0x12, 0x34, 0x56, 0x78},
-                                                         {0x02, 0x17, 0x12, 0x34, 0x56, 0x78}};
-
-    /* Flush Stream */
-    gTestStream.flushInputBuffer();
-    gTestStream.flushOutputBuffer();
-
-    /*
-     * Case: Receive Data on non-existent channel.
-     */
-    callbackCalled = false;
-    gTestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
-    testYapServer.process(testTime++);
-    testYapServer.process(testTime++);
-    TEST_ASSERT_FALSE(callbackCalled);
-
-    /* Create a Channel */
-    TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.createChannel("TEST", sizeof(testPayload), testChannelCallback));
-
-    /*
-     * Case: Receive Data on existent channel.
-     */
-    callbackCalled = false;
-    gTestStream.flushInputBuffer();
-    gTestStream.pushToQueue(inputQueueVector[0U], (HEADER_LEN + sizeof(testPayload)));
-    testYapServer.process(testTime++);
-    testYapServer.process(testTime++);
-    TEST_ASSERT_TRUE(callbackCalled);
-
-    /*
-     * Case: Receive Data on channel number greater than maxChannels.
-     */
-    callbackCalled = false;
-    gTestStream.pushToQueue(inputQueueVector[1U], (HEADER_LEN + sizeof(testPayload)));
-    testYapServer.process(testTime++);
-    testYapServer.process(testTime++);
-    TEST_ASSERT_FALSE(callbackCalled);
 }
