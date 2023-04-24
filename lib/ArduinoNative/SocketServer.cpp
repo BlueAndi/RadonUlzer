@@ -52,6 +52,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
+#include <cstring> /* definition of memset for tests. */
 #endif
 
 /******************************************************************************
