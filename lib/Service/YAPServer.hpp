@@ -345,15 +345,20 @@ private:
                         /* Channel is found in the Server. */
                         if ((0U != channelNumber) && (0U != channelDLC))
                         {
-                            /* Set Channel in RxChannels Array. */
                             uint8_t channelArrayIndex = (channelNumber - 1U);
+
+                            /* Channel is empty. Increase Counter*/
+                            if (nullptr == m_rxChannels[channelArrayIndex].m_callback)
+                            {
+                                /* Increase RX Channel Counter. */
+                                m_numberOfRxChannels++;
+                            }
+
+                            /* Set Channel in RxChannels Array. */
                             memcpy(m_rxChannels[channelArrayIndex].m_name, m_pendingSuscribeChannels[idx].m_name,
                                    CHANNEL_NAME_MAX_LEN);
                             m_rxChannels[channelArrayIndex].m_dlc      = channelDLC;
                             m_rxChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannels[idx].m_callback;
-
-                            /* Increase RX Channel Counter. */
-                            m_numberOfRxChannels++;
                         }
 
                         /* Channel is no longer pending. */
