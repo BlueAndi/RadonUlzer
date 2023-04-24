@@ -303,7 +303,6 @@ private:
         {
             buf[1U] = channelNumber;
             buf[2U] = getTxChannelDLC(channelNumber);
-            memcpy(&buf[3U], payload, CHANNEL_NAME_MAX_LEN);
         }
         else
         {
@@ -311,6 +310,9 @@ private:
             buf[1U] = 0U;
             buf[2U] = 0U;
         }
+
+        /* Name is always sent back. */
+        memcpy(&buf[3U], payload, CHANNEL_NAME_MAX_LEN);
 
         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
         {
