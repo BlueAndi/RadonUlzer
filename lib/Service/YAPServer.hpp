@@ -75,7 +75,9 @@ public:
         m_stream(stream),
         m_receiveFrame(),
         m_receivedBytes(0U),
-        m_rxAttempts(0U)
+        m_rxAttempts(0U),
+        m_numberOfTxChannels(0U),
+        m_numberOfRxChannels(0U)
     {
     }
 
@@ -182,6 +184,9 @@ public:
                 {
                     memcpy(m_txChannels[idx].m_name, channelName, nameLength);
                     m_txChannels[idx].m_dlc = dlc;
+
+                    /* Increase Channel Counter. */
+                    m_numberOfTxChannels++;
                     break;
                 }
             }
@@ -216,6 +221,9 @@ public:
                         memcpy(m_pendingSuscribeChannels[idx].m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX],
                                CHANNEL_NAME_MAX_LEN);
                         m_pendingSuscribeChannels[idx].m_callback = callback;
+
+                        /* Increase Channel Counter. */
+                        m_numberOfPendingChannels++;
                     }
 
                     break;
@@ -238,17 +246,7 @@ public:
      */
     uint8_t getNumberOfTxChannels()
     {
-        uint8_t count = 0U;
-
-        for (uint8_t idx = 0; idx < tMaxChannels; idx++)
-        {
-            if (0U != m_txChannels[idx].m_dlc)
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return m_numberOfTxChannels;
     }
 
     /**
@@ -257,17 +255,7 @@ public:
      */
     uint8_t getNumberOfRxChannels()
     {
-        uint8_t count = 0U;
-
-        for (uint8_t idx = 0; idx < tMaxChannels; idx++)
-        {
-            if (0U != m_rxChannels[idx].m_dlc)
-            {
-                count++;
-            }
-        }
-
-        return count;
+        return m_numberOfRxChannels;
     }
 
 private:
@@ -346,7 +334,7 @@ private:
         uint8_t        channelDLC    = payload[1U];
         const uint8_t* channelName   = &payload[2U];
 
-        if ((0U != channelNumber) && (tMaxChannels >= channelNumber) && (0U != channelDLC) && (nullptr != channelName))
+        if ((0U != channelNumber) && (tMaxChannels >= channelNumber) && (0U != channelDLC) && (nullptr != channelName) && (0U < m_numberOfPendingChannels))
         {
             for (uint8_t idx = 0; idx < tMaxChannels; idx++)
             {
@@ -366,6 +354,12 @@ private:
                         /* Channel is no longer pending. */
                         memset(m_pendingSuscribeChannels[idx].m_name, 0U, CHANNEL_NAME_MAX_LEN);
                         m_pendingSuscribeChannels[idx].m_callback = nullptr;
+
+                        /* Increase RX Channel Counter. */
+                        m_numberOfRxChannels++;
+
+                        /* Decrease Pending Channel Counter. */
+                        m_numberOfPendingChannels--;
                         break;
                     }
                 }
@@ -691,6 +685,21 @@ private:
      * Number of attempts performed at receiving a Frame.
      */
     uint8_t m_rxAttempts;
+
+    /**
+     * Number of TX Channels configured.
+     */
+    uint8_t m_numberOfTxChannels;
+
+    /**
+     * Number of RX Channels configured.
+     */
+    uint8_t m_numberOfRxChannels;
+
+    /**
+     * Number of Pending Channels to subscribe.
+     */
+    uint8_t m_numberOfPendingChannels;
 
 private:
     /* Not allowed. */
