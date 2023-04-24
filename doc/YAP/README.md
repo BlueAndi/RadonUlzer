@@ -61,29 +61,32 @@ typedef union _Frame
     } __attribute__((packed)) fields;
 
     /** Raw Frame Data */
-    uint8_t raw[MAX_FRAME_LEN] = {0};
+    uint8_t raw[MAX_FRAME_LEN] = {0U};
 
 } __attribute__((packed)) Frame;
 ```
 
-### Channel Field
+### Header
+
+#### Channel Field
 
 - Length: 1 Byte.
 - Channel on which the data is being sent.
 - [Channel 0](#control-channel-channel-0) is reserved for the server.
-- Channels 1 to 255 are "Data Channels". The Application can publish data to any of these channels.
+- Channels 1 to 255 are "Data Channels".
+- The Application can publish or subscribe to any of these channels using the channel's name.
 - Client suscribes to a channel using [Channel 0](#control-channel-channel-0).
 
-### Data Field
-
-- Length: Set by the Channel definition.
-- Contains Application Data Bytes.
-
-### Checksum Field
+#### Checksum Field
 
 - Simple Checksum.
 - Applied to previous fields.
-- checksum = sum(Channel + DLC + Data Bytes) % UINT8_MAX
+- checksum = sum(Channel + Data Bytes) % UINT8_MAX
+
+### Payload Field
+
+- Data Length: Set by the Channel definition.
+- Contains Application Data Bytes.
 
 ---
 
@@ -110,13 +113,14 @@ typedef union _Frame
 ### SCRB (D0 = 0x02)
 
 - Client sends the name of the channel it wants to suscribe to.
-- Server responds with the channel number corresponding to the channel name.
+- Server responds with the channel number, DLC, and the channel name of the requested channel, if the channel is found and valid. If channel is not found, the response has channel number = 0, DLC = 0, and the channel name.
 
 ### SCRB_RSP (D0 = 0x03)
 
 - Server Response to [SCRB](#scrb-d0--0x02).
 - Channel Number on Data Byte 1 (D1).
-- If no channel is found with requested name, the Server responds with 0x00.
+- Channel DLC on Data Byte 2 (D2)
+- Channel Name on the following bytes
 
 ---
 
@@ -135,25 +139,34 @@ typedef union _Frame
  */
 struct Channel
 {
-    const char*     m_name;     /**< Name of the channel. */
-    uint8_t         m_dlc;      /**< Payload length of channel */
-    ChannelCallback m_callback; /**< Callback to provide received data to the application. */
+    char            m_name[CHANNEL_NAME_MAX_LEN]; /**< Name of the channel. */
+    uint8_t         m_dlc;                        /**< Payload length of channel */
+    ChannelCallback m_callback;                   /**< Callback to provide received data to the application. */
 
     /**
      * Channel Constructor.
      */
-    Channel() :
-        m_name(""),
-        m_dlc(0),
-        m_callback(nullptr)
+    Channel() : m_name{0U}, m_dlc(0U), m_callback(nullptr)
     {
     }
 };
 ```
 
-- Channel has 3 parameters: Name, dlc, and callback function.
-- Application initializes a channel with a name and a callback function, protocol looks for a free channel and returns its channel number to the application.
+- Channel has 3 members: Name, DLC, and callback function.
+
+### Channel Creation and Subscription
+
+![CreateSubscribeSequence](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/main/doc/YAP/SubscribeSequence.puml)
+
+#### Channel Creation
+
+- Application initializes a channel with a name and a DLC, protocol looks for a free channel number and returns its channel number to the application.
 - If no channel is free, it returns 0 as it is an invalid Data Channel.
+
+#### Channel Subscription
+
+- Application can subscribe to a remote data channel by its name and a callback to the function that must be called when data is received in said channel.
+- Function has no return value, as the response from the server is asynchron.
 
 ### Callback
 
@@ -162,11 +175,12 @@ struct Channel
  * Channel Notification Prototype Callback.
  * Provides the received data in the respective channel to the application.
  */
-typedef void (*ChannelCallback)(const uint8_t* rcvData);
+typedef void (*ChannelCallback)(const uint8_t* payload, const uint8_t payloadSize);
 ```
 
 - Callback passes only a pointer to the received Buffer. Data must be copied by application.
 - Memory is freed by the protocol after the callback is done.
+- DLC is passed as payloadSize to the application.
 
 ### State Machine
 
