@@ -100,6 +100,9 @@ public:
 
         /* Process RX data */
         processRxData();
+
+        /* Manage Pending Subscriptions. */
+        managePendingSubscriptions();
     }
 
     /**
@@ -202,29 +205,21 @@ public:
      */
     void subscribeToChannel(const char* channelName, ChannelCallback callback)
     {
-        if ((nullptr != channelName) && (nullptr != callback))
+        if ((nullptr != channelName) && (nullptr != callback) && (tMaxChannels > m_numberOfPendingChannels))
         {
             /* Check for free channel in m_pendingSubscribeChannels Array*/
             for (uint8_t idx = 0U; idx < tMaxChannels; idx++)
             {
                 if (nullptr == m_pendingSuscribeChannels[idx].m_callback)
                 {
-                    /* Suscribe to channel. */
+                    /* Save Name and Callback for channel creation after response */
                     /* Using strnlen in case the name is not null-terminated. */
-                    uint8_t nameLength                          = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
-                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
+                    uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
+                    memcpy(m_pendingSuscribeChannels[idx].m_name, channelName, nameLength);
+                    m_pendingSuscribeChannels[idx].m_callback = callback;
 
-                    if (true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
-                    {
-                        /* Save Name and Callback for channel creation after response */
-                        memcpy(m_pendingSuscribeChannels[idx].m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX],
-                               CHANNEL_NAME_MAX_LEN);
-                        m_pendingSuscribeChannels[idx].m_callback = callback;
-
-                        /* Increase Channel Counter. */
-                        m_numberOfPendingChannels++;
-                    }
+                    /* Increase Channel Counter. */
+                    m_numberOfPendingChannels++;
 
                     break;
                 }
@@ -513,6 +508,33 @@ private:
             if (true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
             {
                 m_lastSyncCommand = currentTimestamp;
+            }
+        }
+    }
+
+    /**
+     * Subscribe to any pending Channels if synced to server.
+     */
+    void managePendingSubscriptions()
+    {
+        if ((true == m_isSynced) && (0U < m_numberOfPendingChannels))
+        {
+            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
+            {
+                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
+                {
+                    /* Suscribe to channel. */
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
+                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
+                           CHANNEL_NAME_MAX_LEN);
+
+                    if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                    {
+                        /* Out-of-Sync on failed send. */
+                        m_isSynced = false;
+                        break;
+                    }
+                }
             }
         }
     }
