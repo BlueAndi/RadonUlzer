@@ -97,7 +97,7 @@ public:
     virtual uint8_t countsFrontWithRightLeds() const = 0;
 
     /**
-     * Returns the number of brightness levels.
+     * Returns the maximum number of brightness levels.
      * 
      * @return Number of brightness levels.
      */

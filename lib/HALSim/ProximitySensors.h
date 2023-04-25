@@ -122,7 +122,7 @@ public:
      * Returns the number of brightness levels for the left LEDs that
      * activated the front proximity sensor.
      *
-     * @return Number of brightness levels
+     * @return Number of brightness levels in digits.
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
@@ -133,7 +133,7 @@ public:
      * Returns the number of brightness levels for the right LEDs that
      * activated the front proximity sensor.
      *
-     * @return Number of brightness levels
+     * @return Number of brightness levels in digits.
      */
     uint8_t countsFrontWithRightLeds() const final
     {
@@ -165,8 +165,16 @@ private:
      */
     static const uint8_t MAX_SENSORS = 2;
 
-    webots::DistanceSensor* m_proximitySensors[MAX_SENSORS]; /**< The frontal proximity sensors (0: most left)*/
-    uint8_t m_sensorValuesU8[MAX_SENSORS]; /**< The last value read of the sensors as unsigned 8-bit values. */
+    /**
+     * The frontal proximity sensors
+     */
+    webots::DistanceSensor* m_proximitySensors[MAX_SENSORS];
+
+    /**
+     * The last value read of the sensors as unsigned 8-bit values.
+     * Value is in counts/digits representing number of brightness levels received by the sensor.
+     */
+    uint8_t m_sensorValuesU8[MAX_SENSORS]; 
 
     /* Default constructor not allowed. */
     ProximitySensors();
