@@ -199,7 +199,7 @@ private:
     /**
      * Close the listening socket connection.
      */
-    void close();
+    void closeListeningSocket();
 
     /**
      * Get a Byte from the receiving buffer, if any.

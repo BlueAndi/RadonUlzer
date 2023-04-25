@@ -52,6 +52,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
+#include <cstring> /* definition of memset for tests. */
 #endif
 
 /******************************************************************************
@@ -117,7 +118,7 @@ SocketServer::SocketServer() : Stream(), m_members(new SocketServerImpl)
 SocketServer::~SocketServer()
 {
     /* Sockets are closed before deleting m_members. */
-    close();
+    closeListeningSocket();
 
     if (nullptr != m_members)
     {
@@ -161,7 +162,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     if (0 != result)
     {
         printf("getaddrinfo failed with error: %d\n", result);
-        close();
+        closeListeningSocket();
         return false;
     }
 
@@ -171,7 +172,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     {
         printf("socket failed\n");
         freeaddrinfo(addrInfo);
-        close();
+        closeListeningSocket();
         return false;
     }
 
@@ -181,7 +182,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     {
         printf("bind failed\n");
         freeaddrinfo(addrInfo);
-        close();
+        closeListeningSocket();
         return false;
     }
 
@@ -191,7 +192,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
     if (SOCKET_ERROR == result)
     {
         printf("listen failed\n");
-        close();
+        closeListeningSocket();
         return false;
     }
 
@@ -403,7 +404,7 @@ void SocketServer::process()
  * Private Methods
  *****************************************************************************/
 
-void SocketServer::close()
+void SocketServer::closeListeningSocket()
 {
     if (nullptr != m_members)
     {
