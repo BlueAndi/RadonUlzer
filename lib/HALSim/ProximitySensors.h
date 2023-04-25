@@ -126,7 +126,7 @@ public:
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
-        return m_sensorValuesU8[0U];
+        return m_sensorValuesU8[SENSOR_INDEX::LEFT];
     }
 
     /**
@@ -137,7 +137,7 @@ public:
      */
     uint8_t countsFrontWithRightLeds() const final
     {
-        return m_sensorValuesU8[MAX_SENSORS - 1U];
+        return m_sensorValuesU8[SENSOR_INDEX::RIGHT];
     }
 
     /**
@@ -164,6 +164,12 @@ private:
      * Using more than one sensor allows for diferenciation between left and right side.
      */
     static const uint8_t MAX_SENSORS = 2;
+
+    enum SENSOR_INDEX : uint8_t
+    {
+        LEFT = 0U,
+        RIGHT
+    };
 
     /**
      * The frontal proximity sensors
