@@ -96,6 +96,13 @@ public:
      */
     virtual uint8_t countsFrontWithRightLeds() const = 0;
 
+    /**
+     * Returns the maximum number of brightness levels.
+     * 
+     * @return Number of brightness levels.
+     */
+    virtual uint8_t getNumBrightnessLevels() const = 0;
+
 protected:
     /**
      * Constructs the interface.

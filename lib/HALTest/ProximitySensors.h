@@ -117,6 +117,16 @@ public:
         return 0;
     }
 
+    /**
+     * Returns the number of brightness levels.
+     *
+     * @return Number of brightness levels.
+     */
+    uint8_t getNumBrightnessLevels() const final
+    {
+        return 1;
+    }
+
 protected:
 private:
 };

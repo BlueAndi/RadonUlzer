@@ -272,6 +272,12 @@ private:
     /** Name of the green LED in the robot simulation. */
     static const char* LED_GREEN_NAME;
 
+    /** Name of the front proximity sensor in the robot simulation. */
+    static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME;
+
+    /** Name of the front right proximity sensor in the robot simulation. */
+    static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
+
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -341,7 +347,8 @@ private:
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors()
+        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
+                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
     {
     }
 
