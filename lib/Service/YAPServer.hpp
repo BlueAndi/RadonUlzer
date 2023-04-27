@@ -177,25 +177,26 @@ public:
     {
         /* Using strnlen in case the name is not null-terminated. */
         uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-        uint8_t idx        = tMaxChannels;
+        uint8_t idx        = 0U;
 
-        if ((nullptr != channelName) && (0U != nameLength) && (MAX_DATA_LEN >= dlc) && (0U != dlc))
+        if ((nullptr != channelName) && (0U != nameLength) && (MAX_DATA_LEN >= dlc) && (0U != dlc) &&
+            (tMaxChannels > m_numberOfTxChannels))
         {
-            for (idx = 0U; idx < tMaxChannels; idx++)
-            {
-                if (0U == m_txChannels[idx].m_dlc)
-                {
-                    memcpy(m_txChannels[idx].m_name, channelName, nameLength);
-                    m_txChannels[idx].m_dlc = dlc;
+            /*
+             * Number of TX Channels corresponds to idx in TX Channel Array
+             * as these are ordered and Channels cannot be deleted.
+             */
+            memcpy(m_txChannels[m_numberOfTxChannels].m_name, channelName, nameLength);
+            m_txChannels[m_numberOfTxChannels].m_dlc = dlc;
 
-                    /* Increase Channel Counter. */
-                    m_numberOfTxChannels++;
-                    break;
-                }
-            }
+            /* Increase Channel Counter. */
+            m_numberOfTxChannels++;
+
+            /* Provide Channel Number. Could be summarized with operation above. */
+            idx = m_numberOfTxChannels;
         }
 
-        return (idx == tMaxChannels) ? 0U : (idx + 1U);
+        return idx;
     }
 
     /**
