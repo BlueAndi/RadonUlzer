@@ -62,11 +62,17 @@ SOFTWARE.
 /** Total Frame Length in Bytes */
 #define MAX_FRAME_LEN (HEADER_LEN + MAX_DATA_LEN)
 
+/** Max length of channel name */
+#define CHANNEL_NAME_MAX_LEN (10U)
+
+/** Available Bytes in Control Channel Payload for data. */
+#define CONTROL_CHANNEL_PAYLOAD_DATA_LENGTH (4U)
+
 /** Number of Control Channel. */
 #define CONTROL_CHANNEL_NUMBER (0U)
 
 /** DLC of Heartbeat Command. */
-#define CONTROL_CHANNEL_PAYLOAD_LENGTH (11U)
+#define CONTROL_CHANNEL_PAYLOAD_LENGTH (CHANNEL_NAME_MAX_LEN + CONTROL_CHANNEL_PAYLOAD_DATA_LENGTH)
 
 /** Index of the Command Byte of the Control Channel*/
 #define CONTROL_CHANNEL_COMMAND_INDEX (0U)
@@ -79,9 +85,6 @@ SOFTWARE.
 
 /** Period of Heartbeat when Unsynced */
 #define HEATBEAT_PERIOD_UNSYNCED (1000U)
-
-/** Max length of channel name */
-#define CHANNEL_NAME_MAX_LEN (CONTROL_CHANNEL_PAYLOAD_LENGTH - 1U)
 
 /** Max number of attempts at receiving a Frame before resetting RX Buffer */
 #define MAX_RX_ATTEMPTS (MAX_FRAME_LEN)

@@ -73,7 +73,7 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC, positionCallback);
+    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
 }
 
 void App::loop()

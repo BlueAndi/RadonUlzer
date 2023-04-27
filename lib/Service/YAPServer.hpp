@@ -72,11 +72,12 @@ public:
         m_isSynced(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
-        m_pendingSuscribeChannel(),
         m_stream(stream),
         m_receiveFrame(),
         m_receivedBytes(0U),
-        m_rxAttempts(0U)
+        m_rxAttempts(0U),
+        m_numberOfTxChannels(0U),
+        m_numberOfRxChannels(0U)
     {
     }
 
@@ -99,6 +100,9 @@ public:
 
         /* Process RX data */
         processRxData();
+
+        /* Manage Pending Subscriptions. */
+        managePendingSubscriptions();
     }
 
     /**
@@ -133,18 +137,18 @@ public:
 
         if (nullptr != channelName)
         {
-            isSent = sendData(getChannelNumber(channelName), payload, payloadSize);
+            isSent = sendData(getTxChannelNumber(channelName), payload, payloadSize);
         }
 
         return isSent;
     }
 
     /**
-     * Get Number of a channel by its name.
+     * Get Number of a TX channel by its name.
      * @param[in] channelName Name of Channel
      * @returns Number of the Channel, or 0 if not channel with the name is present.
      */
-    uint8_t getChannelNumber(const char* channelName)
+    uint8_t getTxChannelNumber(const char* channelName)
     {
         uint8_t idx = tMaxChannels;
 
@@ -152,7 +156,7 @@ public:
         {
             for (idx = 0U; idx < tMaxChannels; idx++)
             {
-                if (0U == strncmp(channelName, m_dataChannels[idx].m_name, CHANNEL_NAME_MAX_LEN))
+                if (0U == strncmp(channelName, m_txChannels[idx].m_name, CHANNEL_NAME_MAX_LEN))
                 {
                     break;
                 }
@@ -163,34 +167,36 @@ public:
     }
 
     /**
-     * Creates a new channel on the server.
+     * Creates a new TX Channel on the server.
      * @param[in] channelName Name of the channel.
      * It will not be checked if the name already exists.
      * @param[in] dlc Length of the payload of this channel.
-     * @param[in] cb Callback for data incoming to this channel.
      * @returns The channel number if succesfully created, or 0 if not able to create new channel.
      */
-    uint8_t createChannel(const char* channelName, uint8_t dlc, ChannelCallback cb)
+    uint8_t createChannel(const char* channelName, uint8_t dlc)
     {
         /* Using strnlen in case the name is not null-terminated. */
         uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-        uint8_t idx        = tMaxChannels;
+        uint8_t idx        = 0U;
 
-        if ((nullptr != channelName) && (0U != nameLength) && (MAX_DATA_LEN >= dlc) && (0U != dlc) && (nullptr != cb))
+        if ((nullptr != channelName) && (0U != nameLength) && (MAX_DATA_LEN >= dlc) && (0U != dlc) &&
+            (tMaxChannels > m_numberOfTxChannels))
         {
-            for (idx = 0U; idx < tMaxChannels; idx++)
-            {
-                if (nullptr == m_dataChannels[idx].m_callback)
-                {
-                    memcpy(m_dataChannels[idx].m_name, channelName, nameLength);
-                    m_dataChannels[idx].m_dlc      = dlc;
-                    m_dataChannels[idx].m_callback = cb;
-                    break;
-                }
-            }
+            /*
+             * Number of TX Channels corresponds to idx in TX Channel Array
+             * as these are ordered and Channels cannot be deleted.
+             */
+            memcpy(m_txChannels[m_numberOfTxChannels].m_name, channelName, nameLength);
+            m_txChannels[m_numberOfTxChannels].m_dlc = dlc;
+
+            /* Increase Channel Counter. */
+            m_numberOfTxChannels++;
+
+            /* Provide Channel Number. Could be summarized with operation above. */
+            idx = m_numberOfTxChannels;
         }
 
-        return (idx == tMaxChannels) ? 0U : (idx + 1U);
+        return idx;
     }
 
     /**
@@ -200,21 +206,21 @@ public:
      */
     void subscribeToChannel(const char* channelName, ChannelCallback callback)
     {
-        if ((nullptr != channelName) && (nullptr != callback))
+        if ((nullptr != channelName) && (nullptr != callback) && (tMaxChannels > m_numberOfPendingChannels))
         {
-            /* Suscribe to channel. */
+            /* Save Name and Callback for channel creation after response */
             /* Using strnlen in case the name is not null-terminated. */
             uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-            uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
-            buf[CONTROL_CHANNEL_COMMAND_INDEX] = COMMANDS::SCRB;
-            memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], channelName, nameLength);
 
-            if(true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
-            {
-                /* Save Name and Callback for channel creation after response */
-                memcpy(m_pendingSuscribeChannel.m_name, &buf[CONTROL_CHANNEL_PAYLOAD_INDEX], CHANNEL_NAME_MAX_LEN);
-                m_pendingSuscribeChannel.m_callback = callback;
-            }
+            /*
+             * Number of Pending Channels corresponds to idx in Pending Channel Array
+             * as these are ordered and Channels cannot be deleted.
+             */
+            memcpy(m_pendingSuscribeChannels[m_numberOfPendingChannels].m_name, channelName, nameLength);
+            m_pendingSuscribeChannels[m_numberOfPendingChannels].m_callback = callback;
+
+            /* Increase Channel Counter. */
+            m_numberOfPendingChannels++;
         }
     }
 
@@ -227,22 +233,21 @@ public:
     }
 
     /**
-     * Get the number of configured channels.
+     * Get the number of configured TX channels.
      * @returns Number of configured Data Channels. The Command Channel is ignored here.
      */
-    uint8_t getNumberOfChannels()
+    uint8_t getNumberOfTxChannels()
     {
-        uint8_t count = 0U;
+        return m_numberOfTxChannels;
+    }
 
-        for (uint8_t idx = 0; idx < tMaxChannels; idx++)
-        {
-            if (nullptr != m_dataChannels[idx].m_callback)
-            {
-                count++;
-            }
-        }
-
-        return count;
+    /**
+     * Get the number of configured RX channels.
+     * @returns Number of configured Data Channels. The Command Channel is ignored here.
+     */
+    uint8_t getNumberOfRxChannels()
+    {
+        return m_numberOfRxChannels;
     }
 
 private:
@@ -288,14 +293,13 @@ private:
      */
     void cmdSCRB(const uint8_t* payload)
     {
-        uint8_t channelNumber = getChannelNumber(reinterpret_cast<const char*>(payload));
-        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {0U};
-        buf[0U] = COMMANDS::SCRB_RSP;
+        uint8_t channelNumber = getTxChannelNumber(reinterpret_cast<const char*>(payload));
+        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP};
 
         if (CONTROL_CHANNEL_NUMBER != channelNumber)
         {
             buf[1U] = channelNumber;
-            buf[2U] = getChannelDLC(channelNumber);
+            buf[2U] = getChannelDLC(channelNumber, true);
         }
         else
         {
@@ -303,6 +307,9 @@ private:
             buf[1U] = 0U;
             buf[2U] = 0U;
         }
+
+        /* Name is always sent back. */
+        memcpy(&buf[3U], payload, CHANNEL_NAME_MAX_LEN);
 
         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
         {
@@ -317,21 +324,50 @@ private:
      */
     void cmdSCRB_RSP(const uint8_t* payload)
     {
-        /* Check if a SCRB is pending. */
-        if (nullptr != m_pendingSuscribeChannel.m_callback)
+        uint8_t        channelNumber = payload[0U];
+        uint8_t        channelDLC    = payload[1U];
+        const uint8_t* channelName   = &payload[2U];
+
+        if ((tMaxChannels >= channelNumber) && (nullptr != channelName) && (0U < m_numberOfPendingChannels))
         {
-            uint8_t channelNumber     = payload[0U];
-            uint8_t channelDLC        = payload[1U];
-
-            if ((0U != channelNumber) && (0U != channelDLC))
+            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
             {
-                uint8_t channelArrayIndex = (channelNumber - 1U);
-                memcpy(m_dataChannels[channelArrayIndex].m_name, m_pendingSuscribeChannel.m_name, CHANNEL_NAME_MAX_LEN);
-                m_dataChannels[channelArrayIndex].m_dlc      = channelDLC;
-                m_dataChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannel.m_callback;
-            }
+                /* Check if a SCRB is pending. */
+                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
+                {
+                    /* Check if its the correct channel. */
+                    if (0U == strncmp(reinterpret_cast<const char*>(channelName), m_pendingSuscribeChannels[idx].m_name,
+                                      CHANNEL_NAME_MAX_LEN))
+                    {
+                        /* Channel is found in the Server. */
+                        if ((0U != channelNumber) && (0U != channelDLC))
+                        {
+                            uint8_t channelArrayIndex = (channelNumber - 1U);
 
-            m_pendingSuscribeChannel.m_callback = nullptr;
+                            /* Channel is empty. Increase Counter*/
+                            if (nullptr == m_rxChannels[channelArrayIndex].m_callback)
+                            {
+                                /* Increase RX Channel Counter. */
+                                m_numberOfRxChannels++;
+                            }
+
+                            /* Set Channel in RxChannels Array. */
+                            memcpy(m_rxChannels[channelArrayIndex].m_name, m_pendingSuscribeChannels[idx].m_name,
+                                   CHANNEL_NAME_MAX_LEN);
+                            m_rxChannels[channelArrayIndex].m_dlc      = channelDLC;
+                            m_rxChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannels[idx].m_callback;
+                        }
+
+                        /* Channel is no longer pending. */
+                        memset(m_pendingSuscribeChannels[idx].m_name, 0U, CHANNEL_NAME_MAX_LEN);
+                        m_pendingSuscribeChannels[idx].m_callback = nullptr;
+
+                        /* Decrease Pending Channel Counter. */
+                        m_numberOfPendingChannels--;
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -390,8 +426,8 @@ private:
         }
         else
         {
-            /* Header has been read. Get DLC using Header. */
-            dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel);
+            /* Header has been read. Get DLC of Rx Channel using Header. */
+            dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel, false);
 
             /* DLC = 0 means that the channel does not exist. */
             if ((0U != dlc) && (MAX_RX_ATTEMPTS >= m_rxAttempts))
@@ -422,10 +458,10 @@ private:
                     {
                         callbackControlChannel(m_receiveFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     }
-                    else if (nullptr != m_dataChannels[channelArrayIndex].m_callback)
+                    else if (nullptr != m_rxChannels[channelArrayIndex].m_callback)
                     {
                         /* Callback */
-                        m_dataChannels[channelArrayIndex].m_callback(m_receiveFrame.fields.payload.m_data, dlc);
+                        m_rxChannels[channelArrayIndex].m_callback(m_receiveFrame.fields.payload.m_data, dlc);
                     }
                 }
 
@@ -486,6 +522,33 @@ private:
     }
 
     /**
+     * Subscribe to any pending Channels if synced to server.
+     */
+    void managePendingSubscriptions()
+    {
+        if ((true == m_isSynced) && (0U < m_numberOfPendingChannels))
+        {
+            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
+            {
+                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
+                {
+                    /* Suscribe to channel. */
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
+                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
+                           CHANNEL_NAME_MAX_LEN);
+
+                    if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                    {
+                        /* Out-of-Sync on failed send. */
+                        m_isSynced = false;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Send a frame with the selected bytes.
      * @param[in] channelNumber Channel to send frame to.
      * @param[in] payload Byte buffer to be sent.
@@ -495,7 +558,7 @@ private:
     bool send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
         bool    frameSent  = false;
-        uint8_t channelDLC = getChannelDLC(channelNumber);
+        uint8_t channelDLC = getChannelDLC(channelNumber, true);
 
         if ((nullptr != payload) && (channelDLC == payloadSize) &&
             (true == m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
@@ -533,9 +596,10 @@ private:
     /**
      * Get the Payload Length of a channel
      * @param[in] channel Channel number to check
+     * @param[in] isTxChannel Is the Channel a TX Channel? If false, will return value for an RX Channel instead.
      * @returns DLC of the channel, or 0 if channel is not found.
      */
-    uint8_t getChannelDLC(uint8_t channel) const
+    uint8_t getChannelDLC(uint8_t channel, bool isTxChannel) const
     {
         uint8_t channelDLC = 0U;
 
@@ -545,7 +609,14 @@ private:
         }
         else if (tMaxChannels >= channel)
         {
-            channelDLC = m_dataChannels[channel - 1U].m_dlc;
+            if (true == isTxChannel)
+            {
+                channelDLC = m_txChannels[channel - 1U].m_dlc;
+            }
+            else
+            {
+                channelDLC = m_txChannels[channel - 1U].m_dlc;
+            }
         }
         else
         {
@@ -563,10 +634,9 @@ private:
      */
     uint8_t checksum(const Frame& frame) const
     {
-        const uint8_t channelDLC = getChannelDLC(frame.fields.header.headerFields.m_channel);
-        uint32_t      sum        = frame.fields.header.headerFields.m_channel;
+        uint32_t sum = frame.fields.header.headerFields.m_channel;
 
-        for (size_t idx = 0U; idx < channelDLC; idx++)
+        for (size_t idx = 0U; idx < MAX_DATA_LEN; idx++)
         {
             sum += frame.fields.payload.m_data[idx];
         }
@@ -576,9 +646,22 @@ private:
 
 private:
     /**
-     *  Array of Data Channels.
+     * Array of tx Data Channels.
+     * Server publishes to these channels.
      */
-    Channel m_dataChannels[tMaxChannels];
+    Channel m_txChannels[tMaxChannels];
+
+    /**
+     * Array of rx Data Channels.
+     * Server subscribes to these channels.
+     */
+    Channel m_rxChannels[tMaxChannels];
+
+    /**
+     * Array of pending rx Data Channels.
+     * Server subscribes to these channels but no response has been received.
+     */
+    Channel m_pendingSuscribeChannels[tMaxChannels];
 
     /**
      * Current Sync state.
@@ -594,11 +677,6 @@ private:
      * Last sync response timestamp.
      */
     uint32_t m_lastSyncResponse;
-
-    /**
-     * Channel used to store the name and the Callback of a pending suscription.
-     */
-    Channel m_pendingSuscribeChannel;
 
     /**
      * Stream for input and output of data.
@@ -620,6 +698,21 @@ private:
      * Number of attempts performed at receiving a Frame.
      */
     uint8_t m_rxAttempts;
+
+    /**
+     * Number of TX Channels configured.
+     */
+    uint8_t m_numberOfTxChannels;
+
+    /**
+     * Number of RX Channels configured.
+     */
+    uint8_t m_numberOfRxChannels;
+
+    /**
+     * Number of Pending Channels to subscribe.
+     */
+    uint8_t m_numberOfPendingChannels;
 
 private:
     /* Not allowed. */
