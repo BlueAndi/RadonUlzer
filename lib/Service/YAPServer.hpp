@@ -208,23 +208,19 @@ public:
     {
         if ((nullptr != channelName) && (nullptr != callback) && (tMaxChannels > m_numberOfPendingChannels))
         {
-            /* Check for free channel in m_pendingSubscribeChannels Array*/
-            for (uint8_t idx = 0U; idx < tMaxChannels; idx++)
-            {
-                if (nullptr == m_pendingSuscribeChannels[idx].m_callback)
-                {
-                    /* Save Name and Callback for channel creation after response */
-                    /* Using strnlen in case the name is not null-terminated. */
-                    uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
-                    memcpy(m_pendingSuscribeChannels[idx].m_name, channelName, nameLength);
-                    m_pendingSuscribeChannels[idx].m_callback = callback;
+            /* Save Name and Callback for channel creation after response */
+            /* Using strnlen in case the name is not null-terminated. */
+            uint8_t nameLength = strnlen(channelName, CHANNEL_NAME_MAX_LEN);
 
-                    /* Increase Channel Counter. */
-                    m_numberOfPendingChannels++;
+            /*
+             * Number of Pending Channels corresponds to idx in Pending Channel Array
+             * as these are ordered and Channels cannot be deleted.
+             */
+            memcpy(m_pendingSuscribeChannels[m_numberOfPendingChannels].m_name, channelName, nameLength);
+            m_pendingSuscribeChannels[m_numberOfPendingChannels].m_callback = callback;
 
-                    break;
-                }
-            }
+            /* Increase Channel Counter. */
+            m_numberOfPendingChannels++;
         }
     }
 
