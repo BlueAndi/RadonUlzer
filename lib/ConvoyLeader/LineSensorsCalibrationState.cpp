@@ -88,28 +88,45 @@ void LineSensorsCalibrationState::entry()
 
 void LineSensorsCalibrationState::process(StateMachine& sm)
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
     switch (m_phase)
     {
     case PHASE_1_WAIT:
-        phase1Wait();
+        if (true == m_timer.isTimeout())
+        {
+            m_phase = PHASE_2_TURN_LEFT;
+            diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
+        }
         break;
 
     case PHASE_2_TURN_LEFT:
-        phase2TurnLeft();
+        if (true == turnAndCalibrate(CALIB_ANGLE, true))
+        {
+            m_phase = PHASE_3_TURN_RIGHT;
+            diffDrive.setLinearSpeed(m_calibrationSpeed, -m_calibrationSpeed);
+        }
         break;
 
     case PHASE_3_TURN_RIGHT:
-        phase3TurnRight();
+        if (true == turnAndCalibrate(-CALIB_ANGLE, false))
+        {
+            m_phase = PHASE_4_TURN_ORIG;
+            diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
+        }
         break;
 
     case PHASE_4_TURN_ORIG:
-        phase4TurnOrigin();
+        if (true == turnAndCalibrate(0, true))
+        {
+            m_phase = PHASE_5_FINISHED;
+            diffDrive.setLinearSpeed(0, 0);
+            finishCalibration(sm);
+        }
         break;
 
     case PHASE_5_FINISHED:
-        phase5Finished(sm);
-        break;
-
+        /* fallthrough */
     default:
         break;
     }
@@ -131,73 +148,38 @@ void LineSensorsCalibrationState::exit()
  * Private Methods
  *****************************************************************************/
 
-void LineSensorsCalibrationState::phase1Wait()
-{
-    if (true == m_timer.isTimeout())
-    {
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        /* Turn left */
-        m_phase = PHASE_2_TURN_LEFT;
-        diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
-    }
-}
-
-void LineSensorsCalibrationState::phase2TurnLeft()
+bool LineSensorsCalibrationState::turnAndCalibrate(int32_t calibAlpha, bool isGreaterEqual)
 {
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
     Odometry&     odometry    = Odometry::getInstance();
     int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
+    bool          isSuccesful = false;
 
+    /* Continously calibrate the line sensors. */
     lineSensors.calibrate();
 
-    if (CALIB_ANGLE <= alpha)
+    /* Is the goal that the current angle shall be lower or equal than the destination calibration angle? */
+    if (false == isGreaterEqual)
     {
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        /* Turn right */
-        m_phase = PHASE_3_TURN_RIGHT;
-        diffDrive.setLinearSpeed(m_calibrationSpeed, -m_calibrationSpeed);
+        /* Is alpha lower or equal than the destination calibration angle? */
+        if (calibAlpha >= alpha)
+        {
+            isSuccesful = true;
+        }
     }
+    else
+    {
+        /* Is alpha greater or equal than the destination calibration angle? */
+        if (calibAlpha <= alpha)
+        {
+            isSuccesful = true;
+        }
+    }
+
+    return isSuccesful;
 }
 
-void LineSensorsCalibrationState::phase3TurnRight()
-{
-    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    Odometry&     odometry    = Odometry::getInstance();
-    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
-
-    lineSensors.calibrate();
-
-    if ((-CALIB_ANGLE) >= alpha)
-    {
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        /* Turn left */
-        m_phase = PHASE_4_TURN_ORIG;
-        diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
-    }
-}
-
-void LineSensorsCalibrationState::phase4TurnOrigin()
-{
-    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    Odometry&     odometry    = Odometry::getInstance();
-    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
-
-    lineSensors.calibrate();
-
-    if (0 <= alpha)
-    {
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        /* Stop */
-        m_phase = PHASE_5_FINISHED;
-        diffDrive.setLinearSpeed(0, 0);
-    }
-}
-
-void LineSensorsCalibrationState::phase5Finished(StateMachine& sm)
+void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
 {
     ILineSensors& lineSensors = Board::getInstance().getLineSensors();
 

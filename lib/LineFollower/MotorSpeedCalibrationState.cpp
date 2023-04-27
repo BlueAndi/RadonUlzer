@@ -65,7 +65,7 @@
 /**
  * Logging source.
  */
-static const char* TAG = "MotorSpeedCalibrationState";
+static const char* TAG = "MSCState";
 
 /******************************************************************************
  * Public Methods
@@ -83,33 +83,60 @@ void MotorSpeedCalibrationState::entry()
     /* Setup relative encoders */
     m_relEncoders.clear();
 
+    /* Set the max. speeds to maximum of datatype, because during calibration
+     * the max. speed is determined by the lowest motor speed.
+     */
+    m_maxSpeedLeft  = INT16_MAX;
+    m_maxSpeedRight = INT16_MAX;
+
     /* Wait some time, before starting the calibration drive. */
-    m_phase = PHASE_1_WAIT;
+    m_phase = PHASE_1_BACK;
     m_timer.start(WAIT_TIME);
 }
 
 void MotorSpeedCalibrationState::process(StateMachine& sm)
 {
-    switch (m_phase)
+    if (true == m_timer.isTimeout())
     {
-    case PHASE_1_WAIT:
-        phase1Wait();
-        break;
+        /* Control motors directly and not via differential drive control,
+         * because the differential drive control needs first to be updated
+         * regarding the max. possible motor speed in [steps/s] which is
+         * determined by this calibration.
+         */
+        IMotors& motors = Board::getInstance().getMotors();
 
-    case PHASE_2_BACK:
-        phase2Back();
-        break;
+        switch (m_phase)
+        {
+        case PHASE_1_BACK:
+            /* Drive full back. */
+            motors.setSpeeds(-motors.getMaxSpeed(), -motors.getMaxSpeed());
 
-    case PHASE_3_FORWARD:
-        phase3Forward();
-        break;
+            m_timer.start(CALIB_DURATION);
+            m_phase = PHASE_2_FORWARD;
+            break;
 
-    case PHASE_4_FINISHED:
-        phase4Finished(sm);
-        break;
+        case PHASE_2_FORWARD:
+            motors.setSpeeds(0, 0);
+            determineMaxMotorSpeed();
 
-    default:
-        break;
+            /* Drive full forward. */
+            motors.setSpeeds(motors.getMaxSpeed(), motors.getMaxSpeed());
+
+            m_timer.restart();
+            m_phase = PHASE_3_FINISHED;
+            break;
+
+        case PHASE_3_FINISHED:
+            motors.setSpeeds(0, 0);
+            determineMaxMotorSpeed();
+
+            m_timer.stop();
+            finishCalibration(sm);
+            break;
+
+        default:
+            break;
+        }
     }
 }
 
@@ -126,113 +153,48 @@ void MotorSpeedCalibrationState::exit()
  * Private Methods
  *****************************************************************************/
 
-void MotorSpeedCalibrationState::phase1Wait()
+void MotorSpeedCalibrationState::determineMaxMotorSpeed()
 {
-    if (true == m_timer.isTimeout())
+    int32_t stepsLeft  = 0;
+    int32_t stepsRight = 0;
+
+    /* Determine max. speed backward. */
+    stepsLeft  = abs(m_relEncoders.getCountsLeft());
+    stepsRight = abs(m_relEncoders.getCountsRight());
+
+    /* Convert number of steps to [steps/s] */
+    stepsLeft *= 1000;
+    stepsLeft /= CALIB_DURATION;
+    stepsRight *= 1000;
+    stepsRight /= CALIB_DURATION;
+
+    if (INT16_MAX >= stepsLeft)
     {
-        IMotors& motors = Board::getInstance().getMotors();
-
-        /* Full back */
-        m_phase = PHASE_2_BACK;
-        m_timer.start(CALIB_DURATION);
-
-        /* Control motors directly and not via differential drive control,
-         * because the differential drive control needs first to be updated
-         * regarding the max. possible motor speed in [steps/s] which is
-         * determined by this calibration.
-         */
-        motors.setSpeeds(-motors.getMaxSpeed(), -motors.getMaxSpeed());
-    }
-}
-
-void MotorSpeedCalibrationState::phase2Back()
-{
-    if (true == m_timer.isTimeout())
-    {
-        IMotors& motors     = Board::getInstance().getMotors();
-        int32_t  stepsLeft  = 0;
-        int32_t  stepsRight = 0;
-
-        /* Stop motors immediately */
-        motors.setSpeeds(0, 0);
-
-        /* Determine max. speed backward. */
-        stepsLeft  = abs(m_relEncoders.getCountsLeft());
-        stepsRight = abs(m_relEncoders.getCountsRight());
-
-        /* Convert number of steps to [steps/s] */
-        stepsLeft *= 1000;
-        stepsLeft /= CALIB_DURATION;
-        stepsRight *= 1000;
-        stepsRight /= CALIB_DURATION;
-
-        if (INT16_MAX >= stepsLeft)
-        {
-            m_maxSpeedLeft  = static_cast<int16_t>(stepsLeft);
-        }
-
-        if (INT16_MAX >= stepsRight)
-        {
-            m_maxSpeedRight = static_cast<int16_t>(stepsRight);
-        }
-
-        /* Clear relative encoders */
-        m_relEncoders.clear();
-
-        /* Full forward */
-        m_phase = PHASE_3_FORWARD;
-        m_timer.start(CALIB_DURATION);
-        motors.setSpeeds(motors.getMaxSpeed(), motors.getMaxSpeed());
-    }
-}
-
-void MotorSpeedCalibrationState::phase3Forward()
-{
-    if (true == m_timer.isTimeout())
-    {
-        IMotors& motors     = Board::getInstance().getMotors();
-        int32_t  stepsLeft  = 0;
-        int32_t  stepsRight = 0;
-
-        /* Stop motors immediately */
-        motors.setSpeeds(0, 0);
-
-        /* Determine max. speed forward. */
-        stepsLeft  = abs(m_relEncoders.getCountsLeft());
-        stepsRight = abs(m_relEncoders.getCountsRight());
-
-        /* Convert number of steps to [steps/s] */
-        stepsLeft *= 1000;
-        stepsLeft /= CALIB_DURATION;
-        stepsRight *= 1000;
-        stepsRight /= CALIB_DURATION;
-
         /* Use lower speed to ensure that motor speed can be reached in both
          * directions.
          */
         if (stepsLeft < m_maxSpeedLeft)
         {
-            m_maxSpeedLeft = stepsLeft;
+            m_maxSpeedLeft = static_cast<int16_t>(stepsLeft);
         }
+    }
 
+    if (INT16_MAX >= stepsRight)
+    {
         /* Use lower speed to ensure that motor speed can be reached in both
          * directions.
          */
         if (stepsRight < m_maxSpeedRight)
         {
-            m_maxSpeedRight = stepsRight;
+            m_maxSpeedRight = static_cast<int16_t>(stepsRight);
         }
-
-        /* Clear relative encoders */
-        m_relEncoders.clear();
-
-        /* Finished */
-        m_phase = PHASE_4_FINISHED;
-        m_timer.stop();
     }
+
+    /* Clear relative encoders */
+    m_relEncoders.clear();
 }
 
-void MotorSpeedCalibrationState::phase4Finished(StateMachine& sm)
+void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
