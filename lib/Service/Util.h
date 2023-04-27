@@ -112,3 +112,4 @@ bool byteArrayToUint32(const uint8_t* buffer, size_t size, uint32_t& value);
 } // namespace Util
 
 #endif /* UTIL_H */
+/** @} */

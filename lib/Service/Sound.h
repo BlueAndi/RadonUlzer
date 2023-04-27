@@ -78,3 +78,4 @@ void playStartup();
 }
 
 #endif /* SOUND_H */
+/** @} */

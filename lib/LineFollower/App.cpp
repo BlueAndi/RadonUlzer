@@ -60,9 +60,6 @@
  * Local Variables
  *****************************************************************************/
 
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -73,12 +70,10 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
 }
 
 void App::loop()
 {
-    m_yapServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
@@ -95,9 +90,6 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-        /* Send Position to YAP Client */
-        reportPosition();
-
         m_controlInterval.restart();
     }
 
@@ -111,24 +103,6 @@ void App::loop()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-void App::reportPosition()
-{
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
-
-    Odometry::getInstance().getPosition(xPos, yPos);
-
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
-}
-
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
-}
 
 /******************************************************************************
  * External Functions

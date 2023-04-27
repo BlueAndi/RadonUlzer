@@ -2,15 +2,20 @@
 
 title Configuration
 
+component "env:ConvoyLeaderTarget" <<pio>> as envConvoyLeader
+component "env:ConvoyLeaderSim" <<pio>> as envConvoyLeaderSim
+
 component "env:LineFollowerTarget" <<pio>> as envLineFollower
 component "env:LineFollowerSim" <<pio>> as envLineFollowerSim
 
 component "env:RemoteControlTarget" <<pio>> as envRemoteControl
 component "env:RemoteControlSim" <<pio>> as envRemoteControlSim
 
+component "app:ConvoyLeader" <<pio>> as appConvoyLeader
 component "app:LineFollower" <<pio>> as appLineFollower
 component "app:RemoteControl" <<pio>> as appRemoteControl
 
+component "ConvoyLeader" <<lib>> as convoyLeader
 component "LineFollower" <<lib>> as lineFollower
 component "RemoteControl" <<lib>> as remoteControl
 component "Service" <<lib>> as service
@@ -20,6 +25,12 @@ component "target:Sim" <<pio>> as targetSim
 
 component "HALTarget" <<lib>> as halTarget
 component "HALSim" <<lib>> as halSim
+
+envConvoyLeader ..> appConvoyLeader
+envConvoyLeader ..> targetZumo
+
+envConvoyLeaderSim ..> appConvoyLeader
+envConvoyLeaderSim ..> targetSim
 
 envLineFollower ..> appLineFollower
 envLineFollower ..> targetZumo
@@ -33,6 +44,8 @@ envRemoteControl ..> targetZumo
 envRemoteControlSim ..> appRemoteControl
 envRemoteControlSim ..> targetSim
 
+appConvoyLeader ..> convoyLeader
+appConvoyLeader ..> service
 appLineFollower ..> lineFollower
 appLineFollower ..> service
 appRemoteControl ..> remoteControl

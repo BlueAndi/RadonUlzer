@@ -120,6 +120,16 @@ public:
         return m_proximitySensors.countsFrontWithRightLeds();
     }
 
+    /**
+     * Returns the number of brightness levels.
+     * 
+     * @return Number of brightness levels.
+     */
+    uint8_t getNumBrightnessLevels() const final
+    {
+        return m_proximitySensors.getNumBrightnessLevels();
+    }
+
 protected:
 private:
     Zumo32U4ProximitySensors m_proximitySensors; /**< Zumo32U4 proximity sensors */
@@ -130,3 +140,4 @@ private:
  *****************************************************************************/
 
 #endif /* PROXIMITYSENSORS_H */
+/** @} */

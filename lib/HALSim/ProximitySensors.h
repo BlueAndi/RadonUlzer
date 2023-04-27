@@ -42,8 +42,10 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include "IProximitySensors.h"
+#include "SimTime.h"
+
+#include <webots/DistanceSensor.hpp>
 
 /******************************************************************************
  * Macros
@@ -60,8 +62,20 @@ public:
     /**
      * Constructs the interface.
      */
-    ProximitySensors() : IProximitySensors()
+    ProximitySensors(const SimTime& simTime, webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
+        IProximitySensors(),
+        m_proximitySensors{proxSensor0, proxSensor1},
+        m_sensorValuesU8{0U}
     {
+        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+        {
+            m_sensorValuesU8[sensorIndex] = 0;
+
+            if (nullptr != m_proximitySensors[sensorIndex])
+            {
+                m_proximitySensors[sensorIndex]->enable(simTime.getTimeStep());
+            }
+        }
     }
 
     /**
@@ -76,6 +90,7 @@ public:
      */
     void initFrontSensor() final
     {
+        /* Nothing to do. */
     }
 
     /**
@@ -85,7 +100,8 @@ public:
      */
     uint8_t getNumSensors() const final
     {
-        return 1;
+        /* Front sensors are counted as one */
+        return 1U;
     }
 
     /**
@@ -93,32 +109,81 @@ public:
      */
     void read() final
     {
+        for (uint8_t sensorIndex = 0U; sensorIndex < MAX_SENSORS; ++sensorIndex)
+        {
+            if (nullptr != m_proximitySensors[sensorIndex])
+            {
+                m_sensorValuesU8[sensorIndex] = static_cast<uint8_t>(m_proximitySensors[sensorIndex]->getValue());
+            }
+        }
     }
 
     /**
      * Returns the number of brightness levels for the left LEDs that
      * activated the front proximity sensor.
      *
-     * @return Number of brightness levels
+     * @return Number of brightness levels in digits.
      */
     uint8_t countsFrontWithLeftLeds() const final
     {
-        return 0;
+        return m_sensorValuesU8[SENSOR_INDEX::LEFT];
     }
 
     /**
      * Returns the number of brightness levels for the right LEDs that
      * activated the front proximity sensor.
      *
-     * @return Number of brightness levels
+     * @return Number of brightness levels in digits.
      */
     uint8_t countsFrontWithRightLeds() const final
     {
-        return 0;
+        return m_sensorValuesU8[SENSOR_INDEX::RIGHT];
+    }
+
+    /**
+     * Returns the number of brightness levels.
+     *
+     * @return Number of brightness levels.
+     */
+    uint8_t getNumBrightnessLevels() const
+    {
+        return SENSOR_MAX_VALUE;
     }
 
 protected:
 private:
+    /**
+     * Max. value of a single proximity sensor in digits.
+     * It depends on the Zumo32U4ProximitySensors implementation,
+     * specifically the number of brightness levels.
+     */
+    static const uint8_t SENSOR_MAX_VALUE = 6;
+
+    /**
+     * Number of sensors that make up the front of the robot in the simulation.
+     * Using more than one sensor allows for diferenciation between left and right side.
+     */
+    static const uint8_t MAX_SENSORS = 2;
+
+    enum SENSOR_INDEX : uint8_t
+    {
+        LEFT = 0U,
+        RIGHT
+    };
+
+    /**
+     * The frontal proximity sensors
+     */
+    webots::DistanceSensor* m_proximitySensors[MAX_SENSORS];
+
+    /**
+     * The last value read of the sensors as unsigned 8-bit values.
+     * Value is in counts/digits representing number of brightness levels received by the sensor.
+     */
+    uint8_t m_sensorValuesU8[MAX_SENSORS]; 
+
+    /* Default constructor not allowed. */
+    ProximitySensors();
 };
 
 /******************************************************************************
@@ -126,3 +191,4 @@ private:
  *****************************************************************************/
 
 #endif /* PROXIMITYSENSORS_H */
+/** @} */
