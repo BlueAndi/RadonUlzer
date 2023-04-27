@@ -96,10 +96,9 @@ private:
     /** Calibration phases */
     enum Phase
     {
-        PHASE_1_WAIT = 0, /**< Wait that the operator removed its fingers from the robot. */
-        PHASE_2_BACK,     /**< Drive with max. speed backwards. */
-        PHASE_3_FORWARD,  /**< Drive with max. speed forwards. */
-        PHASE_4_FINISHED  /**< Calibration is finished. */
+        PHASE_1_BACK,    /**< Drive with max. speed backwards. */
+        PHASE_2_FORWARD, /**< Drive with max. speed forwards. */
+        PHASE_3_FINISHED /**< Calibration is finished. */
     };
 
     /**
@@ -124,7 +123,7 @@ private:
      */
     MotorSpeedCalibrationState() :
         m_timer(),
-        m_phase(PHASE_1_WAIT),
+        m_phase(PHASE_1_BACK),
         m_maxSpeedLeft(0),
         m_maxSpeedRight(0),
         m_relEncoders(Board::getInstance().getEncoders())
@@ -142,26 +141,19 @@ private:
     MotorSpeedCalibrationState& operator=(const MotorSpeedCalibrationState& state);
 
     /**
-     * Phase 1: Wait a short time to avoid that the operator still touches the robot.
+     * Determine the max. motor speed, considering both driving directions.
+     * There are two steps necessary:
+     * - Drive full backward and call this method to determine.
+     * - Drive full forward and call this method to determine.
      */
-    void phase1Wait();
+    void determineMaxMotorSpeed();
 
     /**
-     * Phase 2: Determine max. backward motor speed.
-     */
-    void phase2Back();
-
-    /**
-     * Phase 3: Determine max. forward motor speed.
-     */
-    void phase3Forward();
-
-    /**
-     * Phase 4: Calibration finished, continue to next state.
+     * Finish the calibration and determine next state.
      *
      * @param[in] sm    State machine
      */
-    void phase4Finished(StateMachine& sm);
+    void finishCalibration(StateMachine& sm);
 };
 
 /******************************************************************************

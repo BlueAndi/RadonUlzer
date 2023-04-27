@@ -74,14 +74,13 @@ extern void loop();
 #ifndef UNIT_TEST
 
 /** SocketServer Stream. */
-static SocketServer SocketStream;
+static SocketServer gSocketStream;
 
 /** Terminal/Console Stream. */
-static Terminal TerminalStream;
+static Terminal gTerminalStream;
 
 /** Serial driver, used by Arduino applications. */
-Serial_ Serial(SocketStream);
-
+Serial_ Serial(gTerminalStream);
 
 /**
  * The maximum duration a simulated time step can have.
@@ -155,8 +154,8 @@ extern int main(int argc, char** argv)
 {
     int       status   = 0;
     Keyboard& keyboard = Board::getInstance().getKeyboard();
-    SocketStream.init(SOCKET_SERVER_PORT, SOCKET_SERVER_MAX_CONNECTIONS);
-    
+    gSocketStream.init(SOCKET_SERVER_PORT, SOCKET_SERVER_MAX_CONNECTIONS);
+
     /* Get simulation time handler. It will be used by millis() and delay(). */
     gSimTime = &Board::getInstance().getSimTime();
 
@@ -182,7 +181,7 @@ extern int main(int argc, char** argv)
         {
             keyboard.getPressedButtons();
             loop();
-            SocketStream.process();
+            gSocketStream.process();
         }
 
         status = 0;

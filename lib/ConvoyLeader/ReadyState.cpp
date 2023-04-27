@@ -62,7 +62,7 @@
 /**
  * Logging source.
  */
-static const char* TAG = "ReadyState";
+static const char* TAG = "RState";
 
 /******************************************************************************
  * Public Methods

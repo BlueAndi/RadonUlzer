@@ -135,31 +135,21 @@ private:
     LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state);
 
     /**
-     * Phase 1: Wait a short time to avoid that the operator still touches the robot.
+     * Turn and calibrate the line sensors.
+     *
+     * @param[in]   calibAlpha      Destination calibration angle in [mrad]
+     * @param[in]   isGreaterEqual  Configure true if angle shall be greater or equal than the destination.
+     *
+     * @return If destination angle reached, it will return true otherwise false.
      */
-    void phase1Wait();
+    bool turnAndCalibrate(int32_t calibAlpha, bool isGreaterEqual);
 
     /**
-     * Phase 2: Turn line sensors left over the line.
-     */
-    void phase2TurnLeft();
-
-    /**
-     * Phase 3: Turn line sensors right over the line.
-     */
-    void phase3TurnRight();
-
-    /**
-     * Phase 4: Turn back to origin.
-     */
-    void phase4TurnOrigin();
-
-    /**
-     * Phase 5: Calibration finished, continue to next state.
+     * Finish the calibration and determine next state.
      *
      * @param[in] sm    State machine
      */
-    void phase5Finished(StateMachine& sm);
+    void finishCalibration(StateMachine& sm);
 };
 
 /******************************************************************************
