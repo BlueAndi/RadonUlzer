@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
+ * @brief  ConvoyLeader application
  * @author Andreas Merkle <web@blue-andi.de>
  */
 

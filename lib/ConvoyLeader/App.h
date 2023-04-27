@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
+ * @brief  ConvoyLeader application
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup Application
@@ -56,13 +56,13 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The line follower application. */
+/** The convoy leader application. */
 class App
 {
 public:
 
     /**
-     * Construct the line follower application.
+     * Construct the convoy leader application.
      */
     App() :
         m_systemStateMachine(),
@@ -72,7 +72,7 @@ public:
     }
 
     /**
-     * Destroy the line follower application.
+     * Destroy the convoy leader application.
      */
     ~App()
     {
