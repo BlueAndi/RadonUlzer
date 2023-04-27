@@ -210,3 +210,4 @@ private:
 };
 
 #endif /* SOCKET_SERVER_H_ */
+/** @} */

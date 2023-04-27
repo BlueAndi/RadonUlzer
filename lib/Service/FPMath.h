@@ -72,3 +72,4 @@ namespace FPMath
 }
 
 #endif /* FPMATH_H */
+/** @} */

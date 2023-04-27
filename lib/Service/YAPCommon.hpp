@@ -26,8 +26,12 @@ SOFTWARE.
     DESCRIPTION
 *******************************************************************************/
 /**
- *  @brief  Common Constants and Structures of the Yet Another Protocol YAP
- *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * @brief  Common Constants and Structures of the Yet Another Protocol YAP
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *
+ * @addtogroup Service
+ *
+ * @{
  */
 
 #ifndef YAP_COMMON_H_
@@ -159,3 +163,4 @@ enum COMMANDS : uint8_t
 };
 
 #endif /* YAP_COMMON_H_ */
+/** @} */

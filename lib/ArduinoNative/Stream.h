@@ -80,3 +80,4 @@ protected:
 };
 
 #endif /* STREAM_H_ */
+/** @} */

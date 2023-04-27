@@ -165,3 +165,4 @@ protected:
 };
 
 #endif /* PRINT_H_ */
+/** @} */
