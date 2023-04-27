@@ -165,6 +165,9 @@ private:
      */
     static const uint8_t MAX_SENSORS = 2;
 
+    /**
+     * Enumeration of Sensors.
+     */
     enum SENSOR_INDEX : uint8_t
     {
         LEFT = 0U,
