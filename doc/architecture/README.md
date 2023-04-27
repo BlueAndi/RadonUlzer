@@ -45,6 +45,7 @@ The physical view shows the deployment which is equal to all applications. But n
 ### Application
 The following applications are supported:
 
+* [ConvoyLeader application](CONVOYLEADER.md)
 * [LineFollower application](LINEFOLLOWER.md)
 * [RemoteControl application](REMOTECONTROL.md)
 
