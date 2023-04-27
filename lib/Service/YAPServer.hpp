@@ -299,7 +299,7 @@ private:
         if (CONTROL_CHANNEL_NUMBER != channelNumber)
         {
             buf[1U] = channelNumber;
-            buf[2U] = getTxChannelDLC(channelNumber);
+            buf[2U] = getChannelDLC(channelNumber, true);
         }
         else
         {
@@ -426,8 +426,8 @@ private:
         }
         else
         {
-            /* Header has been read. Get DLC using Header. */
-            dlc = getRxChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel);
+            /* Header has been read. Get DLC of Rx Channel using Header. */
+            dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel, false);
 
             /* DLC = 0 means that the channel does not exist. */
             if ((0U != dlc) && (MAX_RX_ATTEMPTS >= m_rxAttempts))
@@ -558,7 +558,7 @@ private:
     bool send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
     {
         bool    frameSent  = false;
-        uint8_t channelDLC = getTxChannelDLC(channelNumber);
+        uint8_t channelDLC = getChannelDLC(channelNumber, true);
 
         if ((nullptr != payload) && (channelDLC == payloadSize) &&
             (true == m_isSynced || (CONTROL_CHANNEL_NUMBER == channelNumber)))
@@ -594,11 +594,12 @@ private:
     }
 
     /**
-     * Get the Payload Length of a TX channel
+     * Get the Payload Length of a channel
      * @param[in] channel Channel number to check
+     * @param[in] isTxChannel Is the Channel a TX Channel? If false, will return value for an RX Channel instead.
      * @returns DLC of the channel, or 0 if channel is not found.
      */
-    uint8_t getTxChannelDLC(uint8_t channel) const
+    uint8_t getChannelDLC(uint8_t channel, bool isTxChannel) const
     {
         uint8_t channelDLC = 0U;
 
@@ -608,33 +609,14 @@ private:
         }
         else if (tMaxChannels >= channel)
         {
-            channelDLC = m_txChannels[channel - 1U].m_dlc;
-        }
-        else
-        {
-            /* Invalid channel, nothing to do. */
-            ;
-        }
-
-        return channelDLC;
-    }
-
-    /**
-     * Get the Payload Length of a RX channel
-     * @param[in] channel Channel number to check
-     * @returns DLC of the channel, or 0 if channel is not found.
-     */
-    uint8_t getRxChannelDLC(uint8_t channel) const
-    {
-        uint8_t channelDLC = 0U;
-
-        if (CONTROL_CHANNEL_NUMBER == channel)
-        {
-            channelDLC = CONTROL_CHANNEL_PAYLOAD_LENGTH;
-        }
-        else if (tMaxChannels >= channel)
-        {
-            channelDLC = m_rxChannels[channel - 1U].m_dlc;
+            if (true == isTxChannel)
+            {
+                channelDLC = m_txChannels[channel - 1U].m_dlc;
+            }
+            else
+            {
+                channelDLC = m_txChannels[channel - 1U].m_dlc;
+            }
         }
         else
         {
