@@ -2,10 +2,10 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![Release](https://img.shields.io/github/release/BlueAndi/RadonAlcer.svg)](https://github.com/BlueAndi/RadonAlcer/releases)
-[![Build Status](https://github.com/BlueAndi/RadonAlcer/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/BlueAndi/RadonAlcer/actions/workflows/main.yml)
+[![Release](https://img.shields.io/github/release/BlueAndi/RadonUlzer.svg)](https://github.com/BlueAndi/RadonUlzer/releases)
+[![Build Status](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml)
 
-A line follower robot as fast as the famous Radon Alcer pod racer driven by Anakin Skywalker. :-)
+A line follower robot as fast as the famous pod racer driven by Anakin Skywalker with the powerful engines from Radon Ulzer. :-)
 
 - [The robot](#the-robot)
 - [The simulation](#the-simulation)
@@ -22,7 +22,7 @@ A line follower robot as fast as the famous Radon Alcer pod racer driven by Anak
 # The robot
 The main target of the firmware is the Pololu Zumo32U4 robot (see https://www.pololu.com/category/129/zumo-robots-and-accessories) from Pololu.
 
-![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonAlcer/master/doc/architecture/uml/PhysicalView/Deployment.plantuml)
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/master/doc/architecture/uml/PhysicalView/Deployment.plantuml)
 
 # The simulation
 The simulation is based on the open source robot simulator *Webots*. The application and the services are equal to the target firmware. Only the HAL is different in the simulation.
@@ -72,7 +72,7 @@ Platformio project tasks --> WebotsSim --> Build
 | [Zumo32U4 library](https://github.com/pololu/zumo-32u4-arduino-library) | Provides access to the Zumo32U4 hardware. | MIT |
 
 # Issues, Ideas And Bugs
-If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonAlcer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
+If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
 
 # License
 The whole source code is published under the [MIT license](http://choosealicense.com/licenses/mit/).
