@@ -196,6 +196,10 @@ private:
     /** SocketServer Members. PIMPL Idiom. */
     SocketServerImpl *m_members;
 
+    /* Not allowed. */
+    SocketServer(const SocketServer& srv);
+    SocketServer& operator=(const SocketServer& srv);
+
     /**
      * Close the listening socket connection.
      */

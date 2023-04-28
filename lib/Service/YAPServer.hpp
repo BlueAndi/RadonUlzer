@@ -77,7 +77,8 @@ public:
         m_receivedBytes(0U),
         m_rxAttempts(0U),
         m_numberOfTxChannels(0U),
-        m_numberOfRxChannels(0U)
+        m_numberOfRxChannels(0U),
+        m_numberOfPendingChannels(0U)
     {
     }
 
@@ -609,13 +610,15 @@ private:
         }
         else if (tMaxChannels >= channel)
         {
+            uint8_t channelIdx = channel - 1U;
+
             if (true == isTxChannel)
             {
-                channelDLC = m_txChannels[channel - 1U].m_dlc;
+                channelDLC = m_txChannels[channelIdx].m_dlc;
             }
             else
             {
-                channelDLC = m_txChannels[channel - 1U].m_dlc;
+                channelDLC = m_txChannels[channelIdx].m_dlc;
             }
         }
         else
