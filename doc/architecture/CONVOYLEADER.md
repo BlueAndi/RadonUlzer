@@ -1,4 +1,4 @@
-# Radon Alcer - Line Follower <!-- omit in toc -->
+# Radon Ulzer - Line Follower <!-- omit in toc -->
 
 - [SW Architecture](#sw-architecture)
 - [Abbreviations](#abbreviations)

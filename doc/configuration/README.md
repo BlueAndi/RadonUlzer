@@ -1,4 +1,4 @@
-# Radon Alcer - Line Follower <!-- omit in toc -->
+# Radon Ulzer - Line Follower <!-- omit in toc -->
 
 - [Configuration Management](#configuration-management)
 - [Issues, Ideas And Bugs](#issues-ideas-and-bugs)

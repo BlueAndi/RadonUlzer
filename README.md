@@ -1,4 +1,4 @@
-# Radon Alcer - Line Follower <!-- omit in toc -->
+# Radon Ulzer - Line Follower <!-- omit in toc -->
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)

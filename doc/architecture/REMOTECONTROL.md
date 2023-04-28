@@ -1,4 +1,4 @@
-# Radon Alcer - Remote Control <!-- omit in toc -->
+# Radon Ulzer - Remote Control <!-- omit in toc -->
 
 - [SW Architecture](#sw-architecture)
 - [Abbreviations](#abbreviations)

@@ -1,4 +1,4 @@
-# Radon Alcer <!-- omit in toc -->
+# Radon Ulzer <!-- omit in toc -->
 
 - [SW Architecture](#sw-architecture)
 - [Abbreviations](#abbreviations)
@@ -19,7 +19,7 @@
 - [Contribution](#contribution)
 
 # SW Architecture
-The Radon Alcer repository contains several applications. Each application is described according to the 4+1 architectural view.
+The Radon Ulzer repository contains several applications. Each application is described according to the 4+1 architectural view.
 
 ![architecturalView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/ViewModels.plantuml)
 
