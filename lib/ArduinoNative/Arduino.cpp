@@ -45,6 +45,7 @@
 #include <Keyboard.h>
 #include "Terminal.h"
 #include "SocketServer.h"
+#include <getopt.h>
 
 #endif
 
@@ -66,6 +67,7 @@
 
 extern void setup();
 extern void loop();
+int handleCommandLineArguments(int argc, char** argv);
 
 /******************************************************************************
  * Local Variables
@@ -94,7 +96,7 @@ static const int MAX_TIME_STEP = 10;
 static SimTime* gSimTime = nullptr;
 
 /**
- * Port used for Socket Communications.
+ * Default Port used for Socket Communications.
  */
 static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
 
@@ -102,6 +104,11 @@ static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
  * Maximum Number of Socket Connections.
  */
 static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
+
+/**
+ * Chosen Port Number for Socket Communications.
+ */
+static uint16_t  socketServerPortNumber = SOCKET_SERVER_DEFAULT_PORT;
 
 #endif
 
@@ -153,39 +160,9 @@ extern void delay(unsigned long ms)
 extern int main(int argc, char** argv)
 {
     int       status                 = 0;
-    uint16_t  socketServerPortNumber = SOCKET_SERVER_DEFAULT_PORT;
     Keyboard& keyboard               = Board::getInstance().getKeyboard();
 
-    if (2U < argc) /* Too many arguments passed to program. */
-    {
-        printf("Invalid Number of Arguments!\nUsage: %s <PORT NUMBER>\n", argv[0]);
-        status = -1;
-    }
-    else if (2U == argc) /* One Argument passed to program. */
-    {
-        /* Parse Port Number */
-        char* p;                                    /* End Pointer*/
-        errno            = 0;                       /* Reset Error Register */
-        long parsedValue = strtol(argv[1], &p, 10); /* Long value parsed from string. */
-
-        if ((*p == '\0') &&                         /* Make sure the string is completely read. */
-            (errno == 0) &&                         /* No Errors were produced. */
-            (UINT16_MAX >= parsedValue) &&          /* No overflow of uint16_t to allow direct casting. */
-            (0U <= parsedValue))                    /* No negative values. */
-        {
-            socketServerPortNumber = parsedValue;
-        }
-        else
-        {
-            printf("Error parsing Port Argument.\n");
-            status = -1;
-        }
-    }
-    else /* No argument passed to program. */
-    {
-        /* Nothing to do. */
-        ;
-    }
+    status = handleCommandLineArguments(argc, argv);
 
     if (0 == status)
     {
@@ -262,3 +239,63 @@ extern void delay(unsigned long ms)
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Handle the Arguments passed to the programm.
+ * @param[in] argc Program Argument Count
+ * @param[in] argv Program Argument Vector
+ * @returns 0 if handling was succesful. Otherwise, -1
+ */
+int handleCommandLineArguments(int argc, char** argv)
+{
+    int status = 0;
+    const char *availableOptions = "p:n:h";
+
+    for (;;)
+    {
+        switch (getopt(argc, argv, availableOptions))
+        {
+        case 'p': /* Port */
+        {
+            /* Parse Port Number */
+            char* p;                                   /* End Pointer*/
+            errno            = 0;                      /* Reset Error Register */
+            long parsedValue = strtol(optarg, &p, 10); /* Long value parsed from string. */
+
+            if ((*p == '\0') &&                        /* Make sure the string is completely read. */
+                (errno == 0) &&                        /* No Errors were produced. */
+                (UINT16_MAX >= parsedValue) &&         /* No overflow of uint16_t to allow direct casting. */
+                (0U <= parsedValue))                   /* No negative values. */
+            {
+                socketServerPortNumber = parsedValue;
+            }
+            else
+            {
+                printf("Error parsing Port Argument.\n");
+                status = -1;
+            }
+            continue;
+        }
+        case 'n': /* Name */
+            printf("Instance has been named \"%s\"\n", optarg);
+            continue;
+
+        case '?':                                                  /* Unknown */
+        case 'h':                                                  /* Help */
+        default:                                                   /* Default */
+            printf("Usage: %s <option(s)>\nOptions:\n", argv[0]);
+            printf("\t-h\t\t\tShow this help message.\n");         /* Help */
+            printf("\t-p <PORT NUMBER>\tSet SocketServer Port\n"); /* Port */
+            printf("\t-n <NAME>\t\tSet instace name");             /* Name */
+            status = -1;
+            break;
+
+        case -1: /* No more Arguments to parse. */
+            break;
+        }
+
+        break;
+    }
+
+    return status;
+}
