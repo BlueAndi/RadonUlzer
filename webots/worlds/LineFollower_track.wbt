@@ -2,8 +2,8 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "E:/greyes/Documents/NewTec/RadonAlcer/webots/protos/Zumo32U4.proto"
-EXTERNPROTO "E:/greyes/Documents/NewTec/RadonAlcer/webots/protos/LineFollowerTrack.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/LineFollowerTrack.proto"
 
 WorldInfo {
   info [

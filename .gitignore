@@ -5,5 +5,5 @@
 .vscode/ipch
 .vscode/extensions.json
 lib/Webots
-webots/*.wbproj
-webots/*.jpg
+webots/worlds/*.wbproj
+webots/worlds/*.jpg
