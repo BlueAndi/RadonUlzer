@@ -3,9 +3,9 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
 
 PROTO Zumo32U4 [
-  field SFString   name "robot"
   field SFVec3f    translation  0 0 0
   field SFRotation rotation     0 0 1 0
+  field SFString   name         "robot"
 ]
 {
   Robot {
