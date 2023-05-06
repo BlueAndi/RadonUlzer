@@ -1,9 +1,9 @@
 #VRML_SIM R2023a utf8
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "E:/greyes/Documents/NewTec/RadonAlcer/webots/protos/Zumo32U4.proto"
+EXTERNPROTO "E:/greyes/Documents/NewTec/RadonAlcer/webots/protos/LineFollowerTrack.proto"
 
 WorldInfo {
   info [
@@ -29,35 +29,7 @@ TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-RectangleArena {
-  floorSize 2 2
-  floorTileSize 4 4
-  floorAppearance PBRAppearance {
-    baseColorMap ImageTexture {
-      url [
-        "./protos/track.png"
-      ]
-    }
-    roughness 1
-    roughnessMap ImageTexture {
-      url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_roughness.jpg"
-      ]
-    }
-    metalness 0
-    normalMap ImageTexture {
-      url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_normal.jpg"
-      ]
-    }
-    occlusionMap ImageTexture {
-      url [
-        "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_occlusion.jpg"
-      ]
-    }
-  }
-  wallThickness 0.001
-  wallHeight 0.05
+LineFollowerTrack{
 }
 Zumo32U4 {
   translation -0.249993 -0.0412039 0.0139993
