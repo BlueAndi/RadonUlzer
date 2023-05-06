@@ -80,7 +80,7 @@ static SocketServer gSocketStream;
 static Terminal gTerminalStream;
 
 /** Serial driver, used by Arduino applications. */
-Serial_ Serial(gTerminalStream);
+Serial_ Serial(gSocketStream);
 
 /**
  * The maximum duration a simulated time step can have.
@@ -96,7 +96,7 @@ static SimTime* gSimTime = nullptr;
 /**
  * Port used for Socket Communications.
  */
-static const uint16_t SOCKET_SERVER_PORT = 65432U;
+static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
 
 /**
  * Maximum Number of Socket Connections.
@@ -152,14 +152,63 @@ extern void delay(unsigned long ms)
 
 extern int main(int argc, char** argv)
 {
-    int       status   = 0;
-    Keyboard& keyboard = Board::getInstance().getKeyboard();
-    gSocketStream.init(SOCKET_SERVER_PORT, SOCKET_SERVER_MAX_CONNECTIONS);
+    int       status                 = 0;
+    uint16_t  socketServerPortNumber = SOCKET_SERVER_DEFAULT_PORT;
+    Keyboard& keyboard               = Board::getInstance().getKeyboard();
 
-    /* Get simulation time handler. It will be used by millis() and delay(). */
-    gSimTime = &Board::getInstance().getSimTime();
+    if (2U < argc) /* Too many arguments passed to program. */
+    {
+        printf("Invalid Number of Arguments!\nUsage: %s <PORT NUMBER>\n", argv[0]);
+        status = -1;
+    }
+    else if (2U == argc) /* One Argument passed to program. */
+    {
+        /* Parse Port Number */
+        char* p;                                    /* End Pointer*/
+        errno            = 0;                       /* Reset Error Register */
+        long parsedValue = strtol(argv[1], &p, 10); /* Long value parsed from string. */
 
-    if ((0 == gSimTime->getTimeStep()) || (MAX_TIME_STEP < gSimTime->getTimeStep()))
+        if ((*p == '\0') &&                         /* Make sure the string is completely read. */
+            (errno == 0) &&                         /* No Errors were produced. */
+            (UINT16_MAX >= parsedValue) &&          /* No overflow of uint16_t to allow direct casting. */
+            (0U <= parsedValue))                    /* No negative values. */
+        {
+            socketServerPortNumber = parsedValue;
+        }
+        else
+        {
+            printf("Error parsing Port Argument.\n");
+            status = -1;
+        }
+    }
+    else /* No argument passed to program. */
+    {
+        /* Nothing to do. */
+        ;
+    }
+
+    if (0 == status)
+    {
+        if (false == gSocketStream.init(socketServerPortNumber, SOCKET_SERVER_MAX_CONNECTIONS))
+        {
+            printf("Error initializing SocketServer.\n");
+            status = -1;
+        }
+        else
+        {
+            printf("SocketServer ready on port %d\n", socketServerPortNumber);
+
+            /* Get simulation time handler. It will be used by millis() and delay(). */
+            gSimTime = &Board::getInstance().getSimTime();
+        }
+    }
+
+    if (0 != status)
+    {
+        /* Something went wrong previously and was already notified.*/
+        ;
+    }
+    else if ((0 == gSimTime->getTimeStep()) || (MAX_TIME_STEP < gSimTime->getTimeStep()))
     {
         printf("Simulation time step is too high!\n");
         printf("This would cause missbehaviour in the application.\n");
