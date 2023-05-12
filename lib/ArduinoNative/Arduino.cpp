@@ -61,13 +61,21 @@
  * Types and classes
  *****************************************************************************/
 
+/** This type defines the possible program arguments. */
+typedef struct
+{
+    uint16_t    socketServerPort; /**< Socket server port */
+    const char* name;             /**< Robot name */
+
+} PrgArguments;
+
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
 
 extern void setup();
 extern void loop();
-int handleCommandLineArguments(int argc, char** argv);
+static int  handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv);
 
 /******************************************************************************
  * Local Variables
@@ -75,10 +83,10 @@ int handleCommandLineArguments(int argc, char** argv);
 
 #ifndef UNIT_TEST
 
-/** SocketServer Stream. */
+/** SocketServer stream. */
 static SocketServer gSocketStream;
 
-/** Terminal/Console Stream. */
+/** Terminal/Console stream. */
 static Terminal gTerminalStream;
 
 /** Serial driver, used by Arduino applications. */
@@ -96,19 +104,14 @@ static const int MAX_TIME_STEP = 10;
 static SimTime* gSimTime = nullptr;
 
 /**
- * Default Port used for Socket Communications.
+ * Default port used for socket communications.
  */
 static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
 
 /**
- * Maximum Number of Socket Connections.
+ * Maximum number of socket connections.
  */
 static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
-
-/**
- * Chosen Port Number for Socket Communications.
- */
-static uint16_t  socketServerPortNumber = SOCKET_SERVER_DEFAULT_PORT;
 
 #endif
 
@@ -159,21 +162,22 @@ extern void delay(unsigned long ms)
 
 extern int main(int argc, char** argv)
 {
-    int       status                 = 0;
-    Keyboard& keyboard               = Board::getInstance().getKeyboard();
+    int          status   = 0;
+    Keyboard&    keyboard = Board::getInstance().getKeyboard();
+    PrgArguments prgArguments;
 
-    status = handleCommandLineArguments(argc, argv);
+    status = handleCommandLineArguments(prgArguments, argc, argv);
 
     if (0 == status)
     {
-        if (false == gSocketStream.init(socketServerPortNumber, SOCKET_SERVER_MAX_CONNECTIONS))
+        if (false == gSocketStream.init(prgArguments.socketServerPort, SOCKET_SERVER_MAX_CONNECTIONS))
         {
             printf("Error initializing SocketServer.\n");
             status = -1;
         }
         else
         {
-            printf("SocketServer ready on port %d\n", socketServerPortNumber);
+            printf("SocketServer ready on port %d.\n", prgArguments.socketServerPort);
 
             /* Get simulation time handler. It will be used by millis() and delay(). */
             gSimTime = &Board::getInstance().getSimTime();
@@ -244,34 +248,48 @@ extern void delay(unsigned long ms)
 
 /**
  * Handle the Arguments passed to the programm.
- * @param[in] argc Program Argument Count
- * @param[in] argv Program Argument Vector
+ *
+ * @param[in] argc Program argument count
+ * @param[in] argv Program argument vector
+ *
  * @returns 0 if handling was succesful. Otherwise, -1
  */
-int handleCommandLineArguments(int argc, char** argv)
+static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv)
 {
     /* Not implemented. */
+    (void)prgArguments;
     (void)argc;
     (void)argv;
+
     return 0;
 }
 
 #else
 
 /**
- * Handle the Arguments passed to the programm.
- * @param[in] argc Program Argument Count
- * @param[in] argv Program Argument Vector
+ * Handle the arguments passed to the programm.
+ * If a argument is not given via command line interface, its default value will be used.
+ *
+ * @param[out]  prgArguments    Parsed program arguments
+ * @param[in]   argc            Program argument count
+ * @param[in]   argv            Program argument vector
+ *
  * @returns 0 if handling was succesful. Otherwise, -1
  */
-int handleCommandLineArguments(int argc, char** argv)
+static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv)
 {
-    int status = 0;
-    const char *availableOptions = "p:n:h";
+    int         status           = 0;
+    const char* availableOptions = "p:n:h";
+    const char* programName      = argv[0];
+    int         option           = getopt(argc, argv, availableOptions);
 
-    for (;;)
+    /* Set default values */
+    prgArguments.socketServerPort = SOCKET_SERVER_DEFAULT_PORT;
+    prgArguments.name             = nullptr;
+
+    while ((-1 != option) && (0 == status))
     {
-        switch (getopt(argc, argv, availableOptions))
+        switch (option)
         {
         case 'p': /* Port */
         {
@@ -280,39 +298,43 @@ int handleCommandLineArguments(int argc, char** argv)
             errno            = 0;                      /* Reset Error Register */
             long parsedValue = strtol(optarg, &p, 10); /* Long value parsed from string. */
 
-            if ((*p == '\0') &&                        /* Make sure the string is completely read. */
-                (errno == 0) &&                        /* No Errors were produced. */
+            if (('\0' == *p) &&                        /* Make sure the string is completely read. */
+                (0 == errno) &&                        /* No Errors were produced. */
                 (UINT16_MAX >= parsedValue) &&         /* No overflow of uint16_t to allow direct casting. */
                 (0U <= parsedValue))                   /* No negative values. */
             {
-                socketServerPortNumber = parsedValue;
+                prgArguments.socketServerPort = parsedValue;
             }
             else
             {
-                printf("Error parsing Port Argument.\n");
+                printf("Error parsing port argument.\n");
                 status = -1;
             }
-            continue;
-        }
-        case 'n': /* Name */
-            printf("Instance has been named \"%s\"\n", optarg);
-            continue;
 
-        case '?':                                                  /* Unknown */
-        case 'h':                                                  /* Help */
-        default:                                                   /* Default */
-            printf("Usage: %s <option(s)>\nOptions:\n", argv[0]);
-            printf("\t-h\t\t\tShow this help message.\n");         /* Help */
-            printf("\t-p <PORT NUMBER>\tSet SocketServer Port\n"); /* Port */
-            printf("\t-n <NAME>\t\tSet instace name");             /* Name */
+            break;
+        }
+
+        case 'n': /* Name */
+            printf("Instance has been named \"%s\".\n", optarg);
+            prgArguments.name = optarg;
+            break;
+
+        case '?': /* Unknown */
+            /* fallthrough */
+
+        case 'h': /* Help */
+            /* fallthrough */
+
+        default:                                                    /* Default */
+            printf("Usage: %s <option(s)>\nOptions:\n", programName);
+            printf("\t-h\t\t\tShow this help message.\n");          /* Help */
+            printf("\t-p <PORT NUMBER>\tSet SocketServer port.\n"); /* Port */
+            printf("\t-n <NAME>\t\tSet instace name.");             /* Name */
             status = -1;
             break;
-
-        case -1: /* No more Arguments to parse. */
-            break;
         }
 
-        break;
+        option = getopt(argc, argv, availableOptions);
     }
 
     return status;
