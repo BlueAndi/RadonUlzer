@@ -68,11 +68,14 @@ SOFTWARE.
 /** Available Bytes in Control Channel Payload for data. */
 #define CONTROL_CHANNEL_PAYLOAD_DATA_LENGTH (4U)
 
+/* Length of Command in Bytes */
+#define CONTROL_CHANNEL_CMD_BYTE_LENGTH (1U)
+
 /** Number of Control Channel. */
 #define CONTROL_CHANNEL_NUMBER (0U)
 
 /** DLC of Heartbeat Command. */
-#define CONTROL_CHANNEL_PAYLOAD_LENGTH (CHANNEL_NAME_MAX_LEN + CONTROL_CHANNEL_PAYLOAD_DATA_LENGTH)
+#define CONTROL_CHANNEL_PAYLOAD_LENGTH (CHANNEL_NAME_MAX_LEN + CONTROL_CHANNEL_PAYLOAD_DATA_LENGTH + CONTROL_CHANNEL_CMD_BYTE_LENGTH)
 
 /** Index of the Command Byte of the Control Channel*/
 #define CONTROL_CHANNEL_COMMAND_INDEX (0U)
