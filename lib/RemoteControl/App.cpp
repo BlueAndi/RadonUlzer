@@ -33,9 +33,11 @@
  * Includes
  *****************************************************************************/
 #include "App.h"
+#include "StartupState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
+#include <Odometry.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,17 +66,27 @@
 void App::setup()
 {
     Board::getInstance().init();
-    /* m_systemStateMachine.setState(&StartupState::getInstance()); */
+    m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+    /* m_yapServer.createChannel(...); */
 }
 
 void App::loop()
 {
+    m_yapServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
     {
         DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+        /* The odometry unit needs to detect motor speed changes to be able to
+         * calculate correct values. Therefore it shall be processed right after
+         * the differential drive control.
+         */
+        Odometry::getInstance().process();
+
         m_controlInterval.restart();
     }
 

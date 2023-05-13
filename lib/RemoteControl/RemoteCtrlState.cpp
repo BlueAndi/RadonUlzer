@@ -25,94 +25,76 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Remote control state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef APP_H
-#define APP_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include "RemoteCtrlState.h"
+#include <Board.h>
 #include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include "LineSensorsCalibrationState.h"
+#include "MotorSpeedCalibrationState.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The remote control application. */
-class App
-{
-public:
-
-    /**
-     * Construct the remote control application.
-     */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
-    {
-    }
-
-    /**
-     * Destroy the remote control application.
-     */
-    ~App()
-    {
-    }
-
-    /**
-     * Setup the application.
-     */
-    void setup();
-
-    /**
-     * Process the application periodically.
-     */
-    void loop();
-
-private:
-
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
-
-    /**
-     * YAP Server Instance
-     *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
-     */
-    YAPServer<10U> m_yapServer;
-
-    App(const App& app);
-    App& operator=(const App& app);
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* APP_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void RemoteCtrlState::entry()
+{
+    /* Nothing to do. */
+}
+
+void RemoteCtrlState::process(StateMachine& sm)
+{
+    /* Waiting for command via YAP. */
+    /*
+        CMD to perform line sensor calibration.
+        CMD to perform motor speed calibration.
+        Differential drive value for left and right motor.
+        Providing line sensor data.
+     */
+}
+
+void RemoteCtrlState::exit()
+{
+    /* Nothing to do */
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

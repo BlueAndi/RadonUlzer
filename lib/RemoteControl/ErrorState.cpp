@@ -25,94 +25,94 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Calibration state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef APP_H
-#define APP_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include "ErrorState.h"
+#include <Board.h>
 #include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include "MotorSpeedCalibrationState.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The remote control application. */
-class App
-{
-public:
-
-    /**
-     * Construct the remote control application.
-     */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
-    {
-    }
-
-    /**
-     * Destroy the remote control application.
-     */
-    ~App()
-    {
-    }
-
-    /**
-     * Setup the application.
-     */
-    void setup();
-
-    /**
-     * Process the application periodically.
-     */
-    void loop();
-
-private:
-
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
-
-    /**
-     * YAP Server Instance
-     *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
-     */
-    YAPServer<10U> m_yapServer;
-
-    App(const App& app);
-    App& operator=(const App& app);
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* APP_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void ErrorState::entry()
+{
+    IDisplay& display = Board::getInstance().getDisplay();
+
+    display.clear();
+    display.print("Error");
+    display.gotoXY(0, 1);
+    display.print(m_errorMsg);
+}
+
+void ErrorState::process(StateMachine& sm)
+{
+    IButton& buttonA = Board::getInstance().getButtonA();
+
+    /* Restart calibration? */
+    if (true == buttonA.isPressed())
+    {
+        buttonA.waitForRelease();
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
+    }
+}
+
+void ErrorState::exit()
+{
+    /* Nothing to do. */
+}
+
+void ErrorState::setErrorMsg(const char* msg)
+{
+    if (nullptr == msg)
+    {
+        m_errorMsg[0] = '\0';
+    }
+    else
+    {
+        strncpy(m_errorMsg, msg, ERROR_MSG_SIZE - 1);
+        m_errorMsg[ERROR_MSG_SIZE - 1] = '\0';
+    }
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

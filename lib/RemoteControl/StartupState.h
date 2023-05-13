@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef APP_H
-#define APP_H
+#ifndef STARTUP_STATE_H
+#define STARTUP_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include <stdint.h>
+#include <IState.h>
 
 /******************************************************************************
  * Macros
@@ -55,64 +54,69 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The remote control application. */
-class App
+/** The system startup state. */
+class StartupState : public IState
 {
 public:
-
     /**
-     * Construct the remote control application.
-     */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
-    {
-    }
-
-    /**
-     * Destroy the remote control application.
-     */
-    ~App()
-    {
-    }
-
-    /**
-     * Setup the application.
-     */
-    void setup();
-
-    /**
-     * Process the application periodically.
-     */
-    void loop();
-
-private:
-
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
-
-    /**
-     * YAP Server Instance
+     * Get state instance.
      *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
+     * @return State instance.
      */
-    YAPServer<10U> m_yapServer;
+    static StartupState& getInstance()
+    {
+        static StartupState instance;
 
-    App(const App& app);
-    App& operator=(const App& app);
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
+    }
+
+    /**
+     * If the state is entered, this method will called once.
+     */
+    void entry() final;
+
+    /**
+     * Processing the state.
+     *
+     * @param[in] sm State machine, which is calling this state.
+     */
+    void process(StateMachine& sm) final;
+
+    /**
+     * If the state is left, this method will be called once.
+     */
+    void exit() final;
+
+protected:
+private:
+    /**
+     * Duration in ms how long the application name shall be shown at startup.
+     */
+    static const uint32_t APP_NAME_DURATION = 2000;
+
+    /**
+     * Default constructor.
+     */
+    StartupState()
+    {
+    }
+
+    /**
+     * Default destructor.
+     */
+    ~StartupState()
+    {
+    }
+
+    StartupState(const StartupState& state);
+    StartupState& operator=(const StartupState& state);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* APP_H */
+#endif /* STARTUP_STATE_H */
 /** @} */

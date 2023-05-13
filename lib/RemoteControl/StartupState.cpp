@@ -25,94 +25,78 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef APP_H
-#define APP_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include "StartupState.h"
+#include <Board.h>
 #include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include "RemoteCtrlState.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The remote control application. */
-class App
-{
-public:
-
-    /**
-     * Construct the remote control application.
-     */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
-    {
-    }
-
-    /**
-     * Destroy the remote control application.
-     */
-    ~App()
-    {
-    }
-
-    /**
-     * Setup the application.
-     */
-    void setup();
-
-    /**
-     * Process the application periodically.
-     */
-    void loop();
-
-private:
-
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
-
-    /**
-     * YAP Server Instance
-     *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
-     */
-    YAPServer<10U> m_yapServer;
-
-    App(const App& app);
-    App& operator=(const App& app);
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* APP_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void StartupState::entry()
+{
+    IDisplay& display = Board::getInstance().getDisplay();
+
+    /* Initialize HAL */
+    Board::getInstance().init();
+
+    display.clear();
+    display.print("Remote");
+    display.gotoXY(0, 1);
+    display.print("Ctrl");
+    delay(APP_NAME_DURATION);
+}
+
+void StartupState::process(StateMachine& sm)
+{
+    sm.setState(&RemoteCtrlState::getInstance());
+}
+
+void StartupState::exit()
+{
+    /* Nothing to do */
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

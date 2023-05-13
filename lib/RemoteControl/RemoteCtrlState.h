@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Remote control state
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef APP_H
-#define APP_H
+#ifndef REMOTE_CTRL_H
+#define REMOTE_CTRL_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include <stdint.h>
+#include <IState.h>
 
 /******************************************************************************
  * Macros
@@ -55,64 +54,65 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The remote control application. */
-class App
+/** The system remote control state. */
+class RemoteCtrlState : public IState
 {
 public:
-
     /**
-     * Construct the remote control application.
+     * Get state instance.
+     *
+     * @return State instance.
      */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
+    static RemoteCtrlState& getInstance()
     {
+        static RemoteCtrlState instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Destroy the remote control application.
+     * If the state is entered, this method will called once.
      */
-    ~App()
-    {
-    }
+    void entry() final;
 
     /**
-     * Setup the application.
+     * Processing the state.
+     *
+     * @param[in] sm State machine, which is calling this state.
      */
-    void setup();
+    void process(StateMachine& sm) final;
 
     /**
-     * Process the application periodically.
+     * If the state is left, this method will be called once.
      */
-    void loop();
+    void exit() final;
 
+protected:
 private:
 
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
+    /**
+     * Default constructor.
+     */
+    RemoteCtrlState()
+    {
+    }
 
     /**
-     * YAP Server Instance
-     *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
+     * Default destructor.
      */
-    YAPServer<10U> m_yapServer;
+    ~RemoteCtrlState()
+    {
+    }
 
-    App(const App& app);
-    App& operator=(const App& app);
+    RemoteCtrlState(const RemoteCtrlState& state);
+    RemoteCtrlState& operator=(const RemoteCtrlState& state);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* APP_H */
+#endif /* REMOTE_CTRL_H */
 /** @} */

@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  Error state
  * @author Andreas Merkle <web@blue-andi.de>
  * 
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef APP_H
-#define APP_H
+#ifndef ERROR_STATE_H
+#define ERROR_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <StateMachine.h>
-#include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include <stddef.h>
+#include <IState.h>
 
 /******************************************************************************
  * Macros
@@ -55,64 +54,81 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The remote control application. */
-class App
+/** The system error state. */
+class ErrorState : public IState
 {
 public:
-
     /**
-     * Construct the remote control application.
+     * Get state instance.
+     *
+     * @return State instance.
      */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_yapServer(Serial)
+    static ErrorState& getInstance()
     {
+        static ErrorState instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Destroy the remote control application.
+     * If the state is entered, this method will called once.
      */
-    ~App()
-    {
-    }
+    void entry() final;
 
     /**
-     * Setup the application.
+     * Processing the state.
+     *
+     * @param[in] sm State machine, which is calling this state.
      */
-    void setup();
+    void process(StateMachine& sm) final;
 
     /**
-     * Process the application periodically.
+     * If the state is left, this method will be called once.
      */
-    void loop();
+    void exit() final;
 
+    /**
+     * Set error message, which to show on the display.
+     * 
+     * @param[in] msg   Error message
+     */
+    void setErrorMsg(const char* msg);
+
+protected:
 private:
 
-    /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+    /**
+     * The error message string size in bytes, which
+     * includes the terminating character.
+     */
+    static const size_t ERROR_MSG_SIZE  = 20;
 
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;
-
-    /** Timer used for differential drive control processing. */
-    SimpleTimer m_controlInterval;
+    char    m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
 
     /**
-     * YAP Server Instance
-     *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
+     * Default constructor.
      */
-    YAPServer<10U> m_yapServer;
+    ErrorState() : m_errorMsg()
+    {
+        m_errorMsg[0] = '\0';
+    }
 
-    App(const App& app);
-    App& operator=(const App& app);
+    /**
+     * Default destructor.
+     */
+    ~ErrorState()
+    {
+    }
+
+    ErrorState(const ErrorState& state);
+    ErrorState& operator=(const ErrorState& state);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* APP_H */
+#endif /* ERROR_STATE_H */
 /** @} */
