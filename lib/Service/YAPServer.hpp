@@ -149,7 +149,7 @@ public:
      * @param[in] channelName Name of Channel
      * @returns Number of the Channel, or 0 if not channel with the name is present.
      */
-    uint8_t getTxChannelNumber(const char* channelName)
+    uint8_t getTxChannelNumber(const char* channelName) const
     {
         uint8_t idx = tMaxChannels;
 
