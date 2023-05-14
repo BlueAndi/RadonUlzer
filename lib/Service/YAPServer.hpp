@@ -113,7 +113,7 @@ public:
      * @param[in] payloadSize Amount of bytes to send.
      * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    bool sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
+    bool sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize) const
     {
         bool isSent = false;
 
@@ -132,7 +132,7 @@ public:
      * @param[in] payloadSize Amount of bytes to send.
      * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    bool sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize)
+    bool sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize) const
     {
         bool isSent = false;
 
@@ -556,7 +556,7 @@ private:
      * @param[in] payloadSize Amount of bytes to send.
      * @returns If payload succesfully sent, returns true. Otherwise, false.
      */
-    bool send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize)
+    bool send(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize) const
     {
         bool    frameSent  = false;
         uint8_t channelDLC = getChannelDLC(channelNumber, true);
