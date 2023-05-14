@@ -64,18 +64,29 @@
 
 void RemoteCtrlState::entry()
 {
-    /* Nothing to do. */
+    /* It is assumed that by entering this state, a pending command will be complete. */
+    m_rspId = RSP_ID_OK;
 }
 
 void RemoteCtrlState::process(StateMachine& sm)
 {
-    /* Waiting for command via YAP. */
-    /*
-        CMD to perform line sensor calibration.
-        CMD to perform motor speed calibration.
-        Differential drive value for left and right motor.
-        Providing line sensor data.
-     */
+    switch(m_cmdId)
+    {
+    case CMD_ID_IDLE:
+        /* Nothing to do. */
+        break;
+
+    case CMD_ID_START_LINE_SENSOR_CALIB:
+        sm.setState(&LineSensorsCalibrationState::getInstance());
+        break;
+
+    case CMD_ID_START_MOTOR_SPEED_CALIB:
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
+        break;
+
+    default:
+        break;
+    }
 }
 
 void RemoteCtrlState::exit()
@@ -98,3 +109,5 @@ void RemoteCtrlState::exit()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+

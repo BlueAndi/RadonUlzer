@@ -5,18 +5,18 @@ title System States
 state StartupState
 state MotorSpeedCalibrationState
 state ErrorState
-state DrivingState
+state RemoteCtrlState
 state ReadyState
 
 [*] --> StartupState: Power up
 StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
 MotorSpeedCalibrationState --> ReadyState: [Calibration finished]
 MotorSpeedCalibrationState --> ErrorState: [Calibration failed]
-ReadyState --> DrivingState: [Operator connects]
-DrivingState --> ReadyState: [Connection lost]
+ReadyState --> RemoteCtrlState: [Operator connects]
+RemoteCtrlState --> ReadyState: [Connection lost]
 ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
 ReadyState --> ErrorState: [Connection Timeout]
-DrivingState --> ErrorState: [Fatal error]
+RemoteCtrlState --> ErrorState: [Fatal error]
 
 note right of StartupState
     Initialize the system and wait till
@@ -36,7 +36,7 @@ note right of ReadyState
     Waits for the operator to connect using the Remote Control.
 end note
 
-note right of DrivingState
+note right of RemoteCtrlState
     The system drives according to the commands sent by the operator.
     Additionally, it prevents crashes using the proximity sensors.
 end note

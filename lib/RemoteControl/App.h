@@ -27,7 +27,7 @@
 /**
  * @brief  RemoteControl application
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -47,6 +47,8 @@
 #include <SimpleTimer.h>
 #include <YAPServer.hpp>
 
+#include "RemoteCtrlState.h"
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -59,14 +61,16 @@
 class App
 {
 public:
-
     /**
      * Construct the remote control application.
      */
     App() :
         m_systemStateMachine(),
         m_controlInterval(),
-        m_yapServer(Serial)
+        m_yapServer(Serial),
+        m_yapChannelIdRemoteCtrlRsp(0U),
+        m_yapChannelIdLineSensors(0U),
+        m_lastRemoteControlRspId(RemoteCtrlState::RSP_ID_OK)
     {
     }
 
@@ -88,9 +92,20 @@ public:
     void loop();
 
 private:
-
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
+
+    /** YAP channel name for receiving commands. */
+    static const char* CH_NAME_CMD;
+
+    /** YAP channel name for sending command responses. */
+    static const char* CH_NAME_RSP;
+
+    /** YAP channel name for receiving motor sppeds. */
+    static const char* CH_NAME_MOTOR_SPEEDS;
+
+    /** YAP channel name for sending line sensors data. */
+    static const char* CH_NAME_LINE_SENSORS;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -106,8 +121,27 @@ private:
      */
     YAPServer<10U> m_yapServer;
 
+    /** Channel id sending remote control command responses. */
+    uint8_t m_yapChannelIdRemoteCtrlRsp;
+
+    /** Channel id sending line sensors data. */
+    uint8_t m_yapChannelIdLineSensors;
+
+    /** Last remote control response id */
+    RemoteCtrlState::RspId m_lastRemoteControlRspId;
+
     App(const App& app);
     App& operator=(const App& app);
+
+    /**
+     * Send remote control command responses on change.
+     */
+    void sendRemoteControlResponses();
+
+    /**
+     * Send line sensors data via YAP.
+     */
+    void sendLineSensorsData() const;
 };
 
 /******************************************************************************
