@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
