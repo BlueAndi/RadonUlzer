@@ -27,6 +27,10 @@
 /**
  * @brief  Logging
  * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *
+ * @addtogroup Service
+ *
+ * @{
  */
 
 #ifndef LOGGING_H
@@ -284,3 +288,4 @@ namespace Logging
      *****************************************************************************/
 
 #endif /* __LOGGING_H__ */
+/** @} */

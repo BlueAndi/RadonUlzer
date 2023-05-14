@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
+#include <YAPServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -64,7 +65,8 @@ public:
      */
     App() :
         m_systemStateMachine(),
-        m_controlInterval()
+        m_controlInterval(),
+        m_yapServer(Serial)
     {
     }
 
@@ -96,6 +98,14 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
+    /**
+     * YAP Server Instance
+     *
+     * @tparam tMaxChannels set to 10, as App does not require
+     * more channels for external communication.
+     */
+    YAPServer<10U> m_yapServer;
+
     App(const App& app);
     App& operator=(const App& app);
 };
@@ -105,3 +115,4 @@ private:
  *****************************************************************************/
 
 #endif /* APP_H */
+/** @} */

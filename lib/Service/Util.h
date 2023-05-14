@@ -82,6 +82,34 @@ void uintToStr(char* str, size_t size, uint32_t value);
  */
 void intToStr(char* str, size_t size, int32_t value);
 
-}
+/**
+ * Signed 32-bit integer to byte array.
+ * Endianness: Big Endian
+ * @param[out]  buffer  Destination array
+ * @param[in]   size    Size of the destination buffer in byte
+ * @param[in]   value   Value
+ */
+void int32ToByteArray(uint8_t* buffer, size_t size, int32_t value);
+
+/**
+ * Unsigned 32-bit integer to byte array.
+ * Endianness: Big Endian.
+ * @param[out]  buffer  Destination array.
+ * @param[in]   size    Size of the destination buffer in byte.
+ * @param[in]   value   Value.
+ */
+void uint32ToByteArray(uint8_t* buffer, size_t size, uint32_t value);
+
+/**
+ * Big Endian Byte Array to uint32_t.
+ * @param[in]  buffer   Source Array.
+ * @param[in]  size     Size of source array.
+ * @param[out] value    Destination integer.
+ * @returns true if succesfully parsed. Otherwise, false.
+ */
+bool byteArrayToUint32(const uint8_t* buffer, size_t size, uint32_t& value);
+
+} // namespace Util
 
 #endif /* UTIL_H */
+/** @} */

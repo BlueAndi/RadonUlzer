@@ -45,11 +45,9 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <math.h>
 #include <string.h>
+#include <math.h>
+#include "Serial.h"
 
 /******************************************************************************
  * Macros
@@ -57,110 +55,15 @@
 
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 
+#ifndef PSTR
 #define PSTR
+#endif
 
 #define PI  M_PI
 
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
-
-class Serial_
-{
-public:
-
-    Serial_()
-    {
-    }
-
-    ~Serial_()
-    {
-    }
-
-    void begin(unsigned long baudrate)
-    {
-        (void)baudrate;
-    }
-
-    void end()
-    {
-    }
-
-    void print(const char str[])
-    {
-        printf("%s", str);
-    }
-
-    void print(uint8_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint16_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(uint32_t value)
-    {
-        printf("%u", value);
-    }
-
-    void print(int8_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int16_t value)
-    {
-        printf("%d", value);
-    }
-
-    void print(int32_t value)
-    {
-        printf("%d", value);
-    }
-
-    void println(const char str[])
-    {
-        printf("%s\n", str);
-    }
-
-    void println(uint8_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint16_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(uint32_t value)
-    {
-        printf("%u\n", value);
-    }
-
-    void println(int8_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int16_t value)
-    {
-        printf("%d\n", value);
-    }
-
-    void println(int32_t value)
-    {
-        printf("%d\n", value);
-    }
-
-private:
-
-};
-
-extern Serial_ Serial;
 
 /******************************************************************************
  * Functions

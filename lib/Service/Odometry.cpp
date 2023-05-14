@@ -60,7 +60,7 @@
 /**
  * Logging source.
  */
-static const char* TAG = "Odometry";
+static const char* TAG = "Odo";
 
 /* Initialize static constant data. */
 const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);

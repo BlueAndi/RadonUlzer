@@ -38,6 +38,7 @@
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -65,6 +66,7 @@
 
 void App::setup()
 {
+    Serial.begin(SERIAL_BAUDRATE);
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
@@ -81,7 +83,7 @@ void App::loop()
          * the speedometer.
          */
         DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-        
+
         /* The odometry unit needs to detect motor speed changes to be able to
          * calculate correct values. Therefore it shall be processed right after
          * the differential drive control.

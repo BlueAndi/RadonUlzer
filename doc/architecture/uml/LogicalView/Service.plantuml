@@ -64,6 +64,14 @@ package "Service" as serviceLayer {
         speed with PID controllers.
     end note
 
+    class YAP <<service>>
+
+    note top of YAP
+        Communication Protocol for transmitting 
+        and receiving information to/from a remote
+        client using data channels
+    end note
+
     DifferentialDrive -[hidden]-- MovAvg
     Speedometer -[hidden]-- Odometry
     RelativeEncoder -[hidden]-- PIDController

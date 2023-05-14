@@ -1,0 +1,524 @@
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
+
+PROTO Zumo32U4 [
+  field SFVec3f    translation  0 0 0
+  field SFRotation rotation     0 0 1 0
+  field SFString   name         "robot"
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    children [
+      DEF SHIELD Group {
+        children [
+          Transform {
+            translation 0.047 0 0.007
+            rotation 0 1 0 -0.42
+            children [
+              Shape {
+                appearance PBRAppearance {
+                  emissiveColor 0.4 0.4 0.4
+                }
+                geometry Box {
+                  size 0.001 0.1 0.04
+                }
+              }
+            ]
+          }
+        ]
+      }
+      DEF TRACK_LEFT Track {
+        translation 0 0.0375 0
+        rotation 0 1 0 0
+        children [
+          DEF WHEEL_FL TrackWheel {
+            position 0.0225 0.005
+            rotation 0.6681343103444981 -0.5261152487176364 0.5261171812507756 1.9635600942618647
+            radius 0.018
+            children [
+              DEF TRACK_WHEEL Transform {
+                children [
+                  Shape {
+                    appearance DEF WHEEL_COLOR PBRAppearance {
+                      baseColor 0 0 0
+                      metalness 0
+                    }
+                    geometry Cylinder {
+                      height 0.01
+                      radius 0.0175
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+          DEF WHEEL_RL TrackWheel {
+            position -0.0225 0.005
+            rotation 0.6681343103444981 -0.5261152487176364 0.5261171812507756 1.9635600942618647
+            radius 0.018
+            children [
+              USE TRACK_WHEEL
+            ]
+          }
+        ]
+        name "left_track"
+        boundingObject DEF TRACK_BO Group {
+          children [
+            Transform {
+              translation 0 0 0.005
+              children [
+                Box {
+                  size 0.01 0.01 0.038
+                }
+              ]
+            }
+            Transform {
+              translation 0.0225 0 0.005
+              rotation 1 0 0 1.5708
+              children [
+                DEF WHEEL_BO Cylinder {
+                  height 0.01
+                  radius 0.019
+                }
+              ]
+            }
+            Transform {
+              translation -0.0225 0 0.00499976
+              rotation 1 0 0 1.5708
+              children [
+                USE WHEEL_BO
+              ]
+            }
+          ]
+        }
+        physics DEF TRACK_PH Physics {
+        }
+        device [
+          LinearMotor {
+            name "motor_left"
+            maxVelocity 0.3
+          }
+          PositionSensor {
+            name "position_sensor_left"
+          }
+        ]
+        animatedGeometry DEF ANIM_WHEEL Shape {
+          appearance Rubber {
+          }
+          geometry Box {
+            size 0.003 0.008 0.002
+          }
+        }
+        geometriesCount 70
+      }
+      DEF TRACK_RIGHT Track {
+        translation 0 -0.0375 0
+        children [
+          DEF WHEEL_FR TrackWheel {
+            position 0.0225 0.005
+            rotation 0.6681343103444981 0.5261152487176364 -0.5261171812507756 1.9635600942618647
+            radius 0.018
+            children [
+              DEF TRACK_WHEEL Transform {
+                children [
+                  Shape {
+                    appearance DEF WHEEL_COLOR PBRAppearance {
+                      baseColor 0 0 0
+                      metalness 0
+                    }
+                    geometry Cylinder {
+                      height 0.01
+                      radius 0.018
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+          DEF WHEEL_RR TrackWheel {
+            position -0.0225 0.005
+            rotation 0.6681343103444981 0.5261152487176364 -0.5261171812507756 1.9635600942618647
+            radius 0.018
+            children [
+              USE TRACK_WHEEL
+            ]
+          }
+        ]
+        name "track_right"
+        boundingObject USE TRACK_BO
+        physics USE TRACK_PH
+        device [
+          LinearMotor {
+            name "motor_right"
+            maxVelocity 0.3
+          }
+          PositionSensor {
+            name "position_sensor_right"
+          }
+        ]
+        animatedGeometry USE ANIM_WHEEL
+        geometriesCount 70
+      }
+      DEF BODY Group {
+        children [
+          Shape {
+            appearance DEF BODY_COLOR PBRAppearance {
+              emissiveColor 0.2 0.2 0.2
+            }
+          }
+          Transform {
+            translation 0.0325 0 0.0025
+            children [
+              Shape {
+                appearance USE BODY_COLOR
+                geometry Box {
+                  size 0.025 0.065 0.015
+                }
+              }
+            ]
+          }
+          Transform {
+            translation -0.01 0 0
+            children [
+              Shape {
+                appearance USE BODY_COLOR
+                geometry Box {
+                  size 0.06 0.065 0.02
+                }
+              }
+            ]
+          }
+        ]
+      }
+      DEF LINE_SENSOR_ARRAY Group {
+        children [
+          Transform {
+            translation 0.0425 0 -0.0075
+            children [
+              Shape {
+                appearance USE BODY_COLOR
+                geometry Box {
+                  size 0.005 0.01 0.005
+                }
+              }
+            ]
+          }
+          Transform {
+            translation 0.049 0 -0.009
+            children [
+              Shape {
+                appearance USE BODY_COLOR
+                geometry Box {
+                  size 0.008 0.095 0.002
+                }
+              }
+            ]
+          }
+          DistanceSensor {
+            translation 0.05 0.001 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance DEF LSAPPEARANCE PBRAppearance {
+                  baseColor 0 0 0
+                  metalness 0
+                }
+                geometry DEF LIGHTSENSOR Box {
+                  size 0.00025 0.002 0.004
+                }
+              }
+            ]
+            name "lightsensor_m"
+            boundingObject USE LIGHTSENSOR
+            physics DEF LIGHTSENSOR_PH Physics {
+            }
+            lookupTable [
+              0.008 0 0
+              0.02 1000 0
+            ]
+            type "infra-red"
+            numberOfRays 2
+            aperture 0.4
+          }
+          Emitter {
+            translation 0.05 -0.001 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance DEF EMAPPEARANCE PBRAppearance {
+                  baseColor 1 0 0
+                  metalness 0
+                }
+                geometry DEF EMITTER Box {
+                  size 0.00025 0.002 0.004
+                }
+              }
+            ]
+            name "emitter_m"
+            boundingObject USE EMITTER
+            physics DEF EMITTER_PH Physics {
+            }
+            type "infra-red"
+            aperture 0.35
+          }
+          DistanceSensor {
+            translation 0.05 0.011 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE LSAPPEARANCE
+                geometry USE LIGHTSENSOR
+              }
+            ]
+            name "lightsensor_lm"
+            boundingObject USE LIGHTSENSOR
+            physics USE LIGHTSENSOR_PH
+            lookupTable [
+              0.008 0 0
+              0.02 1000 0
+            ]
+            type "infra-red"
+            numberOfRays 2
+            aperture 0.4
+          }
+          Emitter {
+            translation 0.05 0.009 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE EMAPPEARANCE
+                geometry USE EMITTER
+              }
+            ]
+            name "emitter_lm"
+            boundingObject USE EMITTER
+            physics USE EMITTER_PH
+            type "infra-red"
+            aperture 0.35
+          }
+          DistanceSensor {
+            translation 0.05 -0.009 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE LSAPPEARANCE
+                geometry USE LIGHTSENSOR
+              }
+            ]
+            name "lightsensor_rm"
+            boundingObject USE LIGHTSENSOR
+            physics USE LIGHTSENSOR_PH
+            lookupTable [
+              0.008 0 0
+              0.02 1000 0
+            ]
+            type "infra-red"
+            numberOfRays 2
+            aperture 0.4
+          }
+          Emitter {
+            translation 0.05 -0.011 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE EMAPPEARANCE
+                geometry USE EMITTER
+              }
+            ]
+            name "emitter_rm"
+            boundingObject USE EMITTER
+            physics USE EMITTER_PH
+            type "infra-red"
+            aperture 0.35
+          }
+          DistanceSensor {
+            translation 0.05 0.046 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE LSAPPEARANCE
+                geometry USE LIGHTSENSOR
+              }
+            ]
+            name "lightsensor_l"
+            boundingObject USE LIGHTSENSOR
+            physics USE LIGHTSENSOR_PH
+            lookupTable [
+              0.008 0 0
+              0.02 1000 0
+            ]
+            type "infra-red"
+            numberOfRays 2
+            aperture 0.4
+          }
+          Emitter {
+            translation 0.05 0.044 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE EMAPPEARANCE
+                geometry USE EMITTER
+              }
+            ]
+            name "emitter_l"
+            boundingObject USE EMITTER
+            physics USE EMITTER_PH
+            type "infra-red"
+            aperture 0.35
+          }
+          DistanceSensor {
+            translation 0.05 -0.044 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE LSAPPEARANCE
+                geometry USE LIGHTSENSOR
+              }
+            ]
+            name "lightsensor_r"
+            boundingObject USE LIGHTSENSOR
+            physics USE LIGHTSENSOR_PH
+            lookupTable [
+              0.008 0 0
+              0.02 1000 0
+            ]
+            type "infra-red"
+            numberOfRays 2
+            aperture 0.4
+          }
+          Emitter {
+            translation 0.05 -0.046 -0.01
+            rotation 0 1 0 1.5708
+            children [
+              Shape {
+                appearance USE EMAPPEARANCE
+                geometry USE EMITTER
+              }
+            ]
+            name "emitter_r"
+            boundingObject USE EMITTER
+            physics USE EMITTER_PH
+            type "infra-red"
+            aperture 0.35
+          }
+          DistanceSensor {
+            translation 0.055 0.02 0.02
+            name "proxim_sensor_fl"
+            lookupTable [
+              0 6 0
+              0.05 6 0
+              0.1 5 0
+              0.15 6 0
+              0.2 3 0
+              0.25 2 0
+              0.3 1 0
+              0.301 0 0
+            ]
+            type "infra-red"
+            numberOfRays 4
+            aperture 0.7
+          }
+          DistanceSensor {
+            translation 0.055 -0.02 0.02
+            name "proxim_sensor_fr"
+            lookupTable [
+              0 6 0
+              0.05 6 0
+              0.1 5 0
+              0.15 6 0
+              0.2 3 0
+              0.25 2 0
+              0.3 1 0
+              0.301 0 0
+            ]
+            type "infra-red"
+            numberOfRays 4
+            aperture 0.7
+          }
+        ]
+      }
+      DEF LEDS Group {
+        children [
+          LED {
+            translation -0.03 0.02 0.01
+            rotation 0 1 0 0
+            children [
+              DEF LEDGSHAPE Shape {
+                appearance PBRAppearance {
+                  baseColor 0 0 0
+                  metalness 0
+                }
+                geometry Sphere {
+                  radius 0.005
+                }
+              }
+            ]
+            name "led_green"
+            boundingObject USE LEDGSHAPE
+            physics Physics {
+            }
+            color [
+              0 1 0
+            ]
+            gradual TRUE
+          }
+          LED {
+            translation -0.03 0.005 0.01
+            rotation 0 1 0 0
+            children [
+              DEF LEDGSHAPE Shape {
+                appearance PBRAppearance {
+                  baseColor 0 0 0
+                  metalness 0
+                }
+                geometry Sphere {
+                  radius 0.005
+                }
+              }
+            ]
+            name "led_yellow"
+            boundingObject USE LEDGSHAPE
+            physics Physics {
+            }
+            color [
+              1 1 0
+            ]
+            gradual TRUE
+          }
+          LED {
+            translation -0.03 -0.01 0.01
+            rotation 0 1 0 0
+            children [
+              DEF LEDGSHAPE Shape {
+                appearance PBRAppearance {
+                  baseColor 0 0 0
+                  metalness 0
+                }
+                geometry Sphere {
+                  radius 0.005
+                }
+              }
+            ]
+            name "led_red"
+            boundingObject USE LEDGSHAPE
+            physics Physics {
+            }
+            gradual TRUE
+          }
+          Display {
+            name "robot_display"
+            height 32
+          }
+        ]
+      }
+    ]
+    boundingObject USE BODY
+    physics Physics {
+    }
+    name IS name
+    controller "<extern>"
+  }
+}
