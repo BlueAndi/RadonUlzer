@@ -1,13 +1,18 @@
 # Radon Ulzer - Remote Control <!-- omit in toc -->
 
-- [SW Architecture](#sw-architecture)
-- [Abbreviations](#abbreviations)
-  - [Logical View](#logical-view)
-    - [Application](#application)
-  - [Process View](#process-view)
-- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-- [License](#license)
-- [Contribution](#contribution)
+* [SW Architecture](#sw-architecture)
+* [Abbreviations](#abbreviations)
+  * [Logical View](#logical-view)
+    * [Application](#application)
+      * [Startup](#startup)
+      * [LineSensorsCalibration](#linesensorscalibration)
+      * [MotorSpeedCalibration](#motorspeedcalibration)
+      * [RemoteCtrl](#remotectrl)
+      * [Error](#error)
+  * [Process View](#process-view)
+* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+* [License](#license)
+* [Contribution](#contribution)
 
 # SW Architecture
 The following part contains the specific details of the RemoteControl application.
@@ -21,10 +26,32 @@ The following part contains the specific details of the RemoteControl applicatio
 ## Logical View
 
 ### Application
-TODO
+
+![application](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/Application.plantuml)
+
+#### Startup
+
+![startup](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/StartupState.plantuml)
+
+#### LineSensorsCalibration
+
+![lineSensorsCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/LineSensorsCalibrationState.plantuml)
+
+#### MotorSpeedCalibration
+
+![MotorSpeedCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/LineSensorsCalibrationState.plantuml)
+
+#### RemoteCtrl
+
+![driving](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/RemoteCtrlState.plantuml)
+
+#### Error
+
+![error](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/RemoteControl/ErrorState.plantuml)
 
 ## Process View
-TODO
+
+![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/ProcessView/RemoteControl/SystemStates.plantuml)
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.

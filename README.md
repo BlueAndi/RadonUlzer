@@ -5,19 +5,25 @@
 [![Release](https://img.shields.io/github/release/BlueAndi/RadonUlzer.svg)](https://github.com/BlueAndi/RadonUlzer/releases)
 [![Build Status](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml)
 
-A line follower robot as fast as the famous pod racer driven by Anakin Skywalker with the powerful engines from Radon Ulzer. :-)
+A robot as fast as the famous pod racer driven by Anakin Skywalker with the powerful engines from Radon Ulzer. :-)
+Several kind of applications are available:
+* Convoy leader - A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role.
+* Line follower - Just a line follower, using a PID controller.
+* Remote Control - The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.
 
-- [The robot](#the-robot)
-- [The simulation](#the-simulation)
-  - [Intallation](#intallation)
-  - [The Webots library](#the-webots-library)
-  - [Build](#build)
-  - [Preparation](#preparation)
-  - [Running the robot on track](#running-the-robot-on-track)
-- [Used Libraries](#used-libraries)
-- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-- [License](#license)
-- [Contribution](#contribution)
+## Table of content
+
+* [The robot](#the-robot)
+* [The simulation](#the-simulation)
+  * [Intallation](#intallation)
+  * [The Webots library](#the-webots-library)
+  * [Build](#build)
+  * [Preparation](#preparation)
+  * [Running the robot on track](#running-the-robot-on-track)
+* [Used Libraries](#used-libraries)
+* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+* [License](#license)
+* [Contribution](#contribution)
 
 # The robot
 The main target of the firmware is the Pololu Zumo32U4 robot (see https://www.pololu.com/category/129/zumo-robots-and-accessories) from Pololu.

@@ -1,0 +1,93 @@
+@startuml RemoteControl RemoteCtrlState
+
+title Remote Control State
+
+package "Application" as appLayer {
+
+    class RemoteCtrlState <<control>> {
+        + {static} getInstance() : RemoteCtrlState
+        + entry() : void
+        + process(sm : StateMachine&) : void
+        + exit() : void
+    }
+
+    class MotorSpeedCalibrationState <<control>>
+    class LineSensorsCalibrationState <<control>>
+
+    RemoteCtrlState .l.> MotorSpeedCalibrationState: <<use>>
+    RemoteCtrlState .r.> LineSensorsCalibrationState: <<use>>
+}
+
+package "Service" as serviceLayer {
+
+    class SimpleTimer <<service>> {
+        + start(duration : uint32_t) : void
+        + restart() : void
+        + stop() : void
+        + isTimeout() : bool
+    }
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+        interface IDisplay {
+            + {abstract} clear() : void
+            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
+            + {abstract} print(str : const String&) : size_t
+            + {abstract} print(str : const char[]) : size_t
+            + {abstract} print(value : uint8_t) : size_t
+            + {abstract} print(value : uint16_t) : size_t
+            + {abstract} print(value : uint32_t) : size_t
+            + {abstract} print(value : int8_t) : size_t
+            + {abstract} print(value : int16_t) : size_t
+            + {abstract} print(value : int32_t) : size_t
+        }
+
+        interface IMotors {
+            + {abstract} setSpeeds(leftSpeed : int16_t, rightSpeed : int16_t) : void
+            + {abstract} getMaxSpeed() : int16_t
+        }
+
+        interface ILineSensors {
+            + {abstract} init() : void
+            + {abstract} calibrate() : void
+            + {abstract} readLine() : int16_t
+            + {abstract} getSensorValues() : const uint16_t*
+            + {abstract} isCalibrationSuccessful() : bool
+            + {abstract} getCalibErrorInfo() const : uint8_t
+            + {abstract} getNumLineSensors() const : uint8_t
+            + {abstract} getSensorValueMax() const : uint16_t
+        }
+
+        interface IProximitySensors {
+            + {abstract} initFrontSensor() : void
+            + {abstract} getNumSensors() : const : uint8_t
+            + {abstract} read() : void
+            + {abstract} countsFrontWithLeftLeds() const : uint8_t
+            + {abstract} countsFrontWithRightLeds() const : uint8_t
+        }
+
+        interface ILed {
+            + {abstract} enable(enableIt : bool) : void
+        }
+    }
+
+    class Board << namespace >> {
+        + getDisplay() : IDisplay&
+        + getMotors() : IMotors&
+        + getLineSensors() : ILineSensors&
+        + getProximitySensors() : IProximitySensors&
+        + getLedYellow() : ILed&
+    }
+}
+
+RemoteCtrlState *--> SimpleTimer
+RemoteCtrlState ...> IDisplay: <<use>>
+RemoteCtrlState ...> IMotors: <<use>>
+RemoteCtrlState ...> ILineSensors: <<use>>
+RemoteCtrlState ...> IProximitySensors: <<use>>
+RemoteCtrlState ...> ILed: <<use>>
+RemoteCtrlState ...> Board:: <<use>>
+
+@enduml

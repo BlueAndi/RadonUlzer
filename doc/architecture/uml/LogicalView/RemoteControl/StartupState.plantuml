@@ -11,9 +11,9 @@ package "Application" as appLayer {
         + exit() : void
     }
 
-    class MotorSpeedCalibrationState <<control>>
+    class RemoteCtrlState <<control>>
 
-    StartupState .r.> MotorSpeedCalibrationState: <<use>>
+    StartupState .r.> RemoteCtrlState: <<use>>
 }
 
 package "HAL" as hal {
@@ -31,21 +31,14 @@ package "HAL" as hal {
             + {abstract} print(value : int16_t) : size_t
             + {abstract} print(value : int32_t) : size_t
         }
-
-        interface IButton {
-            + {abstract} isPressed() : bool
-            + {abstract} waitForRelease() : void
-        }
     }
 
     class Board << namespace >> {
         + getDisplay() : IDisplay&
-        + getButtonA() : IButton&
     }
 }
 
 StartupState ..> IDisplay: <<use>>
-StartupState ..> IButton: <<use>>
 StartupState ..> Board:: <<use>>
 
 @enduml

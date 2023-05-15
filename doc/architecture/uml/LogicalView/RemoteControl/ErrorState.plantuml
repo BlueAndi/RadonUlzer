@@ -13,11 +13,11 @@ package "Application" as appLayer {
     }
 
     class MotorSpeedCalibrationState <<control>>
-    class DrivingState <<control>>
+    class RemoteCtrlState <<control>>
     class ReadyState <<control>>
 
     ErrorState .r.> MotorSpeedCalibrationState: <<use>>
-    ErrorState .r.> DrivingState: <<use>>
+    ErrorState .r.> RemoteCtrlState: <<use>>
     ErrorState .r.> ReadyState: <<use>>
 }
 
