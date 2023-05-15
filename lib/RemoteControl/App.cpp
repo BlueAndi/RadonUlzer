@@ -82,6 +82,9 @@ const char* App::CH_NAME_LINE_SENSORS = "LINE_SENS";
 void App::setup()
 {
     Board::getInstance().init();
+    ILineSensors& lineSensors          = Board::getInstance().getLineSensors();
+    uint8_t       maxLineSensors       = lineSensors.getNumLineSensors();
+    uint8_t       lineSensorChannelDlc = maxLineSensors * sizeof(uint16_t);
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
     m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
@@ -94,7 +97,7 @@ void App::setup()
     m_yapServer.subscribeToChannel(CH_NAME_MOTOR_SPEEDS, App_motorSpeedsChannelCallback);
 
     /* Providing line sensor data */
-    m_yapChannelIdLineSensors = m_yapServer.createChannel(CH_NAME_LINE_SENSORS, sizeof(RemoteCtrlState::RspId));
+    m_yapChannelIdLineSensors = m_yapServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
 }
 
 void App::loop()
