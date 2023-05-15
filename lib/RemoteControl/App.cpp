@@ -84,6 +84,7 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+    m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
 
     /* Remote control commands/responses */
     m_yapServer.subscribeToChannel(CH_NAME_CMD, App_cmdChannelCallback);
@@ -116,8 +117,14 @@ void App::loop()
 
     m_systemStateMachine.process();
 
+    if (true == m_sendLineSensorsDataInterval.isTimeout())
+    {
+        sendLineSensorsData();
+
+        m_sendLineSensorsDataInterval.restart();
+    }
+    
     sendRemoteControlResponses();
-    sendLineSensorsData();
 }
 
 /******************************************************************************

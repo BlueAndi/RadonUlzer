@@ -95,6 +95,9 @@ private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
 
+    /** Sending Data period in ms. */
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
+
     /** YAP channel name for receiving commands. */
     static const char* CH_NAME_CMD;
 
@@ -112,6 +115,9 @@ private:
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
+
+    /** Timer used for sending data periodically. */
+    SimpleTimer m_sendLineSensorsDataInterval;
 
     /**
      * YAP Server Instance
