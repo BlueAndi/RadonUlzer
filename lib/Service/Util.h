@@ -83,8 +83,26 @@ void uintToStr(char* str, size_t size, uint32_t value);
 void intToStr(char* str, size_t size, int32_t value);
 
 /**
+ * Signed 16-bit integer to byte array.
+ * Endianness: Big endian
+ * @param[out]  buffer  Destination array
+ * @param[in]   size    Size of the destination buffer in byte
+ * @param[in]   value   Value
+ */
+void int16ToByteArray(uint8_t* buffer, size_t size, int16_t value);
+
+/**
+ * Unsigned 16-bit integer to byte array.
+ * Endianness: Big endian
+ * @param[out]  buffer  Destination array
+ * @param[in]   size    Size of the destination buffer in byte
+ * @param[in]   value   Value
+ */
+void uint16ToByteArray(uint8_t* buffer, size_t size, uint16_t value);
+
+/**
  * Signed 32-bit integer to byte array.
- * Endianness: Big Endian
+ * Endianness: Big endian
  * @param[out]  buffer  Destination array
  * @param[in]   size    Size of the destination buffer in byte
  * @param[in]   value   Value
@@ -93,7 +111,7 @@ void int32ToByteArray(uint8_t* buffer, size_t size, int32_t value);
 
 /**
  * Unsigned 32-bit integer to byte array.
- * Endianness: Big Endian.
+ * Endianness: Big endian.
  * @param[out]  buffer  Destination array.
  * @param[in]   size    Size of the destination buffer in byte.
  * @param[in]   value   Value.
@@ -101,7 +119,25 @@ void int32ToByteArray(uint8_t* buffer, size_t size, int32_t value);
 void uint32ToByteArray(uint8_t* buffer, size_t size, uint32_t value);
 
 /**
- * Big Endian Byte Array to uint32_t.
+ * Big endian byte array to int16_t.
+ * @param[in]  buffer   Source Array.
+ * @param[in]  size     Size of source array.
+ * @param[out] value    Destination integer.
+ * @returns true if succesfully parsed. Otherwise, false.
+ */
+bool byteArrayToInt16(const uint8_t* buffer, size_t size, int16_t& value);
+
+/**
+ * Big endian byte array to uint16_t.
+ * @param[in]  buffer   Source Array.
+ * @param[in]  size     Size of source array.
+ * @param[out] value    Destination integer.
+ * @returns true if succesfully parsed. Otherwise, false.
+ */
+bool byteArrayToUint16(const uint8_t* buffer, size_t size, uint16_t& value);
+
+/**
+ * Big endian byte array to uint32_t.
  * @param[in]  buffer   Source Array.
  * @param[in]  size     Size of source array.
  * @param[out] value    Destination integer.

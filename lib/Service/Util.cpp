@@ -150,6 +150,24 @@ void Util::intToStr(char* str, size_t size, int32_t value)
     }
 }
 
+void Util::int16ToByteArray(uint8_t* buffer, size_t size, int16_t value)
+{
+    if ((nullptr != buffer) && (sizeof(int16_t) <= size))
+    {
+        buffer[0U] = ((value >> 8U) & 0xFF);
+        buffer[1U] = ((value >> 0U) & 0xFF);
+    }
+}
+
+void Util::uint16ToByteArray(uint8_t* buffer, size_t size, uint16_t value)
+{
+    if ((nullptr != buffer) && (sizeof(uint16_t) <= size))
+    {
+        buffer[0U] = ((value >> 8U) & 0xFF);
+        buffer[1U] = ((value >> 0U) & 0xFF);
+    }
+}
+
 void Util::int32ToByteArray(uint8_t* buffer, size_t size, int32_t value)
 {
     if ((nullptr != buffer) && (sizeof(int32_t) <= size))
@@ -178,16 +196,46 @@ void Util::uint32ToByteArray(uint8_t* buffer, size_t size, uint32_t value)
     }
 }
 
+bool Util::byteArrayToInt16(const uint8_t* buffer, size_t size, int16_t& value)
+{
+    bool isSuccess = false;
+
+    if ((nullptr != buffer) && (sizeof(int16_t) <= size))
+    {
+        value = ((static_cast<int16_t>(buffer[0U]) << 8U) & 0xFF00) |
+                ((static_cast<int16_t>(buffer[1U]) << 0U) & 0x00FF) ;
+
+        isSuccess = true;
+    }
+
+    return isSuccess;
+}
+
+bool Util::byteArrayToUint16(const uint8_t* buffer, size_t size, uint16_t& value)
+{
+    bool isSuccess = false;
+
+    if ((nullptr != buffer) && (sizeof(uint16_t) <= size))
+    {
+        value = ((static_cast<uint16_t>(buffer[0U]) << 8U) & 0xFF00) |
+                ((static_cast<uint16_t>(buffer[1U]) << 0U) & 0x00FF) ;
+
+        isSuccess = true;
+    }
+
+    return isSuccess;
+}
+
 bool Util::byteArrayToUint32(const uint8_t* buffer, size_t size, uint32_t& value)
 {
     bool isSuccess = false;
 
     if ((nullptr != buffer) && (sizeof(uint32_t) <= size))
     {
-        value = (((uint32_t)buffer[0U] << 24U) & 0xFF000000) |
-                (((uint32_t)buffer[1U] << 16U) & 0x00FF0000) |
-                (((uint32_t)buffer[2U] <<  8U) & 0x0000FF00) |
-                (((uint32_t)buffer[3U] <<  0U) & 0x000000FF) ;
+        value = ((static_cast<uint32_t>(buffer[0U]) << 24U) & 0xFF000000) |
+                ((static_cast<uint32_t>(buffer[1U]) << 16U) & 0x00FF0000) |
+                ((static_cast<uint32_t>(buffer[2U]) <<  8U) & 0x0000FF00) |
+                ((static_cast<uint32_t>(buffer[3U]) <<  0U) & 0x000000FF) ;
 
         isSuccess = true;
     }

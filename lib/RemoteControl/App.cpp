@@ -148,9 +148,17 @@ void App::sendLineSensorsData() const
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-    const uint8_t*  payload          = reinterpret_cast<const uint8_t*>(lineSensorValues);
+    uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
+    uint8_t         lineSensorIdx    = 0U;
 
-    (void)m_yapServer.sendData(m_yapChannelIdLineSensors, payload, sizeof(uint16_t) * maxLineSensors);
+    while(maxLineSensors > lineSensorIdx)
+    {
+        Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t), lineSensorValues[lineSensorIdx]);
+
+        ++lineSensorIdx;
+    }
+
+    (void)m_yapServer.sendData(m_yapChannelIdLineSensors, payload, sizeof(payload));
 }
 
 /******************************************************************************
@@ -187,10 +195,14 @@ static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t
 {
     if ((nullptr != payload) && ((2U * sizeof(uint16_t)) == payloadSize))
     {
-        const uint16_t* motorSpeeds      = reinterpret_cast<const uint16_t*>(payload);
-        uint16_t        linearSpeedLeft  = motorSpeeds[0U];
-        uint16_t        linearSpeedRight = motorSpeeds[1U];
+        int16_t linearSpeedLeft;
+        int16_t linearSpeedRight;
+        bool convResultLSL = Util::byteArrayToInt16(&payload[0U * sizeof(int16_t)], sizeof(int16_t), linearSpeedLeft);
+        bool convResultLSR = Util::byteArrayToInt16(&payload[1U * sizeof(int16_t)], sizeof(int16_t), linearSpeedRight);
 
-        DifferentialDrive::getInstance().setLinearSpeed(linearSpeedLeft, linearSpeedRight);
+        if ((true == convResultLSL) && (true == convResultLSR))
+        {
+            DifferentialDrive::getInstance().setLinearSpeed(linearSpeedLeft, linearSpeedRight);
+        }
     }
 }
