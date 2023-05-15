@@ -70,10 +70,10 @@ const char* App::CH_NAME_CMD = "REMOTE_CMD";
 const char* App::CH_NAME_RSP = "REMOTE_RSP";
 
 /* Initialize channel name for receiving commands. */
-const char* App::CH_NAME_MOTOR_SPEEDS = "MOTOR_SPEEDS";
+const char* App::CH_NAME_MOTOR_SPEEDS = "MOT_SPEEDS";
 
 /* Initialize channel name for sending line sensors data. */
-const char* App::CH_NAME_LINE_SENSORS = "LINE_SENSORS";
+const char* App::CH_NAME_LINE_SENSORS = "LINE_SENS";
 
 /******************************************************************************
  * Public Methods
