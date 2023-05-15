@@ -70,6 +70,7 @@ public:
      */
     YAPServer(Stream& stream) :
         m_isSynced(false),
+        m_isSubscriberReady(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
         m_stream(stream),
@@ -117,7 +118,10 @@ public:
     {
         bool isSent = false;
 
-        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != payload))
+        if ((CONTROL_CHANNEL_NUMBER != channelNumber) &&
+            (nullptr != payload) &&
+            (true == m_isSubscriberReady) &&
+            (true == m_isSynced))
         {
             isSent = send(channelNumber, payload, payloadSize);
         }
@@ -284,6 +288,7 @@ private:
             else
             {
                 m_isSynced = false;
+                m_isSubscriberReady = false;
             }
         }
     }
@@ -316,6 +321,7 @@ private:
         {
             /* Fall out of sync if failed to send. */
             m_isSynced = false;
+            m_isSubscriberReady = false;
         }
     }
 
@@ -507,6 +513,7 @@ private:
             if (m_lastSyncCommand != m_lastSyncResponse)
             {
                 m_isSynced = false;
+                m_isSubscriberReady = false;
             }
 
             /* Send SYNC Command. */
@@ -542,6 +549,7 @@ private:
                     {
                         /* Out-of-Sync on failed send. */
                         m_isSynced = false;
+                        m_isSubscriberReady = false;
                         break;
                     }
                 }
@@ -670,6 +678,11 @@ private:
      * Current Sync state.
      */
     bool m_isSynced;
+
+    /**
+     * State of Client.
+     */
+    bool m_isSubscriberReady;
 
     /**
      * Last Heartbeat timestamp.
