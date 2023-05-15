@@ -262,6 +262,12 @@ private:
      */
     void cmdSYNC(const uint8_t* payload)
     {
+        if (0U == payload[4U])
+        {
+            /* Subscriber has not pending channels */
+            m_isSubscriberReady = true;
+        }
+
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[0U], payload[1U], payload[2U],
                                                        payload[3U]};
         /* Ignore return as SYNC_RSP can fail */
@@ -521,6 +527,9 @@ private:
 
             /* Using (sizeof(buf) - 1U) as CMD Byte is not passed. */
             Util::uint32ToByteArray(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], (sizeof(buf) - 1), currentTimestamp);
+
+            /* Add Number of Pending Channels. */
+            buf[5] = m_numberOfPendingChannels;
 
             if (true == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
             {
