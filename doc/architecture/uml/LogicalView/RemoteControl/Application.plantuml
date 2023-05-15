@@ -39,20 +39,13 @@ package "Application" as appLayer {
 
     class StartupState <<control>>
     class MotorSpeedCalibrationState <<control>>
+    class LineSensorsCalibrationState <<control>>
     class ErrorState <<control>>
-    class DrivingState <<control>>
-    class ReadyState <<control>>
-
-    class ParameterSets <<entity>>
-
-    note bottom of ParameterSets
-        One of several provided parameter sets
-        can be selected.
-    end note
+    class RemoteCtrlState <<control>>
 
     note bottom of StartupState
         The system starts up and shows
-        the team name on the display.
+        the application name on the display.
     end note
 
     note bottom of MotorSpeedCalibrationState
@@ -62,29 +55,27 @@ package "Application" as appLayer {
         motor is considered!
     end note
 
+    note bottom of LineSensorsCalibrationState
+        The robot turns several times the
+        line sensors over the track for
+        calibration.
+    end note
+
     note bottom of ErrorState
         Error information is shown on display.
         Confirmation from operator is requested.
     end note
 
-    note bottom of DrivingState
+    note bottom of RemoteCtrlState
         The system drives according to
         the commands sent by the operator.
-    end note
-
-    note bottom of ReadyState
-        The robot is stopped and waits for
-        operator input.
+        Every calibration can be triggered via remote.
     end note
 }
 
 note top of  appLayer
     Hint: See the application state behaviour
     in the corresponding state diagram.
-
-    The ParameterSets supports several parameters,
-    e.g. to initialize the PID controller and the
-    top speed.
 end note
 
 App *--> StateMachine
@@ -93,10 +84,8 @@ StateMachine o--> "0..1" IState
 
 IState <|.. StartupState: <<realize>>
 IState <|.... MotorSpeedCalibrationState: <<realize>>
+IState <|.. LineSensorsCalibrationState: <<realize>>
 IState <|.... ErrorState: <<realize>>
-IState <|.. ReadyState: <<realize>>
-IState <|.... DrivingState: <<realize>>
-
-DrivingState ..> ParameterSets: <<use>>
+IState <|.... RemoteCtrlState: <<realize>>
 
 @enduml

@@ -11,10 +11,10 @@ package "Application" as appLayer {
         + exit() : void
     }
 
-    class ReadyState <<control>>
+    class RemoteCtrlState <<control>>
     class ErrorState <<control>>
 
-    MotorSpeedCalibrationState ..> ReadyState: <<use>>
+    MotorSpeedCalibrationState ..> RemoteCtrlState: <<use>>
     MotorSpeedCalibrationState ..> ErrorState: <<use>>
 }
 

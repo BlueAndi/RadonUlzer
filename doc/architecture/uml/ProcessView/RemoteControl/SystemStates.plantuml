@@ -4,23 +4,26 @@ title System States
 
 state StartupState
 state MotorSpeedCalibrationState
+state LineSensorsCalibrationState
 state ErrorState
 state RemoteCtrlState
-state ReadyState
 
 [*] --> StartupState: Power up
-StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
-MotorSpeedCalibrationState --> ReadyState: [Calibration finished]
+StartupState --> RemoteCtrlState
+
+RemoteCtrlState --> MotorSpeedCalibrationState: [on remote request]
+RemoteCtrlState --> LineSensorsCalibrationState: [on remote request]
+
+MotorSpeedCalibrationState --> RemoteCtrlState: [Calibration finished]
 MotorSpeedCalibrationState --> ErrorState: [Calibration failed]
-ReadyState --> RemoteCtrlState: [Operator connects]
-RemoteCtrlState --> ReadyState: [Connection lost]
-ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
-ReadyState --> ErrorState: [Connection Timeout]
-RemoteCtrlState --> ErrorState: [Fatal error]
+
+LineSensorsCalibrationState --> RemoteCtrlState: [Calibration finished]
+LineSensorsCalibrationState --> ErrorState: [Calibration failed]
+
+ErrorState --> RemoteCtrlState: [Pushbutton A triggered]
 
 note right of StartupState
-    Initialize the system and wait till
-    the operator is ready for calibration.
+    Initialize the system and show application name.
 end note
 
 note right of MotorSpeedCalibrationState
@@ -28,12 +31,13 @@ note right of MotorSpeedCalibrationState
     100% motor speed. Required for the motor speed PID.
 end note
 
-note left of ErrorState
-    Shows error to the operator.
+note right of LineSensorsCalibrationState
+    Calibrates the line sensors on the playfield by
+    measuring the the darkness and brightness values.
 end note
 
-note right of ReadyState
-    Waits for the operator to connect using the Remote Control.
+note left of ErrorState
+    Shows error to the operator.
 end note
 
 note right of RemoteCtrlState
