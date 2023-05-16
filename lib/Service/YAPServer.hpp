@@ -237,14 +237,6 @@ public:
     }
 
 private:
-    /**
-     * Desynchronize Server.
-     * Reset Flags.
-     */
-    void desync()
-    {
-        m_isSynced = false;
-    }
 
     /**
      * Control Channel Command: SYNC
@@ -277,7 +269,7 @@ private:
             }
             else
             {
-                desync();
+                m_isSynced = false;
             }
         }
     }
@@ -309,7 +301,7 @@ private:
         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
         {
             /* Fall out of sync if failed to send. */
-            desync();
+            m_isSynced = false;
         }
     }
 
@@ -500,7 +492,7 @@ private:
             /* Timeout. */
             if (m_lastSyncCommand != m_lastSyncResponse)
             {
-                desync();
+                m_isSynced = false;
             }
 
             /* Send SYNC Command. */
@@ -537,7 +529,7 @@ private:
                         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
                         {
                             /* Out-of-Sync on failed send. */
-                            desync();
+                            m_isSynced = false;
                             break;
                         }
                     }
