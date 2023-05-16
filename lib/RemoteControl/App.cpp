@@ -91,13 +91,13 @@ void App::setup()
 
     /* Remote control commands/responses */
     m_yapServer.subscribeToChannel(CH_NAME_CMD, App_cmdChannelCallback);
-    m_yapServer.createChannel(CH_NAME_RSP, sizeof(RemoteCtrlState::RspId));
+    m_yapChannelIdRemoteCtrlRsp = m_yapServer.createChannel(CH_NAME_RSP, sizeof(RemoteCtrlState::RspId));
 
     /* Receiving linear motor speed left/right */
     m_yapServer.subscribeToChannel(CH_NAME_MOTOR_SPEEDS, App_motorSpeedsChannelCallback);
 
     /* Providing line sensor data */
-    m_yapServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
+    m_yapChannelIdLineSensors = m_yapServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
 }
 
 void App::loop()
@@ -147,7 +147,7 @@ void App::sendRemoteControlResponses()
     {
         const uint8_t* payload = reinterpret_cast<const uint8_t*>(&remoteControlRspId);
 
-        (void)m_yapServer.sendData(CH_NAME_RSP, payload, sizeof(remoteControlRspId));
+        (void)m_yapServer.sendData(m_yapChannelIdRemoteCtrlRsp, payload, sizeof(remoteControlRspId));
 
         m_lastRemoteControlRspId = remoteControlRspId;
     }
@@ -168,7 +168,7 @@ void App::sendLineSensorsData() const
         ++lineSensorIdx;
     }
 
-    (void)m_yapServer.sendData(CH_NAME_LINE_SENSORS, payload, sizeof(payload));
+    (void)m_yapServer.sendData(m_yapChannelIdLineSensors, payload, sizeof(payload));
 }
 
 /******************************************************************************

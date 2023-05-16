@@ -108,6 +108,25 @@ public:
 
     /**
      * Send a frame with the selected bytes.
+     * @param[in] channelNumber Channel to send frame to.
+     * @param[in] payload Byte buffer to be sent.
+     * @param[in] payloadSize Amount of bytes to send.
+     * @returns If payload succesfully sent, returns true. Otherwise, false.
+     */
+    bool sendData(uint8_t channelNumber, const uint8_t* payload, uint8_t payloadSize) const
+    {
+        bool isSent = false;
+
+        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != payload) && (true == m_isSynced))
+        {
+            isSent = send(channelNumber, payload, payloadSize);
+        }
+
+        return isSent;
+    }
+
+    /**
+     * Send a frame with the selected bytes.
      * @param[in] channelName Channel to send frame to.
      * @param[in] payload Byte buffer to be sent.
      * @param[in] payloadSize Amount of bytes to send.
@@ -115,13 +134,11 @@ public:
      */
     bool sendData(const char* channelName, const uint8_t* payload, uint8_t payloadSize) const
     {
-        bool    isSent        = false;
-        uint8_t channelNumber = getTxChannelNumber(channelName);
+        bool isSent = false;
 
-        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != channelName) && (nullptr != payload) &&
-            (true == m_isSynced))
+        if (nullptr != channelName)
         {
-            isSent = send(channelNumber, payload, payloadSize);
+            isSent = sendData(getTxChannelNumber(channelName), payload, payloadSize);
         }
 
         return isSent;

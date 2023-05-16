@@ -68,6 +68,8 @@ public:
         m_systemStateMachine(),
         m_controlInterval(),
         m_yapServer(Serial),
+        m_yapChannelIdRemoteCtrlRsp(0U),
+        m_yapChannelIdLineSensors(0U),
         m_lastRemoteControlRspId(RemoteCtrlState::RSP_ID_OK)
     {
     }
@@ -124,6 +126,12 @@ private:
      * more channels for external communication.
      */
     YAPServer<10U> m_yapServer;
+
+    /** Channel id sending remote control command responses. */
+    uint8_t m_yapChannelIdRemoteCtrlRsp;
+
+    /** Channel id sending line sensors data. */
+    uint8_t m_yapChannelIdLineSensors;
 
     /** Last remote control response id */
     RemoteCtrlState::RspId m_lastRemoteControlRspId;
