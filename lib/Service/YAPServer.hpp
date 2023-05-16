@@ -721,6 +721,11 @@ private:
     bool m_isSubscriberReady;
 
     /**
+     * State of Publisher.
+     */
+    bool m_isPublisherReady;
+
+    /**
      * Last Heartbeat timestamp.
      */
     uint32_t m_lastSyncCommand;
