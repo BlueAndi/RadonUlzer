@@ -66,6 +66,7 @@ void RemoteCtrlState::entry()
 {
     /* It is assumed that by entering this state, a pending command will be complete. */
     m_rspId = RSP_ID_OK;
+    m_cmdId = CMD_ID_IDLE;
 }
 
 void RemoteCtrlState::process(StateMachine& sm)
