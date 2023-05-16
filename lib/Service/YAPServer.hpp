@@ -471,7 +471,7 @@ private:
         else
         {
             /* Header has been read. Get DLC of Rx Channel using Header. */
-            dlc = getChannelDLC(m_receiveFrame.fields.header.headerFields.m_channel, false);
+            dlc = m_receiveFrame.fields.header.headerFields.m_dlc;
 
             /* DLC = 0 means that the channel does not exist. */
             if ((0U != dlc) && (MAX_RX_ATTEMPTS >= m_rxAttempts))
@@ -625,6 +625,7 @@ private:
             Frame         newFrame;
 
             newFrame.fields.header.headerFields.m_channel = channelNumber;
+            newFrame.fields.header.headerFields.m_dlc = channelDLC;
             memcpy(newFrame.fields.payload.m_data, payload, channelDLC);
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
@@ -694,6 +695,7 @@ private:
     uint8_t checksum(const Frame& frame) const
     {
         uint32_t sum = frame.fields.header.headerFields.m_channel;
+        sum += frame.fields.header.headerFields.m_dlc;
 
         for (size_t idx = 0U; idx < MAX_DATA_LEN; idx++)
         {
