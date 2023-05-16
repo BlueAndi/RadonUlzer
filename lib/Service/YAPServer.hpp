@@ -329,7 +329,6 @@ private:
                         }
 
                         /* Channel is no longer pending. */
-                        memset(m_pendingSuscribeChannels[idx].m_name, 0U, CHANNEL_NAME_MAX_LEN);
                         m_pendingSuscribeChannels[idx].m_callback = nullptr;
 
                         /* Decrease Pending Channel Counter. */
