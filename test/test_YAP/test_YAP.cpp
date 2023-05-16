@@ -358,13 +358,13 @@ static void testCmdScrb()
 static void testCmdScrbRsp()
 {
     YAPServer<2U> testYapServer(gTestStream);
-    uint8_t       testTime                                                 = 0U;
+    uint8_t       testTime                                                 = 1U;
     uint8_t       numberOfCases                                            = 3U;
     uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
-        {0x00, 0x43, 0x02, 'T', 'E', 'S', 'T', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
-    uint8_t inputQueueVector[numberOfCases][MAX_FRAME_LEN] = {{0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00},
-                                                              {0x00, 0x44, 0x03, 0x00, 0x00, 'T', 'E', 'S', 'T'},
-                                                              {0x00, 0x4D, 0x03, 0x01, 0x08, 'T', 'E', 'S', 'T'}};
+        {0x00, 0x0F, 0x52, 0x02, 'T', 'E', 'S', 'T', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+    uint8_t inputQueueVector[numberOfCases][MAX_FRAME_LEN] = {{0x00, 0x0F, 0x10, 0x01, 0x00, 0x00, 0x00},
+                                                              {0x00, 0x0F, 0x53, 0x03, 0x00, 'T', 'E', 'S', 'T'},
+                                                              {0x00, 0x0F, 0x54, 0x03, 0x01, 'T', 'E', 'S', 'T'}};
 
     /* Sync */
     gTestStream.pushToQueue(inputQueueVector[0U], controlChannelFrameLength);
@@ -377,11 +377,12 @@ static void testCmdScrbRsp()
     /*
      * Case: Suscribe to Unknown Channel
      */
-    gTestStream.pushToQueue(inputQueueVector[1U], controlChannelFrameLength);
 
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
+
+    gTestStream.pushToQueue(inputQueueVector[1U], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(0U, testYapServer.getNumberOfRxChannels());
@@ -391,11 +392,12 @@ static void testCmdScrbRsp()
     /*
      * Case: Suscribe to Known Channel
      */
-    gTestStream.pushToQueue(inputQueueVector[2U], controlChannelFrameLength);
 
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
+
+    gTestStream.pushToQueue(inputQueueVector[2U], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfRxChannels());
@@ -405,11 +407,11 @@ static void testCmdScrbRsp()
     /*
      * Case: Suscribe again to Known Channel
      */
-    gTestStream.pushToQueue(inputQueueVector[2U], controlChannelFrameLength);
-
     testYapServer.subscribeToChannel("TEST", testChannelCallback);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0], gTestStream.m_outputBuffer, controlChannelFrameLength);
+
+    gTestStream.pushToQueue(inputQueueVector[2U], controlChannelFrameLength);
     testYapServer.process(testTime++);
     testYapServer.process(testTime++);
     TEST_ASSERT_EQUAL_UINT8(1U, testYapServer.getNumberOfRxChannels());
