@@ -257,6 +257,18 @@ public:
     }
 
 private:
+
+    /**
+     * Desynchronize Server.
+     * Reset Flags.
+     */
+    void desync()
+    {
+        m_isSynced = false;
+        m_isPublisherReady = false;
+        m_isSubscriberReady = false;
+    }
+
     /**
      * Control Channel Command: SYNC
      * @param[in] payload Incomming Command data
@@ -288,8 +300,7 @@ private:
             }
             else
             {
-                m_isSynced = false;
-                m_isSubscriberReady = false;
+                desync();
             }
         }
     }
@@ -321,8 +332,7 @@ private:
         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
         {
             /* Fall out of sync if failed to send. */
-            m_isSynced = false;
-            m_isSubscriberReady = false;
+            desync();
         }
     }
 
@@ -539,8 +549,7 @@ private:
             /* Timeout. */
             if (m_lastSyncCommand != m_lastSyncResponse)
             {
-                m_isSynced = false;
-                m_isSubscriberReady = false;
+                desync();
             }
 
             /* Send SYNC Command. */
