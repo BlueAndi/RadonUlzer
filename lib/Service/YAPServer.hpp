@@ -78,7 +78,8 @@ public:
         m_rxAttempts(0U),
         m_numberOfTxChannels(0U),
         m_numberOfRxChannels(0U),
-        m_numberOfPendingChannels(0U)
+        m_numberOfPendingChannels(0U),
+        m_rxCallbacks{nullptr}
     {
     }
 
