@@ -71,6 +71,7 @@ public:
     YAPServer(Stream& stream) :
         m_isSynced(false),
         m_isSubscriberReady(false),
+        m_isPublisherReady(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
         m_stream(stream),
@@ -388,6 +389,15 @@ private:
     }
 
     /**
+     * Control Channel Command: RDY_RSP
+     * @param[in] payload Incomming Command data
+     */
+    void cmdRDY_RSP(const uint8_t* payload)
+    {
+        m_isPublisherReady = true;
+    }
+
+    /**
      * Callback for the Control Channel
      * @param[in] payload Payload of received frame.
      * @param[in] payloadSize Length of Payload
@@ -423,6 +433,10 @@ private:
 
         case COMMANDS::RDY:
             cmdRDY(cmdData);
+            break;
+
+        case COMMANDS::RDY_RSP:
+            cmdRDY_RSP(cmdData);
             break;
 
         default:
