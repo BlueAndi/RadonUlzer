@@ -65,8 +65,7 @@ public:
     {
         CMD_ID_IDLE = 0,                /**< Nothing to do. */
         CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
-        CMD_ID_START_MOTOR_SPEED_CALIB, /**< Start motor speed calibration. */
-        CMD_ID_ENABLE_DRIVE,            /**< Enable Differential Drive. */
+        CMD_ID_START_MOTOR_SPEED_CALIB  /**< Start motor speed calibration. */
 
     } CmdId;
 

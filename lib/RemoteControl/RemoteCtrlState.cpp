@@ -65,7 +65,9 @@
 
 void RemoteCtrlState::entry()
 {
-    /* It is assumed that by entering this state, a pending command will be complete. */
+    DifferentialDrive::getInstance().enable();
+
+    /* It is assumed that by entering this state, that a pending command will be complete. */
     m_rspId = RSP_ID_OK;
     m_cmdId = CMD_ID_IDLE;
 }
@@ -85,12 +87,6 @@ void RemoteCtrlState::process(StateMachine& sm)
     case CMD_ID_START_MOTOR_SPEED_CALIB:
         sm.setState(&MotorSpeedCalibrationState::getInstance());
         break;
-    
-    case CMD_ID_ENABLE_DRIVE:
-        DifferentialDrive::getInstance().enable();
-        m_rspId = RSP_ID_OK;
-        m_cmdId = CMD_ID_IDLE;
-        break;
 
     default:
         break;
@@ -99,7 +95,7 @@ void RemoteCtrlState::process(StateMachine& sm)
 
 void RemoteCtrlState::exit()
 {
-    /* Nothing to do */
+    DifferentialDrive::getInstance().disable();
 }
 
 /******************************************************************************

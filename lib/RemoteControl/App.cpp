@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include "App.h"
 #include "StartupState.h"
+#include "RemoteCtrlState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -75,6 +76,9 @@ const char* App::CH_NAME_MOTOR_SPEEDS = "MOT_SPEEDS";
 /* Initialize channel name for sending line sensors data. */
 const char* App::CH_NAME_LINE_SENSORS = "LINE_SENS";
 
+/** Only in remote control state its possible to control the robot. */
+static bool gIsRemoteCtrlActive = false;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -85,7 +89,7 @@ void App::setup()
     ILineSensors& lineSensors          = Board::getInstance().getLineSensors();
     uint8_t       maxLineSensors       = lineSensors.getNumLineSensors();
     uint8_t       lineSensorChannelDlc = maxLineSensors * sizeof(uint16_t);
-    
+
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
     m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
@@ -121,13 +125,25 @@ void App::loop()
 
     m_systemStateMachine.process();
 
+    /* Determine whether the robot can be remote controlled or not. */
+    if (&RemoteCtrlState::getInstance() == m_systemStateMachine.getState())
+    {
+        gIsRemoteCtrlActive = true;
+    }
+    else
+    {
+        gIsRemoteCtrlActive = false;
+    }
+
+    /* Send periodically line sensor data. */
     if (true == m_sendLineSensorsDataInterval.isTimeout())
     {
         sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
     }
-    
+
+    /* Send remote control command responses. */
     sendRemoteControlResponses();
 }
 
@@ -159,12 +175,13 @@ void App::sendLineSensorsData() const
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-    uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
     uint8_t         lineSensorIdx    = 0U;
+    uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
 
-    while(maxLineSensors > lineSensorIdx)
+    while (maxLineSensors > lineSensorIdx)
     {
-        Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t), lineSensorValues[lineSensorIdx]);
+        Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t),
+                                lineSensorValues[lineSensorIdx]);
 
         ++lineSensorIdx;
     }
@@ -204,7 +221,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  */
 static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
 {
-    if ((nullptr != payload) && ((2U * sizeof(uint16_t)) == payloadSize))
+    if ((nullptr != payload) && ((2U * sizeof(uint16_t)) == payloadSize) && (true == gIsRemoteCtrlActive))
     {
         int16_t linearSpeedLeft;
         int16_t linearSpeedRight;
