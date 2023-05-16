@@ -164,29 +164,29 @@ static void testCmdSync()
 {
     YAPServer<2U> testYapServer(gTestStream);
     uint8_t       expectedOutputBufferVector[6U][MAX_FRAME_LEN] = {
-        {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}, /* SYNC 0ms*/
-        {0x00, 0xEB, 0x00, 0x00, 0x00, 0x03, 0xE8}, /* SYNC 1000ms*/
-        {0x00, 0xD7, 0x00, 0x00, 0x00, 0x07, 0xD0}, /* SYNC 2000ms*/
-        {0x00, 0x73, 0x00, 0x00, 0x00, 0x1B, 0x58}, /* SYNC 7000ms*/
-        {0x00, 0x0F, 0x00, 0x00, 0x00, 0x2E, 0xE0}, /* SYNC 12000ms*/
-        {0x00, 0xAA, 0x00, 0x00, 0x00, 0x42, 0x68}  /* SYNC 17000ms*/
+        {0x00, 0x0F, 0xFA, 0x00, 0x00, 0x00, 0x03, 0xE8}, /* SYNC 1000ms*/
+        {0x00, 0x0F, 0xE6, 0x00, 0x00, 0x00, 0x07, 0xD0}, /* SYNC 2000ms*/
+        {0x00, 0x0F, 0x82, 0x00, 0x00, 0x00, 0x1B, 0x58}, /* SYNC 7000ms*/
+        {0x00, 0x0F, 0x1E, 0x00, 0x00, 0x00, 0x2E, 0xE0}, /* SYNC 12000ms*/
+        {0x00, 0x0F, 0xB9, 0x00, 0x00, 0x00, 0x42, 0x68}  /* SYNC 17000ms*/
     };
-    uint8_t inputQueueVector[2U][MAX_FRAME_LEN] = {{0x00, 0xD8, 0x01, 0x00, 0x00, 0x07, 0xD0},
-                                                   {0x00, 0x74, 0x01, 0x00, 0x00, 0x1B, 0x58}};
+    uint8_t inputQueueVector[2U][MAX_FRAME_LEN] = {{0x00, 0x0F, 0xE7, 0x01, 0x00, 0x00, 0x07, 0xD0},
+                                                   {0x00, 0x0F, 0x83, 0x01, 0x00, 0x00, 0x1B, 0x58}};
 
     /*
      * Case: Unsynced Heartbeat.
      */
 
+    gTestStream.flushOutputBuffer();
+
     /* Unsynced Heartbeat at 0 milliseconds */
     testYapServer.process(0U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], gTestStream.m_outputBuffer,
-                                  controlChannelFrameLength);
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, controlChannelFrameLength);
     gTestStream.flushOutputBuffer();
 
     /* Unsynced Heartbeat after 1000 milliseconds */
     testYapServer.process(1000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1U], gTestStream.m_outputBuffer,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[0U], gTestStream.m_outputBuffer,
                                   controlChannelFrameLength);
     gTestStream.flushOutputBuffer();
 
@@ -197,7 +197,7 @@ static void testCmdSync()
 
     /* Unsynced Heartbeat after 2000 milliseconds */
     testYapServer.process(2000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], gTestStream.m_outputBuffer,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[1U], gTestStream.m_outputBuffer,
                                   controlChannelFrameLength);
     gTestStream.flushOutputBuffer();
 
@@ -230,7 +230,7 @@ static void testCmdSync()
 
     /* Synced Heartbeat. */
     testYapServer.process(7000U);
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], gTestStream.m_outputBuffer,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[2U], gTestStream.m_outputBuffer,
                                   controlChannelFrameLength);
     gTestStream.flushOutputBuffer();
 
@@ -250,7 +250,7 @@ static void testCmdSync()
     /* Synced Heartbeat */
     testYapServer.process(12000U);
     TEST_ASSERT_TRUE(testYapServer.isSynced());
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[4U], gTestStream.m_outputBuffer,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[3U], gTestStream.m_outputBuffer,
                                   controlChannelFrameLength);
     gTestStream.flushInputBuffer();
     gTestStream.flushOutputBuffer();
@@ -263,7 +263,7 @@ static void testCmdSync()
     /* Synced Heartbeat. Fall out fo sync, as last Heartbeat was not Acknowledged. */
     testYapServer.process(17000U);
     TEST_ASSERT_FALSE(testYapServer.isSynced());
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[5U], gTestStream.m_outputBuffer,
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(expectedOutputBufferVector[4U], gTestStream.m_outputBuffer,
                                   controlChannelFrameLength);
     gTestStream.flushOutputBuffer();
 }
