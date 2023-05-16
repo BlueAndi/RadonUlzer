@@ -35,6 +35,7 @@
 #include "RemoteCtrlState.h"
 #include <Board.h>
 #include <StateMachine.h>
+#include <DifferentialDrive.h>
 #include "LineSensorsCalibrationState.h"
 #include "MotorSpeedCalibrationState.h"
 
@@ -83,6 +84,12 @@ void RemoteCtrlState::process(StateMachine& sm)
 
     case CMD_ID_START_MOTOR_SPEED_CALIB:
         sm.setState(&MotorSpeedCalibrationState::getInstance());
+        break;
+    
+    case CMD_ID_ENABLE_DRIVE:
+        DifferentialDrive::getInstance().enable();
+        m_rspId = RSP_ID_OK;
+        m_cmdId = CMD_ID_IDLE;
         break;
 
     default:
