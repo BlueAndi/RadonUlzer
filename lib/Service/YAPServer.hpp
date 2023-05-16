@@ -316,16 +316,13 @@ private:
                             uint8_t channelArrayIndex = (channelNumber - 1U);
 
                             /* Channel is empty. Increase Counter*/
-                            if (nullptr == m_rxChannels[channelArrayIndex].m_callback)
+                            if (nullptr == m_rxCallbacks[channelArrayIndex])
                             {
                                 /* Increase RX Channel Counter. */
                                 m_numberOfRxChannels++;
                             }
 
-                            /* Set Channel in RxChannels Array. */
-                            memcpy(m_rxChannels[channelArrayIndex].m_name, m_pendingSuscribeChannels[idx].m_name,
-                                   CHANNEL_NAME_MAX_LEN);
-                            m_rxChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannels[idx].m_callback;
+                            m_rxCallbacks[channelArrayIndex] = m_pendingSuscribeChannels[idx].m_callback;
                         }
 
                         /* Channel is no longer pending. */
@@ -427,10 +424,10 @@ private:
                     {
                         callbackControlChannel(m_receiveFrame.fields.payload.m_data, CONTROL_CHANNEL_PAYLOAD_LENGTH);
                     }
-                    else if (nullptr != m_rxChannels[channelArrayIndex].m_callback)
+                    else if (nullptr != m_rxCallbacks[channelArrayIndex])
                     {
                         /* Callback */
-                        m_rxChannels[channelArrayIndex].m_callback(m_receiveFrame.fields.payload.m_data, dlc);
+                        m_rxCallbacks[channelArrayIndex](m_receiveFrame.fields.payload.m_data, dlc);
                     }
                 }
 
@@ -616,10 +613,10 @@ private:
     Channel m_txChannels[tMaxChannels];
 
     /**
-     * Array of rx Data Channels.
-     * Server subscribes to these channels.
+     * Array of rx channel Callbacks.
+     * Server is subscribed to these channels.
      */
-    Channel m_rxChannels[tMaxChannels];
+    ChannelCallback m_rxCallbacks[tMaxChannels];
 
     /**
      * Array of pending rx Data Channels.
