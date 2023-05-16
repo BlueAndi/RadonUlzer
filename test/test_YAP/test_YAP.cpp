@@ -309,9 +309,9 @@ static void testCmdScrb()
     uint8_t       testTime                                                 = 0U;
     uint8_t       numberOfCases                                            = 2U;
     uint8_t       expectedOutputBufferVector[numberOfCases][MAX_FRAME_LEN] = {
-        {0x00, 0x44, 0x03, 0x00, 0x00, 'T', 'E', 'S', 'T'}, {0x00, 0x4D, 0x03, 0x01, 0x08, 'T', 'E', 'S', 'T'}};
+        {0x00, 0x0F, 0x53, 0x03, 0x00, 'T', 'E', 'S', 'T'}, {0x00, 0x0F, 0x54, 0x03, 0x01, 'T', 'E', 'S', 'T'}};
     uint8_t inputQueueVector[numberOfCases][MAX_FRAME_LEN] = {
-        {0x00, 0x43, 0x02, 'T', 'E', 'S', 'T', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
+        {0x00, 0x0F, 0x52, 0x02, 'T', 'E', 'S', 'T', 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}};
 
     /* Ignore SYNC */
     testYapServer.process(testTime++);
