@@ -118,9 +118,7 @@ public:
         bool    isSent        = false;
         uint8_t channelNumber = getTxChannelNumber(channelName);
 
-        if ((CONTROL_CHANNEL_NUMBER != channelNumber) &&
-            (nullptr != channelName) &&
-            (nullptr != payload) &&
+        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != channelName) && (nullptr != payload) &&
             (true == m_isSynced))
         {
             isSent = send(channelNumber, payload, payloadSize);
@@ -237,7 +235,6 @@ public:
     }
 
 private:
-
     /**
      * Control Channel Command: SYNC
      * @param[in] payload Incomming Command data
@@ -281,7 +278,7 @@ private:
     void cmdSCRB(const uint8_t* payload)
     {
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP};
-        buf[1U] = getTxChannelNumber(reinterpret_cast<const char*>(payload));
+        buf[1U]                                     = getTxChannelNumber(reinterpret_cast<const char*>(payload));
 
         /* Name is always sent back. */
         memcpy(&buf[2U], payload, CHANNEL_NAME_MAX_LEN);
@@ -499,25 +496,22 @@ private:
      */
     void managePendingSubscriptions()
     {
-        if (true == m_isSynced)
+        if ((true == m_isSynced) && (0U < m_numberOfPendingChannels))
         {
-            if (0U < m_numberOfPendingChannels)
+            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
             {
-                for (uint8_t idx = 0; idx < tMaxChannels; idx++)
+                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
                 {
-                    if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
-                    {
-                        /* Suscribe to channel. */
-                        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
-                        memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
-                               CHANNEL_NAME_MAX_LEN);
+                    /* Suscribe to channel. */
+                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
+                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
+                           CHANNEL_NAME_MAX_LEN);
 
-                        if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
-                        {
-                            /* Out-of-Sync on failed send. */
-                            m_isSynced = false;
-                            break;
-                        }
+                    if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                    {
+                        /* Out-of-Sync on failed send. */
+                        m_isSynced = false;
+                        break;
                     }
                 }
             }
@@ -586,7 +580,7 @@ private:
         else if (tMaxChannels >= channel)
         {
             uint8_t channelIdx = channel - 1U;
-            channelDLC = m_txChannels[channelIdx].m_dlc;
+            channelDLC         = m_txChannels[channelIdx].m_dlc;
         }
         else
         {
