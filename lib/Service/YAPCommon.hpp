@@ -165,7 +165,8 @@ enum COMMANDS : uint8_t
     SYNC = 0x00, /**< SYNC Command */
     SYNC_RSP,    /**< SYNC Response */
     SCRB,        /**< Subscribe Command */
-    SCRB_RSP     /**< Subscribe Response */
+    SCRB_RSP,    /**< Subscribe Response */
+    RDY          /**< Ready Command */
 };
 
 #endif /* YAP_COMMON_H_ */

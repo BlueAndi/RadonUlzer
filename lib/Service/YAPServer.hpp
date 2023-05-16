@@ -379,6 +379,15 @@ private:
     }
 
     /**
+     * Control Channel Command: RDY
+     * @param[in] payload Incomming Command data
+     */
+    void cmdRDY(const uint8_t* payload)
+    {
+        m_isSubscriberReady = true;
+    }
+
+    /**
      * Callback for the Control Channel
      * @param[in] payload Payload of received frame.
      * @param[in] payloadSize Length of Payload
@@ -410,6 +419,10 @@ private:
 
         case COMMANDS::SCRB_RSP:
             cmdSCRB_RSP(cmdData);
+            break;
+
+        case COMMANDS::RDY:
+            cmdRDY(cmdData);
             break;
 
         default:
