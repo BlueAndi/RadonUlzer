@@ -70,7 +70,6 @@ public:
      */
     YAPServer(Stream& stream) :
         m_isSynced(false),
-        m_isSubscriberReady(false),
         m_isPublisherReady(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
@@ -121,7 +120,6 @@ public:
 
         if ((CONTROL_CHANNEL_NUMBER != channelNumber) &&
             (nullptr != payload) &&
-            (true == m_isSubscriberReady) &&
             (true == m_isSynced))
         {
             isSent = send(channelNumber, payload, payloadSize);
@@ -266,7 +264,6 @@ private:
     {
         m_isSynced = false;
         m_isPublisherReady = false;
-        m_isSubscriberReady = false;
     }
 
     /**
@@ -395,7 +392,6 @@ private:
      */
     void cmdRDY(const uint8_t* payload)
     {
-        m_isSubscriberReady = true;
     }
 
     /**
@@ -728,11 +724,6 @@ private:
      * Current Sync state.
      */
     bool m_isSynced;
-
-    /**
-     * State of Client.
-     */
-    bool m_isSubscriberReady;
 
     /**
      * State of Publisher.
