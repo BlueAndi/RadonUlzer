@@ -639,7 +639,7 @@ private:
             }
             else
             {
-                channelDLC = m_txChannels[channelIdx].m_dlc;
+                channelDLC = m_rxChannels[channelIdx].m_dlc;
             }
         }
         else
