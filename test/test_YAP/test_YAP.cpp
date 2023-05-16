@@ -464,8 +464,8 @@ static void testChannelCreation()
 static void testDataSend()
 {
     YAPServer<1U> testYapServer(gTestStream);
-    uint8_t       expectedOutputBufferVector[1U][MAX_FRAME_LEN] = {{0x01, 0x16, 0x12, 0x34, 0x56, 0x78}};
-    uint8_t       inputQueueVector[1U][MAX_FRAME_LEN]           = {{0x00, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00}};
+    uint8_t       expectedOutputBufferVector[1U][MAX_FRAME_LEN] = {{0x01, 0x04, 0x1A, 0x12, 0x34, 0x56, 0x78}};
+    uint8_t       inputQueueVector[1U][MAX_FRAME_LEN]           = {{0x00, 0x0F, 0x10, 0x01, 0x00, 0x00, 0x00}};
 
     /* Flush Stream */
     gTestStream.flushInputBuffer();
@@ -488,8 +488,8 @@ static void testDataSend()
 
     /* Sync */
     gTestStream.pushToQueue(inputQueueVector[0U], controlChannelFrameLength);
-    testYapServer.process(0U);
     testYapServer.process(1U);
+    testYapServer.process(2U);
     TEST_ASSERT_TRUE(testYapServer.isSynced());
 
     /*
