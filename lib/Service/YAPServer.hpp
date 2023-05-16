@@ -570,24 +570,36 @@ private:
      */
     void managePendingSubscriptions()
     {
-        if ((true == m_isSynced) && (0U < m_numberOfPendingChannels))
+        if (true == m_isSynced)
         {
-            for (uint8_t idx = 0; idx < tMaxChannels; idx++)
+            if (0U < m_numberOfPendingChannels)
             {
-                if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
+                for (uint8_t idx = 0; idx < tMaxChannels; idx++)
                 {
-                    /* Suscribe to channel. */
-                    uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
-                    memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
-                           CHANNEL_NAME_MAX_LEN);
-
-                    if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                    if (nullptr != m_pendingSuscribeChannels[idx].m_callback)
                     {
-                        /* Out-of-Sync on failed send. */
-                        m_isSynced = false;
-                        m_isSubscriberReady = false;
-                        break;
+                        /* Suscribe to channel. */
+                        uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB};
+                        memcpy(&buf[CONTROL_CHANNEL_PAYLOAD_INDEX], m_pendingSuscribeChannels[idx].m_name,
+                               CHANNEL_NAME_MAX_LEN);
+
+                        if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                        {
+                            /* Out-of-Sync on failed send. */
+                            desync();
+                            break;
+                        }
                     }
+                }
+            }
+            else if (false == m_isPublisherReady)
+            {
+                /* Send RDY Command. */
+                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::RDY};
+
+                if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
+                {
+                    desync();
                 }
             }
         }
