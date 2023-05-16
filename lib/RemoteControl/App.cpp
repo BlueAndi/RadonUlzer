@@ -85,6 +85,7 @@ void App::setup()
     ILineSensors& lineSensors          = Board::getInstance().getLineSensors();
     uint8_t       maxLineSensors       = lineSensors.getNumLineSensors();
     uint8_t       lineSensorChannelDlc = maxLineSensors * sizeof(uint16_t);
+    
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
     m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);

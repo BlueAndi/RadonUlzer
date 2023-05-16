@@ -67,6 +67,7 @@ public:
     App() :
         m_systemStateMachine(),
         m_controlInterval(),
+        m_sendLineSensorsDataInterval(),
         m_yapServer(Serial),
         m_yapChannelIdRemoteCtrlRsp(0U),
         m_yapChannelIdLineSensors(0U),
