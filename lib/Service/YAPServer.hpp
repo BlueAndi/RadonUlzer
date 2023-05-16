@@ -70,7 +70,6 @@ public:
      */
     YAPServer(Stream& stream) :
         m_isSynced(false),
-        m_isPublisherReady(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
         m_stream(stream),
@@ -263,7 +262,6 @@ private:
     void desync()
     {
         m_isSynced = false;
-        m_isPublisherReady = false;
     }
 
     /**
@@ -400,7 +398,6 @@ private:
      */
     void cmdRDY_RSP(const uint8_t* payload)
     {
-        m_isPublisherReady = true;
     }
 
     /**
@@ -588,16 +585,6 @@ private:
                     }
                 }
             }
-            else if (false == m_isPublisherReady)
-            {
-                /* Send RDY Command. */
-                uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::RDY};
-
-                if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
-                {
-                    desync();
-                }
-            }
         }
     }
 
@@ -724,11 +711,6 @@ private:
      * Current Sync state.
      */
     bool m_isSynced;
-
-    /**
-     * State of Publisher.
-     */
-    bool m_isPublisherReady;
 
     /**
      * Last Heartbeat timestamp.
