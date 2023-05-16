@@ -117,9 +117,7 @@ public:
     {
         bool isSent = false;
 
-        if ((CONTROL_CHANNEL_NUMBER != channelNumber) &&
-            (nullptr != payload) &&
-            (true == m_isSynced))
+        if ((CONTROL_CHANNEL_NUMBER != channelNumber) && (nullptr != payload) && (true == m_isSynced))
         {
             isSent = send(channelNumber, payload, payloadSize);
         }
@@ -254,7 +252,6 @@ public:
     }
 
 private:
-
     /**
      * Desynchronize Server.
      * Reset Flags.
@@ -273,7 +270,7 @@ private:
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SYNC_RSP, payload[0U], payload[1U], payload[2U],
                                                        payload[3U]};
         /* Ignore return as SYNC_RSP can fail */
-        (void) send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
+        (void)send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf));
     }
 
     /**
@@ -306,7 +303,7 @@ private:
      */
     void cmdSCRB(const uint8_t* payload)
     {
-        uint8_t channelNumber = getTxChannelNumber(reinterpret_cast<const char*>(payload));
+        uint8_t channelNumber                       = getTxChannelNumber(reinterpret_cast<const char*>(payload));
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP};
 
         if (CONTROL_CHANNEL_NUMBER != channelNumber)
@@ -385,22 +382,6 @@ private:
     }
 
     /**
-     * Control Channel Command: RDY
-     * @param[in] payload Incomming Command data
-     */
-    void cmdRDY(const uint8_t* payload)
-    {
-    }
-
-    /**
-     * Control Channel Command: RDY_RSP
-     * @param[in] payload Incomming Command data
-     */
-    void cmdRDY_RSP(const uint8_t* payload)
-    {
-    }
-
-    /**
      * Callback for the Control Channel
      * @param[in] payload Payload of received frame.
      * @param[in] payloadSize Length of Payload
@@ -432,14 +413,6 @@ private:
 
         case COMMANDS::SCRB_RSP:
             cmdSCRB_RSP(cmdData);
-            break;
-
-        case COMMANDS::RDY:
-            cmdRDY(cmdData);
-            break;
-
-        case COMMANDS::RDY_RSP:
-            cmdRDY_RSP(cmdData);
             break;
 
         default:
@@ -608,7 +581,7 @@ private:
             Frame         newFrame;
 
             newFrame.fields.header.headerFields.m_channel = channelNumber;
-            newFrame.fields.header.headerFields.m_dlc = channelDLC;
+            newFrame.fields.header.headerFields.m_dlc     = channelDLC;
             memcpy(newFrame.fields.payload.m_data, payload, channelDLC);
             newFrame.fields.header.headerFields.m_checksum = checksum(newFrame);
 
