@@ -280,23 +280,11 @@ private:
      */
     void cmdSCRB(const uint8_t* payload)
     {
-        uint8_t channelNumber                       = getTxChannelNumber(reinterpret_cast<const char*>(payload));
         uint8_t buf[CONTROL_CHANNEL_PAYLOAD_LENGTH] = {COMMANDS::SCRB_RSP};
-
-        if (CONTROL_CHANNEL_NUMBER != channelNumber)
-        {
-            buf[1U] = channelNumber;
-            buf[2U] = getTxChannelDLC(channelNumber);
-        }
-        else
-        {
-            /* No channel found. Invalid Response: Channel 0 with DLC = 0 */
-            buf[1U] = 0U;
-            buf[2U] = 0U;
-        }
+        buf[1U] = getTxChannelNumber(reinterpret_cast<const char*>(payload));
 
         /* Name is always sent back. */
-        memcpy(&buf[3U], payload, CHANNEL_NAME_MAX_LEN);
+        memcpy(&buf[2U], payload, CHANNEL_NAME_MAX_LEN);
 
         if (false == send(CONTROL_CHANNEL_NUMBER, buf, sizeof(buf)))
         {
@@ -312,8 +300,7 @@ private:
     void cmdSCRB_RSP(const uint8_t* payload)
     {
         uint8_t        channelNumber = payload[0U];
-        uint8_t        channelDLC    = payload[1U];
-        const uint8_t* channelName   = &payload[2U];
+        const uint8_t* channelName   = &payload[1U];
 
         if ((tMaxChannels >= channelNumber) && (nullptr != channelName) && (0U < m_numberOfPendingChannels))
         {
@@ -327,7 +314,7 @@ private:
                                       CHANNEL_NAME_MAX_LEN))
                     {
                         /* Channel is found in the Server. */
-                        if ((0U != channelNumber) && (0U != channelDLC))
+                        if (0U != channelNumber)
                         {
                             uint8_t channelArrayIndex = (channelNumber - 1U);
 
@@ -341,7 +328,6 @@ private:
                             /* Set Channel in RxChannels Array. */
                             memcpy(m_rxChannels[channelArrayIndex].m_name, m_pendingSuscribeChannels[idx].m_name,
                                    CHANNEL_NAME_MAX_LEN);
-                            m_rxChannels[channelArrayIndex].m_dlc      = channelDLC;
                             m_rxChannels[channelArrayIndex].m_callback = m_pendingSuscribeChannels[idx].m_callback;
                         }
 
