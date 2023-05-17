@@ -31,10 +31,10 @@
 import sys
 import time
 from struct import Struct
-from socket_client import SocketClient
-from yap import YAP
 import keyboard # pylint: disable=import-error
 import numpy as np
+from yap import YAP
+from socket_client import SocketClient
 
 ################################################################################
 # Variables
