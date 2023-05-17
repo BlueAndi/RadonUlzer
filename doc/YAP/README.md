@@ -40,6 +40,9 @@ typedef union _Frame
                 /** Channel ID */
                 uint8_t m_channel;
 
+                /** Channel ID */
+                uint8_t m_dlc;
+
                 /** Frame Checksum */
                 uint8_t m_checksum;
 
@@ -77,6 +80,10 @@ typedef union _Frame
 - The Application can publish or subscribe to any of these channels using the channel's name.
 - Client suscribes to a channel using [Channel 0](#control-channel-channel-0).
 
+#### DLC Field
+
+- Contains the size of the payload contained by the frame.
+
 #### Checksum Field
 
 - Simple Checksum.
@@ -85,7 +92,7 @@ typedef union _Frame
 
 ### Payload Field
 
-- Data Length: Set by the Channel definition.
+- Data Length: Set by the DLC Field.
 - Contains Application Data Bytes.
 
 ---
@@ -113,13 +120,12 @@ typedef union _Frame
 ### SCRB (D0 = 0x02)
 
 - Client sends the name of the channel it wants to suscribe to.
-- Server responds with the channel number, DLC, and the channel name of the requested channel, if the channel is found and valid. If channel is not found, the response has channel number = 0, DLC = 0, and the channel name.
+- Server responds with the number and the name of the requested channel, if it is found and valid. If the channel is not found, the response has channel number = 0.
 
 ### SCRB_RSP (D0 = 0x03)
 
 - Server Response to [SCRB](#scrb-d0--0x02).
 - Channel Number on Data Byte 1 (D1).
-- Channel DLC on Data Byte 2 (D2)
 - Channel Name on the following bytes
 
 ---
@@ -187,7 +193,7 @@ typedef void (*ChannelCallback)(const uint8_t* payload, const uint8_t payloadSiz
 #### Out-of-Sync
 
 - Client is disconnected/does not respond to SYNC Command.
-- No Data is sent in this state.
+- No external data is sent in this state.
 - SYNC Period set to 1 second.
 
 #### Synced
