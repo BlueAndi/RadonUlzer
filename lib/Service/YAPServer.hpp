@@ -469,7 +469,6 @@ private:
      */
     void clearLocalRxBuffers()
     {
-        memset(m_receiveFrame.raw, 0U, MAX_FRAME_LEN);
         m_receivedBytes = 0U;
         m_rxAttempts    = 0U;
     }
