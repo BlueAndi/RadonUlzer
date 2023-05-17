@@ -474,6 +474,12 @@ static void testDataSend()
     gTestStream.flushOutputBuffer();
 
     /*
+     * Case: Send data on Control Channel.
+     */
+    testYapServer.sendData((uint8_t)CONTROL_CHANNEL_NUMBER, testPayload, sizeof(testPayload));
+    TEST_ASSERT_EQUAL_UINT8_ARRAY(emptyOutputBuffer, gTestStream.m_outputBuffer, sizeof(testPayload));
+
+    /*
      * Case: Send on non-existent channel while unsynced.
      */
     testYapServer.sendData("TEST", testPayload, sizeof(testPayload));
