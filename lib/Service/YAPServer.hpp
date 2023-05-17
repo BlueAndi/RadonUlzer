@@ -69,6 +69,7 @@ public:
      * Construct the YAP Server.
      */
     YAPServer(Stream& stream) :
+        m_rxCallbacks{nullptr},
         m_isSynced(false),
         m_lastSyncCommand(0U),
         m_lastSyncResponse(0U),
@@ -78,8 +79,7 @@ public:
         m_rxAttempts(0U),
         m_numberOfTxChannels(0U),
         m_numberOfRxChannels(0U),
-        m_numberOfPendingChannels(0U),
-        m_rxCallbacks{nullptr}
+        m_numberOfPendingChannels(0U)
     {
     }
 
