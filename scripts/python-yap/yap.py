@@ -69,6 +69,7 @@ class YAPConstants:
     # Max number of attempts at receiving a Frame before resetting RX Buffer
     MAX_RX_ATTEMPTS = MAX_FRAME_LEN
 
+    @dataclass
     class Commands():
         """ Enumeration of Commands of Control Channel. """
         SYNC = 0
@@ -76,7 +77,7 @@ class YAPConstants:
         SCRB = 2
         SCRB_RSP = 3
 
-
+@dataclass
 class Channel():
     """ Channel Definition """
 
