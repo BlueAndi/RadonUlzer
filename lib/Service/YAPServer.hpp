@@ -287,6 +287,10 @@ private:
                 m_isSynced = false;
             }
         }
+        else
+        {
+            m_isSynced = false;
+        }
     }
 
     /**
