@@ -619,7 +619,7 @@ private:
         uint32_t sum = frame.fields.header.headerFields.m_channel;
         sum += frame.fields.header.headerFields.m_dlc;
 
-        for (size_t idx = 0U; idx < MAX_DATA_LEN; idx++)
+        for (size_t idx = 0U; idx < frame.fields.header.headerFields.m_dlc; idx++)
         {
             sum += frame.fields.payload.m_data[idx];
         }
