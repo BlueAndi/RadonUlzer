@@ -109,36 +109,51 @@ class Frame():
 
     def pack_frame(self):
         """ Pack header and payload into raw array"""
-        # self.raw.append(self.channel)
-        # self.raw.append(self.checksum)
-        # self.raw.extend(self.payload)
         self.raw[0] = self.channel
         self.raw[1] = self.dlc
         self.raw[2] = self.checksum
         self.raw[3:] = self.payload
 
+@dataclass
+class ChannelArrays:
+    """ Container Class for Channel Arrays and their counters """
+
+    def __init__(self, max_configured_channels: int) -> None:
+        self.number_of_rx_channels      = 0
+        self.number_of_tx_channels      = 0
+        self.number_of_pending_channels = 0
+        self.rx_channels        = [Channel() for x in range(max_configured_channels)]
+        self.tx_channels        = [Channel() for x in range(max_configured_channels)]
+        self.pending_channels   = [Channel() for x in range(max_configured_channels)]
+
+
+@dataclass
+class SyncData:
+    """ Container Dataclass for Synchronization Data. """
+
+    def __init__(self) -> None:
+        self.is_synced = False
+        self.last_sync_response = 0
+        self.last_sync_command = 0
+
+@dataclass
+class RxData:
+    """ Container Dataclass for Receive Data and counters. """
+
+    def __init__(self) -> None:
+        self.received_bytes = 0
+        self.rx_attempts = 0
+        self.receive_frame = Frame()
 
 class YAP:
     """ Yet Another Protocol YAP """
 
     def __init__(self, max_configured_channels: int, stream: SocketClient) -> None:
         self.__max_configured_channels = max_configured_channels
-        self.__is_synced = False
-        self.__received_bytes = 0
-        self.__rx_attempts = 0
         self.__stream = stream
-        self.__receive_frame = Frame()
-        self.__last_sync_response = 0
-        self.__last_sync_command = 0
-        self.__number_of_rx_channels = 0
-        self.__rx_channels = [Channel()
-                              for x in range(max_configured_channels)]
-        self.__number_of_tx_channels = 0
-        self.__tx_channels = [Channel()
-                              for x in range(max_configured_channels)]
-        self.__number_of_pending_channels = 0
-        self.__pending_channels = [
-            Channel() for x in range(max_configured_channels)]
+        self.__rx_data = RxData()
+        self.__sync_data = SyncData()
+        self.__channels = ChannelArrays(max_configured_channels)
 
     def process(self, current_timestamp: int) -> None:
         """Manage the Server functions.
@@ -178,7 +193,7 @@ class YAP:
         channel_number = self.get_tx_channel_number(channel_name)
 
         if (YAPConstants.CONTROL_CHANNEL_NUMBER != channel_number) and\
-           (self.__is_synced is True):
+           (self.__sync_data.is_synced is True):
 
             is_sent = self.__send(channel_number, payload)
 
@@ -186,15 +201,15 @@ class YAP:
 
     def is_synced(self) -> bool:
         """ Returns current Sync state of th YAP Server. """
-        return self.__is_synced
+        return self.__sync_data.is_synced
 
     def get_number_rx_channels(self) -> int:
         """Get the number of configured RX channels."""
-        return self.__number_of_rx_channels
+        return self.__channels.number_of_rx_channels
 
     def get_number_tx_channels(self) -> int:
         """Get the number of configured TX channels."""
-        return self.__number_of_tx_channels
+        return self.__channels.number_of_tx_channels
 
     def create_channel(self, name: str, dlc: int) -> int:
         """Creates a new TX Channel on the server.
@@ -217,17 +232,17 @@ class YAP:
            (YAPConstants.CHANNEL_NAME_MAX_LEN >= name_length) and\
            (0 != dlc) and\
            (YAPConstants.MAX_DATA_LEN >= dlc) and\
-           (self.__max_configured_channels > self.__number_of_tx_channels):
+           (self.__max_configured_channels > self.__channels.number_of_tx_channels):
 
             # Create Channel
-            self.__tx_channels[self.__number_of_tx_channels] = Channel(
+            self.__channels.tx_channels[self.__channels.number_of_tx_channels] = Channel(
                 name, dlc)
 
             # Increase Channel Counter
-            self.__number_of_tx_channels += 1
+            self.__channels.number_of_tx_channels += 1
 
             # Provide Channel Number. Could be summarized with operation above.
-            idx = self.__number_of_tx_channels
+            idx = self.__channels.number_of_tx_channels
 
         return idx
 
@@ -244,14 +259,14 @@ class YAP:
 
         if (YAPConstants.CHANNEL_NAME_MAX_LEN >= len(name)) and\
            (callback is not None) and\
-           (self.__max_configured_channels > self.__number_of_pending_channels):
+           (self.__max_configured_channels > self.__channels.number_of_pending_channels):
 
             # Save Name and Callback for channel creation after response
-            self.__pending_channels[self.__number_of_pending_channels] = Channel(
+            self.__channels.pending_channels[self.__channels.number_of_pending_channels] = Channel(
                 channel_name=name, channel_dlc=0, channel_callback=callback)
 
             # Increase Channel Counter
-            self.__number_of_pending_channels += 1
+            self.__channels.number_of_pending_channels += 1
 
     def get_tx_channel_number(self, channel_name: str) -> int:
         """Get Number of a TX channel by its name.
@@ -268,7 +283,7 @@ class YAP:
 
         channel_number = 0
         for idx in range(self.__max_configured_channels):
-            if self.__tx_channels[idx].name == channel_name:
+            if self.__channels.tx_channels[idx].name == channel_name:
                 channel_number = idx + 1
                 break
 
@@ -287,14 +302,14 @@ class YAP:
 
         heartbeat_period = YAPConstants.HEATBEAT_PERIOD_UNSYNCED
 
-        if self.__is_synced is True:
+        if self.__sync_data.is_synced is True:
             heartbeat_period = YAPConstants.HEATBEAT_PERIOD_SYNCED
 
-        if (current_timestamp - self.__last_sync_command) >= heartbeat_period:
+        if (current_timestamp - self.__sync_data.last_sync_command) >= heartbeat_period:
 
             # Timeout
-            if self.__last_sync_command != self.__last_sync_response:
-                self.__is_synced = False
+            if self.__sync_data.last_sync_command != self.__sync_data.last_sync_response:
+                self.__sync_data.is_synced = False
 
             # Pack big-endian uint32
             packer = Struct(">L")
@@ -310,7 +325,7 @@ class YAP:
                 YAPConstants.CONTROL_CHANNEL_PAYLOAD_LENGTH, b'\x00')
 
             if self.__send(YAPConstants.CONTROL_CHANNEL_NUMBER, command) is True:
-                self.__last_sync_command = current_timestamp
+                self.__sync_data.last_sync_command = current_timestamp
 
     def __process_rx(self) -> None:
         """ Receive and process RX Data. """
@@ -319,20 +334,20 @@ class YAP:
         dlc = 0
 
         # Determine how many bytes to read.
-        if YAPConstants.HEADER_LEN > self.__received_bytes:
+        if YAPConstants.HEADER_LEN > self.__rx_data.received_bytes:
             # Header must be read.
-            expected_bytes = YAPConstants.HEADER_LEN - self.__received_bytes
+            expected_bytes = YAPConstants.HEADER_LEN - self.__rx_data.received_bytes
         else:
             # Header has been read. Get DLC of Rx Channel using header.
-            self.__receive_frame.unpack_header()
+            self.__rx_data.receive_frame.unpack_header()
             # dlc = self.__get_channel_dlc(self.__receive_frame.channel, False)
-            dlc = self.__receive_frame.dlc
+            dlc = self.__rx_data.receive_frame.dlc
 
             # DLC = 0 means that the channel does not exist.
-            if (0 != dlc) and (YAPConstants.MAX_RX_ATTEMPTS >= self.__rx_attempts):
-                remaining_payload_bytes = self.__received_bytes - YAPConstants.HEADER_LEN
+            if (0 != dlc) and (YAPConstants.MAX_RX_ATTEMPTS >= self.__rx_data.rx_attempts):
+                remaining_payload_bytes = self.__rx_data.received_bytes - YAPConstants.HEADER_LEN
                 expected_bytes = dlc - remaining_payload_bytes
-                self.__rx_attempts += 1
+                self.__rx_data.rx_attempts += 1
 
         # Are we expecting to read anything?
         if 0 != expected_bytes:
@@ -340,24 +355,24 @@ class YAP:
             # Read the required amount of bytes, if available.
             if self.__stream.available() >= expected_bytes:
                 rcvd, data = self.__stream.read_bytes(expected_bytes)
-                self.__receive_frame.raw[self.__received_bytes:] = data
-                self.__received_bytes += rcvd
+                self.__rx_data.receive_frame.raw[self.__rx_data.received_bytes:] = data
+                self.__rx_data.received_bytes += rcvd
 
             # Frame has been received.
-            if (0 != dlc) and ((YAPConstants.HEADER_LEN + dlc) == self.__received_bytes):
+            if (0 != dlc) and ((YAPConstants.HEADER_LEN + dlc) == self.__rx_data.received_bytes):
 
                 # Check validity
-                if self.__is_frame_valid(self.__receive_frame) is True:
-                    channel_array_index = self.__receive_frame.channel - 1
-                    self.__receive_frame.unpack_payload()
+                if self.__is_frame_valid(self.__rx_data.receive_frame) is True:
+                    channel_array_index = self.__rx_data.receive_frame.channel - 1
+                    self.__rx_data.receive_frame.unpack_payload()
 
                     # Differenciate between Control and Data Channels.
-                    if YAPConstants.CONTROL_CHANNEL_NUMBER == self.__receive_frame.channel:
+                    if YAPConstants.CONTROL_CHANNEL_NUMBER == self.__rx_data.receive_frame.channel:
                         self.__callback_control_channel(
-                            self.__receive_frame.payload)
-                    elif self.__rx_channels[channel_array_index].callback is not None:
-                        self.__rx_channels[channel_array_index].callback(
-                            self.__receive_frame.payload)
+                            self.__rx_data.receive_frame.payload)
+                    elif self.__channels.rx_channels[channel_array_index].callback is not None:
+                        self.__channels.rx_channels[channel_array_index].callback(
+                            self.__rx_data.receive_frame.payload)
 
                 # Frame received. Cleaning!
                 self.__clear_local_buffers()
@@ -369,9 +384,10 @@ class YAP:
         """ Subscribe to any pending Channels if synced to server. """
 
         # If synced and a channel is pending
-        if (self.__is_synced is True) and (0 < self.__number_of_pending_channels):
+        if (self.__sync_data.is_synced is True) and\
+           (0 < self.__channels.number_of_pending_channels):
             # Channel Iterator
-            for pending_channel in self.__pending_channels:
+            for pending_channel in self.__channels.pending_channels:
 
                 # Channel is pending
                 if pending_channel.callback is not None:
@@ -388,14 +404,14 @@ class YAP:
 
                     if self.__send(YAPConstants.CONTROL_CHANNEL_NUMBER, request) is False:
                         # Fall out of sync if failed to send.
-                        self.__is_synced = False
+                        self.__sync_data.is_synced = False
                         break
 
     def __clear_local_buffers(self) -> None:
         """ Clear Local RX Buffers """
-        self.__receive_frame = Frame()
-        self.__received_bytes = 0
-        self.__rx_attempts = 0
+        self.__rx_data.receive_frame = Frame()
+        self.__rx_data.received_bytes = 0
+        self.__rx_data.rx_attempts = 0
 
     def __get_tx_channel_dlc(self, channel_number: int) -> int:
         """ Get the Payload Length of a channel.
@@ -419,7 +435,7 @@ class YAP:
         else:
             if self.__max_configured_channels >= channel_number:
                 channel_idx = channel_number - 1
-                dlc = self.__tx_channels[channel_idx].dlc
+                dlc = self.__channels.tx_channels[channel_idx].dlc
 
         return dlc
 
@@ -478,7 +494,7 @@ class YAP:
         channel_dlc = self.__get_tx_channel_dlc(channel_number)
 
         if (len(payload) == channel_dlc) and \
-           ((self.__is_synced is True) or
+           ((self.__sync_data.is_synced is True) or
                 (YAPConstants.CONTROL_CHANNEL_NUMBER == channel_number)):
             written_bytes = 0
             new_frame = Frame()
@@ -527,11 +543,11 @@ class YAP:
         unpacker = Struct(">L")
         rcvd_timestamp = unpacker.unpack_from(payload)[0]
 
-        if self.__last_sync_command == rcvd_timestamp:
-            self.__last_sync_response = self.__last_sync_command
-            self.__is_synced = True
+        if self.__sync_data.last_sync_command == rcvd_timestamp:
+            self.__sync_data.last_sync_response = self.__sync_data.last_sync_command
+            self.__sync_data.is_synced = True
         else:
-            self.__is_synced = False
+            self.__sync_data.is_synced = False
 
     def __cmd_scrb(self, payload: bytearray) -> None:
         """ Control Channel Command: SCRB
@@ -558,7 +574,7 @@ class YAP:
 
         if self.__send(YAPConstants.CONTROL_CHANNEL_NUMBER, response) is False:
             # Fall out of sync if failed to send.
-            self.__is_synced = False
+            self.__sync_data.is_synced = False
 
     def __cmd_scrb_rsp(self, payload: bytearray) -> None:
         """ Control Channel Command: SCRB
@@ -574,32 +590,31 @@ class YAP:
         channel_name = str(payload[1:], "ascii").strip('\x00')
 
         if (self.__max_configured_channels >= channel_number) and \
-           (0 < self.__number_of_pending_channels):
+           (0 < self.__channels.number_of_pending_channels):
 
             # Channel Iterator
-            for potential_channel in self.__pending_channels:
-                # Check if a SCRB is pending.
-                if potential_channel.callback is not None:
-                    # Check if its the correct channel
-                    if potential_channel.name == channel_name:
-                        # Channel is found in the server
-                        if 0 != channel_number:
-                            channel_array_index = channel_number - 1
+            for potential_channel in self.__channels.pending_channels:
+                # Check if a SCRB is pending and is the correct channel
+                if (potential_channel.callback is not None) and\
+                   (potential_channel.name == channel_name):
+                    # Channel is found in the server
+                    if 0 != channel_number:
+                        channel_array_index = channel_number - 1
 
-                            if self.__rx_channels[channel_array_index].callback is None:
-                                self.__number_of_rx_channels += 1
+                        if self.__channels.rx_channels[channel_array_index].callback is None:
+                            self.__channels.number_of_rx_channels += 1
 
-                            self.__rx_channels[channel_array_index] = Channel(
-                                channel_name, 0, potential_channel.callback)
+                        self.__channels.rx_channels[channel_array_index] = Channel(
+                            channel_name, 0, potential_channel.callback)
 
-                        # Channel is no longer pending
-                        potential_channel = Channel()
+                    # Channel is no longer pending
+                    potential_channel = Channel()
 
-                        # Decrease Channel Counter
-                        self.__number_of_pending_channels -= 1
+                    # Decrease Channel Counter
+                    self.__channels.number_of_pending_channels -= 1
 
-                        # Break out of iterator
-                        break
+                    # Break out of iterator
+                    break
 
     def __callback_control_channel(self, payload: bytearray) -> None:
         """ Callback for the Control Channel
