@@ -50,11 +50,14 @@ SOFTWARE.
 /** Channel Field Length in Bytes */
 #define CHANNEL_LEN (1U)
 
+/** DLC Field Length in Bytes */
+#define DLC_LEN (1U)
+
 /** Checksum Field Length in Bytes */
 #define CHECKSUM_LEN (1U)
 
 /** Length of Complete Header Field */
-#define HEADER_LEN (CHANNEL_LEN + CHECKSUM_LEN)
+#define HEADER_LEN (CHANNEL_LEN + DLC_LEN + CHECKSUM_LEN)
 
 /** Data Field Length in Bytes */
 #define MAX_DATA_LEN (32U)
@@ -132,6 +135,9 @@ typedef union _Frame
                 /** Channel ID */
                 uint8_t m_channel;
 
+                /** Channel ID */
+                uint8_t m_dlc;
+
                 /** Frame Checksum */
                 uint8_t m_checksum;
 
@@ -166,8 +172,6 @@ enum COMMANDS : uint8_t
     SYNC_RSP,    /**< SYNC Response */
     SCRB,        /**< Subscribe Command */
     SCRB_RSP,    /**< Subscribe Response */
-    RDY,         /**< Ready Command */
-    RDY_RSP      /**< Ready Response */
 };
 
 #endif /* YAP_COMMON_H_ */

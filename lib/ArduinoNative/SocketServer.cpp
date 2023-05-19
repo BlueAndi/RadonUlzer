@@ -378,7 +378,7 @@ void SocketServer::process()
                 /* Client Ready to read */
                 if (FD_ISSET(m_members->m_clientSocket, &readFDS))
                 {
-                    const size_t bufferLength = 300U;
+                    const size_t bufferLength = UINT8_MAX;
                     char         recvbuf[bufferLength];
                     int          result = recv(m_members->m_clientSocket, recvbuf, bufferLength, 0);
 
