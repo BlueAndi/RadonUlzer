@@ -72,11 +72,11 @@ def callback_line_sensors(payload: bytearray) -> None:
 
 def callback_remote_response(payload:bytearray) -> None:
     """ Callback of REMOTE_CMD Channel """
-    if payload == 0:
+    if payload == b'\x00':
         print("Command OK")
-    elif payload == 1:
+    elif payload == b'\x01':
         print("Command Pending")
-    elif payload == 2:
+    elif payload == b'\x02':
         print("Command Error")
 
 def send_motor_setpoints(set_point_left: int, set_point_right: int):
