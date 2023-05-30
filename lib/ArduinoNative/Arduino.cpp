@@ -37,13 +37,13 @@
 #ifdef UNIT_TEST
 
 #include <time.h>
+#include "Terminal.h"
 
 #else
 
 #include <Board.h>
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
-#include "Terminal.h"
 #include "SocketServer.h"
 #include <getopt.h>
 
@@ -81,13 +81,18 @@ static int  handleCommandLineArguments(PrgArguments& prgArguments, int argc, cha
  * Local Variables
  *****************************************************************************/
 
-#ifndef UNIT_TEST
-
-/** SocketServer stream. */
-static SocketServer gSocketStream;
+#ifdef UNIT_TEST
 
 /** Terminal/Console stream. */
 static Terminal gTerminalStream;
+
+/** Serial driver, used by Arduino applications. */
+Serial_ Serial(gTerminalStream);
+
+#else /* UNIT_TEST */
+
+/** SocketServer stream. */
+static SocketServer gSocketStream;
 
 /** Serial driver, used by Arduino applications. */
 Serial_ Serial(gSocketStream);
@@ -113,7 +118,7 @@ static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
  */
 static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
 
-#endif
+#endif /* UNIT_TEST */
 
 /******************************************************************************
  * Public Methods

@@ -64,6 +64,11 @@ public:
     }
 
     /**
+     * Initializes the encoders.
+     */
+    virtual void init() = 0;
+
+    /**
      * Returns the number of counts that have been detected from the left-side
      * encoder.  These counts start at 0. Positive counts correspond to forward
      * movement of the left side of the robot, while negative counts correspond

@@ -27,7 +27,7 @@
 /**
  * @brief  Encoders realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
@@ -62,28 +62,20 @@ class Encoders : public IEncoders
 public:
     /**
      * Constructs the encoders adapter.
-     * 
+     *
      * @param[in] simTime               Simulation time
      * @param[in] wheelCircumference    Wheel circumference in mm
      * @param[in] posSensorLeft         The left position sensor
      * @param[in] posSensorRight        The right position sensor
      */
-    Encoders(const SimTime& simTime, webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) : 
-        IEncoders(), 
+    Encoders(const SimTime& simTime, webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) :
+        IEncoders(),
+        m_simTime(simTime),
         m_posSensorLeft(posSensorLeft),
         m_posSensorRight(posSensorRight),
         m_lastResetValueLeft(0.0f),
         m_lastResetValueRight(0.0f)
     {
-        if (nullptr != m_posSensorLeft)
-        {
-            m_posSensorLeft->enable(simTime.getTimeStep());
-        }
-
-        if (nullptr != m_posSensorRight)
-        {
-            m_posSensorRight->enable(simTime.getTimeStep());
-        }
     }
 
     /**
@@ -94,11 +86,18 @@ public:
     }
 
     /**
+     * Initialize or re-initialize the encoders.
+     * This is used e.g. to re-initialize the encoders after the simulation world
+     * was reset, but the ext. robot is still active.
+     */
+    void init() final;
+
+    /**
      * Returns the counts of the encoder of the left-side motor.
      * Internal calculation are done because the positionSensor
      * in webots that acts as an encoder only returns the driven
      * way in m/s and not the counted steps.
-     * 
+     *
      * @return Encoder steps left
      */
     int16_t getCountsLeft() final;
@@ -108,7 +107,7 @@ public:
      * Internal calculation are done because the positionSensor
      * in webots that acts as an encoder only returns the driven
      * way in m/s and not the counted steps.
-     * 
+     *
      * @return Encoder steps right
      */
     int16_t getCountsRight() final;
@@ -117,7 +116,7 @@ public:
      * This function is just like getCountsLeft() except it also clears the
      * counts before returning.  If you call this frequently enough, you will
      * not have to worry about the count overflowing.
-     * 
+     *
      * @return Encoder steps left
      */
     int16_t getCountsAndResetLeft() final;
@@ -126,31 +125,33 @@ public:
      * This function is just like getCountsRight() except it also clears the
      * counts before returning.  If you call this frequently enough, you will
      * not have to worry about the count overflowing.
-     * 
+     *
      * @return Encoder steps right
      */
     int16_t getCountsAndResetRight() final;
 
 private:
+    /** Simulation time */
+    const SimTime& m_simTime;
 
-    /* The position sensor of the left motor in the robot simulation. */
+    /** The position sensor of the left motor in the robot simulation. */
     webots::PositionSensor* m_posSensorLeft;
 
-    /* The position sensor of the right motor in the robot simulation. */
+    /** The position sensor of the right motor in the robot simulation. */
     webots::PositionSensor* m_posSensorRight;
 
-    /* Last position value of the left sensor in [m], used as reference. */
+    /** Last position value of the left sensor in [m], used as reference. */
     double m_lastResetValueLeft;
 
-    /* Last position value of the right sensor in [m], used as reference. */
+    /** Last position value of the right sensor in [m], used as reference. */
     double m_lastResetValueRight;
 
     /**
      * Calculate the absolute number of encoder steps by position change.
-     * 
+     *
      * @param[in] lastPos   Last position in [m]
      * @param[in] pos       Current position in [m]
-     * 
+     *
      * @return Absolute number of encoder steps
      */
     int16_t calculateSteps(double lastPos, double pos) const;

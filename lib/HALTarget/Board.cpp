@@ -72,7 +72,9 @@
 
 void Board::init()
 {
+    m_encoders.init();
     m_lineSensors.init();
+    m_motors.init();
     m_proximitySensors.initFrontSensor();
 }
 

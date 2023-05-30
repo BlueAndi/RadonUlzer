@@ -73,6 +73,16 @@ public:
     }
 
     /**
+     * Initialize or re-initialize the encoders.
+     * This is used e.g. to re-initialize the encoders after the simulation world
+     * was reset, but the ext. robot is still active.
+     */
+    void init() final
+    {
+        /* Nothing to do. */
+    }
+
+    /**
      * Returns the number of counts that have been detected from the left-side
      * encoder.  These counts start at 0. Positive counts correspond to forward
      * movement of the left side of the robot, while negative counts correspond

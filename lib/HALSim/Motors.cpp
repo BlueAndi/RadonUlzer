@@ -58,6 +58,12 @@
  * Public Methods
  *****************************************************************************/
 
+void Motors::init()
+{
+    initMotor(m_leftMotor);
+    initMotor(m_rightMotor);
+}
+
 void Motors::setSpeeds(int16_t leftSpeed, int16_t rightSpeed)
 {
     const double _MAX_SPEED = static_cast<double>(MAX_SPEED);

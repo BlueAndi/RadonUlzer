@@ -81,6 +81,7 @@ public:
                 webots::DistanceSensor* lightSensor1, webots::DistanceSensor* lightSensor2,
                 webots::DistanceSensor* lightSensor3, webots::DistanceSensor* lightSensor4) :
         ILineSensors(),
+        m_simTime(simTime),
         m_sensorValuesU16(),
         m_emitters{emitter0, emitter1, emitter2, emitter3, emitter4},
         m_lightSensors{lightSensor0, lightSensor1, lightSensor2, lightSensor3, lightSensor4},
@@ -90,17 +91,6 @@ public:
         m_sensorMinValues(),
         m_sensorMaxValues()
     {
-        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
-        {
-            m_sensorValuesU16[sensorIndex] = 0;
-            m_sensorMaxValues[sensorIndex] = 0;
-            m_sensorMinValues[sensorIndex] = SENSOR_MAX_VALUE;
-
-            if (nullptr != m_lightSensors[sensorIndex])
-            {
-                m_lightSensors[sensorIndex]->enable(simTime.getTimeStep());
-            }
-        }
     }
 
     /**
@@ -113,10 +103,7 @@ public:
     /**
      * Initializes the line sensors.
      */
-    void init() final
-    {
-        /* Nothing to do. */
-    }
+    void init() final;
 
     /**
      * Reads the sensors for calibration. Call this method several times during
@@ -142,7 +129,7 @@ public:
      *
      * This function assumes a dark line (high values) surrounded by white
      * (low values).
-     * 
+     *
      * @return Estimated position with respect to track.
      */
     int16_t readLine() final;
@@ -207,6 +194,7 @@ private:
      */
     static const int16_t SENSOR_MAX_VALUE = 1000;
 
+    const SimTime&   m_simTime;                      /**< Simulation time */
     uint16_t         m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
     webots::Emitter* m_emitters[MAX_SENSORS];        /**< The infrared emitters (0: most left) */
     webots::DistanceSensor* m_lightSensors[MAX_SENSORS]; /**< The light sensors (0: most left) */

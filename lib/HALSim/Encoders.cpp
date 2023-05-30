@@ -59,6 +59,19 @@
  * Public Methods
  *****************************************************************************/
 
+void Encoders::init()
+{
+    if (nullptr != m_posSensorLeft)
+    {
+        m_posSensorLeft->enable(m_simTime.getTimeStep());
+    }
+
+    if (nullptr != m_posSensorRight)
+    {
+        m_posSensorRight->enable(m_simTime.getTimeStep());
+    }
+}
+
 int16_t Encoders::getCountsLeft()
 {
     int16_t steps = 0;

@@ -64,18 +64,10 @@ public:
      */
     ProximitySensors(const SimTime& simTime, webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
         IProximitySensors(),
+        m_simTime(simTime),
         m_proximitySensors{proxSensor0, proxSensor1},
         m_sensorValuesU8{0U}
     {
-        for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
-        {
-            m_sensorValuesU8[sensorIndex] = 0;
-
-            if (nullptr != m_proximitySensors[sensorIndex])
-            {
-                m_proximitySensors[sensorIndex]->enable(simTime.getTimeStep());
-            }
-        }
     }
 
     /**
@@ -88,10 +80,7 @@ public:
     /**
      * Initialize only the front proximity sensor.
      */
-    void initFrontSensor() final
-    {
-        /* Nothing to do. */
-    }
+    void initFrontSensor() final;
 
     /**
      * Returns the number of sensors.
@@ -175,6 +164,11 @@ private:
     };
 
     /**
+     * Simulation time
+     */
+    const SimTime& m_simTime;
+
+    /**
      * The frontal proximity sensors
      */
     webots::DistanceSensor* m_proximitySensors[MAX_SENSORS];
@@ -183,7 +177,7 @@ private:
      * The last value read of the sensors as unsigned 8-bit values.
      * Value is in counts/digits representing number of brightness levels received by the sensor.
      */
-    uint8_t m_sensorValuesU8[MAX_SENSORS]; 
+    uint8_t m_sensorValuesU8[MAX_SENSORS];
 
     /* Default constructor not allowed. */
     ProximitySensors();

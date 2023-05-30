@@ -58,6 +58,21 @@
  * Public Methods
  *****************************************************************************/
 
+void LineSensors::init()
+{
+    for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+    {
+        m_sensorValuesU16[sensorIndex] = 0;
+        m_sensorMaxValues[sensorIndex] = 0;
+        m_sensorMinValues[sensorIndex] = SENSOR_MAX_VALUE;
+
+        if (nullptr != m_lightSensors[sensorIndex])
+        {
+            m_lightSensors[sensorIndex]->enable(m_simTime.getTimeStep());
+        }
+    }
+}
+
 void LineSensors::calibrate()
 {
     (void)getSensorValues();

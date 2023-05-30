@@ -64,6 +64,11 @@ public:
     }
 
     /**
+     * Initializes the motors.
+     */
+    virtual void init() = 0;
+
+    /**
      * Sets the speeds for both motors.
      *
      * @param[in] leftSpeed A number from -400 to 400 representing the speed and

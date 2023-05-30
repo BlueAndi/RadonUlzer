@@ -73,8 +73,6 @@ public:
         m_leftSpeed(0),
         m_rightSpeed(0)
     {
-        initMotor(m_leftMotor);
-        initMotor(m_rightMotor);
     }
 
     /**
@@ -83,6 +81,11 @@ public:
     ~Motors()
     {
     }
+
+    /**
+     * Initializes the motors.
+     */
+    void init() final;
 
     /**
      * Sets the speeds for both motors.
