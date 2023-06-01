@@ -35,6 +35,7 @@
 #include "RemoteCtrlState.h"
 #include <Board.h>
 #include <StateMachine.h>
+#include <DifferentialDrive.h>
 #include "LineSensorsCalibrationState.h"
 #include "MotorSpeedCalibrationState.h"
 
@@ -64,23 +65,37 @@
 
 void RemoteCtrlState::entry()
 {
-    /* Nothing to do. */
+    DifferentialDrive::getInstance().enable();
+
+    /* It is assumed that by entering this state, that a pending command will be complete. */
+    m_rspId = RSP_ID_OK;
+    m_cmdId = CMD_ID_IDLE;
 }
 
 void RemoteCtrlState::process(StateMachine& sm)
 {
-    /* Waiting for command via YAP. */
-    /*
-        CMD to perform line sensor calibration.
-        CMD to perform motor speed calibration.
-        Differential drive value for left and right motor.
-        Providing line sensor data.
-     */
+    switch(m_cmdId)
+    {
+    case CMD_ID_IDLE:
+        /* Nothing to do. */
+        break;
+
+    case CMD_ID_START_LINE_SENSOR_CALIB:
+        sm.setState(&LineSensorsCalibrationState::getInstance());
+        break;
+
+    case CMD_ID_START_MOTOR_SPEED_CALIB:
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
+        break;
+
+    default:
+        break;
+    }
 }
 
 void RemoteCtrlState::exit()
 {
-    /* Nothing to do */
+    DifferentialDrive::getInstance().disable();
 }
 
 /******************************************************************************
@@ -98,3 +113,5 @@ void RemoteCtrlState::exit()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+

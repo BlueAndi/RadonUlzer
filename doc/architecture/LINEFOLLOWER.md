@@ -1,19 +1,20 @@
 # Radon Ulzer - Line Follower <!-- omit in toc -->
 
-- [SW Architecture](#sw-architecture)
-- [Abbreviations](#abbreviations)
-  - [Logical View](#logical-view)
-    - [Application](#application)
-      - [Startup](#startup)
-      - [LineSensorsCalibration](#linesensorscalibration)
-      - [Ready](#ready)
-      - [Release Track](#release-track)
-      - [Driving](#driving)
-      - [Error](#error)
-  - [Process View](#process-view)
-- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-- [License](#license)
-- [Contribution](#contribution)
+* [SW Architecture](#sw-architecture)
+* [Abbreviations](#abbreviations)
+  * [Logical View](#logical-view)
+    * [Application](#application)
+      * [Startup](#startup)
+      * [LineSensorsCalibration](#linesensorscalibration)
+      * [MotorSpeedCalibration](#motorspeedcalibration)
+      * [Ready](#ready)
+      * [Release Track](#release-track)
+      * [Driving](#driving)
+      * [Error](#error)
+  * [Process View](#process-view)
+* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+* [License](#license)
+* [Contribution](#contribution)
 
 # SW Architecture
 The following part contains the specific details of the LineFollower application.
@@ -37,6 +38,10 @@ The following part contains the specific details of the LineFollower application
 #### LineSensorsCalibration
 
 ![lineSensorsCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
+
+#### MotorSpeedCalibration
+
+![MotorSpeedCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
 
 #### Ready
 

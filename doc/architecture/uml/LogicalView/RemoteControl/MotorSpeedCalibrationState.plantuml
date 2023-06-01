@@ -1,0 +1,67 @@
+@startuml RemoteControl MotorSpeedCalibrationState
+
+title Motor Speed Calibration State
+
+package "Application" as appLayer {
+
+    class MotorSpeedCalibrationState <<control>> {
+        + {static} getInstance() : MotorSpeedCalibrationState
+        + entry() : void
+        + process(sm : StateMachine&) : void
+        + exit() : void
+    }
+
+    class RemoteCtrlState <<control>>
+    class ErrorState <<control>>
+
+    MotorSpeedCalibrationState ..> RemoteCtrlState: <<use>>
+    MotorSpeedCalibrationState ..> ErrorState: <<use>>
+}
+
+package "Service" as serviceLayer {
+
+    class SimpleTimer <<service>>
+    class RelativeEncoder <<service>>
+    class DifferentialDrve <<service>>
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+        interface IDisplay {
+            + {abstract} clear() : void
+            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
+            + {abstract} print(str : const String&) : size_t
+            + {abstract} print(str : const char[]) : size_t
+            + {abstract} print(value : uint8_t) : size_t
+            + {abstract} print(value : uint16_t) : size_t
+            + {abstract} print(value : uint32_t) : size_t
+            + {abstract} print(value : int8_t) : size_t
+            + {abstract} print(value : int16_t) : size_t
+            + {abstract} print(value : int32_t) : size_t
+        }
+
+        interface IMotors {
+            + {abstract} setSpeeds(leftSpeed : int16_t, rightSpeed : int16_t) : void
+            + {abstract} getMaxSpeed() : int16_t
+        }
+
+    }
+
+    class Board << namespace >> {
+        + getDisplay() : IDisplay&
+        + getMotors() : IMotors&
+    }
+}
+
+appLayer -[hidden]-- serviceLayer
+serviceLayer -[hidden]-- hal
+
+MotorSpeedCalibrationState ....> IDisplay: <<use>>
+MotorSpeedCalibrationState ....> IMotors: <<use>>
+MotorSpeedCalibrationState ....> Board: <<use>>
+MotorSpeedCalibrationState *--> SimpleTimer
+MotorSpeedCalibrationState *--> RelativeEncoder
+MotorSpeedCalibrationState ...> DifferentialDrve: <<use>>
+
+@enduml

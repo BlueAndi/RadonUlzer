@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IState.h>
+#include <YAPServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -58,6 +59,25 @@
 class RemoteCtrlState : public IState
 {
 public:
+
+    /** Remote control commands. */
+    typedef enum : uint8_t
+    {
+        CMD_ID_IDLE = 0,                /**< Nothing to do. */
+        CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
+        CMD_ID_START_MOTOR_SPEED_CALIB  /**< Start motor speed calibration. */
+
+    } CmdId;
+
+    /** Remote control command responses. */
+    typedef enum : uint8_t
+    {
+        RSP_ID_OK = 0,  /**< Command successful executed. */
+        RSP_ID_PENDING, /**< Command is pending. */
+        RSP_ID_ERROR    /**< Command failed. */
+
+    } RspId;
+
     /**
      * Get state instance.
      *
@@ -89,13 +109,43 @@ public:
      */
     void exit() final;
 
+    /**
+     * Execute command.
+     * If a command is pending, it won't be executed.
+     * 
+     * @param[in] cmdId The id of the command which to execute.
+     */
+    void execute(CmdId cmdId)
+    {
+        if (CMD_ID_IDLE == m_cmdId)
+        {
+            m_cmdId = cmdId;
+            m_rspId = RSP_ID_PENDING;
+        }
+    }
+
+    /**
+     * Get command response of current command.
+     * 
+     * @return Command response
+     */
+    RspId getCmdRsp() const
+    {
+        return m_rspId;
+    }
+
 protected:
 private:
+
+    CmdId m_cmdId;  /**< Current pending command. */
+    RspId m_rspId;  /**< Current command response. */
 
     /**
      * Default constructor.
      */
-    RemoteCtrlState()
+    RemoteCtrlState() :
+        m_cmdId(CMD_ID_IDLE),
+        m_rspId(RSP_ID_OK)
     {
     }
 

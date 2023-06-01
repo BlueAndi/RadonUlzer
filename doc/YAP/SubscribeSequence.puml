@@ -10,10 +10,12 @@ actor Application_2 as app2
 
 app2 -> s2 ++: createChannel(channelName, DLC)
 s2 -> s2 : Copy Channel Name and\nDLC to txChannels Array
+s2 -> s2 : Increase txChannels Counter
 return
 
 app1 -> s1 ++: subscribeToChannel(channelName, Callback)
 s1 -> s1 : Copy Channel Name and\nCB to pendingChannels Array
+s1 -> s1 : Increase pendingChannels Counter
 return
 
 
@@ -24,12 +26,16 @@ s1 ->> s2: SCRB Command:\nSends Channel Name
 
 alt Valid Channel
     |||
-    s2 ->> s1: SCRB_RSP Command:\nSends Channel Number,\nChannel DLC and\nChannel Name
+    s2 ->> s1: SCRB_RSP Command:\nSends Channel Number and\nChannel Name
+    s1 ->> s1: Copy CB from pendingChannels Array\nto rxCallbacks Array
+    s1 -> s1 : Increase rxChannels Counter
     |||
 else Invalid/Not Found Channel
     |||
-    s2 ->> s1: SCRB_RSP Command:\nSends Channel Number = 0,\nChannel DLC = 0 and\nChannel Name
+    s2 ->> s1: SCRB_RSP Command:\nSends Channel Number = 0\nand Channel Name
     |||
 end
+
+s1 -> s1 : Decrease pendingChannels Counter
 
 @enduml

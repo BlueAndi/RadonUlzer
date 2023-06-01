@@ -1,0 +1,39 @@
+@startuml Simulation_Deployment
+
+Title RemoteControl in a Simulation Environment
+
+node "PC" {
+    node "RemoteControl" <<exe>> as remoteControlExe{
+
+        component "RemoteControl" <<app>> as app
+
+        component "Odometry" <<service>> as odometry
+        component "Speedometer" <<service>> as speedometer
+        component "DiffDrive" <<service>> as diffdrive
+        component "SocketServer" <<service>> as socketServer
+
+        component "YAP" <<service>> as yap
+        component "HAL" <<HAL>> as hal
+
+        app ..> yap: <<use>>
+        app <.. odometry: <<flow>>
+        app <.. speedometer: <<flow>>
+        app ..> diffdrive: <<control>>
+
+        yap <..> socketServer: <<flow>>
+
+        odometry ..> hal: <<use>>
+        speedometer ..> hal: <<use>>
+        diffdrive ..> hal: <<use>>
+    }
+
+    node "Webots" <<exe>> as webots {
+        PortIn "ipc://1234/Zumo" as webotsPort
+        component "Robot: Zumo" as robot
+        webotsPort <..> robot: <<flow>>
+    }
+
+    hal <..> webotsPort : <<flow>>
+}
+
+@enduml
