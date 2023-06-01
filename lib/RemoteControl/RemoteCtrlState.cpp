@@ -68,8 +68,7 @@ void RemoteCtrlState::entry()
     DifferentialDrive::getInstance().enable();
 
     /* It is assumed that by entering this state, that a pending command will be complete. */
-    m_rspId = RSP_ID_OK;
-    m_cmdId = CMD_ID_IDLE;
+    finishCommand(RSP_ID_OK);
 }
 
 void RemoteCtrlState::process(StateMachine& sm)
@@ -86,6 +85,19 @@ void RemoteCtrlState::process(StateMachine& sm)
 
     case CMD_ID_START_MOTOR_SPEED_CALIB:
         sm.setState(&MotorSpeedCalibrationState::getInstance());
+        break;
+
+    case CMD_ID_REINIT_BOARD:
+        /* Ensure that the motors are stopped, before re-initialize the board. */
+        DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+
+        /* Re-initialize the board. This is required for the webots simulation in
+         * case the world is reset by a supervisor without restarting the RadonUlzer
+         * controller executable.
+         */
+        Board::getInstance().init();
+        
+        finishCommand(RSP_ID_OK);
         break;
 
     default:

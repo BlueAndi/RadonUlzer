@@ -65,7 +65,8 @@ public:
     {
         CMD_ID_IDLE = 0,                /**< Nothing to do. */
         CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
-        CMD_ID_START_MOTOR_SPEED_CALIB  /**< Start motor speed calibration. */
+        CMD_ID_START_MOTOR_SPEED_CALIB, /**< Start motor speed calibration. */
+        CMD_ID_REINIT_BOARD             /**< Re-initialize the board. Required for webots simulation. */
 
     } CmdId;
 
@@ -158,6 +159,17 @@ private:
 
     RemoteCtrlState(const RemoteCtrlState& state);
     RemoteCtrlState& operator=(const RemoteCtrlState& state);
+
+    /**
+     * Set command response and finish the command execution.
+     * 
+     * @param[in] rsp   Command response
+     */
+    void finishCommand(RspId rsp)
+    {
+        m_rspId = rsp;
+        m_cmdId = CMD_ID_IDLE;
+    }
 };
 
 /******************************************************************************
