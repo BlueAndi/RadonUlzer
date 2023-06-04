@@ -184,7 +184,7 @@
 #if (0 == LOG_DEBUG_ENABLE)
 
 #define LOG_DEBUG(_filename, _msg)
-#define LOG_DEBUG_VAL(_filename, _msg, _val)
+#define LOG_DEBUG_VAL(_filename, _msg, _val) (void)(_filename)
 #define LOG_DEBUG_HEAD(_filename)
 #define LOG_DEBUG_MSG(_msg)
 #define LOG_DEBUG_TAIL()
