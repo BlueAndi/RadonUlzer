@@ -172,9 +172,6 @@ class YAP:
         # Process RX data.
         self.__process_rx()
 
-        # Process pending Subscriptions
-        self.__process_subscriptions()
-
     def send_data(self, channel_name: str, payload: bytearray) -> bool:
         """Send a frame with the selected bytes.
 
@@ -546,6 +543,9 @@ class YAP:
         if self.__sync_data.last_sync_command == rcvd_timestamp:
             self.__sync_data.last_sync_response = self.__sync_data.last_sync_command
             self.__sync_data.is_synced = True
+
+            # Process pending Subscriptions
+            self.__process_subscriptions()
         else:
             self.__sync_data.is_synced = False
 

@@ -102,9 +102,6 @@ public:
 
         /* Process RX data */
         processRxData();
-
-        /* Manage Pending Subscriptions. */
-        managePendingSubscriptions();
     }
 
     /**
@@ -281,6 +278,9 @@ private:
             {
                 m_lastSyncResponse = m_lastSyncCommand;
                 m_isSynced         = true;
+
+                /* Manage Pending Subscriptions. */
+                managePendingSubscriptions();
             }
             else
             {
