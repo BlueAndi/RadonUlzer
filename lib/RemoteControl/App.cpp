@@ -40,6 +40,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Board.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -95,19 +96,19 @@ void App::setup()
     m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
 
     /* Remote control commands/responses */
-    m_yapServer.subscribeToChannel(CH_NAME_CMD, App_cmdChannelCallback);
-    m_yapChannelIdRemoteCtrlRsp = m_yapServer.createChannel(CH_NAME_RSP, sizeof(RemoteCtrlState::RspId));
+    m_smpServer.subscribeToChannel(CH_NAME_CMD, App_cmdChannelCallback);
+    m_smpChannelIdRemoteCtrlRsp = m_smpServer.createChannel(CH_NAME_RSP, sizeof(RemoteCtrlState::RspId));
 
     /* Receiving linear motor speed left/right */
-    m_yapServer.subscribeToChannel(CH_NAME_MOTOR_SPEEDS, App_motorSpeedsChannelCallback);
+    m_smpServer.subscribeToChannel(CH_NAME_MOTOR_SPEEDS, App_motorSpeedsChannelCallback);
 
     /* Providing line sensor data */
-    m_yapChannelIdLineSensors = m_yapServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
+    m_smpChannelIdLineSensors = m_smpServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
 }
 
 void App::loop()
 {
-    m_yapServer.process(millis());
+    m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
@@ -164,7 +165,7 @@ void App::sendRemoteControlResponses()
     {
         const uint8_t* payload = reinterpret_cast<const uint8_t*>(&remoteControlRspId);
 
-        (void)m_yapServer.sendData(m_yapChannelIdRemoteCtrlRsp, payload, sizeof(remoteControlRspId));
+        (void)m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, payload, sizeof(remoteControlRspId));
 
         m_lastRemoteControlRspId = remoteControlRspId;
     }
@@ -186,7 +187,7 @@ void App::sendLineSensorsData() const
         ++lineSensorIdx;
     }
 
-    (void)m_yapServer.sendData(m_yapChannelIdLineSensors, payload, sizeof(payload));
+    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, payload, sizeof(payload));
 }
 
 /******************************************************************************
@@ -198,7 +199,7 @@ void App::sendLineSensorsData() const
  *****************************************************************************/
 
 /**
- * Receives remote control commands over YAP channel.
+ * Receives remote control commands over SerialMuxProt channel.
  *
  * @param[in] payload       Command id
  * @param[in] payloadSize   Size of command id
@@ -214,7 +215,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
 }
 
 /**
- * Receives motor speeds over YAP channel.
+ * Receives motor speeds over SerialMuxProt channel.
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds

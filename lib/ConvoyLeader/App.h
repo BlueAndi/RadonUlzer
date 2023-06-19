@@ -45,7 +45,7 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include <SerialMuxProtServer.hpp>
 #include <Arduino.h>
 
 /******************************************************************************
@@ -67,7 +67,7 @@ public:
     App() :
         m_systemStateMachine(),
         m_controlInterval(),
-        m_yapServer(Serial)
+        m_smpServer(Serial)
     {
     }
 
@@ -109,16 +109,16 @@ private:
     SimpleTimer m_controlInterval;
 
     /**
-     * YAP Server Instance
+     * SerialMuxProt Server Instance
      *
      * @tparam tMaxChannels set to 10, as App does not require
      * more channels for external communication.
      */
-    YAPServer<10U> m_yapServer;
+    SerialMuxProtServer<10U> m_smpServer;
 
     /**
      * Report the current position of the robot using the Odometry data.
-     * Sends data through the YAPServer.
+     * Sends data through the SerialMuxProtServer.
      */
     void reportPosition();
 

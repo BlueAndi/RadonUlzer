@@ -73,12 +73,12 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_yapServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
+    m_smpServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
 }
 
 void App::loop()
 {
-    m_yapServer.process(millis());
+    m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
@@ -95,7 +95,7 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-        /* Send Position to YAP Client */
+        /* Send Position to SerialMuxProt Client */
         reportPosition();
 
         m_controlInterval.restart();
@@ -123,7 +123,7 @@ void App::reportPosition()
     Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
     Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
 
-    m_yapServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
+    m_smpServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
 }
 
 void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)

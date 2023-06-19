@@ -45,7 +45,7 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
-#include <YAPServer.hpp>
+#include <SerialMuxProtServer.hpp>
 
 #include "RemoteCtrlState.h"
 
@@ -68,9 +68,9 @@ public:
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendLineSensorsDataInterval(),
-        m_yapServer(Serial),
-        m_yapChannelIdRemoteCtrlRsp(0U),
-        m_yapChannelIdLineSensors(0U),
+        m_smpServer(Serial),
+        m_smpChannelIdRemoteCtrlRsp(0U),
+        m_smpChannelIdLineSensors(0U),
         m_lastRemoteControlRspId(RemoteCtrlState::RSP_ID_OK)
     {
     }
@@ -99,16 +99,16 @@ private:
     /** Sending Data period in ms. */
     static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
 
-    /** YAP channel name for receiving commands. */
+    /** SerialMuxProt channel name for receiving commands. */
     static const char* CH_NAME_CMD;
 
-    /** YAP channel name for sending command responses. */
+    /** SerialMuxProt channel name for sending command responses. */
     static const char* CH_NAME_RSP;
 
-    /** YAP channel name for receiving motor sppeds. */
+    /** SerialMuxProt channel name for receiving motor sppeds. */
     static const char* CH_NAME_MOTOR_SPEEDS;
 
-    /** YAP channel name for sending line sensors data. */
+    /** SerialMuxProt channel name for sending line sensors data. */
     static const char* CH_NAME_LINE_SENSORS;
 
     /** The system state machine. */
@@ -121,18 +121,18 @@ private:
     SimpleTimer m_sendLineSensorsDataInterval;
 
     /**
-     * YAP Server Instance
+     * SerialMuxProt Server Instance
      *
      * @tparam tMaxChannels set to 10, as App does not require
      * more channels for external communication.
      */
-    YAPServer<10U> m_yapServer;
+    SerialMuxProtServer<10U> m_smpServer;
 
     /** Channel id sending remote control command responses. */
-    uint8_t m_yapChannelIdRemoteCtrlRsp;
+    uint8_t m_smpChannelIdRemoteCtrlRsp;
 
     /** Channel id sending line sensors data. */
-    uint8_t m_yapChannelIdLineSensors;
+    uint8_t m_smpChannelIdLineSensors;
 
     /** Last remote control response id */
     RemoteCtrlState::RspId m_lastRemoteControlRspId;
@@ -146,7 +146,7 @@ private:
     void sendRemoteControlResponses();
 
     /**
-     * Send line sensors data via YAP.
+     * Send line sensors data via SerialMuxProt.
      */
     void sendLineSensorsData() const;
 };
