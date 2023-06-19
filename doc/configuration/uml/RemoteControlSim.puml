@@ -12,15 +12,15 @@ node "PC" {
         component "DiffDrive" <<service>> as diffdrive
         component "SocketServer" <<service>> as socketServer
 
-        component "YAP" <<service>> as yap
+        component "SerialMuxProt" <<service>> as smp
         component "HAL" <<HAL>> as hal
 
-        app ..> yap: <<use>>
+        app ..> smp: <<use>>
         app <.. odometry: <<flow>>
         app <.. speedometer: <<flow>>
         app ..> diffdrive: <<control>>
 
-        yap <..> socketServer: <<flow>>
+        smp <..> socketServer: <<flow>>
 
         odometry ..> hal: <<use>>
         speedometer ..> hal: <<use>>

@@ -64,9 +64,9 @@ package "Service" as serviceLayer {
         speed with PID controllers.
     end note
 
-    class YAP <<service>>
+    class SerialMuxProt <<service>>
 
-    note top of YAP
+    note top of SerialMuxProt
         Communication Protocol for transmitting 
         and receiving information to/from a remote
         client using data channels
