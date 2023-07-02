@@ -71,8 +71,8 @@ public:
      */
     RelativeEncoders(IEncoders& absEncoders) :
         m_absEncoders(absEncoders),
-        m_referencePointLeft(m_absEncoders.getCountsLeft()),
-        m_referencePointRight(m_absEncoders.getCountsRight()),
+        m_referencePointLeft(0),
+        m_referencePointRight(0),
         m_lastRelEncoderStepsLeft(0),
         m_lastRelEncoderStepsRight(0)
     {
