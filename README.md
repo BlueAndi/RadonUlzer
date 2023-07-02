@@ -35,6 +35,9 @@ The simulation is based on the open source robot simulator *Webots*. The applica
 
 * Website: https://cyberbotics.com/#cyberbotics
 * Github: https://github.com/cyberbotics/webots
+* Compatible webots versions:
+  * v2023a
+  * v2023b
 
 ## Intallation
 
