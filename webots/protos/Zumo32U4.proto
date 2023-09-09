@@ -168,6 +168,9 @@ PROTO Zumo32U4 [
             appearance DEF BODY_COLOR PBRAppearance {
               emissiveColor 0.2 0.2 0.2
             }
+            geometry DEF BODY_GEOMETRY Box {
+              size 0.06 0.065 0.02
+            }
           }
           Transform {
             translation 0.0325 0 0.0025
@@ -185,9 +188,7 @@ PROTO Zumo32U4 [
             children [
               Shape {
                 appearance USE BODY_COLOR
-                geometry Box {
-                  size 0.06 0.065 0.02
-                }
+                geometry USE BODY_GEOMETRY
               }
             ]
           }

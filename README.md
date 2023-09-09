@@ -35,6 +35,9 @@ The simulation is based on the open source robot simulator *Webots*. The applica
 
 * Website: https://cyberbotics.com/#cyberbotics
 * Github: https://github.com/cyberbotics/webots
+* Compatible webots versions:
+  * v2023a
+  * v2023b
 
 ## Intallation
 
@@ -76,6 +79,7 @@ Platformio project tasks --> WebotsSim --> Build
 | Library | Description | License |
 | - | - | - |
 | [Zumo32U4 library](https://github.com/pololu/zumo-32u4-arduino-library) | Provides access to the Zumo32U4 hardware. | MIT |
+| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt) | Multiplexing Communication Protocol | MIT |
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
