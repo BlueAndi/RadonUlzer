@@ -1,7 +1,7 @@
 # Radon Ulzer - Remote Control <!-- omit in toc -->
 
 * [General](#general)
-  * [YAP Channels](#yap-channels)
+  * [SerialMuxProt Channels](#serialmuxprot-channels)
     * [Rx channel "REMOTE\_CMD"](#rx-channel-remote_cmd)
     * [Tx channel "REMOTE\_RSP"](#tx-channel-remote_rsp)
     * [Rx channel "MOT\_SPEEDS"](#rx-channel-mot_speeds)
@@ -22,13 +22,13 @@
 
 # General
 
-The robot can be controlled remotely by using the YAP protocol.
+The robot can be controlled remotely by using the SerialMuxProt protocol.
 
 On target the physical communication uses the serial.
 
 On simulation the physical communication uses a socket connection.
 
-## YAP Channels
+## SerialMuxProt Channels
 
 ### Rx channel "REMOTE_CMD"
 This channel is used to receive commands, which will be executed by the application in RemoteCtrl state. A command related response will be sent via the "REMOTE_RSP" channel.
