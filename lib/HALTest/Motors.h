@@ -61,7 +61,7 @@ public:
     /**
      * Constructs the motors adapter.
      */
-    Motors() : IMotors()
+    Motors() : IMotors(), m_speedLeft(0), m_speedRight(0)
     {
     }
 
