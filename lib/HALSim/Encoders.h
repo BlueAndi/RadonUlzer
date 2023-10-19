@@ -64,7 +64,6 @@ public:
      * Constructs the encoders adapter.
      *
      * @param[in] simTime               Simulation time
-     * @param[in] wheelCircumference    Wheel circumference in mm
      * @param[in] posSensorLeft         The left position sensor
      * @param[in] posSensorRight        The right position sensor
      */
