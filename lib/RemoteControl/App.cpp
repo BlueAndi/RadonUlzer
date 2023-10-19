@@ -104,6 +104,8 @@ void App::setup()
 
     /* Providing line sensor data */
     m_smpChannelIdLineSensors = m_smpServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
+
+    (void)m_smpServer.createChannel("DEBUG", (6U * sizeof(int16_t)));
 }
 
 void App::loop()
@@ -168,26 +170,57 @@ void App::sendRemoteControlResponses()
         (void)m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, payload, sizeof(remoteControlRspId));
 
         m_lastRemoteControlRspId = remoteControlRspId;
+
+        uint8_t payloadSize         = (6U * sizeof(int16_t));
+        uint8_t buffer[payloadSize] = {0U};
+        Util::int16ToByteArray(&buffer[0U * sizeof(int16_t)], sizeof(int16_t),
+                               DifferentialDrive::getInstance().getMaxMotorSpeed());
+        (void)m_smpServer.sendData("DEBUG", buffer, payloadSize);
     }
 }
 
 void App::sendLineSensorsData() const
 {
-    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
-    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-    uint8_t         lineSensorIdx    = 0U;
-    uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
+    // ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+    // uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
+    // const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+    // uint8_t         lineSensorIdx    = 0U;
+    // uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
 
-    while (maxLineSensors > lineSensorIdx)
+    // while (maxLineSensors > lineSensorIdx)
+    // {
+    //     Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t),
+    //                             lineSensorValues[lineSensorIdx]);
+
+    //     ++lineSensorIdx;
+    // }
+
+    // (void)m_smpServer.sendData(m_smpChannelIdLineSensors, payload, sizeof(payload));
+
+    uint8_t payloadSize         = (12U);
+    uint8_t buffer[payloadSize] = {0U};
+
+    int16_t linearSetpointLeft;
+    int16_t linearSetpointRight;
+
+    DifferentialDrive::getInstance().getLinearSpeed(linearSetpointLeft, linearSetpointRight);
+
+    Util::int16ToByteArray(&buffer[0U * sizeof(int16_t)], sizeof(int16_t),
+                           DifferentialDrive::getInstance().getLinearSpeed());
+    Util::int16ToByteArray(&buffer[1U * sizeof(int16_t)], sizeof(int16_t),
+                           Speedometer::getInstance().getLinearSpeedCenter());
+    Util::int16ToByteArray(&buffer[2U * sizeof(int16_t)], sizeof(int16_t), linearSetpointLeft);
+    Util::int16ToByteArray(&buffer[3U * sizeof(int16_t)], sizeof(int16_t),
+                           Speedometer::getInstance().getLinearSpeedLeft());
+    Util::int16ToByteArray(&buffer[4U * sizeof(int16_t)], sizeof(int16_t), linearSetpointRight);
+    Util::int16ToByteArray(&buffer[5U * sizeof(int16_t)], sizeof(int16_t),
+                           Speedometer::getInstance().getLinearSpeedRight());
+
+    IMotors& motors = Board::getInstance().getMotors();
+    if (0 == motors.getLeftSpeed())
     {
-        Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t),
-                                lineSensorValues[lineSensorIdx]);
-
-        ++lineSensorIdx;
+        (void)m_smpServer.sendData("DEBUG", buffer, payloadSize);
     }
-
-    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, payload, sizeof(payload));
 }
 
 /******************************************************************************
