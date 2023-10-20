@@ -97,7 +97,7 @@ private:
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
 
     /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 1000;
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
 
     /** SerialMuxProt channel name for receiving commands. */
     static const char* CH_NAME_CMD;
