@@ -1,0 +1,38 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/HeadingCalculationTrack.proto"
+
+WorldInfo {
+  info [
+    "Test track for heading calculation."
+  ]
+  title "Heading Calculation Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "track material"
+      coulombFriction [
+        500
+      ]
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
+  position 0.10671498723053877 -0.025801636297686177 4.366758398391875
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+HeadingCalculationTrack {
+}
+Zumo32U4 {
+  translation 0 0 0.0139993
+  rotation 6.60216e-09 2.69589e-07 -1 -1.5286253071795866
+  name "zumo_0"
+}
