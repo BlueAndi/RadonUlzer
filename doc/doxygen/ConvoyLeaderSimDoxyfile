@@ -42,7 +42,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "Radon Ulzer - LineFollower on target"
+PROJECT_NAME           = "Radon Ulzer - ConvoyLeader on simulation"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -68,7 +68,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = ./LineFollowerTarget
+OUTPUT_DIRECTORY       = ./ConvoyLeaderSim
 
 # If the CREATE_SUBDIRS tag is set to YES then doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -910,10 +910,10 @@ WARN_LOGFILE           = doxygen_warnings.txt
 
 INPUT                  = mainpage.dox \
                          ../../src \
-                         ../../lib/LineFollower \
                          ../../lib/Service \
-                         ../../lib/HALTarget \
-                         ../../lib/HALInterfaces
+                         ../../lib/HALSim \
+                         ../../lib/HALInterfaces \
+                         ../../lib/ConvoyLeader
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

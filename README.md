@@ -1,4 +1,4 @@
-# Radon Ulzer - Line Follower <!-- omit in toc -->
+# Radon Ulzer - Firmware for Zumo32U4 <!-- omit in toc -->
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
@@ -6,7 +6,8 @@
 [![Build Status](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/BlueAndi/RadonUlzer/actions/workflows/main.yml)
 
 A robot as fast as the famous pod racer driven by Anakin Skywalker with the powerful engines from Radon Ulzer. :-)
-Several kind of applications are available:
+
+Several kind of exclusive applications are available:
 * Convoy leader - A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role.
 * Line follower - Just a line follower, using a PID controller.
 * Remote Control - The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.
@@ -15,11 +16,12 @@ Several kind of applications are available:
 
 * [The robot](#the-robot)
 * [The simulation](#the-simulation)
-  * [Intallation](#intallation)
+  * [Installation](#installation)
   * [The Webots library](#the-webots-library)
   * [Build](#build)
   * [Preparation](#preparation)
   * [Running the robot on track](#running-the-robot-on-track)
+* [Documentation](#documentation)
 * [Used Libraries](#used-libraries)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
 * [License](#license)
@@ -39,7 +41,7 @@ The simulation is based on the open source robot simulator *Webots*. The applica
   * v2023a
   * v2023b
 
-## Intallation
+## Installation
 
 1. Install [Webots](https://cyberbotics.com).
 2. Setup for [external controllers](https://www.cyberbotics.com/doc/guide/running-extern-robot-controllers):
@@ -73,6 +75,11 @@ Platformio project tasks --> WebotsSim --> Build
 
 1. Click in simulation on the display to focus the simulation.
 2. Now the keyboard keys a, b and c can be used to control the robot according to the implemented application logic.
+
+# Documentation
+
+* [SW Architecture](./doc/architecture/README.md)
+* [SW Configuration](./doc/configuration/README.md)
 
 # Used Libraries
 

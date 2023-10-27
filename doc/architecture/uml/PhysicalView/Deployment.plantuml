@@ -19,13 +19,17 @@ node "Pololu Zumo32U4" as zumo32u4 {
         component "Encoders" as encoders
         component "LEDs" as leds
         component "ProximitySensors" as proximitySensors
+        component "Accelerometer" as accelerometer
+        component "Gyroscope" as gyroscope 
 
         software -u- buttons
         software -u- leds
         software -u- proximitySensors
+        software -u- accelerometer
         software -- buzzer
         software -- motors
         software -- encoders
+        software -- gyroscope
     }
 
     node "Front Sensor Array" {

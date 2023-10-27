@@ -148,7 +148,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget"]
+        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim"]
 
     steps:
     - name: Checkout repository
@@ -186,3 +186,7 @@ jobs:
       with:
         working-directory: './doc/doxygen'
         doxyfile-path: './${{ matrix.environment }}Doxyfile'
+
+    - name: Print doxygen warnings
+      if: ${{ failure() }}
+      run: cat ./doc/doxygen/doxygen_warnings.txt
