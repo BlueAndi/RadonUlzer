@@ -72,11 +72,12 @@ void App::setup()
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
     m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
+    m_serialMuxProtChannelIdSpeed    = m_smpServer.createChannel(SPEED_CHANNEL_NAME, SPEED_CHANNEL_DLC);
 
     /* Channel sucesfully created? */
-    if (0U != m_serialMuxProtChannelIdOdometry)
+    if ((0U != m_serialMuxProtChannelIdOdometry) && (0U != m_serialMuxProtChannelIdSpeed))
     {
-        m_reportOdometryTimer.start(REPORT_ODOMETRY_PERIOD);
+        m_reportTimer.start(REPORTING_PERIOD);
     }
 }
 
@@ -102,12 +103,13 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    if (true == m_reportOdometryTimer.isTimeout())
+    if (true == m_reportTimer.isTimeout())
     {
-        /* Send Odometry to SerialMuxProt Client */
+        /* Send current data to SerialMuxProt Client */
         reportOdometry();
+        reportSpeed();
 
-        m_reportOdometryTimer.restart();
+        m_reportTimer.restart();
     }
 
     m_systemStateMachine.process();
@@ -133,7 +135,17 @@ void App::reportOdometry()
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
 
-    m_smpServer.sendData(ODOMETRY_CHANNEL_NAME, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+}
+
+void App::reportSpeed()
+{
+    Speedometer& speedometer = Speedometer::getInstance();
+    SpeedData    payload;
+    payload.left  = speedometer.getLinearSpeedLeft();
+    payload.right = speedometer.getLinearSpeedRight();
+
+    m_smpServer.sendData(m_serialMuxProtChannelIdSpeed, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************

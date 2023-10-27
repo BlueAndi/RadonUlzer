@@ -47,7 +47,13 @@ SOFTWARE.
 #define ODOMETRY_CHANNEL_NAME "ODOMETRY"
 
 /** DLC of Odometry Channel */
-#define ODOMETRY_CHANNEL_DLC (12U)
+#define ODOMETRY_CHANNEL_DLC (sizeof(OdometryData))
+
+/** Name of Channel to send Speedometer Data to. */
+#define SPEED_CHANNEL_NAME "SPEED"
+
+/** DLC of Speedometer Channel */
+#define SPEED_CHANNEL_DLC (sizeof(SpeedData))
 
 /******************************************************************************
  * Types and Classes
@@ -60,6 +66,13 @@ typedef struct _OdometryData
     int32_t yPos;
     int32_t orientation;
 } __attribute__((packed)) OdometryData;
+
+/** Struct of the "Speed" channel payload. */
+typedef struct _SpeedData
+{
+    int16_t left;
+    int16_t right;
+} __attribute__((packed)) SpeedData;
 
 /******************************************************************************
  * Functions
