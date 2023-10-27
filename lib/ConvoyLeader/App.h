@@ -65,9 +65,10 @@ public:
      */
     App() :
         m_serialMuxProtChannelIdOdometry(0U),
+        m_serialMuxProtChannelIdSpeed(0U),
         m_systemStateMachine(),
         m_controlInterval(),
-        m_reportOdometryTimer(),
+        m_reportTimer(),
         m_smpServer(Serial)
     {
     }
@@ -93,8 +94,8 @@ private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
-    /** Odometry reporting period in ms. */
-    static const uint32_t REPORT_ODOMETRY_PERIOD = 100U;
+    /** Current data reporting period in ms. */
+    static const uint32_t REPORTING_PERIOD = 100U;
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
@@ -102,14 +103,17 @@ private:
     /** SerialMuxProt Channel id for sending the current odometry. */
     uint8_t m_serialMuxProtChannelIdOdometry;
 
+    /** SerialMuxProt Channel id for sending the current speed. */
+    uint8_t m_serialMuxProtChannelIdSpeed;
+
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
-    /** Timer for reporting odometry through SerialMuxProt. */
-    SimpleTimer m_reportOdometryTimer;
+    /** Timer for reporting current data through SerialMuxProt. */
+    SimpleTimer m_reportTimer;
 
     /**
      * SerialMuxProt Server Instance
@@ -124,6 +128,12 @@ private:
      * Sends data through the SerialMuxProtServer.
      */
     void reportOdometry();
+
+    /**
+     * Report the current motor speeds of the robot using the Speedometer data.
+     * Sends data through the SerialMuxProtServer.
+     */
+    void reportSpeed();
 
 private:
     /* An instance shall not be copied or assigned. */
