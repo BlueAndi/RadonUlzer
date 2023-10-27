@@ -57,6 +57,8 @@
  * Prototypes
  *****************************************************************************/
 
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -71,8 +73,11 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+    /* Setup SerialMuxProt Channels. */
     m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
     m_serialMuxProtChannelIdSpeed    = m_smpServer.createChannel(SPEED_CHANNEL_NAME, SPEED_CHANNEL_DLC);
+    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
 
     /* Channel sucesfully created? */
     if ((0U != m_serialMuxProtChannelIdOdometry) && (0U != m_serialMuxProtChannelIdSpeed))
@@ -155,3 +160,18 @@ void App::reportSpeed()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Receives motor speed setpoints over SerialMuxProt channel.
+ *
+ * @param[in] payload       Motor speed left/right
+ * @param[in] payloadSize   Size of twice motor speeds
+ */
+void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+{
+    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
+    {
+        const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
+        DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+    }
+}

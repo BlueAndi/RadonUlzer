@@ -55,6 +55,12 @@ SOFTWARE.
 /** DLC of Speedometer Channel */
 #define SPEED_CHANNEL_DLC (sizeof(SpeedData))
 
+/** Name of Channel to send Motor Speed Setpoints to. */
+#define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
+
+/** DLC of Speedometer Channel */
+#define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
