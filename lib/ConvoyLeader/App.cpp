@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+#include <SerialMuxChannels.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -60,9 +61,6 @@
  * Local Variables
  *****************************************************************************/
 
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -73,7 +71,13 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_smpServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
+    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
+
+    /* Channel sucesfully created? */
+    if (0U != m_serialMuxProtChannelIdOdometry)
+    {
+        m_reportOdometryTimer.start(REPORT_ODOMETRY_PERIOD);
+    }
 }
 
 void App::loop()
@@ -95,10 +99,15 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-        /* Send Position to SerialMuxProt Client */
-        reportPosition();
-
         m_controlInterval.restart();
+    }
+
+    if (true == m_reportOdometryTimer.isTimeout())
+    {
+        /* Send Odometry to SerialMuxProt Client */
+        reportOdometry();
+
+        m_reportOdometryTimer.restart();
     }
 
     m_systemStateMachine.process();
@@ -112,22 +121,19 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::reportPosition()
+void App::reportOdometry()
 {
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
+    Odometry&    odometry = Odometry::getInstance();
+    OdometryData payload;
+    int32_t      xPos = 0;
+    int32_t      yPos = 0;
 
-    Odometry::getInstance().getPosition(xPos, yPos);
+    odometry.getPosition(xPos, yPos);
+    payload.xPos        = xPos;
+    payload.yPos        = yPos;
+    payload.orientation = odometry.getOrientation();
 
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_smpServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
-}
-
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
-{
+    m_smpServer.sendData(ODOMETRY_CHANNEL_NAME, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************
