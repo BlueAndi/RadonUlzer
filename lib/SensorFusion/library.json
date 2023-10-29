@@ -1,7 +1,7 @@
 {
-    "name": "LineFollower",
+    "name": "SensorFusion",
     "version": "0.1.0",
-    "description": "LineFollower application",
+    "description": "SensorFusion application",
     "authors": [{
         "name": "Andreas Merkle",
         "email": "web@blue-andi.de",
