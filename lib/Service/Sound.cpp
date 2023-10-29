@@ -93,34 +93,35 @@ static const uint8_t VOLUME = 10;
 
 void Sound::playAlarm()
 {
-    IBuzzer& buzzer = Board::getInstance().getBuzzer();
+    /* Commented out since Buzzer had to be removed from Board. */
+    // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
-    /* Req. 3.4.5-2:
-     * The Sound shall play two consecutive sounds of 500Hz frequency and 1/3s duration,
-     * interrupted by 1/3s of silence.
-     */
-    buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
-    while (true == buzzer.isPlaying())
-        ;
-    delay(SILENCE_DURATION);
-    buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
+    // /* Req. 3.4.5-2:
+    //  * The Sound shall play two consecutive sounds of 500Hz frequency and 1/3s duration,
+    //  * interrupted by 1/3s of silence.
+    //  */
+    // buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
+    // while (true == buzzer.isPlaying())
+    //     ;
+    // delay(SILENCE_DURATION);
+    // buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
 }
 
 void Sound::playBeep()
 {
-    IBuzzer& buzzer = Board::getInstance().getBuzzer();
+    // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
-    /* Req. 3.4.5-1:
-     * The Sound shall play a sound of 1000Hz frequency and 1s duration.
-     */
-    buzzer.playFrequency(BEEP_FREQ, BEEP_DURATION, VOLUME);
+    // /* Req. 3.4.5-1:
+    //  * The Sound shall play a sound of 1000Hz frequency and 1s duration.
+    //  */
+    // buzzer.playFrequency(BEEP_FREQ, BEEP_DURATION, VOLUME);
 }
 
 void Sound::playStartup()
 {
-    IBuzzer& buzzer = Board::getInstance().getBuzzer();
+    // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
-    buzzer.playMelodyPGM(PSTR("O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"));
+    // buzzer.playMelodyPGM(PSTR("O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"));
 }
 
 /******************************************************************************

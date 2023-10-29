@@ -111,11 +111,14 @@ const char* Board::LED_YELLOW_NAME = "led_yellow";
 /* Name of the green LED in the robot simulation. */
 const char* Board::LED_GREEN_NAME = "led_green";
 
-/* Name of the front left proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
+/* Name of the accelerometer in the robot simulation. */
+const char* Board::ACCELEROMETER_NAME = "accelerometer";
 
-/* Name of the front right proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
+/* Name of the gyro in the robot simulation. */
+const char* Board::GYRO_NAME = "gyro";
+
+/* Name of the magnetometer in the robot simulation. */
+const char* Board::MAGNETOMETER_NAME = "magnetometer";
 
 /******************************************************************************
  * Protected Methods
@@ -135,7 +138,8 @@ void Board::init()
     m_keyboard.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
+    m_imu.init();
+    m_imu.configureForTurnSensing();
 }
 
 /******************************************************************************

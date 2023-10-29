@@ -74,8 +74,11 @@ void Board::init()
 {
     m_encoders.init();
     m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
+    m_imu.init();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();    
+    m_imu.calibrate();
+    
 }
 
 /******************************************************************************
