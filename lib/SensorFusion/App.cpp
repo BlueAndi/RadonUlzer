@@ -132,27 +132,35 @@ void App::sendSensorData() const
     int32_t positionYOdometry;
     int32_t orientationOdometry;
     
-    /* Get the current values from the Odometry.  */
+    /* Get the current values from the Odometry. */
     odometry.getPosition(positionXOdometry, positionYOdometry);
     orientationOdometry = odometry.getOrientation();
+
     /* Cast the Odometry values from 32 to 16 bit integers (the range is enough since the robot won't drive further than +/-32 meters)  */
     int16_t positionXOdometryInt16      = static_cast<int16_t>(positionXOdometry);
     int16_t positionYOdometryInt16      = static_cast<int16_t>(positionYOdometry);
     int16_t orientationOdometryInt16    = static_cast<int16_t>(orientationOdometry);
+
     /* Get the current values from the IMU.  */
     int16_t accelerationValues[3];
     int16_t turnRates[3];
     int16_t magnetometerValues[3];
     
+    /* Wait until new accelerometer data is available and then read the data. */
     while(!imu.accDataReady()) {}
     imu.readAcc();
     imu.getAccelerationValues(accelerationValues);
+
+    /* Wait until new gyro data is available and then read the data. */
     while(!imu.gyroDataReady()){}
     imu.readGyro();
     imu.getTurnRates(turnRates);
+
+    /* Wait until new magnetometer data is available and then read the data. */
     while(!imu.magDataReady()){}
     imu.readMag();
     imu.getMagnetometerValues(magnetometerValues);
+
     /**
      * Write the values into a Byte Array in this order:
      * Acceleration in X
@@ -172,6 +180,7 @@ void App::sendSensorData() const
     Util::int16ToByteArray(&payload[5 * sizeof(int16_t)], sizeof(int16_t), orientationOdometryInt16);
     Util::int16ToByteArray(&payload[6 * sizeof(int16_t)], sizeof(int16_t), positionXOdometryInt16);
     Util::int16ToByteArray(&payload[7 * sizeof(int16_t)], sizeof(int16_t), positionYOdometryInt16);
+
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, payload, sizeof(payload));
 }
 
