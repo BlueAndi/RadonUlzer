@@ -25,8 +25,8 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  SensorFusion application
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
  *
  * @addtogroup Application
  *
@@ -46,6 +46,7 @@
 #include <StateMachine.h>
 #include <SimpleTimer.h>
 #include <Arduino.h>
+#include <SerialMuxProtServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -62,7 +63,11 @@ public:
     /**
      * Construct the line follower application.
      */
-    App() : m_systemStateMachine(), m_controlInterval()
+    App() : m_smpChannelIdSensorData(1U),
+            m_systemStateMachine(),
+            m_controlInterval(),
+            m_sendSensorsDataInterval(),
+            m_smpServer(Serial)
     {
     }
 
@@ -84,17 +89,55 @@ public:
     void loop();
 
 private:
+    /** Indices of axis x, y and z. */
+    static const uint8_t AXIS_INDEX_X = 0U;
+    static const uint8_t AXIS_INDEX_Y = 1U;
+    static const uint8_t AXIS_INDEX_Z = 2U;
+
+    /** Sending Data period in ms. */
+    static const uint32_t SEND_SENSORS_DATA_PERIOD = 20;
+    
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /** SerialMuxProt channel name for sending Sensor data. */
+    static const char* CH_NAME_SENSORDATA;
+         
+    /** Channel id sending sensor data used for sensor fusion. */
+    uint8_t m_smpChannelIdSensorData;
+
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
+
+    /** Timer used for sending data periodically. */
+    SimpleTimer m_sendSensorsDataInterval;
+
+    /**
+     * SerialMuxProt Server Instance
+     *
+     * @tparam tMaxChannels set to 10, as App does not require
+     * more channels for external communication.
+     */
+    SerialMuxProtServer<10U> m_smpServer;
+    
+     /**
+     * Send the following Sensor data via SerialMuxProt:
+     * Acceleration in X
+     * Acceleration in Y
+     * TurnRate around Z
+     * Magnetometer value in X 
+     * Magnetometer value in Y 
+     * Angle calculated by Odometry
+     * Position in X calculated by Odometry
+     * Position in Y calculated by Odometry
+     */
+    void sendSensorData() const;
 
     App(const App& app);
     App& operator=(const App& app);

@@ -25,8 +25,8 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  SensorFusion application
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
  */
 
 /******************************************************************************
@@ -60,6 +60,12 @@
  * Local Variables
  *****************************************************************************/
 
+/* Initialize channel name for sending sensor data. */
+const char* App::CH_NAME_SENSORDATA = "SENSOR_DATA";
+
+/* Number of sensors values to send via SerialMuxProt. */
+const uint8_t NUMBER_OF_SENSOR_DATA = 8;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -70,10 +76,17 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+    m_sendSensorsDataInterval.start(SEND_SENSORS_DATA_PERIOD);
+    uint8_t sensorDataChannelDlc = NUMBER_OF_SENSOR_DATA * sizeof(int16_t);
+    
+    /* Providing Sensor data */
+    m_smpChannelIdSensorData = m_smpServer.createChannel(CH_NAME_SENSORDATA, sensorDataChannelDlc);
 }
 
 void App::loop()
 {
+    m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
@@ -93,6 +106,12 @@ void App::loop()
         m_controlInterval.restart();
     }
 
+    /* Send sensor data periodically. */
+    if (true == m_sendSensorsDataInterval.isTimeout())
+    {
+        m_sendSensorsDataInterval.restart();
+        sendSensorData();
+    }
     m_systemStateMachine.process();
 }
 
@@ -103,6 +122,58 @@ void App::loop()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void App::sendSensorData() const
+{
+    uint8_t         payload[NUMBER_OF_SENSOR_DATA * sizeof(int16_t)];
+    IIMU& imu                          = Board::getInstance().getIMU();
+    Odometry& odometry                 = Odometry::getInstance();    
+    int32_t positionXOdometry;
+    int32_t positionYOdometry;
+    int32_t orientationOdometry;
+    
+    /* Get the current values from the Odometry.  */
+    odometry.getPosition(positionXOdometry, positionYOdometry);
+    orientationOdometry = odometry.getOrientation();
+    /* Cast the Odometry values from 32 to 16 bit integers (the range is enough since the robot won't drive further than +/-32 meters)  */
+    int16_t positionXOdometryInt16      = static_cast<int16_t>(positionXOdometry);
+    int16_t positionYOdometryInt16      = static_cast<int16_t>(positionYOdometry);
+    int16_t orientationOdometryInt16    = static_cast<int16_t>(orientationOdometry);
+    /* Get the current values from the IMU.  */
+    int16_t accelerationValues[3];
+    int16_t turnRates[3];
+    int16_t magnetometerValues[3];
+    
+    while(!imu.accDataReady()) {}
+    imu.readAcc();
+    imu.getAccelerationValues(accelerationValues);
+    while(!imu.gyroDataReady()){}
+    imu.readGyro();
+    imu.getTurnRates(turnRates);
+    while(!imu.magDataReady()){}
+    imu.readMag();
+    imu.getMagnetometerValues(magnetometerValues);
+    /**
+     * Write the values into a Byte Array in this order:
+     * Acceleration in X
+     * Acceleration in Y
+     * TurnRate around Z
+     * Magnetometer value in X 
+     * Magnetometer value in Y 
+     * Angle calculated by Odometry
+     * Position in X calculated by Odometry
+     * Position in Y calculated by Odometry
+     */
+    Util::int16ToByteArray(&payload[0 * sizeof(int16_t)], sizeof(int16_t), accelerationValues[AXIS_INDEX_X]);      
+    Util::int16ToByteArray(&payload[1 * sizeof(int16_t)], sizeof(int16_t), accelerationValues[AXIS_INDEX_Y]);
+    Util::int16ToByteArray(&payload[2 * sizeof(int16_t)], sizeof(int16_t), turnRates[AXIS_INDEX_Z]);
+    Util::int16ToByteArray(&payload[3 * sizeof(int16_t)], sizeof(int16_t), magnetometerValues[AXIS_INDEX_X]);
+    Util::int16ToByteArray(&payload[4 * sizeof(int16_t)], sizeof(int16_t), magnetometerValues[AXIS_INDEX_Y]);
+    Util::int16ToByteArray(&payload[5 * sizeof(int16_t)], sizeof(int16_t), orientationOdometryInt16);
+    Util::int16ToByteArray(&payload[6 * sizeof(int16_t)], sizeof(int16_t), positionXOdometryInt16);
+    Util::int16ToByteArray(&payload[7 * sizeof(int16_t)], sizeof(int16_t), positionYOdometryInt16);
+    (void)m_smpServer.sendData(m_smpChannelIdSensorData, payload, sizeof(payload));
+}
 
 /******************************************************************************
  * External Functions
