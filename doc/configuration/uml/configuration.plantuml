@@ -2,56 +2,111 @@
 
 title Configuration
 
-component "env:ConvoyLeaderTarget" <<pio>> as envConvoyLeader
-component "env:ConvoyLeaderSim" <<pio>> as envConvoyLeaderSim
+package "platformio.ini" {
 
-component "env:LineFollowerTarget" <<pio>> as envLineFollower
-component "env:LineFollowerSim" <<pio>> as envLineFollowerSim
+    package "working environments" {
+        component "env:<APPLICATION-NAME>Target" <<pio>> as pioEnvAppTarget
+        component "env:<APPLICATION-NAME>Sim" <<pio>> as pioEnvAppSim
+    }
 
-component "env:RemoteControlTarget" <<pio>> as envRemoteControl
-component "env:RemoteControlSim" <<pio>> as envRemoteControlSim
+    package "configuration environments" as cfgEnv {
 
-component "app:ConvoyLeader" <<pio>> as appConvoyLeader
-component "app:LineFollower" <<pio>> as appLineFollower
-component "app:RemoteControl" <<pio>> as appRemoteControl
+        component "hal_app:<APPLICATION-NAME>Target" <<pio>> as pioHalAppTarget
+        component "app:<APPLICATION-NAME>" <<pio>> as pioAppApp
+        component "hal_app:<APPLICATION-NAME>Sim" <<pio>> as pioHalAppSim
 
-component "ConvoyLeader" <<lib>> as convoyLeader
-component "LineFollower" <<lib>> as lineFollower
-component "RemoteControl" <<lib>> as remoteControl
-component "Service" <<lib>> as service
+        component "hal:Zumo" <<pio>> as pioHalTarget
+        component "hal:Sim" <<pio>> as pioHalSim
+    }
+}
 
-component "target:Zumo32U4" <<pio>> as targetZumo
-component "target:Sim" <<pio>> as targetSim
+package "/lib" as libFolder {
 
-component "HALTarget" <<lib>> as halTarget
-component "HALSim" <<lib>> as halSim
+    component "HALInterfaces" <<lib>> as halInterfacesLib
 
-envConvoyLeader ..> appConvoyLeader
-envConvoyLeader ..> targetZumo
+    component "APL<APPLICATION-NAME>" <<lib>> as appLib
+    component "Service" <<lib>> as serviceLib
 
-envConvoyLeaderSim ..> appConvoyLeader
-envConvoyLeaderSim ..> targetSim
+    component "HAL<APPLICATION-NAME>Target" <<lib>> as halAppTarget
+    component "HAL<APPLICATION-NAME>Sim" <<lib>> as halAppSim
 
-envLineFollower ..> appLineFollower
-envLineFollower ..> targetZumo
+    component "HALTarget" <<lib>> as halTargetLib
+    component "HALSim" <<lib>> as halSimLib
 
-envLineFollowerSim ..> appLineFollower
-envLineFollowerSim ..> targetSim
+    component "Webots" <<lib>> as webotsLib
+    component "ArduinoNative" <<lib>> as arduinoNativeLib
 
-envRemoteControl ..> appRemoteControl
-envRemoteControl ..> targetZumo
+    note bottom of halAppTarget
+        Application specific target HAL
+        instantiation via Board class.
+        May use less peripherals, than
+        available.
+    end note
 
-envRemoteControlSim ..> appRemoteControl
-envRemoteControlSim ..> targetSim
+    note bottom of halAppSim
+        Application specific simulation HAL
+        instantiation via Board class.
+        May use less peripherals, than
+        available.
+    end note
 
-appConvoyLeader ..> convoyLeader
-appConvoyLeader ..> service
-appLineFollower ..> lineFollower
-appLineFollower ..> service
-appRemoteControl ..> remoteControl
-appRemoteControl ..> service
+    note bottom of halTargetLib
+        Contains the target HAL
+        peripheral classes.
+    end note
 
-targetZumo ..> halTarget
-targetSim ..> halSim
+    note bottom of halSimLib
+        Contains the simulation HAL
+        peripheral classes.
+    end note
+
+    note bottom of halInterfacesLib
+        Defines the interfaces
+        of the HAL peripherals.
+    end note
+
+    note bottom of appLib
+        Application specific functionality.
+    end note
+
+    note bottom of serviceLib
+        General services, used by
+        the applications.
+    end note
+
+    note bottom of webotsLib
+        Webots simulation glue code.
+    end note
+
+    note bottom of arduinoNativeLib
+        Some stubbed Arduino interfaces
+        for simulation.
+    end note
+}
+
+pioEnvAppTarget ...> pioAppApp: <<extends>>
+pioEnvAppTarget ...> pioHalAppTarget: <<extends>>
+
+pioHalAppTarget ..> pioHalTarget: <<extends>>
+pioHalAppTarget ...> halAppTarget: <<depends>>
+
+pioHalTarget ..> halTargetLib: <<depends>>
+pioHalTarget ..> halInterfacesLib: <<depends>>
+
+
+pioEnvAppSim ..> pioAppApp: <<extends>>
+pioEnvAppSim ..> pioHalAppSim: <<extends>>
+
+pioHalAppSim ..> pioHalSim: <<extends>>
+pioHalAppSim ...> halAppSim: <<depends>>
+
+pioHalSim ..> halSimLib: <<depends>>
+pioHalSim ..> webotsLib: <<depends>>
+pioHalSim ..> halInterfacesLib: <<depends>>
+pioHalSim ..> arduinoNativeLib: <<depends>>
+
+
+pioAppApp ...> appLib: <<depends>>
+pioAppApp ...> serviceLib: <<depends>>
 
 @enduml
