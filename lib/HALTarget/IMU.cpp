@@ -94,7 +94,6 @@ void IMU::configureForTurnSensing()
 
 void IMU::readAcc()
 {
-    while(!m_imu.accDataReady()){}
     m_imu.readAcc();
     m_accelerometerValues.x = m_imu.a.x;
     m_accelerometerValues.y = m_imu.a.y;
@@ -103,7 +102,6 @@ void IMU::readAcc()
 
 void IMU::readGyro()
 {
-    while(!m_imu.gyroDataReady()){}
     m_imu.readGyro();
     m_gyroValues.x = m_imu.g.x;
     m_gyroValues.y = m_imu.g.y;
@@ -112,7 +110,6 @@ void IMU::readGyro()
 
 void IMU::readMag()
 {
-    while(!m_imu.magDataReady()){}
     m_imu.readMag();
     m_magnetometerValues.x = m_imu.m.x;
     m_magnetometerValues.y = m_imu.m.y;

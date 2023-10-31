@@ -102,9 +102,6 @@ private:
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
-
-    /** SerialMuxProt channel name for sending Sensor data. */
-    static const char* CH_NAME_SENSORDATA;
          
     /** Channel id sending sensor data used for sensor fusion. */
     uint8_t m_smpChannelIdSensorData;
