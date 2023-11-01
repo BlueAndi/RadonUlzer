@@ -99,18 +99,6 @@ private:
     /** Sending Data period in ms. */
     static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
 
-    /** SerialMuxProt channel name for receiving commands. */
-    static const char* CH_NAME_CMD;
-
-    /** SerialMuxProt channel name for sending command responses. */
-    static const char* CH_NAME_RSP;
-
-    /** SerialMuxProt channel name for receiving motor sppeds. */
-    static const char* CH_NAME_MOTOR_SPEEDS;
-
-    /** SerialMuxProt channel name for sending line sensors data. */
-    static const char* CH_NAME_LINE_SENSORS;
-
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
