@@ -90,11 +90,11 @@ void StartupState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
 
-    if (true == buttonA.isPressed())
-    {
-        buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
-    }
+    // if (true == buttonA.isPressed())
+    // {
+    //     buttonA.waitForRelease();
+    // }
+    sm.setState(&MotorSpeedCalibrationState::getInstance());
 }
 
 void StartupState::exit()
