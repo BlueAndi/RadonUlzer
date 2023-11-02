@@ -83,7 +83,7 @@ public:
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
      */ 
-    virtual void readAcc() = 0;
+    virtual void readAccelerometer() = 0;
         
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
@@ -93,14 +93,14 @@ public:
     /**
      * Takes a reading from the magnetometer and makes the measurements available in m.
      */
-    virtual void readMag() = 0;
+    virtual void readMagnetometer() = 0;
         
     /**
      * Indicates whether the accelerometer has new measurement data ready.
      * 
      * @return True if there is new accelerometer data available; false otherwise. 
      */
-    virtual bool accDataReady() = 0;
+    virtual bool accelerometerDataReady() = 0;
         
     /**
      * Indicates whether the gyro  has new measurement data ready.
@@ -114,24 +114,24 @@ public:
      * 
      * @return True if there is new magnetometer data available; false otherwise.
      */
-    virtual bool magDataReady() = 0;
+    virtual bool magnetometerDataReady() = 0;
 
     /**
-     * Get last raw Accelerometer values.
+     * Get last raw Accelerometer values. Array must have space for 3 values (x, y and z).
      *
      * @param[in] accelerationValues  Pointer to array where the Accelerometer values shall be written into.
      */
     virtual void getAccelerationValues(int16_t* accelerationValues) = 0;
 
     /**
-     * Get last raw Gyroscope values.
+     * Get last raw Gyroscope values. Array must have space for 3 values (x, y and z).
      *
      * @param[in] turnRates  Pointer to array where the Gyroscope values shall be written into.
      */
     virtual void getTurnRates(int16_t* turnRates) = 0;
 
     /**
-     * Get last raw Magnetometer.
+     * Get last raw Magnetometer values. Array must have space for 3 values (x, y and z).
      *
      * @param[in] magnetometerValues  Pointer to array where the Magnetometer values shall be written into.
      */

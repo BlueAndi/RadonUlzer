@@ -82,6 +82,7 @@ void App::loop()
 {
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
+    IIMU& imu = Board::getInstance().getIMU();
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -100,10 +101,9 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    IIMU& imu = Board::getInstance().getIMU();
     /* Send sensor data periodically. */
-    if ((true == m_sendSensorsDataInterval.isTimeout()) && (true == imu.accDataReady()) &&
-        (true == imu.gyroDataReady()) && (true == imu.magDataReady()))
+    if ((true == m_sendSensorsDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
+        (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
         m_sendSensorsDataInterval.restart();
         sendSensorData();
@@ -129,33 +129,39 @@ void App::sendSensorData() const
 
     /* Get the current values from the Odometry. */
     odometry.getPosition(positionXOdometry, positionYOdometry);
-    payload.positionXOdometry   = positionXOdometry;
-    payload.positionYOdometry   = positionYOdometry;
-    payload.orientationOdometry = odometry.getOrientation();
 
     /* Get the current values from the IMU.  */
-    int16_t accelerationValues[3];
-    int16_t turnRates[3];
-    int16_t magnetometerValues[3];
+    int16_t accelerationValues[NUMBER_OF_AXES];
+    int16_t turnRates[NUMBER_OF_AXES];
+    int16_t magnetometerValues[NUMBER_OF_AXES];
 
     /* Read the accelerometer. */
-    imu.readAcc();
+    imu.readAccelerometer();
     imu.getAccelerationValues(accelerationValues);
-    payload.accelerationX   = accelerationValues[AXIS_INDEX_X];
-    payload.accelerationY   = accelerationValues[AXIS_INDEX_Y];
+
+    /* Read the magnetometer. */
+    imu.readMagnetometer();
+    imu.getMagnetometerValues(magnetometerValues);
 
     /* Read the gyro. */
     imu.readGyro();
     imu.getTurnRates(turnRates);
-    payload.turnRate   = turnRates[AXIS_INDEX_Z];
 
-    /* Read the magnetometer. */
-    imu.readMag();
-    imu.getMagnetometerValues(magnetometerValues);
-    payload.magnetometerValueX   = magnetometerValues[AXIS_INDEX_X];
-    payload.magnetometerValueY   = magnetometerValues[AXIS_INDEX_Y];
+    if ((nullptr != accelerationValues) && (nullptr != turnRates) && (nullptr != magnetometerValues))
+    {
+        /* Write the sensor data in the SensorData Struct. */
+        payload.positionXOdometry   = positionXOdometry;
+        payload.positionYOdometry   = positionYOdometry;
+        payload.orientationOdometry = odometry.getOrientation();
+        payload.accelerationX       = accelerationValues[AXIS_INDEX_X];
+        payload.accelerationY       = accelerationValues[AXIS_INDEX_Y];
+        payload.magnetometerValueX  = magnetometerValues[AXIS_INDEX_X];
+        payload.magnetometerValueY  = magnetometerValues[AXIS_INDEX_Y];
+        payload.turnRate            = turnRates[AXIS_INDEX_Z];
 
-    (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+        /* Send the sensor data via the SerialMuxProt. */
+        (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    }
 }
 
 /******************************************************************************

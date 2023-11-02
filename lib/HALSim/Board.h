@@ -173,7 +173,7 @@ public:
 
     /**
      * Get IMU.
-     * 
+     *
      * @return IMU driver
      */
     IIMU& getIMU() final
@@ -306,7 +306,8 @@ private:
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME), m_robot.getCompass(MAGNETOMETER_NAME))
+        m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+              m_robot.getCompass(MAGNETOMETER_NAME))
     {
     }
 

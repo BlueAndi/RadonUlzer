@@ -63,11 +63,12 @@ public:
     /**
      * Construct the line follower application.
      */
-    App() : m_smpChannelIdSensorData(1U),
-            m_systemStateMachine(),
-            m_controlInterval(),
-            m_sendSensorsDataInterval(),
-            m_smpServer(Serial)
+    App() :
+        m_smpChannelIdSensorData(1U),
+        m_systemStateMachine(),
+        m_controlInterval(),
+        m_sendSensorsDataInterval(),
+        m_smpServer(Serial)
     {
     }
 
@@ -94,15 +95,18 @@ private:
     static const uint8_t AXIS_INDEX_Y = 1U;
     static const uint8_t AXIS_INDEX_Z = 2U;
 
+    /** Number of available axes. */
+    static const uint8_t NUMBER_OF_AXES = 3U;
+
     /** Sending Data period in ms. */
     static const uint32_t SEND_SENSORS_DATA_PERIOD = 20;
-    
+
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
-         
+
     /** Channel id sending sensor data used for sensor fusion. */
     uint8_t m_smpChannelIdSensorData;
 
@@ -122,14 +126,14 @@ private:
      * more channels for external communication.
      */
     SerialMuxProtServer<10U> m_smpServer;
-    
-     /**
+
+    /**
      * Send the following Sensor data via SerialMuxProt:
      * Acceleration in X
      * Acceleration in Y
      * TurnRate around Z
-     * Magnetometer value in X 
-     * Magnetometer value in Y 
+     * Magnetometer value in X
+     * Magnetometer value in Y
      * Angle calculated by Odometry
      * Position in X calculated by Odometry
      * Position in Y calculated by Odometry
