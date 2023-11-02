@@ -15,7 +15,7 @@ package "platformio.ini" {
         component "app:<APPLICATION-NAME>" <<pio>> as pioAppApp
         component "hal_app:<APPLICATION-NAME>Sim" <<pio>> as pioHalAppSim
 
-        component "hal:Zumo" <<pio>> as pioHalTarget
+        component "hal:Target" <<pio>> as pioHalTarget
         component "hal:Sim" <<pio>> as pioHalSim
     }
 }
