@@ -913,7 +913,8 @@ INPUT                  = mainpage.dox \
                          ../../lib/Service \
                          ../../lib/HALTarget \
                          ../../lib/HALInterfaces \
-                         ../../lib/APPRemoteControl
+                         ../../lib/APPRemoteControl \
+                         ../../lib/HALRemoteControlTarget
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

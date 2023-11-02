@@ -913,6 +913,7 @@ INPUT                  = mainpage.dox \
                          ../../lib/Service \
                          ../../lib/HALSim \
                          ../../lib/HALInterfaces \
+                         ../../lib/HALRemoteControlSim \
                          ../../lib/APPRemoteControl
 
 # This tag can be used to specify the character encoding of the source files
