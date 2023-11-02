@@ -69,6 +69,7 @@ void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
     Board::getInstance().init();
+
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
@@ -131,37 +132,34 @@ void App::sendSensorData() const
     odometry.getPosition(positionXOdometry, positionYOdometry);
 
     /* Get the current values from the IMU.  */
-    int16_t accelerationValues[NUMBER_OF_AXES];
-    int16_t turnRates[NUMBER_OF_AXES];
-    int16_t magnetometerValues[NUMBER_OF_AXES];
+    IMUData accelerationValues;
+    IMUData turnRates;
+    IMUData magnetometerValues;
 
     /* Read the accelerometer. */
     imu.readAccelerometer();
-    imu.getAccelerationValues(accelerationValues);
+    imu.getAccelerationValues(&accelerationValues);
 
     /* Read the magnetometer. */
     imu.readMagnetometer();
-    imu.getMagnetometerValues(magnetometerValues);
+    imu.getMagnetometerValues(&magnetometerValues);
 
     /* Read the gyro. */
     imu.readGyro();
-    imu.getTurnRates(turnRates);
+    imu.getTurnRates(&turnRates);
 
-    if ((nullptr != accelerationValues) && (nullptr != turnRates) && (nullptr != magnetometerValues))
-    {
-        /* Write the sensor data in the SensorData Struct. */
-        payload.positionXOdometry   = positionXOdometry;
-        payload.positionYOdometry   = positionYOdometry;
-        payload.orientationOdometry = odometry.getOrientation();
-        payload.accelerationX       = accelerationValues[AXIS_INDEX_X];
-        payload.accelerationY       = accelerationValues[AXIS_INDEX_Y];
-        payload.magnetometerValueX  = magnetometerValues[AXIS_INDEX_X];
-        payload.magnetometerValueY  = magnetometerValues[AXIS_INDEX_Y];
-        payload.turnRate            = turnRates[AXIS_INDEX_Z];
+    /* Write the sensor data in the SensorData Struct. */
+    payload.positionXOdometry   = positionXOdometry;
+    payload.positionYOdometry   = positionYOdometry;
+    payload.orientationOdometry = odometry.getOrientation();
+    payload.accelerationX       = accelerationValues.valueX;
+    payload.accelerationY       = accelerationValues.valueY;
+    payload.magnetometerValueX  = magnetometerValues.valueX;
+    payload.magnetometerValueY  = magnetometerValues.valueY;
+    payload.turnRate            = turnRates.valueZ;
 
-        /* Send the sensor data via the SerialMuxProt. */
-        (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-    }
+    /* Send the sensor data via the SerialMuxProt. */
+    (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************

@@ -90,14 +90,6 @@ public:
     void loop();
 
 private:
-    /** Indices of axis x, y and z. */
-    static const uint8_t AXIS_INDEX_X = 0U;
-    static const uint8_t AXIS_INDEX_Y = 1U;
-    static const uint8_t AXIS_INDEX_Z = 2U;
-
-    /** Number of available axes. */
-    static const uint8_t NUMBER_OF_AXES = 3U;
-
     /** Sending Data period in ms. */
     static const uint32_t SEND_SENSORS_DATA_PERIOD = 20;
 

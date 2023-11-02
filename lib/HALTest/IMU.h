@@ -110,25 +110,25 @@ public:
     bool magnetometerDataReady() {return true;}
     
     /**
-     * Get last raw Accelerometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Accelerometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] accelerationValues  Pointer to array where the Accelerometer values shall be written into.
+     * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    void getAccelerationValues(int16_t* accelerationValues) {}
+    void getAccelerationValues(IMUData* accelerationValues) {}
 
     /**
-     * Get last raw Gyroscope values. Array must have space for 3 values (x, y and z).
+     * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] turnRates  Pointer to array where the Gyroscope values shall be written into.
+     * @param[in] turnRates  Pointer to IMUData struct.
      */
-    void getTurnRates(int16_t* turnRates) {}
+    void getTurnRates(IMUData* turnRates) {}
 
     /**
-     * Get last raw Magnetometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] magnetometerValues  Pointer to array where the Magnetometer values shall be written into.
+     * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    void getMagnetometerValues(int16_t* magnetometerValues)  {}
+    void getMagnetometerValues(IMUData* magnetometerValues)  {}
     
     /**
      * Calibrate the IMU.

@@ -153,25 +153,25 @@ public:
     }
 
     /**
-     * Get last raw Accelerometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Accelerometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] accelerationValues  Pointer to array where the Accelerometer values shall be written into.
+     * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    void getAccelerationValues(int16_t* accelerationValues);
+    void getAccelerationValues(IMUData* accelerationValues);
 
     /**
-     * Get last raw Gyroscope values. Array must have space for 3 values (x, y and z).
+     * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] turnRates  Pointer to array where the Gyroscope values shall be written into.
+     * @param[in] turnRates  Pointer to IMUData struct.
      */
-    void getTurnRates(int16_t* turnRates);
+    void getTurnRates(IMUData* turnRates);
 
     /**
-     * Get last raw Magnetometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] magnetometerValues  Pointer to array where the Magnetometer values shall be written into.
+     * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    void getMagnetometerValues(int16_t* magnetometerValues);
+    void getMagnetometerValues(IMUData* magnetometerValues);
 
     /**
      * Calibrate the IMU.
@@ -179,12 +179,11 @@ public:
     void calibrate();
 
 private:
-    int16_t m_accelerationValues[3] = {0, 0, 0};
-    int16_t m_gyroValues[3]         = {0, 0, 0};
-    int16_t m_magnetometerValues[3] = {0, 0, 0};
+    IMUData m_accelerationValues = {0, 0, 0};
+    IMUData m_gyroValues = {0, 0, 0};
+    IMUData m_magnetometerValues = {0, 0, 0};
 
 private:
-    static const uint8_t   NUMBER_OF_AXES = 3; /** Number of axes of the imu sensors. */
     const SimTime&         m_simTime;          /** Simulation time. */
     webots::Accelerometer* m_accelerometer;    /** The accelerometer of Webots. */
     webots::Gyro*          m_gyro;             /** The gyro of Webots. */

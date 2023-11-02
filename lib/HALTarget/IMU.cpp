@@ -63,23 +63,23 @@ bool IMU::init()
     if (isInitSuccessful)
     {
         m_imu.enableDefault();
+        // TD074    Make sure that a Full Scale of 245 dps of the gyros are enough
+        // TD075	Make sure that it is valid to make the Full Scale setting in IMU::init()
+        switch (m_imu.getType())
+        {
+        case Zumo32U4IMUType::LSM303D_L3GD20H:
+            // 0x00  means +/- 245 dps according to L3GD20H data sheet
+            m_imu.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
+            break;
+        case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
+            // 0x00  means +/- 245 dps according to LSM6DS33 data sheet
+            m_imu.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
+            break;
+        default:
+            break;
+        }
     }
 
-    // TD074    Make sure that a Full Scale of 245 dps of the gyros are enough
-    // TD075	Make sure that it is valid to make the Full Scale setting in IMU::init()
-    switch (m_imu.getType())
-    {
-    case Zumo32U4IMUType::LSM303D_L3GD20H:
-        // 0x00  means +/- 245 dps according to L3GD20H data sheet
-        m_imu.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
-        break;
-    case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
-        // 0x00  means +/- 245 dps according to LSM6DS33 data sheet
-        m_imu.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
-        break;
-    default:
-        break;
-    }
     return isInitSuccessful;
 }
 
@@ -96,25 +96,25 @@ void IMU::configureForTurnSensing()
 void IMU::readAccelerometer()
 {
     m_imu.readAcc();
-    m_accelerometerValues.x = m_imu.a.x;
-    m_accelerometerValues.y = m_imu.a.y;
-    m_accelerometerValues.z = m_imu.a.z;
+    m_accelerometerValues.valueX = m_imu.a.x;
+    m_accelerometerValues.valueY = m_imu.a.y;
+    m_accelerometerValues.valueZ = m_imu.a.z;
 }
 
 void IMU::readGyro()
 {
     m_imu.readGyro();
-    m_gyroValues.x = m_imu.g.x;
-    m_gyroValues.y = m_imu.g.y;
-    m_gyroValues.z = m_imu.g.z;
+    m_gyroValues.valueX = m_imu.g.x;
+    m_gyroValues.valueY = m_imu.g.y;
+    m_gyroValues.valueZ = m_imu.g.z;
 }
 
 void IMU::readMagnetometer()
 {
     m_imu.readMag();
-    m_magnetometerValues.x = m_imu.m.x;
-    m_magnetometerValues.y = m_imu.m.y;
-    m_magnetometerValues.z = m_imu.m.z;
+    m_magnetometerValues.valueX = m_imu.m.x;
+    m_magnetometerValues.valueY = m_imu.m.y;
+    m_magnetometerValues.valueZ = m_imu.m.z;
 }
 
 bool IMU::accelerometerDataReady()
@@ -132,33 +132,33 @@ bool IMU::magnetometerDataReady()
     return m_imu.magDataReady();
 }
 
-void IMU::getAccelerationValues(int16_t* accelerationValues)
+void IMU::getAccelerationValues(IMUData* accelerationValues)
 {
     if (nullptr != accelerationValues)
     {
-        accelerationValues[AXIS_INDEX_X] = m_accelerometerValues.x - m_rawAccelerometerOffsetX;
-        accelerationValues[AXIS_INDEX_Y] = m_accelerometerValues.y - m_rawAccelerometerOffsetY;
-        accelerationValues[AXIS_INDEX_Z] = m_accelerometerValues.z - m_rawAccelerometerOffsetZ;
+        accelerationValues->valueX = m_accelerometerValues.valueX - m_rawAccelerometerOffsetX;
+        accelerationValues->valueY = m_accelerometerValues.valueY - m_rawAccelerometerOffsetY;
+        accelerationValues->valueZ = m_accelerometerValues.valueZ - m_rawAccelerometerOffsetZ;
     }
 }
 
-void IMU::getTurnRates(int16_t* turnRates)
+void IMU::getTurnRates(IMUData* turnRates)
 {
     if (nullptr != turnRates)
     {
-        turnRates[AXIS_INDEX_X] = m_gyroValues.x - m_rawGyroOffsetX;
-        turnRates[AXIS_INDEX_Y] = m_gyroValues.y - m_rawGyroOffsetY;
-        turnRates[AXIS_INDEX_Z] = m_gyroValues.z - m_rawGyroOffsetZ;
+        turnRates->valueX = m_gyroValues.valueX - m_rawGyroOffsetX;
+        turnRates->valueY = m_gyroValues.valueY - m_rawGyroOffsetY;
+        turnRates->valueZ = m_gyroValues.valueZ - m_rawGyroOffsetZ;
     }
 }
 
-void IMU::getMagnetometerValues(int16_t* magnetometerValues)
+void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 {
     if (nullptr != magnetometerValues)
     {
-        magnetometerValues[AXIS_INDEX_X] = m_magnetometerValues.x;
-        magnetometerValues[AXIS_INDEX_Y] = m_magnetometerValues.y;
-        magnetometerValues[AXIS_INDEX_Z] = m_magnetometerValues.z;
+        magnetometerValues->valueX = m_magnetometerValues.valueX;
+        magnetometerValues->valueY = m_magnetometerValues.valueY;
+        magnetometerValues->valueZ = m_magnetometerValues.valueZ;
     }
 }
 
@@ -200,7 +200,7 @@ void IMU::calibrate()
         sumOfRawGyroValuesZ += m_imu.g.z;
     }
 
-    m_rawAccelerometerOffsetX = sumOfRawGyroValuesX / NUMBER_OF_MEASUREMENTS;
+    m_rawAccelerometerOffsetX = sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS;
     m_rawAccelerometerOffsetY = sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS;
     m_rawAccelerometerOffsetZ = sumOfRawAccelValuesZ / NUMBER_OF_MEASUREMENTS;
 

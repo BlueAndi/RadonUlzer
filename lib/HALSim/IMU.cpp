@@ -76,10 +76,9 @@ void IMU::readAccelerometer()
         const double* accelerationValues = m_accelerometer->getValues();
         if (nullptr != accelerationValues)
         {
-            for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-            {
-                m_accelerationValues[axisIndex] = static_cast<int16_t>(accelerationValues[axisIndex]);
-            }
+            m_accelerationValues.valueX = static_cast<int16_t>(accelerationValues[0]);
+            m_accelerationValues.valueY = static_cast<int16_t>(accelerationValues[1]);
+            m_accelerationValues.valueZ = static_cast<int16_t>(accelerationValues[2]);
         }
     }
 }
@@ -92,10 +91,9 @@ void IMU::readGyro()
 
         if (nullptr != gyroValues)
         {
-            for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-            {
-                m_gyroValues[axisIndex] = static_cast<int16_t>(gyroValues[axisIndex]);
-            }
+            m_gyroValues.valueX = static_cast<int16_t>(gyroValues[0]);
+            m_gyroValues.valueY = static_cast<int16_t>(gyroValues[1]);
+            m_gyroValues.valueZ = static_cast<int16_t>(gyroValues[2]);
         }
     }
 }
@@ -108,47 +106,40 @@ void IMU::readMagnetometer()
 
         if (nullptr != magnetometerValues)
         {
-            for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-            {
-                m_magnetometerValues[axisIndex] = static_cast<int16_t>(magnetometerValues[axisIndex]);
-            }
+            m_magnetometerValues.valueX = static_cast<int16_t>(magnetometerValues[0]);
+            m_magnetometerValues.valueY = static_cast<int16_t>(magnetometerValues[1]);
+            m_magnetometerValues.valueZ = static_cast<int16_t>(magnetometerValues[2]);
         }
     }
 }
 
-void IMU::getAccelerationValues(int16_t* accelerationValues)
+void IMU::getAccelerationValues(IMUData* accelerationValues)
 {
     if (nullptr != accelerationValues)
     {
-        // TD083 - Size-safety: Make sure that there can fit enough values in the array
-        for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-        {
-            accelerationValues[axisIndex] = m_accelerationValues[axisIndex];
-        }
+        accelerationValues->valueX = m_accelerationValues.valueX;
+        accelerationValues->valueY = m_accelerationValues.valueY;
+        accelerationValues->valueZ = m_accelerationValues.valueZ;
     }
 }
 
-void IMU::getTurnRates(int16_t* turnRates)
+void IMU::getTurnRates(IMUData* turnRates)
 {
     if (nullptr != turnRates)
     {
-        // TD083 - Size-safety: Make sure that there can fit enough values in the array
-        for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-        {
-            turnRates[axisIndex] = m_gyroValues[axisIndex];
-        }
+        turnRates->valueX = m_gyroValues.valueX;
+        turnRates->valueY = m_gyroValues.valueY;
+        turnRates->valueZ = m_gyroValues.valueZ;
     }
 }
 
-void IMU::getMagnetometerValues(int16_t* magnetometerValues)
+void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 {
     if (nullptr != magnetometerValues)
     {
-        // TD083 - Size-safety: Make sure that there can fit enough values in the array
-        for (uint8_t axisIndex = 0; axisIndex < NUMBER_OF_AXES; ++axisIndex)
-        {
-            magnetometerValues[axisIndex] = m_magnetometerValues[axisIndex];
-        }
+        magnetometerValues->valueX = m_magnetometerValues.valueX;
+        magnetometerValues->valueY = m_magnetometerValues.valueY;
+        magnetometerValues->valueZ = m_magnetometerValues.valueZ;
     }
 }
 

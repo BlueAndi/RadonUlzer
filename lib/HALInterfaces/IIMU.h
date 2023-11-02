@@ -52,6 +52,14 @@
  * Types and Classes
  *****************************************************************************/
 
+/** Struct of the IMU data in x, y and z direction. */
+typedef struct _IMUData
+{
+    int16_t valueX;
+    int16_t valueY;
+    int16_t valueZ;
+} __attribute__((packed)) IMUData;
+
 /** The abstract IMU interface. */
 class IIMU
 {
@@ -117,25 +125,25 @@ public:
     virtual bool magnetometerDataReady() = 0;
 
     /**
-     * Get last raw Accelerometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Accelerometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] accelerationValues  Pointer to array where the Accelerometer values shall be written into.
+     * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    virtual void getAccelerationValues(int16_t* accelerationValues) = 0;
+    virtual void getAccelerationValues(IMUData* accelerationValues) = 0;
 
     /**
-     * Get last raw Gyroscope values. Array must have space for 3 values (x, y and z).
+     * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] turnRates  Pointer to array where the Gyroscope values shall be written into.
+     * @param[in] turnRates  Pointer to IMUData struct.
      */
-    virtual void getTurnRates(int16_t* turnRates) = 0;
+    virtual void getTurnRates(IMUData* turnRates) = 0;
 
     /**
-     * Get last raw Magnetometer values. Array must have space for 3 values (x, y and z).
+     * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
-     * @param[in] magnetometerValues  Pointer to array where the Magnetometer values shall be written into.
+     * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    virtual void getMagnetometerValues(int16_t* magnetometerValues) = 0;
+    virtual void getMagnetometerValues(IMUData* magnetometerValues) = 0;
 
     /**
      * Calibrate the IMU.
