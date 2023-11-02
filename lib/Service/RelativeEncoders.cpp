@@ -118,34 +118,12 @@ RelativeEncoders::Direction RelativeEncoders::getDirectionRight()
 
 int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
 {
-    int16_t diffSteps = 0;
+    int16_t diffSteps = absSteps - refPoint;
 
-    /* Wrap around in positive direction: -MAX to +MAX
-     * Wrap around in negative direction: +MAX to -MAX
-     */
-
-    /* Wrap around in from negative to positive direction?
-     * Reference point is in the last half negative part.
-     * Current steps are in the last half positive part.
-     */
-    if (((INT16_MIN / 2) > refPoint) && ((INT16_MAX / 2) < absSteps))
+    /* Wrap around in forward or backword direction? */
+    if (((0 > absSteps) && (0 < refPoint)) || ((0 < absSteps) && (0 > refPoint)))
     {
-        /* Drives forward */
-        diffSteps = (INT16_MIN - refPoint) - (INT16_MAX - absSteps);
-    }
-    /* Wrap around in negative direction?
-     * Reference point is in the last half positive part.
-     * Current steps are in the last half negative part.
-     */
-    else if (((INT16_MAX / 2) < refPoint) && ((INT16_MIN / 2) > absSteps))
-    {
-        /* Drives backward */
-        diffSteps = (INT16_MAX - refPoint) - (INT16_MIN - absSteps);
-    }
-    /* No wrap around */
-    else
-    {
-        diffSteps = absSteps - refPoint;
+        diffSteps *= -1;
     }
 
     return diffSteps;
