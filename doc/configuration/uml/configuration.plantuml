@@ -24,7 +24,7 @@ package "/lib" as libFolder {
 
     component "HALInterfaces" <<lib>> as halInterfacesLib
 
-    component "APL<APPLICATION-NAME>" <<lib>> as appLib
+    component "APP<APPLICATION-NAME>" <<lib>> as appLib
     component "Service" <<lib>> as serviceLib
 
     component "HAL<APPLICATION-NAME>Target" <<lib>> as halAppTarget

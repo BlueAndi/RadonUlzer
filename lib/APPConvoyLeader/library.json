@@ -1,7 +1,7 @@
 {
-    "name": "LineFollower",
+    "name": "APPConvoyLeader",
     "version": "0.1.0",
-    "description": "LineFollower application",
+    "description": "Convoy leader application",
     "authors": [{
         "name": "Andreas Merkle",
         "email": "web@blue-andi.de",
@@ -13,6 +13,9 @@
         "name": "Service"
     }, {
         "name": "HALInterfaces"
+    }, {
+        "name": "SerialMuxProt",
+        "version" : "https://github.com/gabryelreyes/SerialMuxProt.git"
     }],
     "frameworks": "*",
     "platforms": "*"

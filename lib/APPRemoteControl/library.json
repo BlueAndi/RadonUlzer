@@ -1,7 +1,7 @@
 {
-    "name": "ConvoyLeader",
+    "name": "APPRemoteControl",
     "version": "0.1.0",
-    "description": "Convoy leader application",
+    "description": "RemoteControl application",
     "authors": [{
         "name": "Andreas Merkle",
         "email": "web@blue-andi.de",

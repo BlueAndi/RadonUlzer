@@ -910,7 +910,7 @@ WARN_LOGFILE           = doxygen_warnings.txt
 
 INPUT                  = mainpage.dox \
                          ../../src \
-                         ../../lib/LineFollower \
+                         ../../lib/APPLineFollower \
                          ../../lib/Service \
                          ../../lib/HALSim \
                          ../../lib/HALInterfaces
