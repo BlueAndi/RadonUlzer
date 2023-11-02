@@ -41,6 +41,7 @@
 #include <Util.h>
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
+#include "ReadyState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -215,10 +216,15 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
     }
     else
     {
+        IDisplay& display = Board::getInstance().getDisplay();
+        display.clear();
+        display.gotoXY(0, 1);
+        display.print(maxSpeed);
+
         LOG_DEBUG_VAL(TAG, "Calibrated max. speed (steps/s): ", maxSpeed);
         LOG_DEBUG_VAL(TAG, "Calibrated max. speed (mm/s): ", maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
 
-        sm.setState(&LineSensorsCalibrationState::getInstance());
+        sm.setState(&ReadyState::getInstance());
     }
 }
 
