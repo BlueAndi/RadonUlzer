@@ -76,12 +76,12 @@ void RelativeEncoders::clearRight()
 
 int16_t RelativeEncoders::getCountsLeft() const
 {
-    return calculate(m_absEncoders.getCountsLeft(), m_referencePointLeft);
+    return m_absEncoders.getCountsLeft() - m_referencePointLeft;
 }
 
 int16_t RelativeEncoders::getCountsRight() const
 {
-    return calculate(m_absEncoders.getCountsRight(), m_referencePointRight);
+    return m_absEncoders.getCountsRight() - m_referencePointRight;
 }
 
 /******************************************************************************
@@ -91,21 +91,6 @@ int16_t RelativeEncoders::getCountsRight() const
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
-{
-    int16_t diffSteps = absSteps - refPoint;
-
-    /* Wrap around in forward or backward direction?
-     * In both cases the difference must be multiplied with -1.
-     */
-    if (((0 > absSteps) && (0 < refPoint)) || ((0 < absSteps) && (0 > refPoint)))
-    {
-        diffSteps *= -1;
-    }
-
-    return diffSteps;
-}
 
 /******************************************************************************
  * External Functions
