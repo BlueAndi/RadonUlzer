@@ -50,13 +50,14 @@
  * Types and classes
  *****************************************************************************/
 
+/** Test vector element */
 typedef struct
 {
-    int16_t encoderStepsLeft;
-    int16_t encoderStepsRight;
-    bool    isTest;
-    int16_t expectedDiffLeft;
-    int16_t expectedDiffRight;
+    int16_t encoderStepsLeft;   /**< Absolute encoder steps left */
+    int16_t encoderStepsRight;  /**< Absolute encoder steps right */
+    bool    isTest;             /**< Test it or is it for test preparation? */
+    int16_t expectedDiffLeft;   /**< Expected step difference left */
+    int16_t expectedDiffRight;  /**< Expected step difference right */
 
 } Elem;
 
