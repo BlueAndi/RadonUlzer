@@ -56,12 +56,12 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The line follower application. */
+/** The SensorFusion application. */
 class App
 {
 public:
     /**
-     * Construct the line follower application.
+     * Construct the SensorFusion application.
      */
     App() :
         m_smpChannelIdSensorData(1U),
@@ -73,7 +73,7 @@ public:
     }
 
     /**
-     * Destroy the line follower application.
+     * Destroy the SensorFusion application.
      */
     ~App()
     {
