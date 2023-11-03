@@ -131,20 +131,18 @@ void App::sendSensorData() const
     /* Get the current values from the Odometry. */
     odometry.getPosition(positionOdometryX, positionOdometryY);
 
-    /* Get the current values from the IMU.  */
-    IMUData accelerationValues;
-    IMUData turnRates;
-    IMUData magnetometerValues;
-
     /* Read the accelerometer. */
+    IMUData accelerationValues;
     imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
     /* Read the magnetometer. */
+    IMUData magnetometerValues;
     imu.readMagnetometer();
     imu.getMagnetometerValues(&magnetometerValues);
 
     /* Read the gyro. */
+    IMUData turnRates;
     imu.readGyro();
     imu.getTurnRates(&turnRates);
 
