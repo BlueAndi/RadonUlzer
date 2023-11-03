@@ -132,17 +132,6 @@ private:
     RelativeEncoders();
     RelativeEncoders(const RelativeEncoders& relEncoder);
     RelativeEncoders& operator=(const RelativeEncoders& relEncoder);
-
-    /**
-     * Calculate relative number of encoder steps between the reference point
-     * and the current absolute number of encoder steps.
-     * 
-     * @param[in] absSteps  Absolute number of encoder steps
-     * @param[in] refPoint  Reference point
-     * 
-     * @return Relative number of encoder steps
-     */
-    int16_t calculate(int16_t absSteps, int16_t refPoint) const;
 };
 
 /******************************************************************************
