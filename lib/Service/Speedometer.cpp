@@ -78,7 +78,7 @@ void Speedometer::process()
     }
     else
     {
-        RelativeEncoders::Direction currentDrivingDirection = m_relEncoders.getDirectionLeft();
+        Direction currentDrivingDirection = getDirectionLeft();
 
         if (currentDrivingDirection != m_lastDirectionLeft)
         {
@@ -94,7 +94,7 @@ void Speedometer::process()
     }
     else
     {
-        RelativeEncoders::Direction currentDrivingDirection = m_relEncoders.getDirectionRight();
+        Direction currentDrivingDirection = getDirectionRight();
 
         if (currentDrivingDirection != m_lastDirectionRight)
         {
@@ -156,7 +156,7 @@ void Speedometer::process()
     {
         ;
     }
-}
+    }
 
 int16_t Speedometer::getLinearSpeedCenter() const
 {
@@ -184,6 +184,42 @@ int16_t Speedometer::getLinearSpeedRight() const
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+Speedometer::Direction Speedometer::getDirectionLeft()
+{
+    IMotors& motors = Board::getInstance().getMotors();
+    int16_t  speed  = motors.getLeftSpeed();
+
+    return getDirectionByMotorSpeed(speed);
+}
+
+Speedometer::Direction Speedometer::getDirectionRight()
+{
+    IMotors& motors = Board::getInstance().getMotors();
+    int16_t  speed  = motors.getRightSpeed();
+
+    return getDirectionByMotorSpeed(speed);
+}
+
+Speedometer::Direction Speedometer::getDirectionByMotorSpeed(int16_t motorSpeed)
+{
+    Direction direction = DIRECTION_STOPPED;
+
+    if (0 < motorSpeed)
+    {
+        direction = DIRECTION_POSTIVE;
+    }
+    else if (0 > motorSpeed)
+    {
+        direction = DIRECTION_NEGATIVE;
+    }
+    else
+    {
+        ;
+    }
+
+    return direction;
+}
 
 /******************************************************************************
  * External Functions
