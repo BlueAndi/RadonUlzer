@@ -125,11 +125,11 @@ void App::sendSensorData() const
     SensorData payload;
     IIMU&      imu      = Board::getInstance().getIMU();
     Odometry&  odometry = Odometry::getInstance();
-    int32_t    positionXOdometry;
-    int32_t    positionYOdometry;
+    int32_t    positionOdometryX;
+    int32_t    positionOdometryY;
 
     /* Get the current values from the Odometry. */
-    odometry.getPosition(positionXOdometry, positionYOdometry);
+    odometry.getPosition(positionOdometryX, positionOdometryY);
 
     /* Get the current values from the IMU.  */
     IMUData accelerationValues;
@@ -149,8 +149,8 @@ void App::sendSensorData() const
     imu.getTurnRates(&turnRates);
 
     /* Write the sensor data in the SensorData Struct. */
-    payload.positionXOdometry   = positionXOdometry;
-    payload.positionYOdometry   = positionYOdometry;
+    payload.positionOdometryX   = positionOdometryX;
+    payload.positionOdometryY   = positionOdometryY;
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
     payload.accelerationY       = accelerationValues.valueY;

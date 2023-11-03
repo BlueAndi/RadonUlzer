@@ -120,15 +120,7 @@ private:
     SerialMuxProtServer<10U> m_smpServer;
 
     /**
-     * Send the following Sensor data via SerialMuxProt:
-     * Acceleration in X
-     * Acceleration in Y
-     * TurnRate around Z
-     * Magnetometer value in X
-     * Magnetometer value in Y
-     * Angle calculated by Odometry
-     * Position in X calculated by Odometry
-     * Position in Y calculated by Odometry
+     * Send the Sensor data as a SensorData struct via SerialMuxProt.
      */
     void sendSensorData() const;
 
