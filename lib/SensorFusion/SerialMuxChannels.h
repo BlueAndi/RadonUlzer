@@ -37,7 +37,7 @@
  * Includes
  *****************************************************************************/
 
-#include <Arduino.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
@@ -56,8 +56,8 @@
 /** Struct of the Sensor Data channel payload. */
 typedef struct _SensorData
 {
-    int32_t positionXOdometry;
-    int32_t positionYOdometry;
+    int32_t positionOdometryX;
+    int32_t positionOdometryY;
     int32_t orientationOdometry;
     int16_t accelerationX;
     int16_t accelerationY;
