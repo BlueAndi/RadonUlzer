@@ -179,15 +179,25 @@ public:
     void calibrate();
 
 private:
+    /**
+     * Convert a parameter from double to int16_t. Clip the value to the minimum / maximum range of the int16_t data
+     * type if the input value exceeds the limits of int16_t.
+     *
+     * @param[in]   originalValue  The Original double value which shall be converted.
+     * @return  The converted value to int16_t, which might be clipped.
+     */
+    int16_t convertFromDoubleToInt16(double originalValue);
+
+private:
     IMUData m_accelerationValues = {0, 0, 0};
-    IMUData m_gyroValues = {0, 0, 0};
+    IMUData m_gyroValues         = {0, 0, 0};
     IMUData m_magnetometerValues = {0, 0, 0};
 
 private:
-    const SimTime&         m_simTime;          /** Simulation time. */
-    webots::Accelerometer* m_accelerometer;    /** The accelerometer of Webots. */
-    webots::Gyro*          m_gyro;             /** The gyro of Webots. */
-    webots::Compass*       m_magnetometer;     /** The magnetometer of Webots. */
+    const SimTime&         m_simTime;       /** Simulation time. */
+    webots::Accelerometer* m_accelerometer; /** The accelerometer of Webots. */
+    webots::Gyro*          m_gyro;          /** The gyro of Webots. */
+    webots::Compass*       m_magnetometer;  /** The magnetometer of Webots. */
 };
 
 /******************************************************************************

@@ -33,6 +33,7 @@
  * Includes
  *****************************************************************************/
 #include "IMU.h"
+#include <limits>
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -76,9 +77,9 @@ void IMU::readAccelerometer()
         const double* accelerationValues = m_accelerometer->getValues();
         if (nullptr != accelerationValues)
         {
-            m_accelerationValues.valueX = static_cast<int16_t>(accelerationValues[0]);
-            m_accelerationValues.valueY = static_cast<int16_t>(accelerationValues[1]);
-            m_accelerationValues.valueZ = static_cast<int16_t>(accelerationValues[2]);
+            m_accelerationValues.valueX = convertFromDoubleToInt16(accelerationValues[0]);
+            m_accelerationValues.valueY = convertFromDoubleToInt16(accelerationValues[1]);
+            m_accelerationValues.valueZ = convertFromDoubleToInt16(accelerationValues[2]);
         }
     }
 }
@@ -91,9 +92,9 @@ void IMU::readGyro()
 
         if (nullptr != gyroValues)
         {
-            m_gyroValues.valueX = static_cast<int16_t>(gyroValues[0]);
-            m_gyroValues.valueY = static_cast<int16_t>(gyroValues[1]);
-            m_gyroValues.valueZ = static_cast<int16_t>(gyroValues[2]);
+            m_gyroValues.valueX = convertFromDoubleToInt16(gyroValues[0]);
+            m_gyroValues.valueY = convertFromDoubleToInt16(gyroValues[1]);
+            m_gyroValues.valueZ = convertFromDoubleToInt16(gyroValues[2]);
         }
     }
 }
@@ -106,9 +107,9 @@ void IMU::readMagnetometer()
 
         if (nullptr != magnetometerValues)
         {
-            m_magnetometerValues.valueX = static_cast<int16_t>(magnetometerValues[0]);
-            m_magnetometerValues.valueY = static_cast<int16_t>(magnetometerValues[1]);
-            m_magnetometerValues.valueZ = static_cast<int16_t>(magnetometerValues[2]);
+            m_magnetometerValues.valueX = convertFromDoubleToInt16(magnetometerValues[0]);
+            m_magnetometerValues.valueY = convertFromDoubleToInt16(magnetometerValues[1]);
+            m_magnetometerValues.valueZ = convertFromDoubleToInt16(magnetometerValues[2]);
         }
     }
 }
@@ -146,6 +147,27 @@ void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 void IMU::calibrate()
 {
     // TODO: implement TD067
+}
+
+int16_t IMU::convertFromDoubleToInt16(double originalValue)
+{
+    int16_t convertedValue;
+    const int16_t minimumValue = std::numeric_limits<int16_t>::min();
+    const int16_t maximumValue = std::numeric_limits<int16_t>::max();
+
+    if (originalValue <= minimumValue)
+    {
+        convertedValue = minimumValue;
+    }
+    else if (originalValue >= maximumValue)
+    {
+        convertedValue = maximumValue;
+    }
+    else
+    {
+        convertedValue = static_cast<int16_t>(originalValue);
+    }
+    return convertedValue;
 }
 /******************************************************************************
  * Protected Methods
