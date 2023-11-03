@@ -38,7 +38,6 @@
 #include "ReleaseTrackState.h"
 #include <Logging.h>
 #include <Util.h>
-#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -84,9 +83,7 @@ void ReadyState::entry()
     }
 
     /* The line sensor value shall be output on console cyclic. */
-    // m_timer.start(SENSOR_VALUE_OUT_PERIOD);
-    DifferentialDrive::getInstance().enable();
-    DifferentialDrive::getInstance().setLinearSpeed(500, -500);
+    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
 }
 
 void ReadyState::process(StateMachine& sm)
