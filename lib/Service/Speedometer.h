@@ -98,6 +98,15 @@ public:
     int16_t getLinearSpeedRight() const;
 
 private:
+    /**
+     * Direction of movement.
+     */
+    enum Direction
+    {
+        DIRECTION_STOPPED = 0, /**< Stopped */
+        DIRECTION_POSTIVE,     /**< Moving to positive direction */
+        DIRECTION_NEGATIVE,    /**< Moving to negative direction */
+    };
 
     /**
      * The minimum number of counted encoder steps until the speed is measured.
@@ -123,15 +132,11 @@ private:
     /** Linear speed right in steps/s */
     int16_t m_linearSpeedRight;
 
-    /**
-     * Last determined driving direction left.
-     */
-    RelativeEncoders::Direction m_lastDirectionLeft;
+    /** Last determined driving direction left. */
+    Direction m_lastDirectionLeft;
 
-    /**
-     * Last determined driving direction left.
-     */
-    RelativeEncoders::Direction m_lastDirectionRight;
+    /** Last determined driving direction left. */
+    Direction m_lastDirectionRight;
 
     /**
      * Construct the mileage instance.
@@ -142,8 +147,8 @@ private:
         m_timestampRight(0),
         m_linearSpeedLeft(0),
         m_linearSpeedRight(0),
-        m_lastDirectionLeft(RelativeEncoders::DIRECTION_STOPPED),
-        m_lastDirectionRight(RelativeEncoders::DIRECTION_STOPPED)
+        m_lastDirectionLeft(DIRECTION_STOPPED),
+        m_lastDirectionRight(DIRECTION_STOPPED)
     {
     }
 
@@ -156,6 +161,29 @@ private:
 
     Speedometer(const Speedometer& value);
     Speedometer& operator=(const Speedometer& value);
+
+    /**
+     * Get the direction of movement left.
+     *
+     * @return Direction
+     */
+    Direction getDirectionLeft();
+
+    /**
+     * Get the direction of movement right.
+     *
+     * @return Direction
+     */
+    Direction getDirectionRight();
+
+    /**
+     * Determine the direction of the movement by motor speed.
+     * 
+     * @param[in] motorSpeed    Motor speed in digits
+     * 
+     * @return Direction of movement.
+     */
+    Direction getDirectionByMotorSpeed(int16_t motorSpeed);
 };
 
 /******************************************************************************

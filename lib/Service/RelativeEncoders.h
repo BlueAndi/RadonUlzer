@@ -72,9 +72,7 @@ public:
     RelativeEncoders(IEncoders& absEncoders) :
         m_absEncoders(absEncoders),
         m_referencePointLeft(0),
-        m_referencePointRight(0),
-        m_lastRelEncoderStepsLeft(0),
-        m_lastRelEncoderStepsRight(0)
+        m_referencePointRight(0)
     {
     }
 
@@ -114,30 +112,6 @@ public:
      */
     int16_t getCountsRight() const;
 
-    /**
-     * Direction of movement.
-     */
-    enum Direction
-    {
-        DIRECTION_STOPPED = 0, /**< Stopped */
-        DIRECTION_POSTIVE,     /**< Moving to positive direction */
-        DIRECTION_NEGATIVE,    /**< Moving to negative direction */
-    };
-
-    /**
-     * Get the direction of movement left.
-     *
-     * @return Direction
-     */
-    Direction getDirectionLeft();
-
-    /**
-     * Get the direction of movement right.
-     *
-     * @return Direction
-     */
-    Direction getDirectionRight();
-
 private:
     /**
      *  Absolute encoders
@@ -154,18 +128,6 @@ private:
      */
     int16_t m_referencePointRight;
 
-    /**
-     * Last calculated relative encoder steps left, used to determine movement
-     * direction.
-     */
-    int16_t m_lastRelEncoderStepsLeft;
-
-    /**
-     * Last calculated relative encoder steps right, used to determine movement
-     * direction.
-     */
-    int16_t m_lastRelEncoderStepsRight;
-
     /* Not allowed. */
     RelativeEncoders();
     RelativeEncoders(const RelativeEncoders& relEncoder);
@@ -181,13 +143,6 @@ private:
      * @return Relative number of encoder steps
      */
     int16_t calculate(int16_t absSteps, int16_t refPoint) const;
-
-    /**
-     * Get the direction of movement.
-     *
-     * @return Direction
-     */
-    Direction getDirection(int16_t lastRelSteps, int16_t currentRelSteps) const;
 };
 
 /******************************************************************************

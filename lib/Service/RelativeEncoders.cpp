@@ -60,22 +60,18 @@
 
 void RelativeEncoders::clear()
 {
-    m_referencePointLeft       = m_absEncoders.getCountsLeft();
-    m_referencePointRight      = m_absEncoders.getCountsRight();
-    m_lastRelEncoderStepsLeft  = 0;
-    m_lastRelEncoderStepsRight = 0;
+    m_referencePointLeft  = m_absEncoders.getCountsLeft();
+    m_referencePointRight = m_absEncoders.getCountsRight();
 }
 
 void RelativeEncoders::clearLeft()
 {
-    m_referencePointLeft      = m_absEncoders.getCountsLeft();
-    m_lastRelEncoderStepsLeft = 0;
+    m_referencePointLeft = m_absEncoders.getCountsLeft();
 }
 
 void RelativeEncoders::clearRight()
 {
-    m_referencePointRight      = m_absEncoders.getCountsRight();
-    m_lastRelEncoderStepsRight = 0;
+    m_referencePointRight = m_absEncoders.getCountsRight();
 }
 
 int16_t RelativeEncoders::getCountsLeft() const
@@ -86,26 +82,6 @@ int16_t RelativeEncoders::getCountsLeft() const
 int16_t RelativeEncoders::getCountsRight() const
 {
     return calculate(m_absEncoders.getCountsRight(), m_referencePointRight);
-}
-
-RelativeEncoders::Direction RelativeEncoders::getDirectionLeft()
-{
-    int16_t   diffSteps = getCountsLeft();
-    Direction direction = getDirection(m_lastRelEncoderStepsLeft, diffSteps);
-
-    m_lastRelEncoderStepsLeft = diffSteps;
-
-    return direction;
-}
-
-RelativeEncoders::Direction RelativeEncoders::getDirectionRight()
-{
-    int16_t   diffSteps = getCountsRight();
-    Direction direction = getDirection(m_lastRelEncoderStepsRight, diffSteps);
-
-    m_lastRelEncoderStepsRight = diffSteps;
-
-    return direction;
 }
 
 /******************************************************************************
@@ -129,26 +105,6 @@ int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
     }
 
     return diffSteps;
-}
-
-RelativeEncoders::Direction RelativeEncoders::getDirection(int16_t lastRelSteps, int16_t currentRelSteps) const
-{
-    Direction direction = DIRECTION_STOPPED;
-
-    if (lastRelSteps < currentRelSteps)
-    {
-        direction = DIRECTION_POSTIVE;
-    }
-    else if (lastRelSteps > currentRelSteps)
-    {
-        direction = DIRECTION_NEGATIVE;
-    }
-    else
-    {
-        ;
-    }
-
-    return direction;
 }
 
 /******************************************************************************
