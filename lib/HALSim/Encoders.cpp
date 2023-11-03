@@ -130,7 +130,7 @@ int16_t Encoders::getCountsAndResetRight()
 
 int16_t Encoders::calculateSteps(double lastPos, double pos) const
 {
-    int16_t steps = 0;
+    int16_t steps = 0; /* [steps] */
 
     /* Position sensor provides NAN until the first simulation step was perfomed. */
     if (false == isnan(pos))
@@ -139,21 +139,16 @@ int16_t Encoders::calculateSteps(double lastPos, double pos) const
         double       deltaPos            = (pos - lastPos) * CONV_FACTOR_M_TO_MM;                         /* [mm] */
         double       encoderSteps = deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
 
-        /* Simulate int16_t wrap around. */
-        if (static_cast<double>(INT16_MAX) < encoderSteps)
-        {
-            encoderSteps = static_cast<double>(INT16_MIN) + encoderSteps - static_cast<double>(INT16_MAX);
-        }
-        else if (static_cast<double>(INT16_MIN) > encoderSteps)
-        {
-            encoderSteps = static_cast<double>(INT16_MIN) - encoderSteps + static_cast<double>(INT16_MAX);
-        }
-        else
-        {
-            ;
-        }
+        /* Dangerous step, because if encoderSteps is greater than int32_t range, it will fail.
+         * But it is acceptable for the simulation.
+         */
+        int32_t encoderSteps32 = static_cast<int32_t>(encoderSteps); /* [steps] */
 
-        steps = static_cast<int16_t>(encoderSteps);
+        /* Get into the range of a unsigned 16-bit value. */
+        encoderSteps32 %= static_cast<int32_t>(UINT16_MAX); /* [steps] */
+
+        /* Sign is automatically handled by just casting to signed 16-bit value. */
+        steps = static_cast<int16_t>(encoderSteps32); /* [steps] */
     }
 
     return steps;
