@@ -66,6 +66,7 @@ bool IMU::init()
         m_accelerometer->enable(m_simTime.getTimeStep());
         m_gyro->enable(m_simTime.getTimeStep());
         m_magnetometer->enable(m_simTime.getTimeStep());
+        isInitializationSuccessful = true;
     }
     return isInitializationSuccessful;
 }

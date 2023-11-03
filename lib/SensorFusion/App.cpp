@@ -102,7 +102,7 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    /* Send sensor data periodically. */
+    /* Send sensor data periodically if new data is available. */
     if ((true == m_sendSensorsDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
         (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
