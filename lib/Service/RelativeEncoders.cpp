@@ -120,7 +120,9 @@ int16_t RelativeEncoders::calculate(int16_t absSteps, int16_t refPoint) const
 {
     int16_t diffSteps = absSteps - refPoint;
 
-    /* Wrap around in forward or backword direction? */
+    /* Wrap around in forward or backward direction?
+     * In both cases the difference must be multiplied with -1.
+     */
     if (((0 > absSteps) && (0 < refPoint)) || ((0 < absSteps) && (0 > refPoint)))
     {
         diffSteps *= -1;
