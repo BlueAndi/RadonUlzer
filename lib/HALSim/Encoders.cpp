@@ -146,7 +146,7 @@ void Encoders::overflowProtection(double& lastPos, double pos)
         double deltaPosM = pos - lastPos;                                           /* [m] */
 
         /* Protect against delta position overflow (16-bit). */
-        if (0.0f <= deltaPosM)
+        if (0.0F <= deltaPosM)
         {
             if (OVERFLOW_DELTA_POS <= deltaPosM)
             {
