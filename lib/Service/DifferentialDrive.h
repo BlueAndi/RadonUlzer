@@ -204,7 +204,7 @@ private:
     /**
      * The PID proportional factor denominator for the speed control.
      */
-    static const int16_t PID_P_DENOMINATOR = 1;
+    static const int16_t PID_P_DENOMINATOR = 10;
 
     /**
      * The PID integral factor numerator for the speed control.
@@ -214,7 +214,7 @@ private:
     /**
      * The PID integral factor denominator for the speed control.
      */
-    static const int16_t PID_I_DENOMINATOR = 40;
+    static const int16_t PID_I_DENOMINATOR = 100;
 
     /**
      * The PID derivative factor numerator for the speed control.
@@ -224,7 +224,7 @@ private:
     /**
      * The PID derivative factor denominator for the speed control.
      */
-    static const int16_t PID_D_DENOMINATOR = 200;
+    static const int16_t PID_D_DENOMINATOR = 400;
 
     int16_t m_isInit;    /**< Used to determine the initialization in the first time process() is called. */
     bool    m_isEnabled; /**< Enable/Disable the differential drive control. */
