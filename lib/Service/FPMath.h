@@ -55,6 +55,9 @@
 /** Fixpoint 2 * PI [mrad] */
 #define FP_2PI() (static_cast<int32_t>(2000.0f * PI))
 
+/** Fixpoint 4 * PI [mrad] */
+#define FP_4PI() (static_cast<int32_t>(4000.0f * PI))
+
 /** Convert value from mrad to deg. */
 #define MRAD2DEG(__mrad) ((static_cast<int32_t>(__mrad) * static_cast<int32_t>(360)) / FP_2PI())
 
