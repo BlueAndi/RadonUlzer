@@ -65,18 +65,6 @@ static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t
  * Local Variables
  *****************************************************************************/
 
-/* Initialize channel name for receiving commands. */
-const char* App::CH_NAME_CMD = "REMOTE_CMD";
-
-/* Initialize channel name for sending command responses. */
-const char* App::CH_NAME_RSP = "REMOTE_RSP";
-
-/* Initialize channel name for receiving commands. */
-const char* App::CH_NAME_MOTOR_SPEEDS = "MOT_SPEEDS";
-
-/* Initialize channel name for sending line sensors data. */
-const char* App::CH_NAME_LINE_SENSORS = "LINE_SENS";
-
 /** Only in remote control state its possible to control the robot. */
 static bool gIsRemoteCtrlActive = false;
 
@@ -87,23 +75,21 @@ static bool gIsRemoteCtrlActive = false;
 void App::setup()
 {
     Board::getInstance().init();
-    ILineSensors& lineSensors          = Board::getInstance().getLineSensors();
-    uint8_t       maxLineSensors       = lineSensors.getNumLineSensors();
-    uint8_t       lineSensorChannelDlc = maxLineSensors * sizeof(uint16_t);
 
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
     m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
 
     /* Remote control commands/responses */
-    m_smpServer.subscribeToChannel(CH_NAME_CMD, App_cmdChannelCallback);
-    m_smpChannelIdRemoteCtrlRsp = m_smpServer.createChannel(CH_NAME_RSP, sizeof(RemoteCtrlState::RspId));
+    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
+    m_smpChannelIdRemoteCtrlRsp =
+        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
 
     /* Receiving linear motor speed left/right */
-    m_smpServer.subscribeToChannel(CH_NAME_MOTOR_SPEEDS, App_motorSpeedsChannelCallback);
+    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedsChannelCallback);
 
     /* Providing line sensor data */
-    m_smpChannelIdLineSensors = m_smpServer.createChannel(CH_NAME_LINE_SENSORS, lineSensorChannelDlc);
+    m_smpChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
 }
 
 void App::loop()
@@ -163,9 +149,9 @@ void App::sendRemoteControlResponses()
     /* Send only on change. */
     if (remoteControlRspId != m_lastRemoteControlRspId)
     {
-        const uint8_t* payload = reinterpret_cast<const uint8_t*>(&remoteControlRspId);
+        const CommandResponse* payload = reinterpret_cast<const CommandResponse*>(&remoteControlRspId);
 
-        (void)m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, payload, sizeof(remoteControlRspId));
+        (void)m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 
         m_lastRemoteControlRspId = remoteControlRspId;
     }
@@ -177,17 +163,19 @@ void App::sendLineSensorsData() const
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         lineSensorIdx    = 0U;
-    uint8_t         payload[maxLineSensors * sizeof(uint16_t)];
+    LineSensorData  payload;
 
-    while (maxLineSensors > lineSensorIdx)
+    if (LINE_SENSOR_CHANNEL_DLC == maxLineSensors * sizeof(uint16_t))
     {
-        Util::uint16ToByteArray(&payload[lineSensorIdx * sizeof(uint16_t)], sizeof(uint16_t),
-                                lineSensorValues[lineSensorIdx]);
+        while (maxLineSensors > lineSensorIdx)
+        {
+            payload.lineSensorData[lineSensorIdx] = lineSensorValues[lineSensorIdx];
 
-        ++lineSensorIdx;
+            ++lineSensorIdx;
+        }
     }
 
-    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, payload, sizeof(payload));
+    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************
@@ -222,16 +210,9 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  */
 static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
 {
-    if ((nullptr != payload) && ((2U * sizeof(uint16_t)) == payloadSize) && (true == gIsRemoteCtrlActive))
+    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
     {
-        int16_t linearSpeedLeft;
-        int16_t linearSpeedRight;
-        bool convResultLSL = Util::byteArrayToInt16(&payload[0U * sizeof(int16_t)], sizeof(int16_t), linearSpeedLeft);
-        bool convResultLSR = Util::byteArrayToInt16(&payload[1U * sizeof(int16_t)], sizeof(int16_t), linearSpeedRight);
-
-        if ((true == convResultLSL) && (true == convResultLSR))
-        {
-            DifferentialDrive::getInstance().setLinearSpeed(linearSpeedLeft, linearSpeedRight);
-        }
+        const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
+        DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
     }
 }

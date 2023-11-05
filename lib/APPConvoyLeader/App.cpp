@@ -114,20 +114,12 @@ void App::loop()
 
 void App::reportPosition()
 {
-    int32_t xPos;
-    int32_t yPos;
-    uint8_t outBuf[POSITION_CHANNEL_DLC];
-
-    Odometry::getInstance().getPosition(xPos, yPos);
-
-    Util::int32ToByteArray(&outBuf[0U], (sizeof(outBuf) - sizeof(int32_t)), xPos);
-    Util::int32ToByteArray(&outBuf[4U], (sizeof(outBuf) - sizeof(int32_t)), yPos);
-
-    m_smpServer.sendData(POSITION_CHANNEL, outBuf, sizeof(outBuf));
+    ; /* Do nothing. */
 }
 
 void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
 {
+    ; /* Do nothing. */
 }
 
 /******************************************************************************
