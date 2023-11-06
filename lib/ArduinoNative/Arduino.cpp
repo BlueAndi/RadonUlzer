@@ -171,6 +171,10 @@ extern int main(int argc, char** argv)
     Keyboard&    keyboard = Board::getInstance().getKeyboard();
     PrgArguments prgArguments;
 
+    /* Remove any buffering from stout and stderr to get the printed information immediately. */
+    (void)setvbuf(stdout, NULL, _IONBF, 0);
+    (void)setvbuf(stderr, NULL, _IONBF, 0);
+
     status = handleCommandLineArguments(prgArguments, argc, argv);
 
     if (0 == status)
@@ -303,10 +307,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             errno            = 0;                      /* Reset Error Register */
             long parsedValue = strtol(optarg, &p, 10); /* Long value parsed from string. */
 
-            if (('\0' == *p) &&                        /* Make sure the string is completely read. */
-                (0 == errno) &&                        /* No Errors were produced. */
-                (UINT16_MAX >= parsedValue) &&         /* No overflow of uint16_t to allow direct casting. */
-                (0U <= parsedValue))                   /* No negative values. */
+            if (('\0' == *p) &&                /* Make sure the string is completely read. */
+                (0 == errno) &&                /* No Errors were produced. */
+                (UINT16_MAX >= parsedValue) && /* No overflow of uint16_t to allow direct casting. */
+                (0U <= parsedValue))           /* No negative values. */
             {
                 prgArguments.socketServerPort = parsedValue;
             }
@@ -330,7 +334,7 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         case 'h': /* Help */
             /* fallthrough */
 
-        default:                                                    /* Default */
+        default: /* Default */
             printf("Usage: %s <option(s)>\nOptions:\n", programName);
             printf("\t-h\t\t\tShow this help message.\n");          /* Help */
             printf("\t-p <PORT NUMBER>\tSet SocketServer port.\n"); /* Port */
