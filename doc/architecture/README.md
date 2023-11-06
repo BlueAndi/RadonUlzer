@@ -70,6 +70,10 @@ Base equations:
 Orientation:
 * $alpha [rad] = \frac{distanceRight [mm] - distanceLeft [mm]}{wheelBase [mm]}$
 * $orientation' [rad] = orientation [rad] + alpha [rad]$
+* $orientation' [rad] = orientation [rad]~\%~2\pi$
+* $-2\pi < Orientation < 2\pi$
+* After wrapping on the positive limit $2\pi$, the orientation remains positive and starts from 0 again.
+* After wrapping on the negative limit $2\pi$, the orientation remains negative and starts from 0 again.
 
 Position:
 * $dX [mm] = -distanceCenter [mm] \cdot sin(orientation' [rad])$ <- Approximation for performance reason

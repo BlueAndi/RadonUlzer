@@ -197,20 +197,7 @@ int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, i
 
     /* Calculate orientation */
     orientation += alpha;
-
-    /* -2*PI < alpha < +2*PI */
-    if (FP_2PI() < orientation)
-    {
-        orientation = orientation - FP_4PI();
-    }
-    else if (-FP_2PI() > orientation)
-    {
-        orientation = orientation + FP_4PI();
-    }
-    else
-    {
-        ;
-    }
+    orientation %= FP_2PI(); /* -2*PI < orientation < +2*PI */
 
     return orientation;
 }
