@@ -27,7 +27,7 @@
 /**
  * @brief  ConvoyLeader application
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -46,6 +46,7 @@
 #include <StateMachine.h>
 #include <SimpleTimer.h>
 #include <SerialMuxProtServer.hpp>
+#include "SerialMuxChannels.h"
 #include <Arduino.h>
 
 /******************************************************************************
@@ -60,13 +61,15 @@
 class App
 {
 public:
-
     /**
      * Construct the convoy leader application.
      */
     App() :
+        m_serialMuxProtChannelIdOdometry(0U),
+        m_serialMuxProtChannelIdSpeed(0U),
         m_systemStateMachine(),
         m_controlInterval(),
+        m_reportTimer(),
         m_smpServer(Serial)
     {
     }
@@ -89,18 +92,20 @@ public:
     void loop();
 
 private:
-
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
-    /** Name of Channel to send Position Data to. */
-    static const char* POSITION_CHANNEL;
-
-    /** DLC of Position Channel */
-    static const uint8_t POSITION_CHANNEL_DLC = 8U;
+    /** Current data reporting period in ms. */
+    static const uint32_t REPORTING_PERIOD = 50U;
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
+
+    /** SerialMuxProt Channel id for sending the current odometry. */
+    uint8_t m_serialMuxProtChannelIdOdometry;
+
+    /** SerialMuxProt Channel id for sending the current speed. */
+    uint8_t m_serialMuxProtChannelIdSpeed;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -108,27 +113,30 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
+    /** Timer for reporting current data through SerialMuxProt. */
+    SimpleTimer m_reportTimer;
+
     /**
      * SerialMuxProt Server Instance
      *
-     * @tparam tMaxChannels set to 10, as App does not require
-     * more channels for external communication.
+     * @tparam tMaxChannels set to MAX_CHANNELS, defined in SerialMuxChannels.h.
      */
-    SerialMuxProtServer<10U> m_smpServer;
+    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
 
     /**
-     * Report the current position of the robot using the Odometry data.
+     * Report the current position and heading of the robot using the Odometry data.
      * Sends data through the SerialMuxProtServer.
      */
-    void reportPosition();
+    void reportOdometry();
 
     /**
-     * Callback for incoming data from the Position Channel.
-     * @param[in] payload Byte buffer containing incomming data.
-     * @param[in] payloadSize Number of bytes received.
+     * Report the current motor speeds of the robot using the Speedometer data.
+     * Sends data through the SerialMuxProtServer.
      */
-    static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
+    void reportSpeed();
 
+private:
+    /* An instance shall not be copied or assigned. */
     App(const App& app);
     App& operator=(const App& app);
 };

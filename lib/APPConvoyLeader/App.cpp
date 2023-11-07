@@ -56,12 +56,11 @@
  * Prototypes
  *****************************************************************************/
 
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-/* Name of Channel to send Position Data to. */
-const char* App::POSITION_CHANNEL = "POSITION";
 
 /******************************************************************************
  * Public Methods
@@ -73,7 +72,17 @@ void App::setup()
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_smpServer.createChannel(POSITION_CHANNEL, POSITION_CHANNEL_DLC);
+
+    /* Setup SerialMuxProt Channels. */
+    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
+    m_serialMuxProtChannelIdSpeed    = m_smpServer.createChannel(SPEED_CHANNEL_NAME, SPEED_CHANNEL_DLC);
+    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+
+    /* Channel sucesfully created? */
+    if ((0U != m_serialMuxProtChannelIdOdometry) && (0U != m_serialMuxProtChannelIdSpeed))
+    {
+        m_reportTimer.start(REPORTING_PERIOD);
+    }
 }
 
 void App::loop()
@@ -95,10 +104,16 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-        /* Send Position to SerialMuxProt Client */
-        reportPosition();
-
         m_controlInterval.restart();
+    }
+
+    if (true == m_reportTimer.isTimeout())
+    {
+        /* Send current data to SerialMuxProt Client */
+        reportOdometry();
+        reportSpeed();
+
+        m_reportTimer.restart();
     }
 
     m_systemStateMachine.process();
@@ -112,14 +127,35 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::reportPosition()
+void App::reportOdometry()
 {
-    ; /* Do nothing. */
+    Odometry&    odometry = Odometry::getInstance();
+    IDisplay&    display  = Board::getInstance().getDisplay();
+    OdometryData payload;
+    int32_t      xPos = 0;
+    int32_t      yPos = 0;
+
+    odometry.getPosition(xPos, yPos);
+    payload.xPos        = xPos;
+    payload.yPos        = yPos;
+    payload.orientation = odometry.getOrientation();
+
+    m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+
+    display.clear();
+    display.print("Heading:");
+    display.gotoXY(0U, 1U);
+    display.print(payload.orientation);
 }
 
-void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
+void App::reportSpeed()
 {
-    ; /* Do nothing. */
+    Speedometer& speedometer = Speedometer::getInstance();
+    SpeedData    payload;
+    payload.left  = speedometer.getLinearSpeedLeft();
+    payload.right = speedometer.getLinearSpeedRight();
+
+    m_smpServer.sendData(m_serialMuxProtChannelIdSpeed, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************
@@ -129,3 +165,18 @@ void App::positionCallback(const uint8_t* payload, const uint8_t payloadSize)
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Receives motor speed setpoints over SerialMuxProt channel.
+ *
+ * @param[in] payload       Motor speed left/right
+ * @param[in] payloadSize   Size of twice motor speeds
+ */
+void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+{
+    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
+    {
+        const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
+        DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+    }
+}
