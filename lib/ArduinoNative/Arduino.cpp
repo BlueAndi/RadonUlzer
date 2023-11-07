@@ -64,7 +64,7 @@
 /** This type defines the possible program arguments. */
 typedef struct
 {
-    uint16_t    socketServerPort; /**< Socket server port */
+    const char* socketServerPort; /**< Socket server port */
     const char* name;             /**< Robot name */
 
 } PrgArguments;
@@ -111,7 +111,7 @@ static SimTime* gSimTime = nullptr;
 /**
  * Default port used for socket communications.
  */
-static const uint16_t SOCKET_SERVER_DEFAULT_PORT = 65432U;
+static const char* SOCKET_SERVER_DEFAULT_PORT = "65432";
 
 /**
  * Maximum number of socket connections.
@@ -186,7 +186,7 @@ extern int main(int argc, char** argv)
         }
         else
         {
-            printf("SocketServer ready on port %d.\n", prgArguments.socketServerPort);
+            printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
 
             /* Get simulation time handler. It will be used by millis() and delay(). */
             gSimTime = &Board::getInstance().getSimTime();
@@ -301,27 +301,9 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         switch (option)
         {
         case 'p': /* Port */
-        {
-            /* Parse Port Number */
-            char* p;                                   /* End Pointer*/
-            errno            = 0;                      /* Reset Error Register */
-            long parsedValue = strtol(optarg, &p, 10); /* Long value parsed from string. */
-
-            if (('\0' == *p) &&                /* Make sure the string is completely read. */
-                (0 == errno) &&                /* No Errors were produced. */
-                (UINT16_MAX >= parsedValue) && /* No overflow of uint16_t to allow direct casting. */
-                (0U <= parsedValue))           /* No negative values. */
-            {
-                prgArguments.socketServerPort = parsedValue;
-            }
-            else
-            {
-                printf("Error parsing port argument.\n");
-                status = -1;
-            }
-
+            printf("Using Socket Client in Port \"%s\".\n", optarg);
+            prgArguments.socketServerPort = optarg;
             break;
-        }
 
         case 'n': /* Name */
             printf("Instance has been named \"%s\".\n", optarg);
