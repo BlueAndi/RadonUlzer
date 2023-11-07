@@ -39,7 +39,7 @@
 #include <StateMachine.h>
 #include <Logging.h>
 #include <Util.h>
-#include "LineSensorsCalibrationState.h"
+#include "ReadyState.h"
 #include "ErrorState.h"
 
 /******************************************************************************
@@ -218,7 +218,7 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
         LOG_DEBUG_VAL(TAG, "Calibrated max. speed (steps/s): ", maxSpeed);
         LOG_DEBUG_VAL(TAG, "Calibrated max. speed (mm/s): ", maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
 
-        sm.setState(&LineSensorsCalibrationState::getInstance());
+        sm.setState(&ReadyState::getInstance());
     }
 }
 
