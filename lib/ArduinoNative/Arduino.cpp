@@ -334,8 +334,8 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     {
         printf("Usage: %s <option(s)>\nOptions:\n", programName);
         printf("\t-h\t\t\tShow this help message.\n");                /* Help */
-        printf("\t-n <NAME>\t\tSet robot name.");                     /* Robot Name */
-        printf("\t-p <PORT NUMBER>\tSet SocketServer port.");         /* SocketServer Port */
+        printf("\t-n <NAME>\t\tSet robot name.\n");                   /* Robot Name */
+        printf("\t-p <PORT NUMBER>\tSet SocketServer port.\n");       /* SocketServer Port */
         printf(" Default: %s\n", PRG_ARG_SOCKET_SERVER_PORT_DEFAULT); /* SocketServer port default value*/
     }
 
@@ -349,8 +349,8 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
  */
 static void showPrgArguments(const PrgArguments& prgArgs)
 {
-    printf("Robot name             : %s\n", prgArgs.robotName);
-    printf("SocketServer Port      : %s\n", prgArgs.socketServerPort);
+    printf("Robot name       : %s\n", prgArgs.robotName);
+    printf("SocketServer Port: %s\n", prgArgs.socketServerPort);
     /* Skip verbose flag. */
 }
 
