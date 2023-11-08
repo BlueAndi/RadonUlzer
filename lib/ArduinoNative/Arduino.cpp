@@ -61,13 +61,17 @@
  * Types and classes
  *****************************************************************************/
 
+#ifndef UNIT_TEST
+
 /** This type defines the possible program arguments. */
 typedef struct
 {
     const char* socketServerPort; /**< Socket server port */
-    const char* name;             /**< Robot name */
-
+    const char* robotName;        /**< Robot name */
+    bool        verbose;          /**< Show verbose information */
 } PrgArguments;
+
+#endif
 
 /******************************************************************************
  * Prototypes
@@ -75,7 +79,13 @@ typedef struct
 
 extern void setup();
 extern void loop();
+
+#ifndef UNIT_TEST
+
 static int  handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv);
+static void showPrgArguments(const PrgArguments& prgArgs);
+
+#endif
 
 /******************************************************************************
  * Local Variables
@@ -108,10 +118,14 @@ static const int MAX_TIME_STEP = 10;
  */
 static SimTime* gSimTime = nullptr;
 
-/**
- * Default port used for socket communications.
- */
-static const char* SOCKET_SERVER_DEFAULT_PORT = "65432";
+/** Program argument default value of the robot name. */
+static const char* PRG_ARG_ROBOT_NAME_DEFAULT = "";
+
+/** Default port used for socket communications. */
+static const char* PRG_ARG_SOCKET_SERVER_PORT_DEFAULT = "65432";
+
+/** Program argument default value of the verbose flag. */
+static bool PRG_ARG_VERBOSE_DEFAULT = false;
 
 /**
  * Maximum number of socket connections.
@@ -171,6 +185,8 @@ extern int main(int argc, char** argv)
     Keyboard&    keyboard = Board::getInstance().getKeyboard();
     PrgArguments prgArguments;
 
+    printf("\n*** Radon Ulzer ***\n");
+
     /* Remove any buffering from stout and stderr to get the printed information immediately. */
     (void)setvbuf(stdout, NULL, _IONBF, 0);
     (void)setvbuf(stderr, NULL, _IONBF, 0);
@@ -179,6 +195,13 @@ extern int main(int argc, char** argv)
 
     if (0 == status)
     {
+        /* Show used arguments only in verbose mode. */
+        if (true == prgArguments.verbose)
+        {
+            showPrgArguments(prgArguments);
+        }
+
+        /* Initialize the socket server. */
         if (false == gSocketStream.init(prgArguments.socketServerPort, SOCKET_SERVER_MAX_CONNECTIONS))
         {
             printf("Error initializing SocketServer.\n");
@@ -186,7 +209,10 @@ extern int main(int argc, char** argv)
         }
         else
         {
-            printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
+            if (true == prgArguments.verbose)
+            {
+                printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
+            }
 
             /* Get simulation time handler. It will be used by millis() and delay(). */
             gSimTime = &Board::getInstance().getSimTime();
@@ -293,21 +319,24 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     int         option           = getopt(argc, argv, availableOptions);
 
     /* Set default values */
-    prgArguments.socketServerPort = SOCKET_SERVER_DEFAULT_PORT;
-    prgArguments.name             = nullptr;
+    prgArguments.socketServerPort = PRG_ARG_SOCKET_SERVER_PORT_DEFAULT;
+    prgArguments.robotName        = PRG_ARG_ROBOT_NAME_DEFAULT;
+    prgArguments.verbose          = PRG_ARG_VERBOSE_DEFAULT;
 
     while ((-1 != option) && (0 == status))
     {
         switch (option)
         {
-        case 'p': /* Port */
-            printf("Using Socket Client in Port \"%s\".\n", optarg);
+        case 'n': /* Name */
+            prgArguments.robotName = optarg;
+            break;
+
+        case 'p': /* SocketServer Port */
             prgArguments.socketServerPort = optarg;
             break;
 
-        case 'n': /* Name */
-            printf("Instance has been named \"%s\".\n", optarg);
-            prgArguments.name = optarg;
+        case 'v': /* Verbose */
+            prgArguments.verbose = true;
             break;
 
         case '?': /* Unknown */
@@ -317,10 +346,6 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             /* fallthrough */
 
         default: /* Default */
-            printf("Usage: %s <option(s)>\nOptions:\n", programName);
-            printf("\t-h\t\t\tShow this help message.\n");          /* Help */
-            printf("\t-p <PORT NUMBER>\tSet SocketServer port.\n"); /* Port */
-            printf("\t-n <NAME>\t\tSet instace name.");             /* Name */
             status = -1;
             break;
         }
@@ -328,7 +353,29 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         option = getopt(argc, argv, availableOptions);
     }
 
+    /* Does the user need help? */
+    if (0 > status)
+    {
+        printf("Usage: %s <option(s)>\nOptions:\n", programName);
+        printf("\t-h\t\t\tShow this help message.\n");                /* Help */
+        printf("\t-n <NAME>\t\tSet robot name.");                     /* Robot Name */
+        printf("\t-p <PORT NUMBER>\tSet SocketServer port.");         /* SocketServer Port */
+        printf(" Default: %s\n", PRG_ARG_SOCKET_SERVER_PORT_DEFAULT); /* SocketServer port default value*/
+    }
+
     return status;
+}
+
+/**
+ * Show program arguments on the console.
+ *
+ * @param[in] prgArgs   Program arguments
+ */
+static void showPrgArguments(const PrgArguments& prgArgs)
+{
+    printf("Robot name             : %s\n", prgArgs.robotName);
+    printf("SocketServer Port      : %s\n", prgArgs.socketServerPort);
+    /* Skip verbose flag. */
 }
 
 #endif
