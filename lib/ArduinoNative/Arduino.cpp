@@ -273,33 +273,9 @@ extern void delay(unsigned long ms)
     }
 }
 
-#endif
-
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-#ifdef UNIT_TEST
-
-/**
- * Handle the Arguments passed to the programm.
- *
- * @param[in] argc Program argument count
- * @param[in] argv Program argument vector
- *
- * @returns 0 if handling was succesful. Otherwise, -1
- */
-static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv)
-{
-    /* Not implemented. */
-    (void)prgArguments;
-    (void)argc;
-    (void)argv;
-
-    return 0;
-}
-
-#else
 
 /**
  * Handle the arguments passed to the programm.
