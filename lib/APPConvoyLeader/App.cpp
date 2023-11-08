@@ -130,7 +130,6 @@ void App::loop()
 void App::reportOdometry()
 {
     Odometry&    odometry = Odometry::getInstance();
-    IDisplay&    display  = Board::getInstance().getDisplay();
     OdometryData payload;
     int32_t      xPos = 0;
     int32_t      yPos = 0;
@@ -141,11 +140,6 @@ void App::reportOdometry()
     payload.orientation = odometry.getOrientation();
 
     m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-
-    display.clear();
-    display.print("Heading:");
-    display.gotoXY(0U, 1U);
-    display.print(payload.orientation);
 }
 
 void App::reportSpeed()
