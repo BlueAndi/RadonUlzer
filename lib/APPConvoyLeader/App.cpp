@@ -139,7 +139,8 @@ void App::reportOdometry()
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
 
-    m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 void App::reportSpeed()
@@ -149,7 +150,8 @@ void App::reportSpeed()
     payload.left  = speedometer.getLinearSpeedLeft();
     payload.right = speedometer.getLinearSpeedRight();
 
-    m_smpServer.sendData(m_serialMuxProtChannelIdSpeed, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdSpeed, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
 }
 
 /******************************************************************************
