@@ -135,10 +135,9 @@ private:
      */
     void reportSpeed();
 
-private:
-    /* An instance shall not be copied or assigned. */
-    App(const App& app);
-    App& operator=(const App& app);
+    /* Not allowed. */
+    App(const App& app);            /**< Copy construction of an instance. */
+    App& operator=(const App& app); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

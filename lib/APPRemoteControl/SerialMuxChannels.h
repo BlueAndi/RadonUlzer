@@ -76,26 +76,26 @@
 /** Struct of the "Command" channel payload. */
 typedef struct _Command
 {
-    uint8_t commandId;
+    uint8_t commandId; /**< Command ID */
 } __attribute__((packed)) Command;
 
 /** Struct of the "Command Response" channel payload. */
 typedef struct _CommandResponse
 {
-    uint8_t response;
+    uint8_t response; /**< Response to the command */
 } __attribute__((packed)) CommandResponse;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;
-    int16_t right;
+    int16_t left;  /**< Left motor speed [steps/s] */
+    int16_t right; /**< Right motor speed [steps/s] */
 } __attribute__((packed)) SpeedData;
 
 /** Struct of the "Line Sensor" channel payload. */
 typedef struct _LineSensorData
 {
-    uint16_t lineSensorData[5U];
+    uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
 
 /******************************************************************************

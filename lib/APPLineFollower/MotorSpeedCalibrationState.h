@@ -137,8 +137,9 @@ private:
     {
     }
 
-    MotorSpeedCalibrationState(const MotorSpeedCalibrationState& state);
-    MotorSpeedCalibrationState& operator=(const MotorSpeedCalibrationState& state);
+    /* Not allowed. */
+    MotorSpeedCalibrationState(const MotorSpeedCalibrationState& state); /**< Copy construction of an instance. */
+    MotorSpeedCalibrationState& operator=(const MotorSpeedCalibrationState& state); /**< Assignment of an instance. */
 
     /**
      * Determine the max. motor speed, considering both driving directions.

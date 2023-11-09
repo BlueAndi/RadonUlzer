@@ -41,22 +41,27 @@
  *****************************************************************************/
 
 #ifndef LOG_FATAL_ENABLE
+/** Enable/disable fatal log messages. */
 #define LOG_FATAL_ENABLE (1)
 #endif /* LOG_FATAL_ENABLE */
 
 #ifndef LOG_ERROR_ENABLE
+/** Enable/disable error log messages. */
 #define LOG_ERROR_ENABLE (1)
 #endif /* LOG_ERROR_ENABLE */
 
 #ifndef LOG_WARNING_ENABLE
+/** Enable/disable warning log messages. */
 #define LOG_WARNING_ENABLE (1)
 #endif /* LOG_WARNING_ENABLE */
 
 #ifndef LOG_INFO_ENABLE
+/** Enable/disable info log messages. */
 #define LOG_INFO_ENABLE (1)
 #endif /* LOG_INFO_ENABLE */
 
 #ifndef LOG_DEBUG_ENABLE
+/** Enable/disable debug log messages. */
 #define LOG_DEBUG_ENABLE (0)
 #endif /* LOG_DEBUG_ENABLE */
 
@@ -71,10 +76,15 @@
 
 #if (0 == LOG_FATAL_ENABLE)
 
+/** Log fatal error message. */
 #define LOG_FATAL(_filename, _msg)
+/** Log fatal error message with additional value. */
 #define LOG_FATAL_VAL(_filename, _msg, _val)
+/** Log fatal error header. */
 #define LOG_FATAL_HEAD(_filename)
+/** Log fatal error message, without line feed. */
 #define LOG_FATAL_MSG(_msg)
+/** Log fatal error tail. */
 #define LOG_FATAL_TAIL()
 
 #else /* (0 == LOG_FATAL_ENABLE) */
@@ -99,10 +109,15 @@
 
 #if (0 == LOG_ERROR_ENABLE)
 
+/** Log error message. */
 #define LOG_ERROR(_filename, _msg)
+/** Log error message with additional value. */
 #define LOG_ERROR_VAL(_filename, _msg, _val)
+/** Log error header. */
 #define LOG_ERROR_HEAD(_filename)
+/** Log error error message, without line feed. */
 #define LOG_ERROR_MSG(_msg)
+/** Log error tail. */
 #define LOG_ERROR_TAIL()
 
 #else /* (0 == LOG_ERROR_ENABLE) */
@@ -127,10 +142,15 @@
 
 #if (0 == LOG_WARNING_ENABLE)
 
+/** Log warning message. */
 #define LOG_WARNING(_filename, _msg)
+/** Log warning message with additional value. */
 #define LOG_WARNING_VAL(_filename, _msg, _val)
+/** Log warning header. */
 #define LOG_WARNING_HEAD(_filename)
+/** Log warning message, without line feed. */
 #define LOG_WARNING_MSG(_msg)
+/** Log warning tail. */
 #define LOG_WARNING_TAIL()
 
 #else /* (0 == LOG_WARNING_ENABLE) */
@@ -155,10 +175,15 @@
 
 #if (0 == LOG_INFO_ENABLE)
 
+/** Log info message. */
 #define LOG_INFO(_filename, _msg)
+/** Log info message with additional value. */
 #define LOG_INFO_VAL(_filename, _msg, _val)
+/** Log info header. */
 #define LOG_INFO_HEAD(_filename)
+/** Log info message, without line feed. */
 #define LOG_INFO_MSG(_msg)
+/** Log info tail. */
 #define LOG_INFO_TAIL()
 
 #else /* (0 == LOG_INFO_ENABLE) */
@@ -183,10 +208,15 @@
 
 #if (0 == LOG_DEBUG_ENABLE)
 
-#define LOG_DEBUG(_filename, _msg)           (void)(_filename)
-#define LOG_DEBUG_VAL(_filename, _msg, _val) (void)(_filename)
-#define LOG_DEBUG_HEAD(_filename)            (void)(_filename)
+/** Log debug message. */
+#define LOG_DEBUG(_filename, _msg)
+/** Log debug message with additional value. */
+#define LOG_DEBUG_VAL(_filename, _msg, _val)
+/** Log debug header. */
+#define LOG_DEBUG_HEAD(_filename)
+/** Log debug message, without line feed. */
 #define LOG_DEBUG_MSG(_msg)
+/** Log debug tail. */
 #define LOG_DEBUG_TAIL()
 
 #else /* (0 == LOG_DEBUG_ENABLE) */
@@ -283,9 +313,9 @@ namespace Logging
 
 }; // namespace Logging
 
-    /******************************************************************************
-     * Functions
-     *****************************************************************************/
+/******************************************************************************
+ * Functions
+ *****************************************************************************/
 
 #endif /* __LOGGING_H__ */
 /** @} */
