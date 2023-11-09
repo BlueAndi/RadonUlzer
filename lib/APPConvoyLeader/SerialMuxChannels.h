@@ -25,89 +25,73 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Startup state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Channel structure definition for the SerialMuxProt.
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *
+ * @addtogroup Application
+ *
+ * @{
  */
+#ifndef SERIAL_MUX_CHANNELS_H
+#define SERIAL_MUX_CHANNELS_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "StartupState.h"
-#include <Board.h>
-#include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
-#include "Sound.h"
 
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <Arduino.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-/******************************************************************************
- * Types and classes
- *****************************************************************************/
+/** Maximum number of SerialMuxProt Channels. */
+#define MAX_CHANNELS (10U)
+
+/** Name of Channel to send Odometry Data to. */
+#define ODOMETRY_CHANNEL_NAME "ODOMETRY"
+
+/** DLC of Odometry Channel */
+#define ODOMETRY_CHANNEL_DLC (sizeof(OdometryData))
+
+/** Name of Channel to send Speedometer Data to. */
+#define SPEED_CHANNEL_NAME "SPEED"
+
+/** DLC of Speedometer Channel */
+#define SPEED_CHANNEL_DLC (sizeof(SpeedData))
+
+/** Name of Channel to send Motor Speed Setpoints to. */
+#define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
+
+/** DLC of Speedometer Channel */
+#define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
 
 /******************************************************************************
- * Prototypes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void StartupState::entry()
+/** Struct of the "Odometry" channel payload. */
+typedef struct _OdometryData
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    int32_t xPos;        /**< X position [mm]. */
+    int32_t yPos;        /**< Y position [mm]. */
+    int32_t orientation; /**< Orientation [mrad]. */
+} __attribute__((packed)) OdometryData;
 
-    /* Initialize HAL */
-    Board::getInstance().init();
-
-    /* Surprise the audience. */
-    Sound::playStartup();
-
-    /* Show team id / team name */
-    display.clear();
-    display.print(TEAM_NAME_LINE_1);
-    display.gotoXY(0, 1);
-    display.print(TEAM_NAME_LINE_2);
-    delay(TEAM_NAME_DURATION);
-
-    /* Show operator info on LCD */
-    display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
-}
-
-void StartupState::process(StateMachine& sm)
+/** Struct of the "Speed" channel payload. */
+typedef struct _SpeedData
 {
-    sm.setState(&MotorSpeedCalibrationState::getInstance());
-}
-
-void StartupState::exit()
-{
-    /* Nothing to do */
-}
+    int16_t left;  /**< Left motor speed [steps/s]. */
+    int16_t right; /**< Right motor speed [steps/s]. */
+} __attribute__((packed)) SpeedData;
 
 /******************************************************************************
- * Protected Methods
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* SERIAL_MUX_CHANNELS_H */
+/** @} */

@@ -38,6 +38,7 @@
 #include "ReleaseTrackState.h"
 #include <Logging.h>
 #include <Util.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -59,11 +60,6 @@
  * Local Variables
  *****************************************************************************/
 
-/**
- * Logging source.
- */
-static const char* TAG = "RState";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -84,51 +80,12 @@ void ReadyState::entry()
 
     /* The line sensor value shall be output on console cyclic. */
     m_timer.start(SENSOR_VALUE_OUT_PERIOD);
+    DifferentialDrive::getInstance().enable();
 }
 
 void ReadyState::process(StateMachine& sm)
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
-
-    /* Shall track be released? */
-    if (true == buttonA.isPressed())
-    {
-        buttonA.waitForRelease();
-        sm.setState(&ReleaseTrackState::getInstance());
-    }
-    /* Shall the line sensor values be printed out on console? */
-    else if (true == m_timer.isTimeout())
-    {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char valueStr[10];
-
-        LOG_DEBUG_HEAD(TAG);
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-            
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-        
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
-    }
+    /* Do nothing. */
 }
 
 void ReadyState::exit()
