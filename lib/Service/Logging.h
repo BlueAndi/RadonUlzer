@@ -43,27 +43,27 @@
 #ifndef LOG_FATAL_ENABLE
 /** Enable/disable fatal log messages. */
 #define LOG_FATAL_ENABLE (1)
-#endif
+#endif /* LOG_FATAL_ENABLE */
 
 #ifndef LOG_ERROR_ENABLE
 /** Enable/disable error log messages. */
 #define LOG_ERROR_ENABLE (1)
-#endif
+#endif /* LOG_ERROR_ENABLE */
 
 #ifndef LOG_WARNING_ENABLE
 /** Enable/disable warning log messages. */
 #define LOG_WARNING_ENABLE (1)
-#endif
+#endif /* LOG_WARNING_ENABLE */
 
 #ifndef LOG_INFO_ENABLE
 /** Enable/disable info log messages. */
 #define LOG_INFO_ENABLE (1)
-#endif
+#endif /* LOG_INFO_ENABLE */
 
 #ifndef LOG_DEBUG_ENABLE
 /** Enable/disable debug log messages. */
 #define LOG_DEBUG_ENABLE (0)
-#endif
+#endif /* LOG_DEBUG_ENABLE */
 
 /******************************************************************************
  * Includes

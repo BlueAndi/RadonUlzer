@@ -88,14 +88,14 @@ typedef struct _CommandResponse
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;  /**< Left motor speed */
-    int16_t right; /**< Right motor speed */
+    int16_t left;  /**< Left motor speed [steps/s] */
+    int16_t right; /**< Right motor speed [steps/s] */
 } __attribute__((packed)) SpeedData;
 
 /** Struct of the "Line Sensor" channel payload. */
 typedef struct _LineSensorData
 {
-    uint16_t lineSensorData[5U]; /**< Line sensor data */
+    uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
 
 /******************************************************************************
