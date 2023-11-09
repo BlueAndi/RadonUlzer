@@ -209,11 +209,11 @@
 #if (0 == LOG_DEBUG_ENABLE)
 
 /** Log debug message. */
-#define LOG_DEBUG(_filename, _msg)
+#define LOG_DEBUG(_filename, _msg) (void)(_filename)
 /** Log debug message with additional value. */
-#define LOG_DEBUG_VAL(_filename, _msg, _val)
+#define LOG_DEBUG_VAL(_filename, _msg, _val) (void)(_filename)
 /** Log debug header. */
-#define LOG_DEBUG_HEAD(_filename)
+#define LOG_DEBUG_HEAD(_filename) (void)(_filename)
 /** Log debug message, without line feed. */
 #define LOG_DEBUG_MSG(_msg)
 /** Log debug tail. */
