@@ -77,16 +77,16 @@
 /** Struct of the "Odometry" channel payload. */
 typedef struct _OdometryData
 {
-    int32_t xPos;
-    int32_t yPos;
-    int32_t orientation;
+    int32_t xPos;        /**< X position. */
+    int32_t yPos;        /**< Y position. */
+    int32_t orientation; /**< Orientation. */
 } __attribute__((packed)) OdometryData;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;
-    int16_t right;
+    int16_t left;  /**< Left motor speed. */
+    int16_t right; /**< Right motor speed. */
 } __attribute__((packed)) SpeedData;
 
 /******************************************************************************
