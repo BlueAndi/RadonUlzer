@@ -27,7 +27,7 @@
 /**
  * @brief  Release track state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -111,8 +111,9 @@ private:
     {
     }
 
-    ReleaseTrackState(const ReleaseTrackState& state);
-    ReleaseTrackState& operator=(const ReleaseTrackState& state);
+    /* Not allowed. */
+    ReleaseTrackState(const ReleaseTrackState& state);            /**< Copy construction of an instance. */
+    ReleaseTrackState& operator=(const ReleaseTrackState& state); /**< Assignment of an instance. */
 
     /**
      * Show choosen parameter set on LCD.

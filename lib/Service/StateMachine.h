@@ -27,7 +27,7 @@
 /**
  * @brief  Statemachine
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -101,8 +101,9 @@ private:
     IState* m_currentState; /**< Current active state */
     IState* m_nextState;    /**< Next state */
 
-    StateMachine(const StateMachine& sm);
-    StateMachine& operator=(const StateMachine& sm);
+    /* Not allowed. */
+    StateMachine(const StateMachine& sm);            /**< Copy construction of an instance. */
+    StateMachine& operator=(const StateMachine& sm); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

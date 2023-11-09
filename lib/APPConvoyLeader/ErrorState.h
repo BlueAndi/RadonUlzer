@@ -27,7 +27,7 @@
 /**
  * @brief  Error state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -91,21 +91,20 @@ public:
 
     /**
      * Set error message, which to show on the display.
-     * 
+     *
      * @param[in] msg   Error message
      */
     void setErrorMsg(const char* msg);
 
 protected:
 private:
-
     /**
      * The error message string size in bytes, which
      * includes the terminating character.
      */
-    static const size_t ERROR_MSG_SIZE  = 20;
+    static const size_t ERROR_MSG_SIZE = 20;
 
-    char    m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
+    char m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
 
     /**
      * Default constructor.
@@ -122,8 +121,9 @@ private:
     {
     }
 
-    ErrorState(const ErrorState& state);
-    ErrorState& operator=(const ErrorState& state);
+    /* Not allowed. */
+    ErrorState(const ErrorState& state);            /**< Copy construction of an instance. */
+    ErrorState& operator=(const ErrorState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

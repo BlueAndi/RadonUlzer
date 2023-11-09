@@ -27,7 +27,7 @@
 /**
  * @brief  ConvoyLeader application
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -60,14 +60,10 @@
 class App
 {
 public:
-
     /**
      * Construct the convoy leader application.
      */
-    App() :
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_smpServer(Serial)
+    App() : m_systemStateMachine(), m_controlInterval(), m_smpServer(Serial)
     {
     }
 
@@ -89,7 +85,6 @@ public:
     void loop();
 
 private:
-
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
@@ -129,8 +124,9 @@ private:
      */
     static void positionCallback(const uint8_t* payload, const uint8_t payloadSize);
 
-    App(const App& app);
-    App& operator=(const App& app);
+    /* Not allowed. */
+    App(const App& app);            /**< Copy construction of an instance. */
+    App& operator=(const App& app); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

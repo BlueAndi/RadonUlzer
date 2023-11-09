@@ -124,8 +124,9 @@ private:
     /** Last remote control response id */
     RemoteCtrlState::RspId m_lastRemoteControlRspId;
 
-    App(const App& app);
-    App& operator=(const App& app);
+    /* Not allowed. */
+    App(const App& app);            /**< Copy construction of an instance. */
+    App& operator=(const App& app); /**< Assignment of an instance. */
 
     /**
      * Send remote control command responses on change.

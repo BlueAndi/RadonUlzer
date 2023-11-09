@@ -129,9 +129,9 @@ private:
     int16_t m_referencePointRight;
 
     /* Not allowed. */
-    RelativeEncoders();
-    RelativeEncoders(const RelativeEncoders& relEncoder);
-    RelativeEncoders& operator=(const RelativeEncoders& relEncoder);
+    RelativeEncoders();                                              /**< Default constructor. */
+    RelativeEncoders(const RelativeEncoders& relEncoder);            /**< Copy construction of an instance. */
+    RelativeEncoders& operator=(const RelativeEncoders& relEncoder); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
