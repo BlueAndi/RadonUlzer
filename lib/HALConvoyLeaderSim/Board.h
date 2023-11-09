@@ -205,7 +205,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -379,9 +379,15 @@ private:
         return m_keyboard;
     }
 
-    /* The main entry needs access to the simulation robot instance.
+    /**
+     * The main entry needs access to the simulation robot instance.
      * But all other application parts shall have no access, which is
      * solved by this friend.
+     *
+     * @param[in] argc  Number of arguments
+     * @param[in] argv  Arguments
+     *
+     * @return Exit code
      */
     friend int main(int argc, char** argv);
 };

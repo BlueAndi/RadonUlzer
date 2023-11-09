@@ -27,7 +27,7 @@
 /**
  * @brief  Remote control state
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Application
  *
  * @{
@@ -58,7 +58,6 @@
 class RemoteCtrlState : public IState
 {
 public:
-
     /** Remote control commands. */
     typedef enum : uint8_t
     {
@@ -112,7 +111,7 @@ public:
     /**
      * Execute command.
      * If a command is pending, it won't be executed.
-     * 
+     *
      * @param[in] cmdId The id of the command which to execute.
      */
     void execute(CmdId cmdId)
@@ -126,7 +125,7 @@ public:
 
     /**
      * Get command response of current command.
-     * 
+     *
      * @return Command response
      */
     RspId getCmdRsp() const
@@ -136,16 +135,13 @@ public:
 
 protected:
 private:
-
-    CmdId m_cmdId;  /**< Current pending command. */
-    RspId m_rspId;  /**< Current command response. */
+    CmdId m_cmdId; /**< Current pending command. */
+    RspId m_rspId; /**< Current command response. */
 
     /**
      * Default constructor.
      */
-    RemoteCtrlState() :
-        m_cmdId(CMD_ID_IDLE),
-        m_rspId(RSP_ID_OK)
+    RemoteCtrlState() : m_cmdId(CMD_ID_IDLE), m_rspId(RSP_ID_OK)
     {
     }
 
@@ -156,12 +152,12 @@ private:
     {
     }
 
-    RemoteCtrlState(const RemoteCtrlState& state);
-    RemoteCtrlState& operator=(const RemoteCtrlState& state);
+    RemoteCtrlState(const RemoteCtrlState& state);            /**< Copy construction of an instance. */
+    RemoteCtrlState& operator=(const RemoteCtrlState& state); /**< Assignment of an instance. */
 
     /**
      * Set command response and finish the command execution.
-     * 
+     *
      * @param[in] rsp   Command response
      */
     void finishCommand(RspId rsp)

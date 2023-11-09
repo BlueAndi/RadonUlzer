@@ -159,8 +159,9 @@ private:
     {
     }
 
-    Speedometer(const Speedometer& value);
-    Speedometer& operator=(const Speedometer& value);
+    /* Not allowed. */
+    Speedometer(const Speedometer& value);            /**< Copy construction of an instance. */
+    Speedometer& operator=(const Speedometer& value); /**< Assignment of an instance. */
 
     /**
      * Get the direction of movement left.
@@ -178,9 +179,9 @@ private:
 
     /**
      * Determine the direction of the movement by motor speed.
-     * 
+     *
      * @param[in] motorSpeed    Motor speed in digits
-     * 
+     *
      * @return Direction of movement.
      */
     Direction getDirectionByMotorSpeed(int16_t motorSpeed);

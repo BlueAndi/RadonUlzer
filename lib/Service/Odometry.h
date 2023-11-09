@@ -63,15 +63,15 @@
  * - Orientation
  * - Position
  * - Mileage
- * 
+ *
  * Its following the REP-103: https://ros.org/reps/rep-0103.html
- * 
+ *
  * That means the cartesian representation of geographic locations use the
  * east-north-up (ENU) convention:
  * - X east
  * - Y north
  * - Z up
- * 
+ *
  * Rotation only about the Z axis (yaw) is supported.
  * The yaw relates to the X axis. That means if the robot is heading to the
  * north, the yaw will be 90°.
@@ -129,7 +129,7 @@ public:
     /**
      * Set the orientation.
      * Use this to align the Y axis to north.
-     * 
+     *
      * @param[in] orientation   The orientation in mrad.
      */
     void setOrientation(int32_t orientation)
@@ -230,24 +230,25 @@ private:
     {
     }
 
-    Odometry(const Odometry& value);
-    Odometry& operator=(const Odometry& value);
+    /* Not allowed. */
+    Odometry(const Odometry& value);            /**< Copy construction of an instance. */
+    Odometry& operator=(const Odometry& value); /**< Assignment of an instance. */
 
     /**
      * Is the robot standstill?
      *
-     * @param[in] relStepsLeft      Relative absolute steps left
-     * @param[in] relStepsRight     Relative absolute steps right
+     * @param[in] absStepsLeft      Absolute steps left
+     * @param[in] absStepsRight     Absolute steps right
      */
 
     bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
      * Calculate the mileage in mm.
-     * 
+     *
      * @param[in]   mileage     Mileage in mm
      * @param[in]   stepsCenter Number of steps center
-     * 
+     *
      * @return Mileage in mm
      */
     int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter);

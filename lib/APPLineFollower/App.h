@@ -96,8 +96,9 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
-    App(const App& app);
-    App& operator=(const App& app);
+    /* Not allowed. */
+    App(const App& app);            /**< Copy construction of an instance. */
+    App& operator=(const App& app); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
