@@ -167,7 +167,7 @@ public:
     }
 
     /**
-     * Get IMU driver.
+     * Get IMU (=Inertial Measurement Unit) driver.
      * 
      * @return IMU driver
      */

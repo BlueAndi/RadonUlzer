@@ -59,23 +59,24 @@
 
 bool IMU::init()
 {
-    bool isInitSuccessful = m_imu.init();
-    if (isInitSuccessful)
+    bool isInitSuccessful = m_imuDrv.init();
+    if (true == isInitSuccessful)
     {
-        m_imu.enableDefault();
-        // TD074    Make sure that a Full Scale of 245 dps of the gyros are enough
-        // TD075	Make sure that it is valid to make the Full Scale setting in IMU::init()
-        switch (m_imu.getType())
+        m_imuDrv.enableDefault();
+        /* TODO: TD074    Make sure that a Full Scale of 245 dps of the gyros are enough */
+        /* TODO: TD075	Make sure that it is valid to make the Full Scale setting in IMU::init() */
+        switch (m_imuDrv.getType())
         {
         case Zumo32U4IMUType::LSM303D_L3GD20H:
-            // 0x00  means +/- 245 dps according to L3GD20H data sheet
-            m_imu.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
+            /* 0x00  means +/- 245 dps according to L3GD20H data sheet */
+            m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
             break;
         case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
-            // 0x00  means +/- 245 dps according to LSM6DS33 data sheet
-            m_imu.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
+            /* 0x00  means +/- 245 dps according to LSM6DS33 data sheet */
+            m_imuDrv.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
             break;
         default:
+            isInitSuccessful = false;
             break;
         }
     }
@@ -85,54 +86,54 @@ bool IMU::init()
 
 void IMU::enableDefault()
 {
-    m_imu.enableDefault();
+    m_imuDrv.enableDefault();
 }
 
 void IMU::configureForTurnSensing()
 {
-    m_imu.configureForTurnSensing();
+    m_imuDrv.configureForTurnSensing();
 }
 
 void IMU::readAccelerometer()
 {
-    m_imu.readAcc();
-    m_accelerometerValues.valueX = m_imu.a.x;
-    m_accelerometerValues.valueY = m_imu.a.y;
-    m_accelerometerValues.valueZ = m_imu.a.z;
+    m_imuDrv.readAcc();
+    m_accelerometerValues.valueX = m_imuDrv.a.x;
+    m_accelerometerValues.valueY = m_imuDrv.a.y;
+    m_accelerometerValues.valueZ = m_imuDrv.a.z;
 }
 
 void IMU::readGyro()
 {
-    m_imu.readGyro();
-    m_gyroValues.valueX = m_imu.g.x;
-    m_gyroValues.valueY = m_imu.g.y;
-    m_gyroValues.valueZ = m_imu.g.z;
+    m_imuDrv.readGyro();
+    m_gyroValues.valueX = m_imuDrv.g.x;
+    m_gyroValues.valueY = m_imuDrv.g.y;
+    m_gyroValues.valueZ = m_imuDrv.g.z;
 }
 
 void IMU::readMagnetometer()
 {
-    m_imu.readMag();
-    m_magnetometerValues.valueX = m_imu.m.x;
-    m_magnetometerValues.valueY = m_imu.m.y;
-    m_magnetometerValues.valueZ = m_imu.m.z;
+    m_imuDrv.readMag();
+    m_magnetometerValues.valueX = m_imuDrv.m.x;
+    m_magnetometerValues.valueY = m_imuDrv.m.y;
+    m_magnetometerValues.valueZ = m_imuDrv.m.z;
 }
 
 bool IMU::accelerometerDataReady()
 {
-    return m_imu.accDataReady();
+    return m_imuDrv.accDataReady();
 }
 
 bool IMU::gyroDataReady()
 {
-    return m_imu.gyroDataReady();
+    return m_imuDrv.gyroDataReady();
 }
 
 bool IMU::magnetometerDataReady()
 {
-    return m_imu.magDataReady();
+    return m_imuDrv.magDataReady();
 }
 
-void IMU::getAccelerationValues(IMUData* accelerationValues)
+const void IMU::getAccelerationValues(IMUData* accelerationValues)
 {
     if (nullptr != accelerationValues)
     {
@@ -142,7 +143,7 @@ void IMU::getAccelerationValues(IMUData* accelerationValues)
     }
 }
 
-void IMU::getTurnRates(IMUData* turnRates)
+const void IMU::getTurnRates(IMUData* turnRates)
 {
     if (nullptr != turnRates)
     {
@@ -152,7 +153,7 @@ void IMU::getTurnRates(IMUData* turnRates)
     }
 }
 
-void IMU::getMagnetometerValues(IMUData* magnetometerValues)
+const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 {
     if (nullptr != magnetometerValues)
     {
@@ -162,8 +163,8 @@ void IMU::getMagnetometerValues(IMUData* magnetometerValues)
     }
 }
 
-// TD076	Make sure that it is necessary to read and calibrate all sensor values, if only 1 of the gyro values and 2
-// of the acceleration values are being used.
+/* TODO:  TD076	Make sure that it is necessary to read and calibrate all sensor values, if only 1 of the gyro values and
+ 2 of the acceleration values are being used.*/
 void IMU::calibrate()
 {
     /* Define how many measurements should be made for calibration. */
@@ -181,23 +182,23 @@ void IMU::calibrate()
 
     for (uint8_t measurementIdx = 0; measurementIdx < NUMBER_OF_MEASUREMENTS; ++measurementIdx)
     {
-        while (!m_imu.accDataReady())
+        while (!m_imuDrv.accDataReady())
         {
             /* Do nothing and wait until new Accelerometer Data is available. */
         }
-        m_imu.readAcc();
-        sumOfRawAccelValuesX += m_imu.a.x;
-        sumOfRawAccelValuesY += m_imu.a.y;
-        sumOfRawAccelValuesZ += m_imu.a.z;
+        m_imuDrv.readAcc();
+        sumOfRawAccelValuesX += m_imuDrv.a.x;
+        sumOfRawAccelValuesY += m_imuDrv.a.y;
+        sumOfRawAccelValuesZ += m_imuDrv.a.z;
 
-        while (!m_imu.gyroDataReady())
+        while (!m_imuDrv.gyroDataReady())
         {
             /* Do nothing and wait until new Gyro Data is available. */
         }
-        m_imu.readGyro();
-        sumOfRawGyroValuesX += m_imu.g.x;
-        sumOfRawGyroValuesY += m_imu.g.y;
-        sumOfRawGyroValuesZ += m_imu.g.z;
+        m_imuDrv.readGyro();
+        sumOfRawGyroValuesX += m_imuDrv.g.x;
+        sumOfRawGyroValuesY += m_imuDrv.g.y;
+        sumOfRawGyroValuesZ += m_imuDrv.g.z;
     }
 
     m_rawAccelerometerOffsetX = sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS;

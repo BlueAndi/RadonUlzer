@@ -114,21 +114,21 @@ public:
      *
      * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    void getAccelerationValues(IMUData* accelerationValues) {}
+    const void getAccelerationValues(IMUData* accelerationValues) {}
 
     /**
      * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] turnRates  Pointer to IMUData struct.
      */
-    void getTurnRates(IMUData* turnRates) {}
+    const void getTurnRates(IMUData* turnRates) {}
 
     /**
      * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    void getMagnetometerValues(IMUData* magnetometerValues)  {}
+    const void getMagnetometerValues(IMUData* magnetometerValues)  {}
     
     /**
      * Calibrate the IMU.

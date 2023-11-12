@@ -72,6 +72,9 @@ public:
      */
     IMU(const SimTime& simTime, webots::Accelerometer* accelerometer, webots::Gyro* gyro, webots::Compass* compass) :
         IIMU(),
+        m_accelerationValues{0, 0, 0},
+        m_gyroValues{0, 0, 0},
+        m_magnetometerValues{0, 0, 0},
         m_simTime(simTime),
         m_accelerometer(accelerometer),
         m_gyro(gyro),
@@ -157,21 +160,21 @@ public:
      *
      * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    void getAccelerationValues(IMUData* accelerationValues);
+    void const getAccelerationValues(IMUData* accelerationValues);
 
     /**
      * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] turnRates  Pointer to IMUData struct.
      */
-    void getTurnRates(IMUData* turnRates);
+    void const getTurnRates(IMUData* turnRates);
 
     /**
      * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    void getMagnetometerValues(IMUData* magnetometerValues);
+    void const getMagnetometerValues(IMUData* magnetometerValues);
 
     /**
      * Calibrate the IMU.
@@ -188,16 +191,14 @@ private:
      */
     int16_t convertFromDoubleToInt16(double originalValue);
 
-private:
-    IMUData m_accelerationValues = {0, 0, 0};
-    IMUData m_gyroValues         = {0, 0, 0};
-    IMUData m_magnetometerValues = {0, 0, 0};
+    IMUData m_accelerationValues; /* Struct to store the current raw accelerometer data. */
+    IMUData m_gyroValues;         /* Struct to store the current gyro data. */
+    IMUData m_magnetometerValues; /* Struct to store the current magnotometer data. */
 
-private:
-    const SimTime&         m_simTime;       /** Simulation time. */
-    webots::Accelerometer* m_accelerometer; /** The accelerometer of Webots. */
-    webots::Gyro*          m_gyro;          /** The gyro of Webots. */
-    webots::Compass*       m_magnetometer;  /** The magnetometer of Webots. */
+    const SimTime&         m_simTime;       /* Simulation time. */
+    webots::Accelerometer* m_accelerometer; /* The accelerometer of Webots. */
+    webots::Gyro*          m_gyro;          /* The gyro of Webots. */
+    webots::Compass*       m_magnetometer;  /* The magnetometer of Webots. */
 };
 
 /******************************************************************************

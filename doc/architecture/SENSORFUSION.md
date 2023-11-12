@@ -25,16 +25,16 @@ On simulation the physical communication uses a socket connection.
 ### Tx channel "SENSOR_DATA"
 This channel is used to send raw sensor data used for Sensor Fusion on the ZumoComSystem.
 
-* The dataypes int16_t is used.
+* The datatypes can be found in SerialMuxChannel.h.
 * Order:
-  * Acceleration in X
-  * Acceleration in Y
-  * turnRateZ around Z
-  * Magnetometer value in X 
-  * Magnetometer value in Y 
-  * Angle calculated by Odometry
-  * Position in X calculated by Odometry
-  * Position in Y calculated by Odometry
+  * Acceleration in X (raw sensor value)
+  * Acceleration in Y (raw sensor value)
+  * turnRateZ around Z (raw sensor value)
+  * Magnetometer value in X (raw sensor value)
+  * Magnetometer value in Y (raw sensor value)
+  * Angle calculated by Odometry (in mrad)
+  * Position in X calculated by Odometry (in mm)
+  * Position in Y calculated by Odometry (in mm)
 * Endianess: Big endian
 
 # SW Architecture

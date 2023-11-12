@@ -78,9 +78,9 @@ void IMU::readAccelerometer()
         const double* accelerationValues = m_accelerometer->getValues();
         if (nullptr != accelerationValues)
         {
-            m_accelerationValues.valueX = convertFromDoubleToInt16(accelerationValues[0]); /** Index 0 is the x-axis. */
-            m_accelerationValues.valueY = convertFromDoubleToInt16(accelerationValues[1]); /** Index 1 is the y-axis. */
-            m_accelerationValues.valueZ = convertFromDoubleToInt16(accelerationValues[2]); /** Index 2 is the z-axis. */
+            m_accelerationValues.valueX = convertFromDoubleToInt16(accelerationValues[0]); /* Index 0 is the x-axis. */
+            m_accelerationValues.valueY = convertFromDoubleToInt16(accelerationValues[1]); /* Index 1 is the y-axis. */
+            m_accelerationValues.valueZ = convertFromDoubleToInt16(accelerationValues[2]); /* Index 2 is the z-axis. */
         }
     }
 }
@@ -93,9 +93,9 @@ void IMU::readGyro()
 
         if (nullptr != gyroValues)
         {
-            m_gyroValues.valueX = convertFromDoubleToInt16(gyroValues[0]); /** Index 0 is the x-axis. */
-            m_gyroValues.valueY = convertFromDoubleToInt16(gyroValues[1]); /** Index 1 is the y-axis. */
-            m_gyroValues.valueZ = convertFromDoubleToInt16(gyroValues[2]); /** Index 2 is the z-axis. */
+            m_gyroValues.valueX = convertFromDoubleToInt16(gyroValues[0]); /* Index 0 is the x-axis. */
+            m_gyroValues.valueY = convertFromDoubleToInt16(gyroValues[1]); /* Index 1 is the y-axis. */
+            m_gyroValues.valueZ = convertFromDoubleToInt16(gyroValues[2]); /* Index 2 is the z-axis. */
         }
     }
 }
@@ -108,14 +108,14 @@ void IMU::readMagnetometer()
 
         if (nullptr != magnetometerValues)
         {
-            m_magnetometerValues.valueX = convertFromDoubleToInt16(magnetometerValues[0]); /** Index 0 is the x-axis. */
-            m_magnetometerValues.valueY = convertFromDoubleToInt16(magnetometerValues[1]); /** Index 1 is the y-axis. */
-            m_magnetometerValues.valueZ = convertFromDoubleToInt16(magnetometerValues[2]); /** Index 2 is the z-axis. */
+            m_magnetometerValues.valueX = convertFromDoubleToInt16(magnetometerValues[0]); /* Index 0 is the x-axis. */
+            m_magnetometerValues.valueY = convertFromDoubleToInt16(magnetometerValues[1]); /* Index 1 is the y-axis. */
+            m_magnetometerValues.valueZ = convertFromDoubleToInt16(magnetometerValues[2]); /* Index 2 is the z-axis. */
         }
     }
 }
 
-void IMU::getAccelerationValues(IMUData* accelerationValues)
+const void IMU::getAccelerationValues(IMUData* accelerationValues)
 {
     if (nullptr != accelerationValues)
     {
@@ -125,7 +125,7 @@ void IMU::getAccelerationValues(IMUData* accelerationValues)
     }
 }
 
-void IMU::getTurnRates(IMUData* turnRates)
+const void IMU::getTurnRates(IMUData* turnRates)
 {
     if (nullptr != turnRates)
     {
@@ -135,7 +135,7 @@ void IMU::getTurnRates(IMUData* turnRates)
     }
 }
 
-void IMU::getMagnetometerValues(IMUData* magnetometerValues)
+const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 {
     if (nullptr != magnetometerValues)
     {
@@ -147,22 +147,20 @@ void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 
 void IMU::calibrate()
 {
-    // TODO: implement TD067
+    /* TODO: implement TD067 */
 }
 
 int16_t IMU::convertFromDoubleToInt16(double originalValue)
 {
-    int16_t       convertedValue;
-    const int16_t minimumValue = std::numeric_limits<int16_t>::min();
-    const int16_t maximumValue = std::numeric_limits<int16_t>::max();
+    int16_t convertedValue;
 
-    if (originalValue <= minimumValue)
+    if (originalValue <= INT16_MIN)
     {
-        convertedValue = minimumValue;
+        convertedValue = INT16_MIN;
     }
-    else if (originalValue >= maximumValue)
+    else if (originalValue >= INT16_MAX)
     {
-        convertedValue = maximumValue;
+        convertedValue = INT16_MAX;
     }
     else
     {

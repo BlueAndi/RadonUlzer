@@ -93,7 +93,7 @@ static const uint8_t VOLUME = 10;
 
 void Sound::playAlarm()
 {
-    /* Commented out since Buzzer had to be removed from Board. */
+    // TODO: TD090	Un-comment Method body in the Sound class 
     // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
     // /* Req. 3.4.5-2:
@@ -109,6 +109,7 @@ void Sound::playAlarm()
 
 void Sound::playBeep()
 {
+    // TODO: TD090	Un-comment Method body in the Sound class 
     // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
     // /* Req. 3.4.5-1:
@@ -119,6 +120,7 @@ void Sound::playBeep()
 
 void Sound::playStartup()
 {
+    // TODO: TD090	Un-comment Method body in the Sound class 
     // IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
     // buzzer.playMelodyPGM(PSTR("O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"));

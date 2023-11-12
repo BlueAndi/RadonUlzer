@@ -137,21 +137,21 @@ public:
      *
      * @param[in] accelerationValues  Pointer to IMUData struct.
      */
-    void getAccelerationValues(IMUData* accelerationValues);
+    const void getAccelerationValues(IMUData* accelerationValues);
 
     /**
      * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] turnRates  Pointer to IMUData struct.
      */
-    void getTurnRates(IMUData* turnRates);
+    const void getTurnRates(IMUData* turnRates);
 
     /**
      * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
      *
      * @param[in] magnetometerValues  Pointer to IMUData struct.
      */
-    void getMagnetometerValues(IMUData* magnetometerValues);
+    const void getMagnetometerValues(IMUData* magnetometerValues);
 
     /**
      * Calibrate the IMU.
@@ -159,23 +159,23 @@ public:
     void calibrate();
 
 private:
-    IMUData m_accelerometerValues = {0, 0, 0}; /**< Raw accelerometer readings. */
-    IMUData m_gyroValues          = {0, 0, 0}; /**< Raw gyro readings. */
-    IMUData m_magnetometerValues  = {0, 0, 0}; /**< Raw magnetometer readings. */
+    IMUData m_accelerometerValues = {0, 0, 0}; /* Raw accelerometer readings. */
+    IMUData m_gyroValues          = {0, 0, 0}; /* Raw gyro readings. */
+    IMUData m_magnetometerValues  = {0, 0, 0}; /* Raw magnetometer readings. */
 
 protected:
 private:
-    Zumo32U4IMU m_imu;
+    Zumo32U4IMU m_imuDrv; /**< IMU driver from Zumo32U4 Library. */
 
     /**
      * Bias values of the sensors determined by the calibration.
      */
-    int16_t m_rawAccelerometerOffsetX;
-    int16_t m_rawAccelerometerOffsetY;
-    int16_t m_rawAccelerometerOffsetZ;
-    int16_t m_rawGyroOffsetX;
-    int16_t m_rawGyroOffsetY;
-    int16_t m_rawGyroOffsetZ;
+    int16_t m_rawAccelerometerOffsetX; /* Mean raw accelerometer offset in x-direction determined by calibration. */
+    int16_t m_rawAccelerometerOffsetY; /* Mean raw accelerometer offset in y-direction determined by calibration. */
+    int16_t m_rawAccelerometerOffsetZ; /* Mean raw accelerometer offset in z-direction determined by calibration. */
+    int16_t m_rawGyroOffsetX;          /* Mean raw gyro offset in x-direction determined by calibration. */
+    int16_t m_rawGyroOffsetY;          /* Mean raw gyro offset in y-direction determined by calibration. */
+    int16_t m_rawGyroOffsetZ;          /* Mean raw gyro offset in z-direction determined by calibration. */
 };
 
 /******************************************************************************

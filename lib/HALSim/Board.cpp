@@ -138,7 +138,7 @@ void Board::init()
     m_keyboard.init();
     m_lineSensors.init();
     m_motors.init();
-    // To Do: TD084	React if IMU initialization fails
+    /*  TODO: TD084	React if IMU initialization fails */
     (void)m_imu.init();
     m_imu.configureForTurnSensing();
 }

@@ -56,14 +56,14 @@
 /** Struct of the Sensor Data channel payload. */
 typedef struct _SensorData
 {
-    int32_t positionOdometryX;
-    int32_t positionOdometryY;
-    int32_t orientationOdometry;
-    int16_t accelerationX;
-    int16_t accelerationY;
-    int16_t magnetometerValueX;
-    int16_t magnetometerValueY;
-    int16_t turnRate;
+    int32_t positionOdometryX;   /* Position in x direction in mm calculated by odometry. */
+    int32_t positionOdometryY;   /* Position in y direction in mm calculated by odometry. */
+    int32_t orientationOdometry; /* Orientation in mrad calculated by odometry. */
+    int16_t accelerationX;       /* Acceleration in x direction as a raw sensor value. */
+    int16_t accelerationY;       /* Acceleration in y direction as a raw sensor value. */
+    int16_t magnetometerValueX;  /* Magnetometer value in x direction as a raw sensor value. */
+    int16_t magnetometerValueY;  /* Magnetometer value in y direction as a raw sensor value. */
+    int16_t turnRate;            /* Gyroscope value around z axis as a raw sensor value. */
 } __attribute__((packed)) SensorData;
 
 /******************************************************************************
