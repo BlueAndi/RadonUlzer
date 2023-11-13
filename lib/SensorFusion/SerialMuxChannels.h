@@ -56,14 +56,44 @@
 /** Struct of the Sensor Data channel payload. */
 typedef struct _SensorData
 {
-    int32_t positionOdometryX;   /* Position in x direction in mm calculated by odometry. */
-    int32_t positionOdometryY;   /* Position in y direction in mm calculated by odometry. */
-    int32_t orientationOdometry; /* Orientation in mrad calculated by odometry. */
-    int16_t accelerationX;       /* Acceleration in x direction as a raw sensor value. */
-    int16_t accelerationY;       /* Acceleration in y direction as a raw sensor value. */
-    int16_t magnetometerValueX;  /* Magnetometer value in x direction as a raw sensor value. */
-    int16_t magnetometerValueY;  /* Magnetometer value in y direction as a raw sensor value. */
-    int16_t turnRate;            /* Gyroscope value around z axis as a raw sensor value. */
+    /** Position in x direction in mm calculated by odometry. */
+    int32_t positionOdometryX;
+
+    /** Position in y direction in mm calculated by odometry. */
+    int32_t positionOdometryY;
+
+    /** Orientation in mrad calculated by odometry. */
+    int32_t orientationOdometry;
+
+    /** Acceleration in x direction as a raw sensor value in bit.
+     * This is a unitless bit value. It can be converted into a physical acceleration value in mm/s^2 via the
+     * multiplication with a sensitivity factor in mm/s^2/bit.
+     */
+    int16_t accelerationX;
+
+    /** Acceleration in y direction as a raw sensor value in bit.
+     * This is a unitless bit value. It can be converted into a physical acceleration value in mm/s^2 via the
+     * multiplication with a sensitivity factor in mm/s^2/bit.
+     */
+    int16_t accelerationY;
+
+    /** Magnetometer value in x direction as a raw sensor value in bit.
+     * This is a unitless bit value. It does not require conversion into a physical magnetometer value since only the
+     * ratio with the value in y direction is important.
+     */
+    int16_t magnetometerValueX;
+
+    /** Magnetometer value in y direction as a raw sensor value in bit.
+     * This is a unitless bit value. It does not require conversion into a physical magnetometer value since only the
+     * ratio with the value in x direction is important.
+     */
+    int16_t magnetometerValueY;
+
+    /** Gyroscope value around z axis as a raw sensor value in bit.
+     * This is a unitless bit value. It can be converted into a physical turn rate in mrad/s via the multiplication
+     * with a sensitivity factor in mrad/s/bit.
+     */
+    int16_t turnRate;
 } __attribute__((packed)) SensorData;
 
 /******************************************************************************

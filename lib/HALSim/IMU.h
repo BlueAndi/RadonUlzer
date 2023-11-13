@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  IMU implementation of the simulation
+ * @brief  IMU (Inertial Measurement Unit) implementation of the simulation
  * @author Juliane Kerpe <juliane.kerpe@web.de>
  *
  * @addtogroup HALSim
@@ -58,7 +58,9 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The IMU adapter. */
+/** The IMU adapter.
+ * IMU stands for Inertial Measurement Unit.
+ */
 class IMU : public IIMU
 {
 public:
@@ -156,23 +158,29 @@ public:
     }
 
     /**
-     * Get last raw Accelerometer values as a IMUData struct containing values in x, y and z.
+     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z.
      *
-     * @param[in] accelerationValues  Pointer to IMUData struct.
+     * @param[in] accelerationValues  Pointer to IMUData struct where the raw, unitless acceleration values in
+     * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
+     * multiplication with a sensitivity factor in mm/s^2/bit.
      */
     void const getAccelerationValues(IMUData* accelerationValues);
 
     /**
-     * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
+     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z.
      *
-     * @param[in] turnRates  Pointer to IMUData struct.
+     * @param[in] turnRates  Pointer to IMUData struct where the raw, unitless turn Rates in x, y and z
+     * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
+     * with a sensitivity factor in mrad/s/bit.
      */
     void const getTurnRates(IMUData* turnRates);
 
     /**
-     * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
+     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z.
      *
-     * @param[in] magnetometerValues  Pointer to IMUData struct.
+     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw, unitless magnetometer values in
+     * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
+     * multiplication with a sensitivity factor in mgauss/bit.
      */
     void const getMagnetometerValues(IMUData* magnetometerValues);
 

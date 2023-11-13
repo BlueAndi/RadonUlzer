@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  IMU realization
+ * @brief  IMU (Inertial Measurement Unit) realization
  * @author Juliane Kerpe <juliane.kerpe@web.de>
  *
  * @addtogroup HALSim
@@ -36,7 +36,6 @@
 #ifndef IMU_H
 #define IMU_H
 
-
 /******************************************************************************
  * Compile Switches
  *****************************************************************************/
@@ -45,7 +44,9 @@
  * Includes
  *****************************************************************************/
 #include "IIMU.h"
-
+/** The IMU adapter.
+ * IMU stands for Inertial Measurement Unit.
+ */
 class IMU : public IIMU
 {
 public:
@@ -61,80 +62,114 @@ public:
      *
      * @return True if the sensor type was detected succesfully; false otherwise.
      */
-    bool init(){return true;}
-        
+    bool init()
+    {
+        return true;
+    }
+
     /**
      * Enables all of the inertial sensors with a default configuration.
      */
-    void enableDefault() {};
+    void enableDefault(){};
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.
      */
-    void configureForTurnSensing() {}
+    void configureForTurnSensing()
+    {
+    }
 
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
-     */ 
-    void readAccelerometer() {}
-        
+     */
+    void readAccelerometer()
+    {
+    }
+
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
      */
-    void readGyro() {}
-        
+    void readGyro()
+    {
+    }
+
     /**
      * Takes a reading from the magnetometer and makes the measurements available in m.
      */
-    void readMagnetometer() {}
-        
+    void readMagnetometer()
+    {
+    }
+
     /**
      * Indicates whether the accelerometer has new measurement data ready.
-     * 
-     * @return True if there is new accelerometer data available; false otherwise. 
+     *
+     * @return True if there is new accelerometer data available; false otherwise.
      */
-    bool accelerometerDataReady() {return true;}
-        
+    bool accelerometerDataReady()
+    {
+        return true;
+    }
+
     /**
      * Indicates whether the gyro  has new measurement data ready.
-     * 
+     *
      * @return True if there is new gyro data available; false otherwise.
      */
-    bool gyroDataReady() {return true;}
-        
+    bool gyroDataReady()
+    {
+        return true;
+    }
+
     /**
      * Indicates whether the magnetometer  has new measurement data ready.
-     * 
+     *
      * @return True if there is new magnetometer data available; false otherwise.
      */
-    bool magnetometerDataReady() {return true;}
-    
-    /**
-     * Get last raw Accelerometer values as a IMUData struct containing values in x, y and z.
-     *
-     * @param[in] accelerationValues  Pointer to IMUData struct.
-     */
-    const void getAccelerationValues(IMUData* accelerationValues) {}
+    bool magnetometerDataReady()
+    {
+        return true;
+    }
 
     /**
-     * Get last raw Gyroscope values as a IMUData struct containing values in x, y and z.
+     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z.
      *
-     * @param[in] turnRates  Pointer to IMUData struct.
+     * @param[in] accelerationValues  Pointer to IMUData struct where the raw, unitless acceleration values in
+     * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
+     * multiplication with a sensitivity factor in mm/s^2/bit.
      */
-    const void getTurnRates(IMUData* turnRates) {}
+    const void getAccelerationValues(IMUData* accelerationValues)
+    {
+    }
 
     /**
-     * Get last raw Magnetometer values as a IMUData struct containing values in x, y and z.
+     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z.
      *
-     * @param[in] magnetometerValues  Pointer to IMUData struct.
+     * @param[in] turnRates  Pointer to IMUData struct where the raw, unitless turn Rates in x, y and z
+     * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
+     * with a sensitivity factor in mrad/s/bit.
      */
-    const void getMagnetometerValues(IMUData* magnetometerValues)  {}
-    
+    const void getTurnRates(IMUData* turnRates)
+    {
+    }
+
+    /**
+     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z.
+     *
+     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw, unitless magnetometer values in
+     * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
+     * multiplication with a sensitivity factor in mgauss/bit.
+     */
+    const void getMagnetometerValues(IMUData* magnetometerValues)
+    {
+    }
+
     /**
      * Calibrate the IMU.
      */
-    virtual void calibrate() {}
-    
+    virtual void calibrate()
+    {
+    }
+
 private:
 };
 
