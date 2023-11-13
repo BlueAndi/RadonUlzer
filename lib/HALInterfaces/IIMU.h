@@ -52,13 +52,13 @@
  * Types and Classes
  *****************************************************************************/
 
-/** Struct of the raw, unitless and not yet converted IMU (=accelerometer, gyro or magnetometer) data in x, y and z
+/** Struct of the raw and not yet converted IMU (=accelerometer, gyro or magnetometer) values in digits in x, y and z
  * direction. */
 typedef struct _IMUData
 {
-    int16_t valueX; /* Raw sensor value in x direction (unitless) */
-    int16_t valueY; /* Raw sensor value in y direction (unitless) */
-    int16_t valueZ; /* Raw sensor value in z direction (unitless) */
+    int16_t valueX; /* Raw sensor value in x direction in digits */
+    int16_t valueY; /* Raw sensor value in y direction in digits */
+    int16_t valueZ; /* Raw sensor value in z direction in digits */
 } __attribute__((packed)) IMUData;
 
 /** The abstract IMU interface.
@@ -128,29 +128,29 @@ public:
     virtual bool magnetometerDataReady() = 0;
 
     /**
-     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z.
+     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] accelerationValues  Pointer to IMUData struct where the raw, unitless acceleration values in
+     * @param[in] accelerationValues  Pointer to IMUData struct where the raw acceleration values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
-     * multiplication with a sensitivity factor in mm/s^2/bit.
+     * multiplication with a sensitivity factor in mm/s^2/digit.
      */
     virtual const void getAccelerationValues(IMUData* accelerationValues) = 0;
 
     /**
-     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z.
+     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] turnRates  Pointer to IMUData struct where the raw, unitless turn Rates in x, y and z
+     * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
-     * with a sensitivity factor in mrad/s/bit.
+     * with a sensitivity factor in mrad/s/digit.
      */
     virtual const void getTurnRates(IMUData* turnRates) = 0;
 
     /**
-     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z.
+     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw, unitless magnetometer values in
+     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw magnetometer values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
-     * multiplication with a sensitivity factor in mgauss/bit.
+     * multiplication with a sensitivity factor in mgauss/digit.
      */
     virtual const void getMagnetometerValues(IMUData* magnetometerValues) = 0;
 

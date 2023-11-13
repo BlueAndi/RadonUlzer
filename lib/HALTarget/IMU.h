@@ -138,29 +138,29 @@ public:
     bool magnetometerDataReady();
 
     /**
-     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z.
+     * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] accelerationValues  Pointer to IMUData struct where the raw, unitless acceleration values in
+     * @param[in] accelerationValues  Pointer to IMUData struct where the raw acceleration values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
-     * multiplication with a sensitivity factor in mm/s^2/bit.
+     * multiplication with a sensitivity factor in mm/s^2/digit.
      */
     const void getAccelerationValues(IMUData* accelerationValues);
 
     /**
-     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z.
+     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] turnRates  Pointer to IMUData struct where the raw, unitless turn Rates in x, y and z
+     * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
-     * with a sensitivity factor in mrad/s/bit.
+     * with a sensitivity factor in mrad/s/digit.
      */
     const void getTurnRates(IMUData* turnRates);
 
     /**
-     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z.
+     * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z in digits.
      *
-     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw, unitless magnetometer values in
+     * @param[in] magnetometerValues  Pointer to IMUData struct where the raw magnetometer values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
-     * multiplication with a sensitivity factor in mgauss/bit.
+     * multiplication with a sensitivity factor in mgauss/digit.
      */
     const void getMagnetometerValues(IMUData* magnetometerValues);
 
