@@ -45,9 +45,6 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
-#include <ButtonB.h>
-#include <ButtonC.h>
-#include <Buzzer.h>
 #include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
@@ -56,6 +53,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <IMU.h>
 
 #include <math.h>
 #include <webots/Robot.hpp>
@@ -101,36 +99,6 @@ public:
     IButton& getButtonA() final
     {
         return m_buttonA;
-    }
-
-    /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    IButton& getButtonB() final
-    {
-        return m_buttonB;
-    }
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    IButton& getButtonC() final
-    {
-        return m_buttonC;
-    }
-
-    /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    IBuzzer& getBuzzer() final
-    {
-        return m_buzzer;
     }
 
     /**
@@ -204,13 +172,13 @@ public:
     }
 
     /**
-     * Get proximity sensors driver.
+     * Get IMU (=Inertial Measurement Unit) driver.
      * 
-     * @return Proximity sensors driver
+     * @return IMU driver
      */
-    IProximitySensors& getProximitySensors() final
+    IIMU& getIMU() final
     {
-        return m_proximitySensors;
+        return m_imu;
     }
 
 protected:
@@ -272,11 +240,14 @@ private:
     /** Name of the green LED in the robot simulation. */
     static const char* LED_GREEN_NAME;
 
-    /** Name of the front proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME;
+    /** Name of the accelerometer in the robot simulation. */
+    static const char* ACCELEROMETER_NAME;
 
-    /** Name of the front right proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
+    /** Name of the gyro in the robot simulation. */
+    static const char* GYRO_NAME;
+
+    /** Name of the Magnetometer in the robot simulation. */
+    static const char* MAGNETOMETER_NAME;
 
     /** Simulated roboter instance. */
     webots::Robot m_robot;
@@ -289,15 +260,6 @@ private:
 
     /** Button A driver */
     ButtonA m_buttonA;
-
-    /** Button B driver */
-    ButtonB m_buttonB;
-
-    /** Button C driver */
-    ButtonC m_buttonC;
-
-    /** Buzzer driver */
-    Buzzer m_buzzer;
 
     /** Display driver */
     Display m_display;
@@ -320,8 +282,8 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
+    /** IMU driver */
+    IMU m_imu;
 
     /**
      * Constructs the concrete board.
@@ -332,9 +294,6 @@ private:
         m_simTime(m_robot),
         m_keyboard(m_simTime, m_robot.getKeyboard()),
         m_buttonA(m_keyboard),
-        m_buttonB(m_keyboard),
-        m_buttonC(m_keyboard),
-        m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
         m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
                    m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
@@ -347,8 +306,8 @@ private:
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
+        m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+              m_robot.getCompass(MAGNETOMETER_NAME))
     {
     }
 

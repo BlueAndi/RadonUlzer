@@ -1,0 +1,161 @@
+@startuml HAL SensorFusion
+
+title Hardware Abstraction Layer - SensorFusion App
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+
+        interface "IButton" as iButton {
+            + {abstract} isPressed() : bool
+            + {abstract} waitForRelease() : void
+        }
+
+        interface "IEncoders" as iEncoders {
+            + {abstract} getCountsLeft() : int16_t
+            + {abstract} getCountsRight() : int16_t
+            + {abstract} getCountsAndResetLeft() : int16_t
+            + {abstract} getCountsAndResetRight() : int16_t
+            + {abstract} getResolution() const : uint16_t
+        }
+
+        interface "IDisplay" as iDisplay {
+            + {abstract} clear() : void
+            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
+            + {abstract} print(str : const String&) : size_t
+            + {abstract} print(str : const char[]) : size_t
+            + {abstract} print(value : uint8_t) : size_t
+            + {abstract} print(value : uint16_t) : size_t
+            + {abstract} print(value : uint32_t) : size_t
+            + {abstract} print(value : int8_t) : size_t
+            + {abstract} print(value : int16_t) : size_t
+            + {abstract} print(value : int32_t) : size_t
+        }
+
+        interface "ILed" as iLed {
+            + {abstract} enable(enableIt : bool) : void
+        }
+
+        interface "ILineSensors" as iLineSensors {
+            + {abstract} init() : void
+            + {abstract} calibrate() : void
+            + {abstract} readLine() : int16_t
+            + {abstract} getSensorValues() : const uint16_t*
+            + {abstract} isCalibrationSuccessful() : bool
+            + {abstract} getCalibErrorInfo() const : uint8_t
+            + {abstract} getNumLineSensors() const : uint8_t
+            + {abstract} getSensorValueMax() const : uint16_t
+        }
+
+        interface "IMotors" as iMotors {
+            + {abstract} setSpeeds(leftSpeed : int16_t, rightSpeed : int16_t) : void
+            + {abstract} getMaxSpeed() const : int16_t
+        }
+
+        interface "IIMU" as iIMU {            
+            + {abstract} init() : bool
+            + {abstract} readAcc() : void
+            + {abstract} readGyro() : void
+            + {abstract} readMag() : void
+            + {abstract} accDataReady() : bool
+            + {abstract} gyroDataReady() : bool
+            + {abstract} magDataReady() : bool
+            + {abstract} getAccelerationValues(int16_t* accelerationValues) : void
+            + {abstract} getTurnRates(int16_t* turnRates) : void
+            + {abstract} getMagnetometerValues(int16_t* magnetometerValues) : void
+
+        }
+    }
+
+    class Board << namespace >> {
+        + getButtonA() : IButton&
+        + getDisplay() : IDisplay&
+        + getEncoders() : IEncoders&
+        + getLedRed() : ILed&
+        + getLedYellow() : ILed&
+        + getLedGreen() : iLed&
+        + getLineSensors() : ILineSensors&
+        + getMotors() : IMotors&
+        + getIMU() : IIMU&
+    }
+
+    class RobotConstants {
+        + GEAR_RATIO : uint32_t
+        + ENCODER_RESOLUTION : uint16_t
+        + WHEEL_DIAMETER : uint32_t
+        + WHEEL_CIRCUMFERENCE : uint32_t
+        + ENCODER_STEPS_PER_MM : uint32_t
+    }
+
+    note top of Board
+        Defines the physical board with all actor
+        and sensor instances. The application retrieves
+        every driver via the board.
+    end note
+
+    note top of RobotConstants
+        Provides robot specific constants, e.g. given by
+        mechanic parts.
+    end note
+
+    note top of iIMU
+        IMU stands for Inertial Measurement Unit.
+    end note
+
+    package "Target" as target {
+        class LineSensors
+        class ButtonA
+        class Motors
+        class Display
+        class Encoders
+        class LedRed
+        class LedYellow
+        class LedGreen
+        class IMU
+    }
+
+    iLineSensors <|... LineSensors: <<realize>>
+    iButton <|... ButtonA: <<realize>>
+    iMotors <|... Motors: <<realize>>
+    iDisplay <|... Display: <<realize>>
+    iEncoders <|... Encoders: <<realize>>
+    iLed <|... LedRed: <<realize>>
+    iLed <|... LedYellow: <<realize>>
+    iLed <|... LedGreen: <<realize>>
+    iIMU <|... IMU: <<realize>>
+}
+
+package "Zumo32U4 library"  as zumo32u4Lib {
+    class Zumo32U4LineSensors
+    class Zumo32U4ButtonA
+    class Zumo32U4Motors
+    class Zumo32U4LCD
+    class Zumo32U4Encoders
+    class Zumo32U4IMU
+    class Zumo32U4 <<Functions>>
+}
+
+note bottom of zumo32u4Lib
+    Provided by Pololu.
+    https://pololu.github.io/zumo-32u4-arduino-library/index.html
+end note
+
+halInterfaces -[hidden]-- hal
+hal -[hidden]-- zumo32u4Lib
+
+LineSensors *--> Zumo32U4LineSensors
+ButtonA *--> Zumo32U4ButtonA
+Motors *--> Zumo32U4Motors
+Display *--> Zumo32U4LCD
+Encoders *--> Zumo32U4Encoders
+IMU *--> Zumo32U4IMU
+LedRed ..> Zumo32U4: <<use>>
+LedYellow ..> Zumo32U4: <<use>>
+LedGreen ..> Zumo32U4: <<use>>
+
+note bottom of hal
+    The hardware abstraction layer contains
+    all drivers, provided by the Pololu Library.
+end note
+
+@enduml

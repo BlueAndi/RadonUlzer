@@ -1,11 +1,11 @@
 {
-    "name": "LineFollower",
+    "name": "SensorFusion",
     "version": "0.1.0",
-    "description": "LineFollower application",
+    "description": "SensorFusion application",
     "authors": [{
-        "name": "Andreas Merkle",
-        "email": "web@blue-andi.de",
-        "url": "https://github.com/BlueAndi",
+        "name": "Juliane Kerpe",
+        "email": "juliane.kerpe@web.de",
+        "url": "https://github.com/jkerpe",
         "maintainer": true
     }],
     "license": "MIT",

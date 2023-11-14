@@ -45,13 +45,12 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IButton.h>
-#include <IBuzzer.h>
 #include <IDisplay.h>
 #include <IEncoders.h>
 #include <ILineSensors.h>
 #include <IMotors.h>
 #include <ILed.h>
-#include <IProximitySensors.h>
+#include <IIMU.h>
 
 /******************************************************************************
  * Macros
@@ -86,27 +85,6 @@ public:
      * @return Button A driver.
      */
     virtual IButton& getButtonA() = 0;
-
-    /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    virtual IButton& getButtonB() = 0;
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    virtual IButton& getButtonC() = 0;
-
-    /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    virtual IBuzzer& getBuzzer() = 0;
 
     /**
      * Get LCD driver.
@@ -158,11 +136,11 @@ public:
     virtual ILed& getGreenLed() = 0;
 
     /**
-     * Get proximity sensors driver.
+     * Get IMU (=Inertial Measurement Unit) driver.
      * 
-     * @return Proximity sensors driver
+     * @return IMU driver
      */
-    virtual IProximitySensors& getProximitySensors() = 0;
+    virtual IIMU& getIMU() = 0;
 
 protected:
 
