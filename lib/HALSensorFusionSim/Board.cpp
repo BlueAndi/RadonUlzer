@@ -111,6 +111,12 @@ const char* Board::LED_YELLOW_NAME = "led_yellow";
 /* Name of the green LED in the robot simulation. */
 const char* Board::LED_GREEN_NAME = "led_green";
 
+/* Name of the front left proximity sensor in the robot simulation. */
+const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
+
+/* Name of the front right proximity sensor in the robot simulation. */
+const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
+#
 /* Name of the accelerometer in the robot simulation. */
 const char* Board::ACCELEROMETER_NAME = "accelerometer";
 
@@ -140,7 +146,9 @@ void Board::init()
     m_motors.init();
     /*  TODO: TD084	React if IMU initialization fails */
     (void)m_imu.init();
-    m_imu.configureForTurnSensing();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();    
+    m_imu.calibrate();
 }
 
 /******************************************************************************

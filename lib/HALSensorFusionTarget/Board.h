@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -45,17 +45,17 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
-#include <ButtonB.h>
-#include <ButtonC.h>
-#include <Buzzer.h>
-#include <Display.h>
+#include <SensorFusionButton.h>
+#include <SensorFusionBuzzer.h>
+#include <SensorFusionDisplay.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
-#include <ProximitySensors.h>
+#include <SensorFusionProximitySensors.h>
+#include <IMU.h>
 
 /******************************************************************************
  * Macros
@@ -71,10 +71,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -201,7 +200,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -209,24 +208,32 @@ public:
         return m_proximitySensors;
     }
 
+    /**
+     * Get IMU (=Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
 protected:
-
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
-    /** Button B driver */
-    ButtonB m_buttonB;
+    /** Button B driver (Dummy driver only for the Sensor Fusion App) */
+    SensorFusionButton m_buttonB;
 
-    /** Button C driver */
-    ButtonC m_buttonC;
+    /** Button C driver (Dummy driver only for the Sensor Fusion App) */
+    SensorFusionButton m_buttonC;
 
-    /** Buzzer driver */
-    Buzzer m_buzzer;
+    /** Buzzer driver (Dummy driver only for the Sensor Fusion App) */
+    SensorFusionBuzzer m_buzzer;
 
-    /** Display driver */
-    Display m_display;
+    /** Display driver (Dummy driver only for the Sensor Fusion App) */
+    SensorFusionDisplay m_display;
 
     /** Encoders driver */
     Encoders m_encoders;
@@ -246,8 +253,11 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
+    /** Proximity sensors dummy driver (Dummy driver only for the Sensor Fusion App) */
+    SensorFusionProximitySensors m_proximitySensors;
+
+    /** IMU Driver */
+    IMU m_imu;
 
     /**
      * Constructs the concrete board.
@@ -265,7 +275,8 @@ private:
         m_ledRed(),
         m_ledYellow(),
         m_ledGreen(),
-        m_proximitySensors()
+        m_proximitySensors(),
+        m_imu()
     {
     }
 
@@ -275,7 +286,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

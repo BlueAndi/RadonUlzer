@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,63 +25,115 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Proximity sensors realization for the Sensor Fusion App
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
+ *
+ * @addtogroup HALTarget
+ *
+ * @{
  */
+#ifndef SENSORFUSIONPROXIMITYSENSORS_H
+#define SENSORFUSIONPROXIMITYSENSORS_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <stdint.h>
+#include <IProximitySensors.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-void Board::init()
+/** This class provides access to a dummy driver for the Proximity Sensors of the Sensor Fusion Application.  */
+class SensorFusionProximitySensors : public IProximitySensors
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-    m_imu.init();
-    m_imu.enableDefault();
-    m_imu.configureForTurnSensing();    
-    m_imu.calibrate();
-}
+public:
+    /**
+     * Constructs the ProximitySensors adapter.
+     */
+    SensorFusionProximitySensors() : IProximitySensors()
+    {
+    }
+
+    /**
+     * Destroys the ProximitySensors adapter.
+     */
+    virtual ~SensorFusionProximitySensors()
+    {
+    }
+
+    /**
+     * Initialize only the front proximity sensor.
+     */
+    void initFrontSensor() final
+    {
+    }
+
+    /**
+     * Returns the number of sensors.
+     *
+     * @return Number of sensors
+     */
+    uint8_t getNumSensors() const final
+    {
+        return 1;
+    }
+
+    /**
+     * Emits IR pulses and gets readings from the sensors.
+     */
+    void read() final
+    {
+    }
+
+    /**
+     * Returns the number of brightness levels for the left LEDs that
+     * activated the front proximity sensor.
+     *
+     * @return Number of brightness levels
+     */
+    uint8_t countsFrontWithLeftLeds() const final
+    {
+        return 0;
+    }
+
+    /**
+     * Returns the number of brightness levels for the right LEDs that
+     * activated the front proximity sensor.
+     *
+     * @return Number of brightness levels
+     */
+    uint8_t countsFrontWithRightLeds() const final
+    {
+        return 0;
+    }
+
+    /**
+     * Returns the number of brightness levels.
+     *
+     * @return Number of brightness levels.
+     */
+    uint8_t getNumBrightnessLevels() const final
+    {
+        return 1;
+    }
+
+protected:
+private:
+};
 
 /******************************************************************************
- * Local Functions
+ * Functions
  *****************************************************************************/
+
+#endif /* SENSORFUSIONPROXIMITYSENSORS_H */
+/** @} */

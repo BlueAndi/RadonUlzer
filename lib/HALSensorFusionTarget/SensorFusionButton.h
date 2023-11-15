@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,63 +25,75 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Button realization for the Sensor Fusion App
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
+ *
+ * @addtogroup HALTarget
+ *
+ * @{
  */
+
+#ifndef SENSORFUSIONBUTTON_H
+#define SENSORFUSIONBUTTON_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include "IButton.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-void Board::init()
+/** This class provides access to a dummy driver for the Button of the Sensor Fusion Application.   */
+class SensorFusionButton : public IButton
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-    m_imu.init();
-    m_imu.enableDefault();
-    m_imu.configureForTurnSensing();    
-    m_imu.calibrate();
-}
+public:
+    /**
+     * Constructs the button adapter.
+     */
+    SensorFusionButton() : IButton()
+    {
+    }
+
+    /**
+     * Destroys the button adapter.
+     */
+    ~SensorFusionButton()
+    {
+    }
+
+    /**
+     * Is button pressed or not
+     *
+     * @return If button is pressed, returns true otherwise false.
+     */
+    bool isPressed() final
+    {
+        return false;
+    }
+
+    /**
+     * Wait until button is released.
+     */
+    void waitForRelease() final
+    {
+    }
+
+private:
+};
 
 /******************************************************************************
- * Local Functions
+ * Functions
  *****************************************************************************/
+
+#endif /* SENSORFUSIONBUTTON_H */
+/** @} */

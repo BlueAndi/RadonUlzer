@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Buzzer realization for the Sensor Fusion App
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
+#include "SensorFusionBuzzer.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -58,6 +58,18 @@
  * Public Methods
  *****************************************************************************/
 
+void SensorFusionBuzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
+{
+}
+
+void SensorFusionBuzzer::playMelody(const char* sequence)
+{
+}
+
+void SensorFusionBuzzer::playMelodyPGM(const char* sequence)
+{
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
@@ -68,20 +80,4 @@
 
 /******************************************************************************
  * External Functions
- *****************************************************************************/
-
-void Board::init()
-{
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-    m_imu.init();
-    m_imu.enableDefault();
-    m_imu.configureForTurnSensing();    
-    m_imu.calibrate();
-}
-
-/******************************************************************************
- * Local Functions
  *****************************************************************************/
