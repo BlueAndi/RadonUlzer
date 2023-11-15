@@ -199,14 +199,14 @@ private:
      */
     int16_t convertFromDoubleToInt16(double originalValue);
 
-    IMUData m_accelerationValues; /* Struct to store the current raw accelerometer data. */
-    IMUData m_gyroValues;         /* Struct to store the current gyro data. */
-    IMUData m_magnetometerValues; /* Struct to store the current magnotometer data. */
+    IMUData m_accelerationValues; /**< Struct to store the current raw accelerometer data. */
+    IMUData m_gyroValues;         /**< Struct to store the current gyro data. */
+    IMUData m_magnetometerValues; /**< Struct to store the current magnotometer data. */
 
-    const SimTime&         m_simTime;       /* Simulation time. */
-    webots::Accelerometer* m_accelerometer; /* The accelerometer of Webots. */
-    webots::Gyro*          m_gyro;          /* The gyro of Webots. */
-    webots::Compass*       m_magnetometer;  /* The magnetometer of Webots. */
+    const SimTime&         m_simTime;       /**< Simulation time. */
+    webots::Accelerometer* m_accelerometer; /**< The accelerometer of Webots. */
+    webots::Gyro*          m_gyro;          /**< The gyro of Webots. */
+    webots::Compass*       m_magnetometer;  /**< The magnetometer of Webots. */
 };
 
 /******************************************************************************

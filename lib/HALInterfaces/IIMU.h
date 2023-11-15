@@ -56,9 +56,9 @@
  * direction. */
 typedef struct _IMUData
 {
-    int16_t valueX; /* Raw sensor value in x direction in digits */
-    int16_t valueY; /* Raw sensor value in y direction in digits */
-    int16_t valueZ; /* Raw sensor value in z direction in digits */
+    int16_t valueX; /**< Raw sensor value in x direction in digits */
+    int16_t valueY; /**< Raw sensor value in y direction in digits */
+    int16_t valueZ; /**< Raw sensor value in z direction in digits */
 } __attribute__((packed)) IMUData;
 
 /** The abstract IMU interface.

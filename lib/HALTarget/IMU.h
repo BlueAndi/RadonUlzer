@@ -169,24 +169,20 @@ public:
      */
     void calibrate();
 
-private:
-    IMUData m_accelerometerValues; /* Raw accelerometer readings. */
-    IMUData m_gyroValues;          /* Raw gyro readings. */
-    IMUData m_magnetometerValues;  /* Raw magnetometer readings. */
-
 protected:
 private:
+    IMUData m_accelerometerValues; /**< Raw accelerometer readings. */
+    IMUData m_gyroValues;          /**< Raw gyro readings. */
+    IMUData m_magnetometerValues;  /**< Raw magnetometer readings. */
+
     Zumo32U4IMU m_imuDrv; /**< IMU driver from Zumo32U4 Library. */
 
-    /**
-     * Bias values of the sensors determined by the calibration.
-     */
-    int16_t m_rawAccelerometerOffsetX; /* Mean raw accelerometer offset in x-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetY; /* Mean raw accelerometer offset in y-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetZ; /* Mean raw accelerometer offset in z-direction determined by calibration. */
-    int16_t m_rawGyroOffsetX;          /* Mean raw gyro offset in x-direction determined by calibration. */
-    int16_t m_rawGyroOffsetY;          /* Mean raw gyro offset in y-direction determined by calibration. */
-    int16_t m_rawGyroOffsetZ;          /* Mean raw gyro offset in z-direction determined by calibration. */
+    int16_t m_rawAccelerometerOffsetX; /**< Mean raw accelerometer offset in x-direction determined by calibration. */
+    int16_t m_rawAccelerometerOffsetY; /**< Mean raw accelerometer offset in y-direction determined by calibration. */
+    int16_t m_rawAccelerometerOffsetZ; /**< Mean raw accelerometer offset in z-direction determined by calibration. */
+    int16_t m_rawGyroOffsetX;          /**< Mean raw gyro offset in x-direction determined by calibration. */
+    int16_t m_rawGyroOffsetY;          /**< Mean raw gyro offset in y-direction determined by calibration. */
+    int16_t m_rawGyroOffsetZ;          /**< Mean raw gyro offset in z-direction determined by calibration. */
 };
 
 /******************************************************************************
