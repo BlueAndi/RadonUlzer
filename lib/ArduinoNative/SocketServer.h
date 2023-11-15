@@ -68,7 +68,7 @@ public:
      * @param[in] maxConnections Number of maxConnections allowed.
      * @returns true if server has been succesfully set-up.
      */
-    bool init(uint16_t port, uint8_t maxConnections);
+    bool init(const char* port, uint8_t maxConnections);
 
     /**
      * Print argument to the Output Stream.
@@ -189,12 +189,11 @@ public:
     void process();
 
 private:
-
     /** Struct for Implementation of PIMPL Idiom. */
     struct SocketServerImpl;
 
     /** SocketServer Members. PIMPL Idiom. */
-    SocketServerImpl *m_members;
+    SocketServerImpl* m_members;
 
     /* Not allowed. */
     SocketServer(const SocketServer& srv);

@@ -146,10 +146,22 @@ private:
     double m_lastResetValueRight;
 
     /**
+     * The position sensor provides a distance as double and in [m].
+     * The target system provides the distance as int16_t and in [steps].
+     * Calling this method will prevent that the difference between the
+     * reference point and the current position will overflow the target
+     * data type.
+     * 
+     * @param[in,out]   lastPos   Last position in [m]
+     * @param[in]       pos       Current position in [m]
+     */
+    void overflowProtection(double& lastPos, double pos);
+
+    /**
      * Calculate the absolute number of encoder steps by position change.
      *
-     * @param[in] lastPos   Last position in [m]
-     * @param[in] pos       Current position in [m]
+     * @param[in]   lastPos   Last position in [m]
+     * @param[in]   pos       Current position in [m]
      *
      * @return Absolute number of encoder steps
      */

@@ -52,7 +52,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
-#include <cstring> /* definition of memset for tests. */
+#include <cstring>  /* definition of memset for tests. */
 #endif
 
 /******************************************************************************
@@ -126,7 +126,7 @@ SocketServer::~SocketServer()
     }
 }
 
-bool SocketServer::init(uint16_t port, uint8_t maxConnections)
+bool SocketServer::init(const char* port, uint8_t maxConnections)
 {
     int              result;
     struct addrinfo  hints;
@@ -158,7 +158,7 @@ bool SocketServer::init(uint16_t port, uint8_t maxConnections)
 #endif
 
     /* Resolve the server address and port */
-    result = getaddrinfo(nullptr, std::to_string(port).c_str(), &hints, &addrInfo);
+    result = getaddrinfo(nullptr, port, &hints, &addrInfo);
     if (0 != result)
     {
         printf("getaddrinfo failed with error: %d\n", result);
