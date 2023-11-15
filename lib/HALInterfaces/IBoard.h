@@ -52,6 +52,7 @@
 #include <IMotors.h>
 #include <ILed.h>
 #include <IProximitySensors.h>
+#include <IIMU.h>
 
 /******************************************************************************
  * Macros

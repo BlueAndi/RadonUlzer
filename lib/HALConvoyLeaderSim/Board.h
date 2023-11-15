@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <IMU.h>
 
 #include <math.h>
 #include <webots/Robot.hpp>
@@ -213,6 +214,16 @@ public:
         return m_proximitySensors;
     }
 
+    /**
+     * Get IMU (=Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
 protected:
 private:
     /** Name of the speaker in the robot simulation. */
@@ -278,6 +289,15 @@ private:
     /** Name of the front right proximity sensor in the robot simulation. */
     static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
 
+    /** Name of the accelerometer in the robot simulation. */
+    static const char* ACCELEROMETER_NAME;
+
+    /** Name of the gyro in the robot simulation. */
+    static const char* GYRO_NAME;
+
+    /** Name of the Magnetometer in the robot simulation. */
+    static const char* MAGNETOMETER_NAME;
+
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -323,6 +343,9 @@ private:
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
 
+    /** IMU driver */
+    IMU m_imu;
+
     /**
      * Constructs the concrete board.
      */
@@ -348,7 +371,9 @@ private:
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
         m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
+                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
+        m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+              m_robot.getCompass(MAGNETOMETER_NAME))
     {
     }
 

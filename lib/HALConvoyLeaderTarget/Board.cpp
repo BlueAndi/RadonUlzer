@@ -76,6 +76,11 @@ void Board::init()
     m_lineSensors.init();
     m_motors.init();
     m_proximitySensors.initFrontSensor();
+    /*  TODO: TD084	React if IMU initialization fails */
+    (void)m_imu.init();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();
+    m_imu.calibrate();
 }
 
 /******************************************************************************

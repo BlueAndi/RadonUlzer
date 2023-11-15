@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -45,6 +45,9 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
+#include <ButtonB.h>
+#include <ButtonC.h>
+#include <Buzzer.h>
 #include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
@@ -52,7 +55,8 @@
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
-#include <IMU.h>
+#include <ProximitySensors.h>
+#include <RemoteControlIMU.h>
 
 /******************************************************************************
  * Macros
@@ -68,10 +72,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -94,6 +97,36 @@ public:
     IButton& getButtonA() final
     {
         return m_buttonA;
+    }
+
+    /**
+     * Get button B driver.
+     *
+     * @return Button B driver.
+     */
+    IButton& getButtonB() final
+    {
+        return m_buttonB;
+    }
+
+    /**
+     * Get button C driver.
+     *
+     * @return Button C driver.
+     */
+    IButton& getButtonC() final
+    {
+        return m_buttonC;
+    }
+
+    /**
+     * Get buzzer driver.
+     *
+     * @return Buzzer driver.
+     */
+    IBuzzer& getBuzzer() final
+    {
+        return m_buzzer;
     }
 
     /**
@@ -167,8 +200,18 @@ public:
     }
 
     /**
+     * Get proximity sensors driver.
+     *
+     * @return Proximity sensors driver
+     */
+    IProximitySensors& getProximitySensors() final
+    {
+        return m_proximitySensors;
+    }
+
+    /**
      * Get IMU (=Inertial Measurement Unit) driver.
-     * 
+     *
      * @return IMU driver
      */
     IIMU& getIMU() final
@@ -177,11 +220,18 @@ public:
     }
 
 protected:
-
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
+
+    /** Button B driver */
+    ButtonB m_buttonB;
+
+    /** Button C driver */
+    ButtonC m_buttonC;
+
+    /** Buzzer driver */
+    Buzzer m_buzzer;
 
     /** Display driver */
     Display m_display;
@@ -204,8 +254,11 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
-    /** IMU */
-    IMU m_imu;
+    /** Proximity sensors */
+    ProximitySensors m_proximitySensors;
+
+    /** IMU Driver (Dummy Driver for the RemoteControl Application) */
+    RemoteControlIMU m_imu;
 
     /**
      * Constructs the concrete board.
@@ -213,6 +266,9 @@ private:
     Board() :
         IBoard(),
         m_buttonA(),
+        m_buttonB(),
+        m_buttonC(),
+        m_buzzer(),
         m_display(),
         m_encoders(),
         m_lineSensors(),
@@ -220,6 +276,7 @@ private:
         m_ledRed(),
         m_ledYellow(),
         m_ledGreen(),
+        m_proximitySensors(),
         m_imu()
     {
     }
@@ -230,7 +287,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

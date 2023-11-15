@@ -117,6 +117,15 @@ const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
 /* Name of the front right proximity sensor in the robot simulation. */
 const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
 
+/* Name of the accelerometer in the robot simulation. */
+const char* Board::ACCELEROMETER_NAME = "accelerometer";
+
+/* Name of the gyro in the robot simulation. */
+const char* Board::GYRO_NAME = "gyro";
+
+/* Name of the magnetometer in the robot simulation. */
+const char* Board::MAGNETOMETER_NAME = "magnetometer";
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/

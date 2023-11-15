@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <LineFollowerIMU.h>
 
 /******************************************************************************
  * Macros
@@ -71,10 +72,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -201,7 +201,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -209,10 +209,18 @@ public:
         return m_proximitySensors;
     }
 
+    /**
+     * Get IMU (=Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
 protected:
-
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -249,6 +257,9 @@ private:
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
 
+    /** IMU Driver (Dummy Driver for the LineFollower Application) */
+    LineFollowerIMU m_imu;
+
     /**
      * Constructs the concrete board.
      */
@@ -265,7 +276,8 @@ private:
         m_ledRed(),
         m_ledYellow(),
         m_ledGreen(),
-        m_proximitySensors()
+        m_proximitySensors(),
+        m_imu()
     {
     }
 
@@ -275,7 +287,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

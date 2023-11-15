@@ -45,6 +45,9 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
+#include <ButtonB.h>
+#include <ButtonC.h>
+#include <Buzzer.h>
 #include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
@@ -99,6 +102,36 @@ public:
     IButton& getButtonA() final
     {
         return m_buttonA;
+    }
+
+    /**
+     * Get button B driver.
+     *
+     * @return Button B driver.
+     */
+    IButton& getButtonB() final
+    {
+        return m_buttonB;
+    }
+
+    /**
+     * Get button C driver.
+     *
+     * @return Button C driver.
+     */
+    IButton& getButtonC() final
+    {
+        return m_buttonC;
+    }
+
+    /**
+     * Get buzzer driver.
+     *
+     * @return Buzzer driver.
+     */
+    IBuzzer& getBuzzer() final
+    {
+        return m_buzzer;
     }
 
     /**
@@ -172,15 +205,19 @@ public:
     }
 
     /**
-<<<<<<< HEAD:lib/HALSim/Board.h
-     * Get IMU (=Inertial Measurement Unit) driver.
-     * 
-     * @return IMU driver
-=======
      * Get proximity sensors driver.
      *
      * @return Proximity sensors driver
->>>>>>> 9034d5bdd460d0137c832385dafefea587e646bf:lib/HALLineFollowerSim/Board.h
+     */
+    IProximitySensors& getProximitySensors() final
+    {
+        return m_proximitySensors;
+    }
+
+    /**
+     * Get IMU (=Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
      */
     IIMU& getIMU() final
     {
@@ -246,6 +283,12 @@ private:
     /** Name of the green LED in the robot simulation. */
     static const char* LED_GREEN_NAME;
 
+    /** Name of the front proximity sensor in the robot simulation. */
+    static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME;
+
+    /** Name of the front right proximity sensor in the robot simulation. */
+    static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
+
     /** Name of the accelerometer in the robot simulation. */
     static const char* ACCELEROMETER_NAME;
 
@@ -266,6 +309,15 @@ private:
 
     /** Button A driver */
     ButtonA m_buttonA;
+
+    /** Button B driver */
+    ButtonB m_buttonB;
+
+    /** Button C driver */
+    ButtonC m_buttonC;
+
+    /** Buzzer driver */
+    Buzzer m_buzzer;
 
     /** Display driver */
     Display m_display;
@@ -288,6 +340,9 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
+    /** Proximity sensors */
+    ProximitySensors m_proximitySensors;
+
     /** IMU driver */
     IMU m_imu;
 
@@ -300,6 +355,9 @@ private:
         m_simTime(m_robot),
         m_keyboard(m_simTime, m_robot.getKeyboard()),
         m_buttonA(m_keyboard),
+        m_buttonB(m_keyboard),
+        m_buttonC(m_keyboard),
+        m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
         m_display(m_robot.getDisplay(DISPLAY_NAME)),
         m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
                    m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
@@ -312,6 +370,8 @@ private:
         m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
         m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
+        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
+                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
         m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
               m_robot.getCompass(MAGNETOMETER_NAME))
     {
