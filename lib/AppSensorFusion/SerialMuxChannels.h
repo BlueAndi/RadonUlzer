@@ -49,6 +49,9 @@
 /** DLC of Sensordata Channel */
 #define SENSORDATA_CHANNEL_DLC (sizeof(SensorData))
 
+/** Maximum number of SerialMuxProt Channels. */
+#define MAX_CHANNELS (10U)
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/

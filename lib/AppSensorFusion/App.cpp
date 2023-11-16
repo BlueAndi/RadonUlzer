@@ -39,7 +39,6 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
-#include "SerialMuxChannels.h"
 
 /******************************************************************************
  * Compiler Switches
