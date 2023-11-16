@@ -27,8 +27,6 @@
 /**
  * @brief  IMU implementation for ConvoyLeader Application
  * @author Juliane Kerpe <juliane.kerpe@web.de>
- *
- * @{
  */
 
 /******************************************************************************

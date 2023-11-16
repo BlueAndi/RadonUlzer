@@ -63,7 +63,7 @@ bool IMU::init()
     if (true == isInitSuccessful)
     {
         m_imuDrv.enableDefault();
-        /* TODO: TD074    Make sure that a Full Scale of 245 dps of the gyros are enough */
+        /* TODO: TD074  Make sure that a Full Scale of 245 dps of the gyros are enough */
         /* TODO: TD075	Make sure that it is valid to make the Full Scale setting in IMU::init() */
         switch (m_imuDrv.getType())
         {

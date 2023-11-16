@@ -27,7 +27,6 @@
 /**
  * @brief  IMU implementation for LineFollower Application
  * @author Juliane Kerpe <juliane.kerpe@web.de>
- *
  */
 
 /******************************************************************************

@@ -27,7 +27,6 @@
 /**
  * @brief  IMU implementation for RemoteControl Application
  * @author Juliane Kerpe <juliane.kerpe@web.de>
- *
  */
 
 /******************************************************************************

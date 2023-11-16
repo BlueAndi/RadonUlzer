@@ -52,14 +52,14 @@
  * Types and Classes
  *****************************************************************************/
 
-/** Struct of the raw and not yet converted IMU (=accelerometer, gyro or magnetometer) values in digits in x, y and z
- * direction. */
+/** Struct of the raw and not yet converted IMU Data (=accelerometer, gyro or magnetometer values)
+ * in digits in x, y and z direction. */
 typedef struct _IMUData
 {
     int16_t valueX; /**< Raw sensor value in x direction in digits */
     int16_t valueY; /**< Raw sensor value in y direction in digits */
     int16_t valueZ; /**< Raw sensor value in z direction in digits */
-} __attribute__((packed)) IMUData;
+} IMUData;
 
 /** The abstract IMU interface.
  * IMU stands for Inertial Measurement Unit.
