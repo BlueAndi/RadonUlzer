@@ -64,7 +64,7 @@ public:
      * Construct the SensorFusion application.
      */
     App() :
-        m_smpChannelIdSensorData(0U),
+        m_smpChannelIdSensorData(1U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendSensorsDataInterval(),
