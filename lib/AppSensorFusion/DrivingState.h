@@ -156,14 +156,15 @@ private:
     {
     }
 
-    DrivingState(const DrivingState& state);
-    DrivingState& operator=(const DrivingState& state);
+    /* Not allowed. */
+    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
+    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 
     /**
      * Control driving in case the robot is on track.
      *
      * @param[in] position          Current position on track
-     * @param[in] lineSensorValue   Value of each line sensor
+     * @param[in] lineSensorValues   Value of each line sensor
      */
     void processOnTrack(int16_t position, const uint16_t* lineSensorValues);
 
@@ -172,7 +173,7 @@ private:
      * It handles the track search algorithm.
      *
      * @param[in] position          Current position on track
-     * @param[in] lineSensorValue   Value of each line sensor
+     * @param[in] lineSensorValues   Value of each line sensor
      */
     void processTrackLost(int16_t position, const uint16_t* lineSensorValues);
 

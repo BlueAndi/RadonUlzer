@@ -122,8 +122,9 @@ private:
     {
     }
 
-    ErrorState(const ErrorState& state);
-    ErrorState& operator=(const ErrorState& state);
+    /* Not allowed. */
+    ErrorState(const ErrorState& state);            /**< Copy construction of an instance. */
+    ErrorState& operator=(const ErrorState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

@@ -7,3 +7,11 @@
 lib/Webots
 webots/worlds/*.wbproj
 webots/worlds/*.jpg
+doc/doxygen/RemoteControlSim/
+doc/doxygen/RemoteControlTarget/
+doc/doxygen/SensorFusionSim/
+doc/doxygen/SensorFusionTarget/
+doc/doxygen/LineFollowerSim/
+doc/doxygen/LineFollowerTarget/
+doc/doxygen/ConvoyLeaderSim/
+doc/doxygen/ConvoyLeaderTarget/

@@ -131,8 +131,9 @@ private:
     {
     }
 
-    LineSensorsCalibrationState(const LineSensorsCalibrationState& state);
-    LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state);
+    /* Not allowed. */
+    LineSensorsCalibrationState(const LineSensorsCalibrationState& state); /**< Copy construction of an instance. */
+    LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state); /**< Assignment of an instance. */
 
     /**
      * Turn and calibrate the line sensors.

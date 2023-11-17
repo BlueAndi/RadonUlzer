@@ -110,8 +110,9 @@ private:
     {
     }
 
-    StartupState(const StartupState& state);
-    StartupState& operator=(const StartupState& state);
+    /* Not allowed. */
+    StartupState(const StartupState& state);            /**< Copy construction of an instance. */
+    StartupState& operator=(const StartupState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

@@ -116,8 +116,9 @@ private:
     {
     }
 
-    ReadyState(const ReadyState& state);
-    ReadyState& operator=(const ReadyState& state);
+    /* Not allowed. */
+    ReadyState(const ReadyState& state);            /**< Copy construction of an instance. */
+    ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
