@@ -43,19 +43,12 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IBoard.h>
 #include <ButtonA.h>
-#include <ButtonB.h>
-#include <ButtonC.h>
 #include <Buzzer.h>
-#include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
-#include <LedRed.h>
 #include <LedYellow.h>
-#include <LedGreen.h>
-#include <ProximitySensors.h>
 #include <IMU.h>
 
 #include <math.h>
@@ -74,7 +67,7 @@
 /**
  * The concrete simulation robot board.
  */
-class Board : public IBoard
+class Board
 {
 public:
     /**
@@ -92,56 +85,26 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init() final;
+    void init();
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA() final
+    IButton& getButtonA()
     {
         return m_buttonA;
     }
 
-    /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    IButton& getButtonB() final
-    {
-        return m_buttonB;
-    }
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    IButton& getButtonC() final
-    {
-        return m_buttonC;
-    }
-
-    /**
+        /**
      * Get buzzer driver.
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer() final
+    IBuzzer& getBuzzer()
     {
         return m_buzzer;
-    }
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    IDisplay& getDisplay() final
-    {
-        return m_display;
     }
 
     /**
@@ -149,7 +112,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders() final
+    IEncoders& getEncoders()
     {
         return m_encoders;
     }
@@ -159,7 +122,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors() final
+    ILineSensors& getLineSensors()
     {
         return m_lineSensors;
     }
@@ -169,19 +132,9 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors() final
+    IMotors& getMotors()
     {
         return m_motors;
-    }
-
-    /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    ILed& getRedLed() final
-    {
-        return m_ledRed;
     }
 
     /**
@@ -189,29 +142,9 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed() final
+    ILed& getYellowLed()
     {
         return m_ledYellow;
-    }
-
-    /**
-     * Get green LED driver.
-     *
-     * @return Green LED driver.
-     */
-    ILed& getGreenLed() final
-    {
-        return m_ledGreen;
-    }
-
-    /**
-     * Get proximity sensors driver.
-     *
-     * @return Proximity sensors driver
-     */
-    IProximitySensors& getProximitySensors() final
-    {
-        return m_proximitySensors;
     }
 
     /**
@@ -219,7 +152,7 @@ public:
      *
      * @return IMU driver
      */
-    IIMU& getIMU() final
+    IIMU& getIMU()
     {
         return m_imu;
     }
@@ -274,20 +207,8 @@ private:
     /** Name of the light sensor 4 in the robot simulation. */
     static const char* LIGHT_SENSOR_4_NAME;
 
-    /** Name of the red LED in the robot simulation. */
-    static const char* LED_RED_NAME;
-
     /** Name of the yellow LED in the robot simulation. */
     static const char* LED_YELLOW_NAME;
-
-    /** Name of the green LED in the robot simulation. */
-    static const char* LED_GREEN_NAME;
-
-    /** Name of the front proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME;
-
-    /** Name of the front right proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
 
     /** Name of the accelerometer in the robot simulation. */
     static const char* ACCELEROMETER_NAME;
@@ -310,17 +231,8 @@ private:
     /** Button A driver */
     ButtonA m_buttonA;
 
-    /** Button B driver */
-    ButtonB m_buttonB;
-
-    /** Button C driver */
-    ButtonC m_buttonC;
-
     /** Buzzer driver */
     Buzzer m_buzzer;
-
-    /** Display driver */
-    Display m_display;
 
     /** Encoders driver */
     Encoders m_encoders;
@@ -332,16 +244,7 @@ private:
     Motors m_motors;
 
     /** Red LED driver */
-    LedRed m_ledRed;
-
-    /** Red LED driver */
     LedYellow m_ledYellow;
-
-    /** Red LED driver */
-    LedGreen m_ledGreen;
-
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
 
     /** IMU driver */
     IMU m_imu;
@@ -350,15 +253,11 @@ private:
      * Constructs the concrete board.
      */
     Board() :
-        IBoard(),
         m_robot(),
         m_simTime(m_robot),
         m_keyboard(m_simTime, m_robot.getKeyboard()),
         m_buttonA(m_keyboard),
-        m_buttonB(m_keyboard),
-        m_buttonC(m_keyboard),
         m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-        m_display(m_robot.getDisplay(DISPLAY_NAME)),
         m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
                    m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
         m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
@@ -367,11 +266,7 @@ private:
                       m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
                       m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
         m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
-        m_ledRed(m_robot.getLED(LED_RED_NAME)),
         m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-        m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
         m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
               m_robot.getCompass(MAGNETOMETER_NAME))
     {

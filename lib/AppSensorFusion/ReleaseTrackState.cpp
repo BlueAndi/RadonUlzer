@@ -109,15 +109,7 @@ void ReleaseTrackState::exit()
 
 void ReleaseTrackState::showParSet() const
 {
-    IDisplay&   display    = Board::getInstance().getDisplay();
-    uint8_t     parSetId   = ParameterSets::getInstance().getCurrentSetId();
-    const char* parSetName = ParameterSets::getInstance().getParameterSet().name;
-
-    display.clear();
-    display.print("Set ");
-    display.print(parSetId);
-    display.gotoXY(0, 1);
-    display.print(parSetName);
+    /* Nothing to do. */
 }
 
 /******************************************************************************

@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- *
+ * 
  * @addtogroup HALTarget
  *
  * @{
@@ -43,7 +43,6 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
@@ -56,7 +55,6 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
-#include <LineFollowerIMU.h>
 
 /******************************************************************************
  * Macros
@@ -69,12 +67,13 @@
 /**
  * The concrete physical board.
  */
-class Board : public IBoard
+class Board
 {
 public:
+
     /**
      * Get board instance.
-     *
+     * 
      * @return Board instance
      */
     static Board& getInstance()
@@ -87,14 +86,14 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init() final;
+    void init();
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA() final
+    IButton& getButtonA()
     {
         return m_buttonA;
     }
@@ -104,7 +103,7 @@ public:
      *
      * @return Button B driver.
      */
-    IButton& getButtonB() final
+    IButton& getButtonB()
     {
         return m_buttonB;
     }
@@ -114,7 +113,7 @@ public:
      *
      * @return Button C driver.
      */
-    IButton& getButtonC() final
+    IButton& getButtonC()
     {
         return m_buttonC;
     }
@@ -124,7 +123,7 @@ public:
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer() final
+    IBuzzer& getBuzzer()
     {
         return m_buzzer;
     }
@@ -134,7 +133,7 @@ public:
      *
      * @return LCD driver.
      */
-    IDisplay& getDisplay() final
+    IDisplay& getDisplay()
     {
         return m_display;
     }
@@ -144,7 +143,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders() final
+    IEncoders& getEncoders()
     {
         return m_encoders;
     }
@@ -154,7 +153,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors() final
+    ILineSensors& getLineSensors()
     {
         return m_lineSensors;
     }
@@ -164,7 +163,7 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors() final
+    IMotors& getMotors()
     {
         return m_motors;
     }
@@ -174,7 +173,7 @@ public:
      *
      * @return Red LED driver.
      */
-    ILed& getRedLed() final
+    ILed& getRedLed()
     {
         return m_ledRed;
     }
@@ -184,7 +183,7 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed() final
+    ILed& getYellowLed()
     {
         return m_ledYellow;
     }
@@ -194,33 +193,25 @@ public:
      *
      * @return Green LED driver.
      */
-    ILed& getGreenLed() final
+    ILed& getGreenLed()
     {
         return m_ledGreen;
     }
 
     /**
      * Get proximity sensors driver.
-     *
+     * 
      * @return Proximity sensors driver
      */
-    IProximitySensors& getProximitySensors() final
+    IProximitySensors& getProximitySensors()
     {
         return m_proximitySensors;
     }
 
-    /**
-     * Get IMU (Inertial Measurement Unit) driver.
-     *
-     * @return IMU driver
-     */
-    IIMU& getIMU() final
-    {
-        return m_imu;
-    }
-
 protected:
+
 private:
+
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -248,23 +239,19 @@ private:
     /** Red LED driver */
     LedRed m_ledRed;
 
-    /** Red LED driver */
+    /** Yellow LED driver */
     LedYellow m_ledYellow;
 
-    /** Red LED driver */
+    /** Green LED driver */
     LedGreen m_ledGreen;
 
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
 
-    /** IMU Driver (Dummy Driver for the LineFollower Application) */
-    LineFollowerIMU m_imu;
-
     /**
      * Constructs the concrete board.
      */
     Board() :
-        IBoard(),
         m_buttonA(),
         m_buttonB(),
         m_buttonC(),
@@ -276,8 +263,7 @@ private:
         m_ledRed(),
         m_ledYellow(),
         m_ledGreen(),
-        m_proximitySensors(),
-        m_imu()
+        m_proximitySensors()
     {
     }
 
@@ -287,6 +273,7 @@ private:
     ~Board()
     {
     }
+
 };
 
 /******************************************************************************

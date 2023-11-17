@@ -70,17 +70,7 @@ static const char* TAG = "RState";
 
 void ReadyState::entry()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
     const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
-
-    display.clear();
-    display.print("Rdy.");
-
-    if (true == m_isLapTimeAvailable)
-    {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-    }
 
     /* The line sensor value shall be output on console cyclic. */
     m_timer.start(SENSOR_VALUE_OUT_PERIOD);

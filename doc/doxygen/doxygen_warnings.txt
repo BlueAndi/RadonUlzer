@@ -1,0 +1,24 @@
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/App.h:127: error: Member App(const App &app) (function) of class App is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/App.h:128: error: Member operator=(const App &app) (function) of class App is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:159: error: Member DrivingState(const DrivingState &state) (function) of class DrivingState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:160: error: Member operator=(const DrivingState &state) (function) of class DrivingState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:163: error: argument 'lineSensorValue' of command @param is not found in the argument list of DrivingState::processOnTrack(int16_t position, const uint16_t *lineSensorValues)
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:163: error: The following parameter of DrivingState::processOnTrack(int16_t position, const uint16_t *lineSensorValues) is not documented:
+  parameter 'lineSensorValues'
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:171: error: argument 'lineSensorValue' of command @param is not found in the argument list of DrivingState::processTrackLost(int16_t position, const uint16_t *lineSensorValues)
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/DrivingState.h:171: error: The following parameter of DrivingState::processTrackLost(int16_t position, const uint16_t *lineSensorValues) is not documented:
+  parameter 'lineSensorValues'
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ErrorState.h:125: error: Member ErrorState(const ErrorState &state) (function) of class ErrorState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ErrorState.h:126: error: Member operator=(const ErrorState &state) (function) of class ErrorState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/LineSensorsCalibrationState.h:134: error: Member LineSensorsCalibrationState(const LineSensorsCalibrationState &state) (function) of class LineSensorsCalibrationState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/LineSensorsCalibrationState.h:135: error: Member operator=(const LineSensorsCalibrationState &state) (function) of class LineSensorsCalibrationState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/MotorSpeedCalibrationState.h:140: error: Member MotorSpeedCalibrationState(const MotorSpeedCalibrationState &state) (function) of class MotorSpeedCalibrationState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/MotorSpeedCalibrationState.h:141: error: Member operator=(const MotorSpeedCalibrationState &state) (function) of class MotorSpeedCalibrationState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ParameterSets.h:135: error: Member ParameterSets(const ParameterSets &set) (function) of class ParameterSets is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ParameterSets.h:136: error: Member operator=(const ParameterSets &set) (function) of class ParameterSets is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ReadyState.h:119: error: Member ReadyState(const ReadyState &state) (function) of class ReadyState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ReadyState.h:120: error: Member operator=(const ReadyState &state) (function) of class ReadyState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ReleaseTrackState.h:114: error: Member ReleaseTrackState(const ReleaseTrackState &state) (function) of class ReleaseTrackState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/ReleaseTrackState.h:115: error: Member operator=(const ReleaseTrackState &state) (function) of class ReleaseTrackState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/StartupState.h:113: error: Member StartupState(const StartupState &state) (function) of class StartupState is not documented.
+C:/Users/jkerpe/MasterArbeit/10_Code/Launcher/RadonUlzer/lib/APPSensorFusion/StartupState.h:114: error: Member operator=(const StartupState &state) (function) of class StartupState is not documented.

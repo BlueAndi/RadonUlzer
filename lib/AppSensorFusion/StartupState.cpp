@@ -64,26 +64,8 @@
 
 void StartupState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-
     /* Initialize HAL */
     Board::getInstance().init();
-
-    /* Surprise the audience. */
-    Sound::playStartup();
-
-    /* Show team id / team name */
-    display.clear();
-    display.print(TEAM_NAME_LINE_1);
-    display.gotoXY(0, 1);
-    display.print(TEAM_NAME_LINE_2);
-    delay(TEAM_NAME_DURATION);
-
-    /* Show operator info on LCD */
-    display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
 }
 
 void StartupState::process(StateMachine& sm)

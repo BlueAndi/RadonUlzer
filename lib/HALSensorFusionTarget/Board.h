@@ -43,18 +43,13 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IBoard.h>
 #include <ButtonA.h>
-#include <SensorFusionButton.h>
-#include <SensorFusionBuzzer.h>
-#include <SensorFusionDisplay.h>
+#include <Buzzer.h>
+#include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
-#include <LedRed.h>
 #include <LedYellow.h>
-#include <LedGreen.h>
-#include <SensorFusionProximitySensors.h>
 #include <IMU.h>
 
 /******************************************************************************
@@ -68,7 +63,7 @@
 /**
  * The concrete physical board.
  */
-class Board : public IBoard
+class Board
 {
 public:
     /**
@@ -86,36 +81,16 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init() final;
+    void init();
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA() final
+    IButton& getButtonA()
     {
         return m_buttonA;
-    }
-
-    /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    IButton& getButtonB() final
-    {
-        return m_buttonB;
-    }
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    IButton& getButtonC() final
-    {
-        return m_buttonC;
     }
 
     /**
@@ -123,19 +98,9 @@ public:
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer() final
+    IBuzzer& getBuzzer()
     {
         return m_buzzer;
-    }
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    IDisplay& getDisplay() final
-    {
-        return m_display;
     }
 
     /**
@@ -143,7 +108,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders() final
+    IEncoders& getEncoders()
     {
         return m_encoders;
     }
@@ -153,7 +118,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors() final
+    ILineSensors& getLineSensors()
     {
         return m_lineSensors;
     }
@@ -163,19 +128,9 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors() final
+    IMotors& getMotors()
     {
         return m_motors;
-    }
-
-    /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    ILed& getRedLed() final
-    {
-        return m_ledRed;
     }
 
     /**
@@ -183,29 +138,9 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed() final
+    ILed& getYellowLed()
     {
         return m_ledYellow;
-    }
-
-    /**
-     * Get green LED driver.
-     *
-     * @return Green LED driver.
-     */
-    ILed& getGreenLed() final
-    {
-        return m_ledGreen;
-    }
-
-    /**
-     * Get proximity sensors driver.
-     *
-     * @return Proximity sensors driver
-     */
-    IProximitySensors& getProximitySensors() final
-    {
-        return m_proximitySensors;
     }
 
     /**
@@ -213,7 +148,7 @@ public:
      *
      * @return IMU driver
      */
-    IIMU& getIMU() final
+    IIMU& getIMU()
     {
         return m_imu;
     }
@@ -223,17 +158,8 @@ private:
     /** Button A driver */
     ButtonA m_buttonA;
 
-    /** Button B driver (Dummy driver only for the Sensor Fusion App) */
-    SensorFusionButton m_buttonB;
-
-    /** Button C driver (Dummy driver only for the Sensor Fusion App) */
-    SensorFusionButton m_buttonC;
-
-    /** Buzzer driver (Dummy driver only for the Sensor Fusion App) */
-    SensorFusionBuzzer m_buzzer;
-
-    /** Display driver (Dummy driver only for the Sensor Fusion App) */
-    SensorFusionDisplay m_display;
+    /** Buzzer driver */
+    Buzzer m_buzzer;
 
     /** Encoders driver */
     Encoders m_encoders;
@@ -244,17 +170,8 @@ private:
     /** Motors driver */
     Motors m_motors;
 
-    /** Red LED driver */
-    LedRed m_ledRed;
-
-    /** Red LED driver */
+    /** Yellow LED driver */
     LedYellow m_ledYellow;
-
-    /** Red LED driver */
-    LedGreen m_ledGreen;
-
-    /** Proximity sensors dummy driver (Dummy driver only for the Sensor Fusion App) */
-    SensorFusionProximitySensors m_proximitySensors;
 
     /** IMU Driver */
     IMU m_imu;
@@ -263,19 +180,12 @@ private:
      * Constructs the concrete board.
      */
     Board() :
-        IBoard(),
         m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
         m_buzzer(),
-        m_display(),
         m_encoders(),
         m_lineSensors(),
         m_motors(),
-        m_ledRed(),
         m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors(),
         m_imu()
     {
     }

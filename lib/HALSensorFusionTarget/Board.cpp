@@ -75,7 +75,6 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
     /*  TODO: TD084	React if IMU initialization fails */
     (void)m_imu.init();
     m_imu.enableDefault();

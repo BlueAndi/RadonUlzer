@@ -73,13 +73,6 @@ static const char* TAG = "MSCState";
 
 void MotorSpeedCalibrationState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-
-    display.clear();
-    display.print("Calib");
-    display.gotoXY(0, 1);
-    display.print("MSpeed");
-
     /* Setup relative encoders */
     m_relEncoders.clear();
 
