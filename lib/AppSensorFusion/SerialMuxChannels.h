@@ -92,7 +92,7 @@ typedef struct _SensorData
      */
     int16_t magnetometerValueY;
 
-    /** Gyroscope value around z axis as a raw sensor value in digits.
+    /** Gyro value around z axis as a raw sensor value in digits.
      * It can be converted into a physical turn rate in mrad/s via the multiplication
      * with a sensitivity factor in mrad/s/digit.
      */

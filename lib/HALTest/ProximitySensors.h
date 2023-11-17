@@ -85,7 +85,7 @@ public:
      */
     uint8_t getNumSensors() const final
     {
-        return 1;
+        return 1U;
     }
 
     /**

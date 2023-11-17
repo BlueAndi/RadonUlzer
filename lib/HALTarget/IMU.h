@@ -147,7 +147,7 @@ public:
     const void getAccelerationValues(IMUData* accelerationValues);
 
     /**
-     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z in digits.
+     * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
      *
      * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication

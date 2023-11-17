@@ -52,7 +52,7 @@
  * Types and Classes
  *****************************************************************************/
 
-/** Struct of the raw and not yet converted IMU Data (=accelerometer, gyro or magnetometer values)
+/** Struct of the raw and not yet converted IMU Data (accelerometer, gyro or magnetometer values)
  * in digits in x, y and z direction. */
 typedef struct _IMUData
 {
@@ -137,7 +137,7 @@ public:
     virtual const void getAccelerationValues(IMUData* accelerationValues) = 0;
 
     /**
-     * Get last raw Gyroscope values as an IMUData struct containing values in x, y and z in digits.
+     * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
      *
      * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication

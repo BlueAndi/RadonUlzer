@@ -60,14 +60,22 @@
 
 void SensorFusionBuzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
 {
+    /* Not implemented*/
+    (void) freq;
+    (void) duration;
+    (void) volume;
 }
 
 void SensorFusionBuzzer::playMelody(const char* sequence)
 {
+    /* Not implemented*/
+    (void) sequence;
 }
 
 void SensorFusionBuzzer::playMelodyPGM(const char* sequence)
 {
+    /* Not implemented*/
+    (void) sequence;
 }
 
 /******************************************************************************
