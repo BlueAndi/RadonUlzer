@@ -27,11 +27,11 @@ This channel is used to send raw sensor data used for Sensor Fusion on the ZumoC
 
 * The datatypes can be found in SerialMuxChannel.h.
 * Order:
-  * Acceleration in X (raw sensor value)
-  * Acceleration in Y (raw sensor value)
-  * turnRateZ around Z (raw sensor value)
-  * Magnetometer value in X (raw sensor value)
-  * Magnetometer value in Y (raw sensor value)
+  * Acceleration in X (raw sensor value in digits)
+  * Acceleration in Y (raw sensor value in digits)
+  * turnRateZ around Z (raw sensor value in digits)
+  * Magnetometer value in X (raw sensor value in digits)
+  * Magnetometer value in Y (raw sensor value in digits)
   * Angle calculated by Odometry (in mrad)
   * Position in X calculated by Odometry (in mm)
   * Position in Y calculated by Odometry (in mm)
@@ -47,11 +47,11 @@ The application uses the same [State Machine](https://github.com/BlueAndi/RadonU
 
 ### HAL
 Some changes have been made to the HAL.
-![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
+![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/sync/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
 
 ButtonB, ButtonC, the ProximitySensor and the Buzzer have been removed. 
 An IMU has been added:
-![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
+![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/sync/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
 
 # Abbreviations
 

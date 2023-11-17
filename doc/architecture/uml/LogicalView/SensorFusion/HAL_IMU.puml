@@ -1,44 +1,35 @@
-@startuml HAL IMU
+@startuml
 
-title Hardware Abstraction Layer - IMU
+title RadonUlzer - Hardware Abstraction Layer
 
 package "HAL" as hal {
 
     package "HAL Interfaces" as halInterfaces {
-        interface "IBoard" as iBoard {
-            + {abstract} getIMU() : IIMU&
-            + init() : void
-        }
         interface "IIMU" as iIMU {
             + {abstract} init() : bool
-            + {abstract} readAcc() : void
+            + {abstract} readAccelerometer() : void
             + {abstract} readGyro() : void
-            + {abstract} readMag() : void
-            + {abstract} accDataReady() : bool
+            + {abstract} readMagnetometer() : void
+            + {abstract} accelerometerDataReady() : bool
             + {abstract} gyroDataReady() : bool
-            + {abstract} magDataReady() : bool
-            + {abstract} getAccelerationValues(int16_t* accelerationValues) : void
-            + {abstract} getTurnRates(int16_t* turnRates) : void
-            + {abstract} getMagnetometerValues(int16_t* magnetometerValues) : void
+            + {abstract} magnetometerDataReady() : bool
+            + {abstract} getAccelerationValues(IMUData* accelerationValues) : void
+            + {abstract} getTurnRates(IMUData* turnRates) : void
+            + {abstract} getMagnetometerValues(IMUData* magnetometerValues) : void
 
+        }
+        struct IMUData {
+            + valueX: int16_t
+            + valueY: int16_t
+            + valueZ: int16_t
         }
     }
 
     package "HAL Simulation" as simulation {
         class "IMU" as ImuSim {
-            -  m_accelerationValues[3] : int16_t
-            -  m_gyroValues[3] : int16_t
-            -  m_magnetometerValues[3] : int16_t
-            +  init() : bool
-            +  readAcc() : void
-            +  readGyro() : void
-            +  readMag() : void
-            +  accDataReady() : bool
-            +  gyroDataReady() : bool
-            +  magDataReady() : bool
-            +  getAccelerationValues(int16_t* accelerationValues) : void
-            +  getTurnRates(int16_t* turnRates) : void
-            +  getMagnetometerValues(int16_t* magnetometerValues) : void
+            -  m_accelerationValues : IMUData
+            -  m_gyroValues : IMUData
+            -  m_magnetometerValues : IMUData
         }
         class "Board" as BoardSim {
             - m_imu : IMU
@@ -49,19 +40,9 @@ package "HAL" as hal {
 
     package "HAL Target" as target {
         class "IMU" as ImuTarget {
-            -  m_accelerationValues[3] : vector<int16_t> 
-            -  m_gyroValues[3] : vector<int16_t> 
-            -  m_magnetometerValues[3] : vector<int16_t> 
-            +  init() : bool
-            +  readAcc() : void
-            +  readGyro() : void
-            +  readMag() : void
-            +  accDataReady() : bool
-            +  gyroDataReady() : bool
-            +  magDataReady() : bool
-            +  getAccelerationValues(int16_t* accelerationValues) : void
-            +  getTurnRates(int16_t* turnRates) : void
-            +  getMagnetometerValues(int16_t* magnetometerValues) : void
+            -  m_accelerationValues : IMUData
+            -  m_gyroValues : IMUData
+            -  m_magnetometerValues : IMUData
         }
         class "Board" as BoardTarget{
             - m_imu : IMU
@@ -69,15 +50,14 @@ package "HAL" as hal {
             + init() : void
         }
     }
-    }
+
+    iIMU ..> IMUData: <<use>>
     iIMU <|... ImuSim: <<realize>>
-    iBoard <|... BoardSim: <<realize>>
-    iBoard *-- iIMU
+    ImuTarget *- BoardTarget
+    ImuSim *- BoardSim
 
     iIMU <|... ImuTarget: <<realize>>
-    iBoard <|... BoardTarget: <<realize>>
-
-
+}
 package "Webots library"  as webotsLib {
     class Accelerometer {
         + getValues() : double *
@@ -125,13 +105,13 @@ ImuSim *--> Accelerometer
 ImuSim *--> Gyro
 ImuSim *--> Compass
 
-note left of iIMU
+note right of iIMU
     IMU stands for Inertial Measurement Unit.
 end note
 
 note left of hal
     This diagram shows the added IMU component.
-    Classes like the LineSensors or Motors
+    Classes like the LineSensors or Encoders
     are missing.
 end note
 
