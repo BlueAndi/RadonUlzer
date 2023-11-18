@@ -240,16 +240,26 @@ extern int main(int argc, char** argv)
          * https://cyberbotics.com/doc/reference/robot#synchronous-versus-asynchronous-controllers
          */
 
-        setup();
-
-        while (true == gSimTime->step())
+        /* Do one single simulation step to force that all sensors will deliver already data.
+         * Otherwise e.g. the position sensor will provide NaN.
+         * This must be done before setup() is called!
+         */
+        if (false == gSimTime->step())
         {
-            keyboard.getPressedButtons();
-            loop();
-            gSocketStream.process();
+            printf("Very first simulation step failed.\n");
+            status = -1;
         }
+        else
+        {
+            setup();
 
-        status = 0;
+            while (true == gSimTime->step())
+            {
+                keyboard.getPressedButtons();
+                loop();
+                gSocketStream.process();
+            }
+        }
     }
 
     return status;
