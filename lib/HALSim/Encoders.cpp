@@ -64,11 +64,21 @@ void Encoders::init()
     if (nullptr != m_posSensorLeft)
     {
         m_posSensorLeft->enable(m_simTime.getTimeStep());
+        
+        /* If robot reconnets, the position sensor will provide its position.
+         * Ensure that the left encoder will start at 0.
+         */
+        m_lastResetValueLeft = m_posSensorLeft->getValue();
     }
 
     if (nullptr != m_posSensorRight)
     {
         m_posSensorRight->enable(m_simTime.getTimeStep());
+
+        /* If robot reconnets, the position sensor will provide its position.
+         * Ensure that the right encoder will start at 0.
+         */
+        m_lastResetValueRight = m_posSensorRight->getValue();
     }
 }
 
@@ -101,8 +111,8 @@ int16_t Encoders::getCountsRight()
     {
         double currentPos = m_posSensorRight->getValue();
 
-        overflowProtection(m_lastResetValueLeft, currentPos);
-        steps = calculateSteps(m_lastResetValueLeft, currentPos);
+        overflowProtection(m_lastResetValueRight, currentPos);
+        steps = calculateSteps(m_lastResetValueRight, currentPos);
     }
 
     return steps;
