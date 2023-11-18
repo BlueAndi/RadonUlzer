@@ -47,7 +47,6 @@
 #include <IState.h>
 #include <SimpleTimer.h>
 #include <PIDController.h>
-#include <MovAvg.hpp>
 
 /******************************************************************************
  * Macros
@@ -131,7 +130,6 @@ private:
     LineStatus             m_lineStatus;  /**< Status of start-/end line detection */
     TrackStatus            m_trackStatus; /**< Status of track which means on track or track lost, etc. */
     uint8_t m_startEndLineDebounce;       /**< Counter used for easys debouncing of the start-/end line detection. */
-    MovAvg<int16_t, 2> m_posMovAvg;       /**< The moving average of the position over 2 calling cycles. */
 
     /**
      * Default constructor.
@@ -144,8 +142,7 @@ private:
         m_topSpeed(0),
         m_lineStatus(LINE_STATUS_FIND_START_LINE),
         m_trackStatus(TRACK_STATUS_ON_TRACK),
-        m_startEndLineDebounce(0),
-        m_posMovAvg()
+        m_startEndLineDebounce(0)
     {
     }
 
