@@ -28,7 +28,6 @@
  * @brief  IMU implementation
  * @author Juliane Kerpe <juliane.kerpe@web.de>
  *
- * @{
  */
 
 /******************************************************************************

@@ -81,7 +81,7 @@ int16_t DifferentialDrive::getLinearSpeed() const
 
 void DifferentialDrive::setLinearSpeed(int16_t linearSpeed)
 {
-    m_linearSpeedCenterSetPoint = linearSpeed;
+    m_linearSpeedCenterSetPoint = constrain(linearSpeed, -m_maxMotorSpeed, m_maxMotorSpeed);
     calculateLinearSpeedLeftRight(m_linearSpeedCenterSetPoint, m_angularSpeedSetPoint, m_linearSpeedLeftSetPoint,
                                   m_linearSpeedRightSetPoint);
 }
@@ -94,8 +94,8 @@ void DifferentialDrive::getLinearSpeed(int16_t& linearSpeedLeft, int16_t& linear
 
 void DifferentialDrive::setLinearSpeed(int16_t linearSpeedLeft, int16_t linearSpeedRight)
 {
-    m_linearSpeedLeftSetPoint  = linearSpeedLeft;
-    m_linearSpeedRightSetPoint = linearSpeedRight;
+    m_linearSpeedLeftSetPoint  = constrain(linearSpeedLeft, -m_maxMotorSpeed, m_maxMotorSpeed);
+    m_linearSpeedRightSetPoint = constrain(linearSpeedRight, -m_maxMotorSpeed, m_maxMotorSpeed);
     calculateLinearAndAngularSpeedCenter(m_linearSpeedLeftSetPoint, m_linearSpeedRightSetPoint,
                                          m_linearSpeedCenterSetPoint, m_angularSpeedSetPoint);
 }

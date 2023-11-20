@@ -19,19 +19,6 @@ package "HAL" as hal {
             + {abstract} getResolution() const : uint16_t
         }
 
-        interface "IDisplay" as iDisplay {
-            + {abstract} clear() : void
-            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
-            + {abstract} print(str : const String&) : size_t
-            + {abstract} print(str : const char[]) : size_t
-            + {abstract} print(value : uint8_t) : size_t
-            + {abstract} print(value : uint16_t) : size_t
-            + {abstract} print(value : uint32_t) : size_t
-            + {abstract} print(value : int8_t) : size_t
-            + {abstract} print(value : int16_t) : size_t
-            + {abstract} print(value : int32_t) : size_t
-        }
-
         interface "ILed" as iLed {
             + {abstract} enable(enableIt : bool) : void
         }
@@ -52,28 +39,25 @@ package "HAL" as hal {
             + {abstract} getMaxSpeed() const : int16_t
         }
 
-        interface "IIMU" as iIMU {            
+        interface "IIMU" as iIMU {
             + {abstract} init() : bool
-            + {abstract} readAcc() : void
+            + {abstract} readAccelerometer() : void
             + {abstract} readGyro() : void
-            + {abstract} readMag() : void
-            + {abstract} accDataReady() : bool
+            + {abstract} readMagnetometer() : void
+            + {abstract} accelerometerDataReady() : bool
             + {abstract} gyroDataReady() : bool
-            + {abstract} magDataReady() : bool
-            + {abstract} getAccelerationValues(int16_t* accelerationValues) : void
-            + {abstract} getTurnRates(int16_t* turnRates) : void
-            + {abstract} getMagnetometerValues(int16_t* magnetometerValues) : void
+            + {abstract} magnetometerDataReady() : bool
+            + {abstract} getAccelerationValues(IMUData* accelerationValues) : void
+            + {abstract} getTurnRates(IMUData* turnRates) : void
+            + {abstract} getMagnetometerValues(IMUData* magnetometerValues) : void
 
         }
     }
 
     class Board << namespace >> {
         + getButtonA() : IButton&
-        + getDisplay() : IDisplay&
         + getEncoders() : IEncoders&
-        + getLedRed() : ILed&
         + getLedYellow() : ILed&
-        + getLedGreen() : iLed&
         + getLineSensors() : ILineSensors&
         + getMotors() : IMotors&
         + getIMU() : IIMU&
@@ -106,22 +90,16 @@ package "HAL" as hal {
         class LineSensors
         class ButtonA
         class Motors
-        class Display
         class Encoders
-        class LedRed
         class LedYellow
-        class LedGreen
         class IMU
     }
 
     iLineSensors <|... LineSensors: <<realize>>
     iButton <|... ButtonA: <<realize>>
     iMotors <|... Motors: <<realize>>
-    iDisplay <|... Display: <<realize>>
     iEncoders <|... Encoders: <<realize>>
-    iLed <|... LedRed: <<realize>>
     iLed <|... LedYellow: <<realize>>
-    iLed <|... LedGreen: <<realize>>
     iIMU <|... IMU: <<realize>>
 }
 
@@ -146,12 +124,9 @@ hal -[hidden]-- zumo32u4Lib
 LineSensors *--> Zumo32U4LineSensors
 ButtonA *--> Zumo32U4ButtonA
 Motors *--> Zumo32U4Motors
-Display *--> Zumo32U4LCD
 Encoders *--> Zumo32U4Encoders
 IMU *--> Zumo32U4IMU
-LedRed ..> Zumo32U4: <<use>>
 LedYellow ..> Zumo32U4: <<use>>
-LedGreen ..> Zumo32U4: <<use>>
 
 note bottom of hal
     The hardware abstraction layer contains

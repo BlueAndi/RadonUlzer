@@ -51,7 +51,11 @@ The simulation is based on the open source robot simulator *Webots*. The applica
         * Windows: ```%WEBOTS_HOME%\lib\controller```
 3. Install the native compiler toolchain:
     * Linux: Install the gcc toolchain, depended on your distribution.
-    * Windows: Install the [MSYS2](https://www.msys2.org) toolchain and follow the instructions there.
+    * Windows
+        * Install the [MSYS2](https://www.msys2.org) toolchain.
+        * Open MSYS2 shell.
+            * Update package database: ```pacman -Sy pacman```
+            * Install GCC: ```pacman -Sy mingw-w64-ucrt-x86_64-gcc```
 
 ## The Webots library
 To adapt the HAL to the simulation, some sourcecode files from Webots are necessary. Currently there is no Webots library in the platformio registry available. Therefore a local library is created during the build. Ensure that that Webots is already installed, before you try to build it!

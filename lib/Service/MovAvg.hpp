@@ -27,7 +27,7 @@
 /**
  * @brief  Moving average
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Service
  *
  * @{
@@ -151,8 +151,9 @@ private:
     uint8_t m_written;        /**< The number of written values to the list of values, till length is reached. */
     T       m_sum;            /**< Sum of all values */
 
-    MovAvg(const MovAvg& avg);
-    MovAvg& operator=(const MovAvg& avg);
+    /* Not allowed. */
+    MovAvg(const MovAvg& avg);            /**< Copy construction of an instance. */
+    MovAvg& operator=(const MovAvg& avg); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

@@ -1,0 +1,21 @@
+{
+    "name": "HALSensorFusionSim",
+    "version": "0.1.0",
+    "description": "...",
+    "authors": [{
+        "name": "Juliane Kerpe",
+        "email": "juliane-98@web.de",
+        "url": "https://github.com/jkerpe",
+        "maintainer": true
+    }],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "HALInterfaces"
+    }, {
+        "name": "HALSim"
+    }, {
+        "name": "Webots"
+    }],
+    "frameworks": "*",
+    "platforms": "*"
+}
