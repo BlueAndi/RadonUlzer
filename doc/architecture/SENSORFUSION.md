@@ -47,11 +47,11 @@ The application uses the same [State Machine](https://github.com/BlueAndi/RadonU
 
 ### HAL
 Some changes have been made to the HAL.
-![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/sync/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
+![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/base/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
 
 ButtonB, ButtonC, the ProximitySensor and the Buzzer have been removed. 
 An IMU has been added:
-![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/sync/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
+![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/SensorFusion/base/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
 
 # Abbreviations
 
