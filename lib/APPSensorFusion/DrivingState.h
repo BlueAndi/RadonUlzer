@@ -92,8 +92,6 @@ public:
      */
     void exit() final;
 
-protected:
-private:
     /**
      * The line detection status.
      */
@@ -101,9 +99,22 @@ private:
     {
         LINE_STATUS_FIND_START_LINE = 0, /**< Find the start line. */
         LINE_STATUS_START_LINE_DETECTED, /**< Start line detected. */
-        LINE_STATUS_FIND_END_LINE        /**< Find the end line. */
+        LINE_STATUS_FIND_END_LINE,       /**< Find the end line. */
+        LINE_STATUS_END_LINE_DETECTED    /**< End Line detected. */
     };
 
+    /**
+     * Indicates if there is currently an End line detected.
+     *
+     * @return current Line Status as a LineStatus enum
+     */
+    DrivingState::LineStatus getLineStatus()
+    {
+        return m_lineStatus;
+    }
+
+protected:
+private:
     /**
      * The track status.
      */
@@ -124,7 +135,6 @@ private:
     static const uint32_t PID_PROCESS_PERIOD = 10;
 
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
-    SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
     SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
     PIDController<int16_t> m_pidCtrl;          /**< PID controller, used for driving. */
     int16_t                m_topSpeed;         /**< Top speed in [steps/s]. It might be lower or equal to the max. speed! */
@@ -138,7 +148,6 @@ private:
      */
     DrivingState() :
         m_observationTimer(),
-        m_lapTime(),
         m_pidProcessTime(),
         m_pidCtrl(),
         m_topSpeed(0),

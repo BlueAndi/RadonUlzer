@@ -49,6 +49,12 @@
 /** DLC of Sensordata Channel */
 #define SENSORDATA_CHANNEL_DLC (sizeof(SensorData))
 
+/** Name of Channel to End Line Detected Signal. */
+#define ENDLINE_CHANNEL_NAME "END_LINE"
+
+/** DLC of End Line Channel */
+#define ENDLINE_CHANNEL_DLC (sizeof(EndLineFlag))
+
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
@@ -98,6 +104,13 @@ typedef struct _SensorData
      */
     int16_t turnRate;
 } __attribute__((packed)) SensorData;
+
+/** Struct of the End Line Detection payload. */
+typedef struct _EndLineFlag
+{
+    /** Indicates if the End Line has been detected. */
+    bool isEndLineDetected;
+} __attribute__((packed)) EndLineFlag;
 
 /******************************************************************************
  * Functions
