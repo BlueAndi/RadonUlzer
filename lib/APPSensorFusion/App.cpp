@@ -176,8 +176,7 @@ void App::sendEndLineDetectionSignal()
     if ((DrivingState::LINE_STATUS_FIND_END_LINE == m_lastLineDetectionStatus) &&
         (DrivingState::LINE_STATUS_END_LINE_DETECTED == lineStatus))
     {
-        EndLineFlag payload;
-        payload.isEndLineDetected = true;
+        EndLineFlag payload = {.isEndLineDetected = true};
         (void)m_smpServer.sendData(m_smpChannelIdEndLine, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
     }
 
