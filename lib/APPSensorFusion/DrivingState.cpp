@@ -182,25 +182,12 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
                 m_lineStatus = LINE_STATUS_START_LINE_DETECTED;
 
                 Sound::playBeep();
-
-                /* Measure the lap time and use as start point the detected start line. */
-                m_lapTime.start(0);
             }
             /* End line detected */
             else if (LINE_STATUS_FIND_END_LINE == m_lineStatus)
             {
-                DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-                /* Stop motors immediately. Don't move this to a later position,
-                 * as this would extend the driven length.
-                 */
-                diffDrive.setLinearSpeed(0, 0);
-
-                Sound::playBeep();
-                m_trackStatus = TRACK_STATUS_FINISHED;
-
-                /* Calculate lap time and show it*/
-                ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
+                m_lineStatus = LINE_STATUS_END_LINE_DETECTED;
+                /* Don't switch to the Ready State and do nothing. */
             }
             else
             {
@@ -213,7 +200,8 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
         }
         else
         {
-            ;
+            /* Be able to switch back to LINE_STATUS_FIND_END_LINE */
+            m_lineStatus = LINE_STATUS_FIND_END_LINE;
         }
 
         if (TRACK_STATUS_FINISHED != m_trackStatus)
