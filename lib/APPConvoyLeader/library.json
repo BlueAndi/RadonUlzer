@@ -2,21 +2,28 @@
     "name": "APPConvoyLeader",
     "version": "0.1.0",
     "description": "Convoy leader application",
-    "authors": [{
-        "name": "Andreas Merkle",
-        "email": "web@blue-andi.de",
-        "url": "https://github.com/BlueAndi",
-        "maintainer": true
-    }],
+    "authors": [
+        {
+            "name": "Andreas Merkle",
+            "email": "web@blue-andi.de",
+            "url": "https://github.com/BlueAndi",
+            "maintainer": true
+        }
+    ],
     "license": "MIT",
-    "dependencies": [{
-        "name": "Service"
-    }, {
-        "name": "HALInterfaces"
-    }, {
-        "name": "SerialMuxProt",
-        "version" : "https://github.com/gabryelreyes/SerialMuxProt.git"
-    }],
+    "dependencies": [
+        {
+            "name": "Service"
+        },
+        {
+            "name": "HALInterfaces"
+        },
+        {
+            "owner": "gabryelreyes",
+            "name": "SerialMuxProt",
+            "version": "^1.0.0"
+        }
+    ],
     "frameworks": "*",
     "platforms": "*"
 }
