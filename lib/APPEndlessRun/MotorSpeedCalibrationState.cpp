@@ -33,12 +33,15 @@
  * Includes
  *****************************************************************************/
 #include "MotorSpeedCalibrationState.h"
+
 #include <Board.h>
 #include <RobotConstants.h>
 #include <DifferentialDrive.h>
 #include <StateMachine.h>
+
 #include <Logging.h>
 #include <Util.h>
+
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
 

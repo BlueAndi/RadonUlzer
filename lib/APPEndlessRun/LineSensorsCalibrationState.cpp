@@ -33,12 +33,15 @@
  * Includes
  *****************************************************************************/
 #include "LineSensorsCalibrationState.h"
+
 #include <Board.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <StateMachine.h>
 #include <Util.h>
+
 #include "ErrorState.h"
+#include "DrivingState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -200,7 +203,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
     else
     {
         /* Jump to driving state, taking first (= default) Parameter set. */
-        sm.setState(&OdoState::getInstance());
+        sm.setState(&DrivingState::getInstance());
     }
 }
 
