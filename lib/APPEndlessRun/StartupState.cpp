@@ -33,10 +33,12 @@
  * Includes
  *****************************************************************************/
 #include "StartupState.h"
+
 #include <Board.h>
+#include <Sound.h>
 #include <StateMachine.h>
+
 #include "MotorSpeedCalibrationState.h"
-#include "Sound.h"
 
 /******************************************************************************
  * Compiler Switches
