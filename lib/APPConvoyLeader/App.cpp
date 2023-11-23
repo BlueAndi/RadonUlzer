@@ -56,7 +56,7 @@
  * Prototypes
  *****************************************************************************/
 
-static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -167,9 +167,12 @@ void App::reportSpeed()
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds
+ * @param[in] userData      User data provided by the application.
  */
-void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
+    /* Not implemented*/
+    (void) userData;
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);

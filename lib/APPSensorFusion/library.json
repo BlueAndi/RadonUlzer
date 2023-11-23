@@ -1,19 +1,29 @@
 {
-    "name": "SensorFusion",
+    "name": "APPSensorFusion",
     "version": "0.1.0",
-    "description": "SensorFusion application",
-    "authors": [{
-        "name": "Juliane Kerpe",
-        "email": "juliane.kerpe@web.de",
-        "url": "https://github.com/jkerpe",
-        "maintainer": true
-    }],
+    "description": "Sensor Fusion application",
+    "authors": [
+        {
+            "name": "Juliane Kerpe",
+            "email": "juliane.kerpe@web.de",
+            "url": "https://github.com/jkerpe",
+            "maintainer": true
+        }
+    ],
     "license": "MIT",
-    "dependencies": [{
-        "name": "Service"
-    }, {
-        "name": "HALInterfaces"
-    }],
+    "dependencies": [
+        {
+            "name": "Service"
+        },
+        {
+            "name": "HALInterfaces"
+        },
+        {
+            "owner": "gabryelreyes",
+            "name": "SerialMuxProt",
+            "version": "^2.0.0"
+        }
+    ],
     "frameworks": "*",
     "platforms": "*"
 }
