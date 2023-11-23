@@ -167,12 +167,11 @@ void App::reportSpeed()
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds
- * @param[in] userData      User data provided by the application.
+ * @param[in] userData      User data
  */
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    /* Not implemented*/
-    (void) userData;
+    (void)userData;
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
