@@ -46,7 +46,6 @@
 #include <Keyboard.h>
 #include "SocketServer.h"
 #include <getopt.h>
-#include "ArduinoJson.h"
 
 #endif
 

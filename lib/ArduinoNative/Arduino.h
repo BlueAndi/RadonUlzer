@@ -48,7 +48,6 @@
 #include <string.h>
 #include <math.h>
 #include "Serial.h"
-#include "WString.h"
 #include "Stream.h"
 
 /******************************************************************************
