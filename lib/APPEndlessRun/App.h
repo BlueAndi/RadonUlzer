@@ -47,6 +47,7 @@
 #include <SimpleTimer.h>
 #include <SerialMuxProtServer.hpp>
 #include <Arduino.h>
+#include <Board.h>
 
 /******************************************************************************
  * Macros
@@ -91,6 +92,9 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /** Default size of the JSON Document for parsing. */
+    static const uint32_t JSON_DOC_DEFAULT_SIZE = 1024U;
+
     /* YAP channel name for sending motor speeds. */
     static const char* CH_NAME_TRAFFIC_LIGHT_COLORS;
 
@@ -114,7 +118,10 @@ private:
     App(const App& app);            /**< Copy construction of an instance. */
     App& operator=(const App& app); /**< Assignment of an instance. */
 
-    void sendHandShake();
+    /**
+     * Send coordinates via SerialMuxProt.
+     */
+    void sendCoordinates(const String& payload);
 };
 
 /******************************************************************************
