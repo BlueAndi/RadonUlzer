@@ -27,7 +27,7 @@
 /**
  * @brief  Arduino native
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HAL
  *
  * @{
@@ -48,18 +48,20 @@
 #include <string.h>
 #include <math.h>
 #include "Serial.h"
+#include "WString.h"
+#include "Stream.h"
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
-#define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
+#define constrain(amt, low, high) ((amt) < (low) ? (low) : ((amt) > (high) ? (high) : (amt)))
 
 #ifndef PSTR
 #define PSTR
 #endif
 
-#define PI  M_PI
+#define PI M_PI
 
 /******************************************************************************
  * Types and Classes
@@ -71,17 +73,17 @@
 
 /**
  * Returns the number of milliseconds passed since the system start.
- * 
+ *
  * @return The number of milliseconds.
  */
 extern unsigned long millis();
 
 /**
- * Delays the program for the specified amount of milliseconds. In the mean time the 
+ * Delays the program for the specified amount of milliseconds. In the mean time the
  * simulation still steps to prevent an endless loop.
- * 
+ *
  * @param[in] ms The amount of milliseconds that the program should be delayed by.
  */
 extern void delay(unsigned long ms);
 
-#endif  /* ARDUINO_H */
+#endif /* ARDUINO_H */
