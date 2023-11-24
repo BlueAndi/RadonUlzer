@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <StateMachine.h>
 #include <SimpleTimer.h>
+#include <SerialMuxProtServer.hpp>
 #include <Arduino.h>
 
 /******************************************************************************
@@ -62,7 +63,7 @@ public:
     /**
      * Construct the line follower application.
      */
-    App() : m_systemStateMachine(), m_controlInterval()
+    App() : m_systemStateMachine(), m_controlInterval(), m_smpServer(Serial)
     {
     }
 
@@ -90,15 +91,30 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /* YAP channel name for sending motor speeds. */
+    static const char* CH_NAME_TRAFFIC_LIGHT_COLORS;
+
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
+    /**
+     * SerialMuxProt Server Instance
+     *
+     * @tparam tMaxChannels set to 10, as App does not require
+     * more channels for external communication.
+     */
+    SerialMuxProtServer<10U> m_smpServer;
+
+    uint8_t m_smpChannelIdHandShake;
+
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
     App& operator=(const App& app); /**< Assignment of an instance. */
+
+    void sendHandShake();
 };
 
 /******************************************************************************

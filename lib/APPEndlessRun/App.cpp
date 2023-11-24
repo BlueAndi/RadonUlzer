@@ -33,13 +33,16 @@
  * Includes
  *****************************************************************************/
 #include "App.h"
-#include "StartupState.h"
 
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+
+#include "StartupState.h"
+#include "ColorState.h"
+#include "SerialMuxChannels.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -57,9 +60,14 @@
  * Prototypes
  *****************************************************************************/
 
+static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize);
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
+
+/* Initialize channel name for  */
+const char* App::CH_NAME_TRAFFIC_LIGHT_COLORS = "TL_COLORS";
 
 /******************************************************************************
  * Public Methods
@@ -69,7 +77,12 @@ void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
     Board::getInstance().init();
+
+    /* Subscribe to TrafficLight SMP channel. */
+    m_smpServer.subscribeToChannel(CH_NAME_TRAFFIC_LIGHT_COLORS, App_trafficLightColorsCallback);
+
     m_systemStateMachine.setState(&StartupState::getInstance());
+
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 }
 
@@ -112,3 +125,22 @@ void App::loop()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Type: Rx SMP
+ * Name: TrafficLightColorsCallback
+ *
+ * Receives traffic light color values over SerialMuxProt channel.
+ *
+ * @param[in] payload Traffic light (integer) color value.
+ * @param[in] payloadSize Size of color value.
+ */
+static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize)
+{
+    if ((nullptr != payload) && (sizeof(ColorState::TLCId) == payloadSize))
+    {
+        ColorState::TLCId tlcId = *reinterpret_cast<const ColorState::TLCId*>(payload);
+
+        ColorState::getInstance().execute(tlcId);
+    }
+}
