@@ -45,45 +45,22 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of Channel to send Commands to. */
-#define COMMAND_CHANNEL_NAME "CMD"
+/** Name of the Channel to receive Traffic Light IDs. */
 
-/** DLC of Command Channel. */
-#define COMMAND_CHANNEL_DLC (sizeof(Command))
+#define TRAFFIC_LIGHT_COLORS_NAME "TL_COLRS"
 
-/** Name of Channel to receive Command Responses from. */
-#define COMMAND_RESPONSE_CHANNEL_NAME "CMD_RSP"
-
-/** DLC of Command Response Channel. */
-#define COMMAND_RESPONSE_CHANNEL_DLC (sizeof(CommandResponse))
-
-/** Name of Channel to send Motor Speed Setpoints to. */
-#define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
-
-/** DLC of Speedometer Channel */
-#define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
-
-/** Name of the Channel to receive Line Sensor Data from. */
-#define LINE_SENSOR_CHANNEL_NAME "LINE_SENS"
-
-/** DLC of Line Sensor Channel */
-#define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
+/** DLC of Traffic Light Channel. */
+#define TRAFFIC_LIGHT_COLORS_DLC (sizeof(Color))
 
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
-/** Struct of the "Command" channel payload. */
-typedef struct _Command
+/** Struct of the "Color" channel payload. */
+typedef struct _Color
 {
-    uint8_t commandId; /**< Command ID */
-} __attribute__((packed)) Command;
-
-/** Struct of the "Command Response" channel payload. */
-typedef struct _CommandResponse
-{
-    uint8_t response; /**< Response to the command */
-} __attribute__((packed)) CommandResponse;
+    int8_t colorId; /**< Command ID */
+} __attribute__((packed)) Color;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
