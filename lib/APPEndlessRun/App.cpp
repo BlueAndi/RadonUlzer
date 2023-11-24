@@ -88,6 +88,7 @@ void App::setup()
 
 void App::loop()
 {
+    m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
