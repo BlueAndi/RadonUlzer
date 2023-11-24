@@ -1,0 +1,80 @@
+#VRML_SIM R2023b utf8
+# Describe the functionality of your PROTO here.
+
+
+PROTO TrafficLightDCS [
+  field SFVec3f translation 0 0 0
+  field SFRotation rotation 0 0 1 0
+  field SFString name "TrafficLightDCS"
+  field SFString controller "<generic>"
+]
+{
+  Robot {
+  translation IS translation
+  rotation IS rotation
+  children [
+    Pose {
+      translation 0 0 0.5
+      children [
+        LED {
+          translation 0 0 0.2
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "RedLight"
+          gradual TRUE
+        }
+        LED {
+          translation 0 0 0.1
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "OrangeLight"
+          color [
+            1 0.8 0
+          ]
+          gradual TRUE
+        }
+        LED {
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "GreenLight"
+          color [
+            0.2 1 0.1
+          ]
+          gradual TRUE
+        }
+      ]
+    }
+  ]
+  name "TrafficLightDCS"
+  name IS name
+  controller "<extern>"
+  controller IS controller 
+ }
+}

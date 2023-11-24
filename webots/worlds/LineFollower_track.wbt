@@ -1,9 +1,10 @@
-#VRML_SIM R2023a utf8
+#VRML_SIM R2023b utf8
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
 EXTERNPROTO "../protos/LineFollowerTrack.proto"
+EXTERNPROTO "../protos/TrafficLightDCS.proto"
 
 WorldInfo {
   info [
@@ -22,8 +23,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
-  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
+  orientation -0.3610704057050694 -0.07116474889007521 0.9298191978225601 3.504101281220505
+  position 3.1614868111156675 1.227277290108515 3.588798223847756
 }
 TexturedBackground {
 }
@@ -32,7 +33,10 @@ TexturedBackgroundLight {
 LineFollowerTrack {
 }
 Zumo32U4 {
-  translation -0.249993 -0.0412039 0.0139993
-  rotation -6.60216e-09 -2.69589e-07 1 1.52863
+  translation -1.22444 -0.517579 0.0139993
+  rotation 0 0 -1 -1.5707953071795862
   name "Zumo"
+}
+TrafficLightDCS {
+  translation 0 0 -0.2
 }
