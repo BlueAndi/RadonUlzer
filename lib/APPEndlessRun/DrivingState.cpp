@@ -43,11 +43,12 @@
 
 #include "StartupState.h"
 #include "ParameterSets.h"
+#include "ColorState.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 
-using namespace std;
+// using namespace std;
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -135,11 +136,11 @@ void DrivingState::process(StateMachine& sm)
         {
             Odometry::getInstance().getPosition(CURRENT_X_COORDINATE, CURRENT_Y_COORDINATE);
 
-            cout << "x:" << CURRENT_X_COORDINATE << " "
-                 << "y:" << CURRENT_Y_COORDINATE << endl;
+            // cout << "x:" << CURRENT_X_COORDINATE << " "
+            //      << "y:" << CURRENT_Y_COORDINATE << endl;
 
-            m_callbackTimer.restart();
-            // sm.setState(&ColorState::getInstance());
+            // m_callbackTimer.restart();
+            sm.setState(&ColorState::getInstance());
         }
         break;
 
