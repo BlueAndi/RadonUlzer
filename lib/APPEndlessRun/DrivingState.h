@@ -143,6 +143,7 @@ private:
     static const uint32_t PID_PROCESS_PERIOD = 10;
 
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
+    SimpleTimer            m_callbackTimer;
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
     SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
     PIDController<int16_t> m_pidCtrl;          /**< PID controller, used for driving. */
@@ -151,7 +152,6 @@ private:
     TrackStatus            m_trackStatus; /**< Status of track which means on track or track lost, etc. */
     uint8_t m_startEndLineDebounce;       /**< Counter used for easys debouncing of the start-/end line detection. */
 
-    SimpleTimer m_callbackTimer;
     int16_t     KEEP_TOP_SPEED = m_topSpeed;
 
     /**
