@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef STARTUP_STATE_H
-#define STARTUP_STATE_H
+#ifndef COLOR_STATE_H
+#define COLOR_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -116,7 +116,8 @@ private:
     /**
      * Default constructor.
      */
-    ColorState() : m_tlcId(COLOR_ID_IDLE)
+    ColorState() : 
+        m_tlcId(COLOR_ID_IDLE)
     {
     }
 
@@ -136,5 +137,5 @@ private:
  * Functions
  *****************************************************************************/
 
-#endif /* STARTUP_STATE_H */
+#endif /* COLOR_STATE_H */
 /** @} */
