@@ -45,8 +45,13 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of the Channel to receive Traffic Light IDs. */
+/** Name of Channel to send Coordinates to. */
+#define ODOMETRY_CHANNEL_NAME "ODOMETRY"
 
+/** DLC of Odometry Channel */
+#define ODOMETRY_CHANNEL_DLC (sizeof(OdometryData))
+
+/** Name of the Channel to receive Traffic Light IDs. */
 #define TRAFFIC_LIGHT_COLORS_NAME "TL_COLRS"
 
 /** DLC of Traffic Light Channel. */
@@ -62,18 +67,13 @@ typedef struct _Color
     int8_t colorId; /**< Command ID */
 } __attribute__((packed)) Color;
 
-/** Struct of the "Speed" channel payload. */
-typedef struct _SpeedData
+/** Struct of the "Odometry" channel payload. */
+typedef struct _OdometryData
 {
-    int16_t left;  /**< Left motor speed [steps/s] */
-    int16_t right; /**< Right motor speed [steps/s] */
-} __attribute__((packed)) SpeedData;
-
-/** Struct of the "Line Sensor" channel payload. */
-typedef struct _LineSensorData
-{
-    uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
-} __attribute__((packed)) LineSensorData;
+    int32_t xPos;        /**< X position [mm]. */
+    int32_t yPos;        /**< Y position [mm]. */
+    int32_t orientation; /**< Orientation [mrad]. */
+} __attribute__((packed)) OdometryData;
 
 /******************************************************************************
  * Functions

@@ -42,7 +42,6 @@
 
 #include "StartupState.h"
 #include "ColorState.h"
-#include "SerialMuxChannels.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -66,9 +65,6 @@ static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t
  * Local Variables
  *****************************************************************************/
 
-/* Initialize channel name for  */
-const char* App::CH_NAME_TRAFFIC_LIGHT_COLORS = "TL_COLORS";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -79,11 +75,17 @@ void App::setup()
     Board::getInstance().init();
 
     /* Subscribe to TrafficLight SMP channel. */
-    m_smpServer.subscribeToChannel(CH_NAME_TRAFFIC_LIGHT_COLORS, App_trafficLightColorsCallback);
+    m_smpServer.subscribeToChannel(TRAFFIC_LIGHT_COLORS_NAME, App_trafficLightColorsCallback);
 
+    /* Create Tx SMP Coordinates channel. */
+    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
+
+    /* Jump to StartupState. */
     m_systemStateMachine.setState(&StartupState::getInstance());
 
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+    m_reportTimer.start(100U);
 }
 
 void App::loop()
@@ -108,6 +110,14 @@ void App::loop()
         m_controlInterval.restart();
     }
 
+    if (true == m_reportTimer.isTimeout())
+    {
+        /* Send current data to SerialMuxProt Client */
+        sendCoordinates();
+
+        m_reportTimer.restart();
+    }
+
     m_systemStateMachine.process();
 }
 
@@ -118,6 +128,29 @@ void App::loop()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+/**
+ * Type: Tx SMP
+ * Name: sendCoordinates
+ *
+ * Sends x and y position values over SerialMuxProt.
+ *
+ */
+void App::sendCoordinates()
+{
+    Odometry&    odometry = Odometry::getInstance();
+    OdometryData payload;
+    int32_t      xPos = 0;
+    int32_t      yPos = 0;
+
+    odometry.getPosition(xPos, yPos);
+    payload.xPos        = xPos;
+    payload.yPos        = yPos;
+    payload.orientation = odometry.getOrientation();
+
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+}
 
 /******************************************************************************
  * External Functions

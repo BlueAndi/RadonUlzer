@@ -46,6 +46,7 @@
 #include <StateMachine.h>
 #include <SimpleTimer.h>
 #include <SerialMuxProtServer.hpp>
+#include "SerialMuxChannels.h"
 #include <Arduino.h>
 #include <Board.h>
 
@@ -64,7 +65,12 @@ public:
     /**
      * Construct the line follower application.
      */
-    App() : m_systemStateMachine(), m_controlInterval(), m_smpServer(Serial)
+    App() :
+        m_serialMuxProtChannelIdOdometry(0U),
+        m_systemStateMachine(),
+        m_controlInterval(),
+        m_reportTimer(),
+        m_smpServer(Serial)
     {
     }
 
@@ -95,8 +101,8 @@ private:
     /** Default size of the JSON Document for parsing. */
     static const uint32_t JSON_DOC_DEFAULT_SIZE = 1024U;
 
-    /* YAP channel name for sending motor speeds. */
-    static const char* CH_NAME_TRAFFIC_LIGHT_COLORS;
+    /** SerialMuxProt Channel id sending coordinates. */
+    uint8_t m_serialMuxProtChannelIdOdometry;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -104,15 +110,16 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
+    /** Timer for reporting current data through SerialMuxProt. */
+    SimpleTimer m_reportTimer;
+
     /**
      * SerialMuxProt Server Instance
      *
      * @tparam tMaxChannels set to 10, as App does not require
      * more channels for external communication.
      */
-    SerialMuxProtServer<10U> m_smpServer;
-
-    uint8_t m_smpChannelIdHandShake;
+    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
@@ -121,7 +128,7 @@ private:
     /**
      * Send coordinates via SerialMuxProt.
      */
-    void sendCoordinates(const String& payload);
+    void sendCoordinates();
 };
 
 /******************************************************************************
