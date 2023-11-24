@@ -134,12 +134,7 @@ void DrivingState::process(StateMachine& sm)
         /** If callback timer is done, refresh odometry coordinates. */
         if (true == m_callbackTimer.isTimeout())
         {
-            Odometry::getInstance().getPosition(CURRENT_X_COORDINATE, CURRENT_Y_COORDINATE);
 
-            // cout << "x:" << CURRENT_X_COORDINATE << " "
-            //      << "y:" << CURRENT_Y_COORDINATE << endl;
-
-            // m_callbackTimer.restart();
             sm.setState(&ColorState::getInstance());
         }
         break;
