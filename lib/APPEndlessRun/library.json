@@ -17,6 +17,10 @@
         },
         {
             "name": "HALInterfaces"
+        },
+        {
+            "name": "SerialMuxProt",
+            "version": "1.0.0"
         }
     ],
     "frameworks": "*",
