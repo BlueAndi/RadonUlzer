@@ -54,6 +54,11 @@
  * Local Variables
  *****************************************************************************/
 
+/**
+ * Is logging enabled?
+ */
+static bool gIsLogEnabled = true;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -70,60 +75,87 @@
  * External Functions
  *****************************************************************************/
 
+bool Logging::isEnabled()
+{
+    return gIsLogEnabled;
+}
+
+void Logging::enable()
+{
+    gIsLogEnabled = true;
+}
+
+void Logging::disable()
+{
+    gIsLogEnabled = false;
+}
+
 void Logging::printHead(const char* filename, int lineNumber, Logging::LogLevel level)
 {
-    const char* levelStr = "U";
-
-    switch (level)
+    if (true == isEnabled())
     {
-    case Logging::LOG_LEVEL_FATAL:
-        levelStr = "F";
-        break;
+        const char* levelStr = "U";
 
-    case Logging::LOG_LEVEL_ERROR:
-        levelStr = "E";
-        break;
+        switch (level)
+        {
+        case Logging::LOG_LEVEL_FATAL:
+            levelStr = "F";
+            break;
 
-    case Logging::LOG_LEVEL_WARNING:
-        levelStr = "W";
-        break;
+        case Logging::LOG_LEVEL_ERROR:
+            levelStr = "E";
+            break;
 
-    case Logging::LOG_LEVEL_INFO:
-        levelStr = "I";
-        break;
+        case Logging::LOG_LEVEL_WARNING:
+            levelStr = "W";
+            break;
 
-    case Logging::LOG_LEVEL_DEBUG:
-        levelStr = "D";
-        break;
+        case Logging::LOG_LEVEL_INFO:
+            levelStr = "I";
+            break;
 
-    default:
-        break;
+        case Logging::LOG_LEVEL_DEBUG:
+            levelStr = "D";
+            break;
+
+        default:
+            break;
+        }
+
+        Serial.print(static_cast<uint32_t>(millis()));
+        Serial.print(" ");
+        Serial.print(levelStr);
+        Serial.print(" ");
+        Serial.print(filename);
+        Serial.print("(");
+        Serial.print(lineNumber);
+        Serial.print("): ");
     }
-
-    Serial.print(static_cast<uint32_t>(millis()));
-    Serial.print(" ");
-    Serial.print(levelStr);
-    Serial.print(" ");
-    Serial.print(filename);
-    Serial.print("(");
-    Serial.print(lineNumber);
-    Serial.print("): ");
 }
 
 void Logging::printMsg(const char* message)
 {
-    Serial.print(message);
+    if (true == isEnabled())
+    {
+        Serial.print(message);
+    }
 }
 
 void Logging::printTail()
 {
-    Serial.print("\n");
+    if (true == isEnabled())
+    {
+        Serial.print("\n");
+    }
 }
 
 void Logging::print(const char* filename, int lineNumber, Logging::LogLevel level, const char* message)
 {
-    printHead(filename, lineNumber, level);
-    Serial.println(message);
+    if (true == isEnabled())
+    {
+        printHead(filename, lineNumber, level);
+        Serial.println(message);
+    }
 }
 
 /******************************************************************************

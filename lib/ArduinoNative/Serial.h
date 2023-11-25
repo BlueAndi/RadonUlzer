@@ -60,7 +60,8 @@ class Serial_ : public Stream
 public:
     /**
      * Construct Serial_.
-     * @param[in] stream Output Stream.
+     *
+     * @param[in] stream Output stream.
      */
     Serial_(Stream& stream);
 
@@ -70,125 +71,152 @@ public:
     ~Serial_();
 
     /**
-     * Begin Serial_ Communication.
-     * @param[in] baudrate Comm. Speed in bits per second
+     * Set stream where serial data shall be sent to.
+     *
+     * @param[in] stream Output stream.
+     */
+    void setStream(Stream& stream);
+
+    /**
+     * Begin Serial_ communication.
+     *
+     * @param[in] baudrate Comm. speed in bits per second
      */
     void begin(unsigned long baudrate);
 
     /**
-     * End the Serial_ Communication.
+     * End the Serial_ communication.
      */
     void end();
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] str Argument to print.
      */
     void print(const char str[]) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(uint8_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(uint16_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(uint32_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(int8_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(int16_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
+     *
      * @param[in] value Argument to print.
      */
     void print(int32_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] str Argument to print.
      */
     void println(const char str[]) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(uint8_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(uint16_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(uint32_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(int8_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(int16_t value) final;
 
     /**
-     * Print argument to the Output Stream.
+     * Print argument to the output stream.
      * Appends Carriage Return at the end of the argument.
+     *
      * @param[in] value Argument to print.
      */
     void println(int32_t value) final;
 
     /**
      * Write bytes to stream.
+     *
      * @param[in] buffer Byte Array to send.
      * @param[in] length Length of Buffer.
+     *
      * @returns Number of bytes written
      */
     size_t write(const uint8_t* buffer, size_t length) final;
 
     /**
      * Check if there are available bytes in the Stream.
+     *
      * @returns Number of available bytes.
      */
     int available() const final;
 
     /**
      * Read bytes into a buffer.
+     *
      * @param[in] buffer Array to write bytes to.
      * @param[in] length number of bytes to be read.
+     *
      * @returns Number of bytes read from Stream.
      */
     size_t readBytes(uint8_t* buffer, size_t length) final;
@@ -197,7 +225,7 @@ private:
     /**
      * Stream for input and output of data.
      */
-    Stream& m_stream;
+    Stream* m_stream;
 
     /* Prevent empty constructor*/
     Serial_();
