@@ -127,9 +127,9 @@ void Logging::printHead(const char* filename, int lineNumber, Logging::LogLevel 
         Serial.print(levelStr);
         Serial.print(" ");
         Serial.print(filename);
-        Serial.print("(");
+        Serial.print(":");
         Serial.print(lineNumber);
-        Serial.print("): ");
+        Serial.print(" ");
     }
 }
 
