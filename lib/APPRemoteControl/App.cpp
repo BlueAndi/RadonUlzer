@@ -41,6 +41,7 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <Util.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -74,6 +75,8 @@ static bool gIsRemoteCtrlActive = false;
 
 void App::setup()
 {
+    Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
     Board::getInstance().init();
 
     m_systemStateMachine.setState(&StartupState::getInstance());
