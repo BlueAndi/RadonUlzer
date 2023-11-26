@@ -1,9 +1,10 @@
-#VRML_SIM R2023a utf8
+#VRML_SIM R2023b utf8
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
 EXTERNPROTO "../protos/LineFollowerTrack.proto"
+IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
 
 WorldInfo {
   info [
@@ -31,8 +32,13 @@ TexturedBackgroundLight {
 }
 LineFollowerTrack {
 }
-Zumo32U4 {
-  translation -0.249993 -0.0412039 0.0139993
-  rotation -6.60216e-09 -2.69589e-07 1 1.52863
+DEF ROBOT Zumo32U4 {
+  translation -0.24713614078815466 -0.04863962992854465 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "Zumo"
+}
+Supervisor {
+  name "Supervisor"
+  controller "Supervisor"
+  supervisor TRUE
 }
