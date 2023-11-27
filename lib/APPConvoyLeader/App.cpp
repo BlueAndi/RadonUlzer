@@ -142,6 +142,7 @@ void App::reportVehicleData()
     payload.orientation = odometry.getOrientation();
     payload.left        = speedometer.getLinearSpeedLeft();
     payload.right       = speedometer.getLinearSpeedRight();
+    payload.center      = speedometer.getLinearSpeedCenter();
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));

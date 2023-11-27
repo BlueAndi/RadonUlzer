@@ -76,6 +76,7 @@ typedef struct _VehicleData
     int32_t orientation; /**< Orientation [mrad]. */
     int16_t left;        /**< Left motor speed [steps/s]. */
     int16_t right;       /**< Right motor speed [steps/s]. */
+    int16_t center;      /**< Center speed [steps/s]. */
 } __attribute__((packed)) VehicleData;
 
 /** Struct of the "Speed" channel payload. */
