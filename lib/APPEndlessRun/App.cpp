@@ -85,7 +85,7 @@ void App::setup()
 
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_reportTimer.start(100U);
+    m_reportTimer.start(250U);
 }
 
 void App::loop()
@@ -171,7 +171,7 @@ void App::sendCoordinates()
  */
 static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize)
 {
-    if ((nullptr != payload) && (sizeof(ColorState::TLCId) == payloadSize))
+    if ((nullptr != payload) && (TRAFFIC_LIGHT_COLORS_DLC == payloadSize))
     {
         ColorState::TLCId tlcId = *reinterpret_cast<const ColorState::TLCId*>(payload);
 

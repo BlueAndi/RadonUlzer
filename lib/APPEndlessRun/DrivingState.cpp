@@ -134,7 +134,6 @@ void DrivingState::process(StateMachine& sm)
         /** If callback timer is done, refresh odometry coordinates. */
         if (true == m_callbackTimer.isTimeout())
         {
-
             sm.setState(&ColorState::getInstance());
         }
         break;
