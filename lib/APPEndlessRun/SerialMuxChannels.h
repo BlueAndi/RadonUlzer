@@ -52,7 +52,7 @@
 #define ODOMETRY_CHANNEL_DLC (sizeof(OdometryData))
 
 /** Name of the Channel to receive Traffic Light IDs. */
-#define TRAFFIC_LIGHT_COLORS_NAME "TL_COLRS"
+#define TRAFFIC_LIGHT_COLORS_NAME "TL_COLORS"
 
 /** DLC of Traffic Light Channel. */
 #define TRAFFIC_LIGHT_COLORS_DLC (sizeof(Color))
