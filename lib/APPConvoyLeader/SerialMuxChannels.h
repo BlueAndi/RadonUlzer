@@ -52,17 +52,11 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of Channel to send Odometry Data to. */
-#define ODOMETRY_CHANNEL_NAME "ODOMETRY"
+/** Name of Channel to send Current Vehicle Data to. */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "CURR_DATA"
 
-/** DLC of Odometry Channel */
-#define ODOMETRY_CHANNEL_DLC (sizeof(OdometryData))
-
-/** Name of Channel to send Speedometer Data to. */
-#define SPEED_CHANNEL_NAME "SPEED"
-
-/** DLC of Speedometer Channel */
-#define SPEED_CHANNEL_DLC (sizeof(SpeedData))
+/** DLC of Current Vehicle Data Channel */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
 
 /** Name of Channel to send Motor Speed Setpoints to. */
 #define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
@@ -74,13 +68,15 @@
  * Types and Classes
  *****************************************************************************/
 
-/** Struct of the "Odometry" channel payload. */
-typedef struct _OdometryData
+/** Struct of the "Current Vehicle Data" channel payload. */
+typedef struct _VehicleData
 {
     int32_t xPos;        /**< X position [mm]. */
     int32_t yPos;        /**< Y position [mm]. */
     int32_t orientation; /**< Orientation [mrad]. */
-} __attribute__((packed)) OdometryData;
+    int16_t left;        /**< Left motor speed [steps/s]. */
+    int16_t right;       /**< Right motor speed [steps/s]. */
+} __attribute__((packed)) VehicleData;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
