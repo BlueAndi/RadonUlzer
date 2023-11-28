@@ -59,6 +59,7 @@ The simulation is based on the open source robot simulator *Webots*. The applica
         * Open MSYS2 shell.
             * Update package database: ```pacman -Sy pacman```
             * Install GCC: ```pacman -Sy mingw-w64-ucrt-x86_64-gcc```
+4. Ensure a current (>=3.9) Python3 version is installed on your machine.
 
 ## The Webots library
 To adapt the HAL to the simulation, some sourcecode files from Webots are necessary. Currently there is no Webots library in the platformio registry available. Therefore a local library is created during the build. Ensure that that Webots is already installed, before you try to build it!
