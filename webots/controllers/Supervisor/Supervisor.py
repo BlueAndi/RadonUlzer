@@ -4,7 +4,6 @@
 
 import math
 import sys
-import numpy as np
 from controller import Supervisor
 
 # Create the Supervisor instance.
