@@ -47,7 +47,6 @@
 #include <IState.h>
 #include <SimpleTimer.h>
 #include <PIDController.h>
-#include <MovAvg.hpp>
 
 /******************************************************************************
  * Macros
@@ -137,11 +136,10 @@ private:
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
     PIDController<int16_t> m_pidCtrl;          /**< PID controller, used for driving. */
-    int16_t                m_topSpeed;         /**< Top speed in [steps/s]. It might be lower or equal to the max. speed! */
-    LineStatus             m_lineStatus;       /**< Status of start-/end line detection */
-    TrackStatus            m_trackStatus;      /**< Status of track which means on track or track lost, etc. */
-    uint8_t m_startEndLineDebounce; /**< Counter used for easys debouncing of the start-/end line detection. */
-    MovAvg<int16_t, 2> m_posMovAvg; /**< The moving average of the position over 2 calling cycles. */
+    int16_t                m_topSpeed;    /**< Top speed in [steps/s]. It might be lower or equal to the max. speed! */
+    LineStatus             m_lineStatus;  /**< Status of start-/end line detection */
+    TrackStatus            m_trackStatus; /**< Status of track which means on track or track lost, etc. */
+    uint8_t m_startEndLineDebounce;       /**< Counter used for easys debouncing of the start-/end line detection. */
 
     /**
      * Default constructor.
@@ -153,8 +151,7 @@ private:
         m_topSpeed(0),
         m_lineStatus(LINE_STATUS_FIND_START_LINE),
         m_trackStatus(TRACK_STATUS_ON_TRACK),
-        m_startEndLineDebounce(0),
-        m_posMovAvg()
+        m_startEndLineDebounce(0)
     {
     }
 
@@ -172,7 +169,7 @@ private:
     /**
      * Control driving in case the robot is on track.
      *
-     * @param[in] position          Current position on track
+     * @param[in] position           Current position on track
      * @param[in] lineSensorValues   Value of each line sensor
      */
     void processOnTrack(int16_t position, const uint16_t* lineSensorValues);
@@ -181,7 +178,7 @@ private:
      * Control driving in case the robot lost the track.
      * It handles the track search algorithm.
      *
-     * @param[in] position          Current position on track
+     * @param[in] position           Current position on track
      * @param[in] lineSensorValues   Value of each line sensor
      */
     void processTrackLost(int16_t position, const uint16_t* lineSensorValues);

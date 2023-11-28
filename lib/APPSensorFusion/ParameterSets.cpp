@@ -110,7 +110,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         2,          /* Kp Denominator */
         1,          /* Ki Numerator */
         40,         /* Ki Denominator */
-        10,         /* Kd Numerator */
+        40,         /* Kd Numerator */
         1           /* Kd Denominator */
     };
 
@@ -121,7 +121,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         1,         /* Kp Denominator */
         0,         /* Ki Numerator */
         1,         /* Ki Denominator */
-        10,        /* Kd Numerator */
+        40,        /* Kd Numerator */
         1          /* Kd Denominator */
     };
 }

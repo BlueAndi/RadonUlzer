@@ -62,7 +62,7 @@
 /**
  * Logging source.
  */
-static const char* TAG = "RState";
+LOG_TAG("RState");
 
 /******************************************************************************
  * Public Methods
@@ -93,9 +93,9 @@ void ReadyState::process(StateMachine& sm)
         uint8_t         index        = 0;
         int16_t         position     = lineSensors.readLine();
         const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char valueStr[10];
+        char            valueStr[10];
 
-        LOG_DEBUG_HEAD(TAG);
+        LOG_DEBUG_HEAD();
 
         /* Print line sensor value on console for debug purposes. */
         for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
@@ -106,12 +106,12 @@ void ReadyState::process(StateMachine& sm)
             }
 
             Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-            
+
             LOG_DEBUG_MSG(valueStr);
         }
 
         LOG_DEBUG_MSG(" -> ");
-        
+
         Util::intToStr(valueStr, sizeof(valueStr), position);
         LOG_DEBUG_MSG(valueStr);
 

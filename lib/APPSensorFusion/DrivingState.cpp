@@ -75,7 +75,6 @@ void DrivingState::entry()
     m_pidProcessTime.start(0); /* Immediate */
     m_lineStatus  = LINE_STATUS_FIND_START_LINE;
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
-    m_posMovAvg.clear();
 
     diffDrive.enable();
 
@@ -98,8 +97,6 @@ void DrivingState::process(StateMachine& sm)
 
     /* Get the position of the line. */
     position = lineSensors.readLine();
-
-    (void)m_posMovAvg.write(position);
 
     switch (m_trackStatus)
     {
@@ -159,7 +156,7 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
     }
 
     /* Track lost just in this moment? */
-    if (true == isTrackGapDetected(m_posMovAvg.getResult()))
+    if (true == isTrackGapDetected(position))
     {
         m_trackStatus = TRACK_STATUS_LOST;
 
@@ -320,6 +317,7 @@ void DrivingState::adaptDriving(int16_t position)
 {
     DifferentialDrive&  diffDrive       = DifferentialDrive::getInstance();
     const ILineSensors& lineSensors     = Board::getInstance().getLineSensors();
+    const int16_t       MAX_MOTOR_SPEED = diffDrive.getMaxMotorSpeed();
     int16_t             speedDifference = 0; /* [steps/s] */
     int16_t             leftSpeed       = 0; /* [steps/s] */
     int16_t             rightSpeed      = 0; /* [steps/s] */
@@ -345,8 +343,8 @@ void DrivingState::adaptDriving(int16_t position)
      * might want to allow the motor speed to go negative so that
      * it can spin in reverse.
      */
-    leftSpeed  = constrain(leftSpeed, 0, m_topSpeed);
-    rightSpeed = constrain(rightSpeed, 0, m_topSpeed);
+    leftSpeed  = constrain(leftSpeed, 0, MAX_MOTOR_SPEED);
+    rightSpeed = constrain(rightSpeed, 0, MAX_MOTOR_SPEED);
 
     diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
