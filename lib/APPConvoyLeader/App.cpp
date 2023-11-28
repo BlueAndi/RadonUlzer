@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -69,6 +70,7 @@ static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);

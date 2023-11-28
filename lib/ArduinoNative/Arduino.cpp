@@ -33,11 +33,11 @@
  * Includes
  *****************************************************************************/
 #include <Arduino.h>
+#include "Terminal.h"
 
 #ifdef UNIT_TEST
 
 #include <time.h>
-#include "Terminal.h"
 
 #else
 
@@ -46,6 +46,7 @@
 #include <Keyboard.h>
 #include "SocketServer.h"
 #include <getopt.h>
+#include <Logging.h>
 
 #endif
 
@@ -66,9 +67,11 @@
 /** This type defines the possible program arguments. */
 typedef struct
 {
-    const char* socketServerPort; /**< Socket server port */
-    const char* robotName;        /**< Robot name */
-    bool        verbose;          /**< Show verbose information */
+    const char* socketServerPort;   /**< Socket server port */
+    const char* robotName;          /**< Robot name */
+    bool        isSerialOverSocket; /**< Is serial communication over socket? */
+    bool        verbose;            /**< Show verbose information */
+
 } PrgArguments;
 
 #endif
@@ -91,21 +94,13 @@ static void showPrgArguments(const PrgArguments& prgArgs);
  * Local Variables
  *****************************************************************************/
 
-#ifdef UNIT_TEST
-
 /** Terminal/Console stream. */
 static Terminal gTerminalStream;
 
 /** Serial driver, used by Arduino applications. */
 Serial_ Serial(gTerminalStream);
 
-#else /* UNIT_TEST */
-
-/** SocketServer stream. */
-static SocketServer gSocketStream;
-
-/** Serial driver, used by Arduino applications. */
-Serial_ Serial(gSocketStream);
+#ifndef UNIT_TEST
 
 /**
  * The maximum duration a simulated time step can have.
@@ -126,6 +121,9 @@ static const char* PRG_ARG_SOCKET_SERVER_PORT_DEFAULT = "65432";
 
 /** Program argument default value of the verbose flag. */
 static bool PRG_ARG_VERBOSE_DEFAULT = false;
+
+/** Program argument default value of the serial over socket flag. */
+static bool PRG_ARG_IS_SERIAL_OVER_SOCKET_DEFAULT = false;
 
 /**
  * Maximum number of socket connections.
@@ -184,6 +182,7 @@ extern int main(int argc, char** argv)
     int          status   = 0;
     Keyboard&    keyboard = Board::getInstance().getKeyboard();
     PrgArguments prgArguments;
+    SocketServer socketStream;
 
     printf("\n*** Radon Ulzer ***\n");
 
@@ -201,19 +200,28 @@ extern int main(int argc, char** argv)
             showPrgArguments(prgArguments);
         }
 
-        /* Initialize the socket server. */
-        if (false == gSocketStream.init(prgArguments.socketServerPort, SOCKET_SERVER_MAX_CONNECTIONS))
+        /* Enable socket server? */
+        if (true == prgArguments.isSerialOverSocket)
         {
-            printf("Error initializing SocketServer.\n");
-            status = -1;
-        }
-        else
-        {
-            if (true == prgArguments.verbose)
+            if (false == socketStream.init(prgArguments.socketServerPort, SOCKET_SERVER_MAX_CONNECTIONS))
             {
-                printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
+                printf("Error initializing SocketServer.\n");
+                status = -1;
             }
+            else
+            {
+                if (true == prgArguments.verbose)
+                {
+                    printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
+                }
 
+                Serial.setStream(socketStream);
+                Logging::disable();
+            }
+        }
+
+        if (0 == status)
+        {
             /* Get simulation time handler. It will be used by millis() and delay(). */
             gSimTime = &Board::getInstance().getSimTime();
         }
@@ -257,7 +265,7 @@ extern int main(int argc, char** argv)
             {
                 keyboard.getPressedButtons();
                 loop();
-                gSocketStream.process();
+                socketStream.process();
             }
         }
     }
@@ -300,14 +308,15 @@ extern void delay(unsigned long ms)
 static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv)
 {
     int         status           = 0;
-    const char* availableOptions = "p:n:h";
+    const char* availableOptions = "p:n:hs";
     const char* programName      = argv[0];
     int         option           = getopt(argc, argv, availableOptions);
 
     /* Set default values */
-    prgArguments.socketServerPort = PRG_ARG_SOCKET_SERVER_PORT_DEFAULT;
-    prgArguments.robotName        = PRG_ARG_ROBOT_NAME_DEFAULT;
-    prgArguments.verbose          = PRG_ARG_VERBOSE_DEFAULT;
+    prgArguments.socketServerPort   = PRG_ARG_SOCKET_SERVER_PORT_DEFAULT;
+    prgArguments.robotName          = PRG_ARG_ROBOT_NAME_DEFAULT;
+    prgArguments.verbose            = PRG_ARG_VERBOSE_DEFAULT;
+    prgArguments.isSerialOverSocket = PRG_ARG_IS_SERIAL_OVER_SOCKET_DEFAULT;
 
     while ((-1 != option) && (0 == status))
     {
@@ -319,6 +328,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
 
         case 'p': /* SocketServer Port */
             prgArguments.socketServerPort = optarg;
+            break;
+
+        case 's': /* Is serial over socket? */
+            prgArguments.isSerialOverSocket = true;
             break;
 
         case 'v': /* Verbose */
@@ -346,7 +359,9 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         printf("\t-h\t\t\tShow this help message.\n");                /* Help */
         printf("\t-n <NAME>\t\tSet robot name.\n");                   /* Robot Name */
         printf("\t-p <PORT NUMBER>\tSet SocketServer port.");         /* SocketServer Port */
-        printf(" Default: %s\n", PRG_ARG_SOCKET_SERVER_PORT_DEFAULT); /* SocketServer port default value*/
+        printf(" Default: %s\n", PRG_ARG_SOCKET_SERVER_PORT_DEFAULT); /* SocketServer port default value */
+        printf("\t-s\t\t\tEnable serial over socket.\n");             /* Flag */
+        printf("\t-v\t\t\tVerbose mode.\n");                          /* Flag */
     }
 
     return status;
@@ -359,8 +374,9 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
  */
 static void showPrgArguments(const PrgArguments& prgArgs)
 {
-    printf("Robot name       : %s\n", prgArgs.robotName);
-    printf("SocketServer Port: %s\n", prgArgs.socketServerPort);
+    printf("Robot name        : %s\n", prgArgs.robotName);
+    printf("SocketServer Port : %s\n", prgArgs.socketServerPort);
+    printf("Serial over socket: %s\n", (false == prgArgs.isSerialOverSocket) ? "disabled" : "enabled");
     /* Skip verbose flag. */
 }
 

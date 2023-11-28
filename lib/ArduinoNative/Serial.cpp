@@ -55,12 +55,17 @@
  * Public Methods
  *****************************************************************************/
 
-Serial_::Serial_(Stream& stream) : Stream(), m_stream(stream)
+Serial_::Serial_(Stream& stream) : Stream(), m_stream(&stream)
 {
 }
 
 Serial_::~Serial_()
 {
+}
+
+void Serial_::setStream(Stream& stream)
+{
+    m_stream = &stream;
 }
 
 void Serial_::begin(unsigned long baudrate)
@@ -74,87 +79,87 @@ void Serial_::end()
 
 void Serial_::print(const char str[])
 {
-    m_stream.print(str);
+    m_stream->print(str);
 }
 
 void Serial_::print(uint8_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::print(uint16_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::print(uint32_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::print(int8_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::print(int16_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::print(int32_t value)
 {
-    m_stream.print(value);
+    m_stream->print(value);
 }
 
 void Serial_::println(const char str[])
 {
-    m_stream.println(str);
+    m_stream->println(str);
 }
 
 void Serial_::println(uint8_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 void Serial_::println(uint16_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 void Serial_::println(uint32_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 void Serial_::println(int8_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 void Serial_::println(int16_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 void Serial_::println(int32_t value)
 {
-    m_stream.println(value);
+    m_stream->println(value);
 }
 
 size_t Serial_::write(const uint8_t* buffer, size_t length)
 {
-    return m_stream.write(buffer, length);
+    return m_stream->write(buffer, length);
 }
 
 int Serial_::available() const
 {
-    return m_stream.available();
+    return m_stream->available();
 }
 
 size_t Serial_::readBytes(uint8_t* buffer, size_t length)
 {
-    return m_stream.readBytes(buffer, length);
+    return m_stream->readBytes(buffer, length);
 }
 
 /******************************************************************************
