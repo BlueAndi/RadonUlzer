@@ -70,6 +70,9 @@
  */
 LOG_TAG("MSCState");
 
+/** Execute wait timer once. */
+bool DO_ONCE = false;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -120,13 +123,27 @@ void MotorSpeedCalibrationState::process(StateMachine& sm)
 
         case PHASE_2_FORWARD:
             motors.setSpeeds(0, 0);
-            determineMaxMotorSpeed();
 
-            /* Drive full forward. */
-            motors.setSpeeds(motors.getMaxSpeed(), motors.getMaxSpeed());
+            /** Wait half a second after driving backwards to avoid jumping around. */
+            if (false == DO_ONCE)
+            {
+                m_waitTimer.start(500U);
+                DO_ONCE = true;
+            }
 
-            m_timer.restart();
-            m_phase = PHASE_3_FINISHED;
+            if (true == m_waitTimer.isTimeout())
+            {
+                m_waitTimer.stop();
+
+                determineMaxMotorSpeed();
+
+                /* Drive full forward. */
+                motors.setSpeeds(motors.getMaxSpeed(), motors.getMaxSpeed());
+
+                m_timer.restart();
+                m_phase = PHASE_3_FINISHED;
+            }
+
             break;
 
         case PHASE_3_FINISHED:

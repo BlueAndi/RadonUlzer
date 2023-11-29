@@ -112,8 +112,9 @@ private:
      */
     static const uint32_t CALIB_DURATION = 1000;
 
-    SimpleTimer      m_timer; /**< Timer used to wait, until the calibration drive starts and for drive duration. */
-    Phase            m_phase; /**< Current calibration phase */
+    SimpleTimer      m_waitTimer; /**< Timer used to avoid jump when calibrating.  */
+    SimpleTimer      m_timer;     /**< Timer used to wait, until the calibration drive starts and for drive duration. */
+    Phase            m_phase;     /**< Current calibration phase */
     int16_t          m_maxSpeedLeft;  /**< Max. determined left motor speed [steps/s]. */
     int16_t          m_maxSpeedRight; /**< Max. determined right motor speed [steps/s]. */
     RelativeEncoders m_relEncoders;   /**< Relative encoders left/right. */
@@ -122,6 +123,7 @@ private:
      * Default constructor.
      */
     MotorSpeedCalibrationState() :
+        m_waitTimer(),
         m_timer(),
         m_phase(PHASE_1_BACK),
         m_maxSpeedLeft(0),
