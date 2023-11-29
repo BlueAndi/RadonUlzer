@@ -1,0 +1,48 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/LineFollowerTrack.proto"
+EXTERNPROTO "../protos/TrafficLightDCS.proto"
+IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+
+WorldInfo {
+  info [
+    "Example uses of Track nodes, as caterpillar tracks on a robot, or as a conveyor belt."
+  ]
+  title "Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "track material"
+      coulombFriction [
+        500
+      ]
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.3610704057050694 -0.07116474889007521 0.9298191978225601 3.504101281220505
+  position 3.86934377421974 1.5175911369482857 4.28850448913202
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+LineFollowerTrack {
+}
+DEF ROBOT Zumo32U4 {
+  translation -1.22337 -0.521921 0.0139943
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "Zumo"
+}
+TrafficLightDCS {
+  translation 0 0 -0.2
+}
+Supervisor {
+  name "Supervisor"
+  controller "Supervisor"
+  supervisor TRUE
+}

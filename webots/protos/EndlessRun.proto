@@ -1,0 +1,37 @@
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
+
+PROTO EndlessRunTrack [
+
+]
+{
+  RectangleArena {
+    floorSize 4 4
+    floorTileSize 6 6
+    floorAppearance PBRAppearance {
+      baseColorMap ImageTexture {
+        url [
+          "./track.png"
+        ]
+      }
+      roughness 1
+      roughnessMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_roughness.jpg"
+        ]
+      }
+      metalness 0
+      normalMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_normal.jpg"
+        ]
+      }
+      occlusionMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_occlusion.jpg"
+        ]
+      }
+    }
+  }
+}
