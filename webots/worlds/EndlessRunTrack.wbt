@@ -40,6 +40,7 @@ DEF ROBOT Zumo32U4 {
 }
 TrafficLightDCS {
   translation 0 0 -0.2
+  controller "<extern>"
 }
 Supervisor {
   name "Supervisor"
