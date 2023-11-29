@@ -42,6 +42,7 @@
 
 #include "StartupState.h"
 #include "ColorState.h"
+#include "DrivingState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -110,7 +111,7 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    if (true == m_reportTimer.isTimeout())
+    if ((true == m_reportTimer.isTimeout()) && (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
         /* Send current data to SerialMuxProt Client */
         sendCoordinates();
