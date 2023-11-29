@@ -1,0 +1,15 @@
+#VRML_SIM R2023b utf8
+# The supervisor observes the world and its robots. On demand it may influence them.
+
+PROTO Supervisor [
+  field SFString name "robot"
+  field SFString controller "<generic>"
+  field SFBool supervisor FALSE
+]
+{
+  Robot {
+    name IS name
+    controller IS controller
+    supervisor IS supervisor
+  }
+}

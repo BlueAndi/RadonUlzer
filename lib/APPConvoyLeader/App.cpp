@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -56,7 +57,7 @@
  * Prototypes
  *****************************************************************************/
 
-static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -69,6 +70,7 @@ static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
     Board::getInstance().init();
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
@@ -167,9 +169,11 @@ void App::reportSpeed()
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds
+ * @param[in] userData      User data
  */
-void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
+    (void)userData;
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);

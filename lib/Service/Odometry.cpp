@@ -57,13 +57,13 @@
  * Local Variables
  *****************************************************************************/
 
+/* Initialize static constant data. */
+const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+
 /**
  * Logging source.
  */
-static const char* TAG = "Odo";
-
-/* Initialize static constant data. */
-const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+LOG_TAG("Odo");
 
 /******************************************************************************
  * Public Methods
@@ -100,9 +100,9 @@ void Odometry::process()
             m_posX += dX;
             m_posY += dY;
 
-            LOG_DEBUG_VAL(TAG, "x: ", m_posX);
-            LOG_DEBUG_VAL(TAG, "y: ", m_posY);
-            LOG_DEBUG_VAL(TAG, "O (deg): ", MRAD2DEG(m_orientation));
+            LOG_DEBUG_VAL("x: ", m_posX);
+            LOG_DEBUG_VAL("y: ", m_posY);
+            LOG_DEBUG_VAL("o (deg): ", MRAD2DEG(m_orientation));
 
             /* Reset to be able to calculate the next delta. */
             m_lastAbsRelEncStepsLeft  = 0;

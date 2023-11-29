@@ -74,14 +74,26 @@
  * Macros
  *****************************************************************************/
 
+#if LOG_FATAL_ENABLE || LOG_ERROR_ENABLE || LOG_WARNING_ENABLE || LOG_INFO_ENABLE || LOG_DEBUG_ENABLE
+
+/** Define the logging tag to know in which file the log message is located. */
+#define LOG_TAG(_tag) static const char* LOG_TAG = _tag
+
+#else /* LOG_FATAL_ENABLE || LOG_ERROR_ENABLE || LOG_WARNING_ENABLE || LOG_INFO_ENABLE || LOG_DEBUG_ENABLE */
+
+/** Define the logging tag to know in which file the log message is located. */
+#define LOG_TAG(_tag)
+
+#endif /* LOG_FATAL_ENABLE || LOG_ERROR_ENABLE || LOG_WARNING_ENABLE || LOG_INFO_ENABLE || LOG_DEBUG_ENABLE */
+
 #if (0 == LOG_FATAL_ENABLE)
 
 /** Log fatal error message. */
-#define LOG_FATAL(_filename, _msg)
+#define LOG_FATAL(_msg)
 /** Log fatal error message with additional value. */
-#define LOG_FATAL_VAL(_filename, _msg, _val)
+#define LOG_FATAL_VAL(_msg, _val)
 /** Log fatal error header. */
-#define LOG_FATAL_HEAD(_filename)
+#define LOG_FATAL_HEAD()
 /** Log fatal error message, without line feed. */
 #define LOG_FATAL_MSG(_msg)
 /** Log fatal error tail. */
@@ -90,14 +102,13 @@
 #else /* (0 == LOG_FATAL_ENABLE) */
 
 /** Log fatal error message. */
-#define LOG_FATAL(_filename, _msg) Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_FATAL, (_msg))
+#define LOG_FATAL(_msg)           Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_FATAL, (_msg))
 
 /** Log fatal error message with additional value. */
-#define LOG_FATAL_VAL(_filename, _msg, _val)                                                                           \
-    Logging::print<_val>((_filename), __LINE__, Logging::LOG_LEVEL_FATAL, (_msg), (_val))
+#define LOG_FATAL_VAL(_msg, _val) Logging::print<_val>(LOG_TAG, __LINE__, Logging::LOG_LEVEL_FATAL, (_msg), (_val))
 
 /** Log fatal error header. */
-#define LOG_FATAL_HEAD(_filename) Logging::printHead((_filename), __LINE__, Logging::LOG_LEVEL_FATAL)
+#define LOG_FATAL_HEAD()          Logging::printHead(LOG_TAG, __LINE__, Logging::LOG_LEVEL_FATAL)
 
 /** Log fatal error message, without line feed. */
 #define LOG_FATAL_MSG(_msg)       Logging::printMsg(_msg)
@@ -110,11 +121,11 @@
 #if (0 == LOG_ERROR_ENABLE)
 
 /** Log error message. */
-#define LOG_ERROR(_filename, _msg)
+#define LOG_ERROR(_msg)
 /** Log error message with additional value. */
-#define LOG_ERROR_VAL(_filename, _msg, _val)
+#define LOG_ERROR_VAL(_msg, _val)
 /** Log error header. */
-#define LOG_ERROR_HEAD(_filename)
+#define LOG_ERROR_HEAD()
 /** Log error error message, without line feed. */
 #define LOG_ERROR_MSG(_msg)
 /** Log error tail. */
@@ -123,14 +134,13 @@
 #else /* (0 == LOG_ERROR_ENABLE) */
 
 /** Log error message. */
-#define LOG_ERROR(_filename, _msg) Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_ERROR, (_msg))
+#define LOG_ERROR(_msg)           Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_ERROR, (_msg))
 
 /** Log error message with additional value. */
-#define LOG_ERROR_VAL(_filename, _msg, _val)                                                                           \
-    Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_ERROR, (_msg), (_val))
+#define LOG_ERROR_VAL(_msg, _val) Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_ERROR, (_msg), (_val))
 
 /** Log error header. */
-#define LOG_ERROR_HEAD(_filename) Logging::printHead((_filename), __LINE__, Logging::LOG_LEVEL_ERROR)
+#define LOG_ERROR_HEAD()          Logging::printHead(LOG_TAG, __LINE__, Logging::LOG_LEVEL_ERROR)
 
 /** Log error error message, without line feed. */
 #define LOG_ERROR_MSG(_msg)       Logging::printMsg(_msg)
@@ -143,11 +153,11 @@
 #if (0 == LOG_WARNING_ENABLE)
 
 /** Log warning message. */
-#define LOG_WARNING(_filename, _msg)
+#define LOG_WARNING(_msg)
 /** Log warning message with additional value. */
-#define LOG_WARNING_VAL(_filename, _msg, _val)
+#define LOG_WARNING_VAL(_msg, _val)
 /** Log warning header. */
-#define LOG_WARNING_HEAD(_filename)
+#define LOG_WARNING_HEAD()
 /** Log warning message, without line feed. */
 #define LOG_WARNING_MSG(_msg)
 /** Log warning tail. */
@@ -156,14 +166,13 @@
 #else /* (0 == LOG_WARNING_ENABLE) */
 
 /** Log warning message. */
-#define LOG_WARNING(_filename, _msg) Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_WARNING, (_msg))
+#define LOG_WARNING(_msg)           Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_WARNING, (_msg))
 
 /** Log warning message with additional value. */
-#define LOG_WARNING_VAL(_filename, _msg, _val)                                                                         \
-    Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_WARNING, (_msg), (_val))
+#define LOG_WARNING_VAL(_msg, _val) Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_WARNING, (_msg), (_val))
 
 /** Log warning header. */
-#define LOG_WARNING_HEAD(_filename) Logging::printHead((_filename), __LINE__, Logging::LOG_LEVEL_WARNING)
+#define LOG_WARNING_HEAD()          Logging::printHead(LOG_TAG, __LINE__, Logging::LOG_LEVEL_WARNING)
 
 /** Log warning message, without line feed. */
 #define LOG_WARNING_MSG(_msg)       Logging::printMsg(_msg)
@@ -176,11 +185,11 @@
 #if (0 == LOG_INFO_ENABLE)
 
 /** Log info message. */
-#define LOG_INFO(_filename, _msg)
+#define LOG_INFO(_msg)
 /** Log info message with additional value. */
-#define LOG_INFO_VAL(_filename, _msg, _val)
+#define LOG_INFO_VAL(_msg, _val)
 /** Log info header. */
-#define LOG_INFO_HEAD(_filename)
+#define LOG_INFO_HEAD()
 /** Log info message, without line feed. */
 #define LOG_INFO_MSG(_msg)
 /** Log info tail. */
@@ -189,14 +198,13 @@
 #else /* (0 == LOG_INFO_ENABLE) */
 
 /** Log info message. */
-#define LOG_INFO(_filename, _msg) Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_INFO, (_msg))
+#define LOG_INFO(_msg)           Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_INFO, (_msg))
 
 /** Log info message with additional value. */
-#define LOG_INFO_VAL(_filename, _msg, _val)                                                                            \
-    Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_INFO, (_msg), (_val))
+#define LOG_INFO_VAL(_msg, _val) Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_INFO, (_msg), (_val))
 
 /** Log info header. */
-#define LOG_INFO_HEAD(_filename) Logging::printHead((_filename), __LINE__, Logging::LOG_LEVEL_INFO)
+#define LOG_INFO_HEAD()          Logging::printHead(LOG_TAG, __LINE__, Logging::LOG_LEVEL_INFO)
 
 /** Log info message, without line feed. */
 #define LOG_INFO_MSG(_msg)       Logging::printMsg(_msg)
@@ -209,11 +217,11 @@
 #if (0 == LOG_DEBUG_ENABLE)
 
 /** Log debug message. */
-#define LOG_DEBUG(_filename, _msg)
+#define LOG_DEBUG(_msg)
 /** Log debug message with additional value. */
-#define LOG_DEBUG_VAL(_filename, _msg, _val)
+#define LOG_DEBUG_VAL(_msg, _val)
 /** Log debug header. */
-#define LOG_DEBUG_HEAD(_filename)
+#define LOG_DEBUG_HEAD()
 /** Log debug message, without line feed. */
 #define LOG_DEBUG_MSG(_msg)
 /** Log debug tail. */
@@ -222,14 +230,13 @@
 #else /* (0 == LOG_DEBUG_ENABLE) */
 
 /** Log debug message. */
-#define LOG_DEBUG(_filename, _msg) Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_DEBUG, (_msg))
+#define LOG_DEBUG(_msg)           Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_DEBUG, (_msg))
 
 /** Log debug message with additional value. */
-#define LOG_DEBUG_VAL(_filename, _msg, _val)                                                                           \
-    Logging::print((_filename), __LINE__, Logging::LOG_LEVEL_DEBUG, (_msg), (_val))
+#define LOG_DEBUG_VAL(_msg, _val) Logging::print(LOG_TAG, __LINE__, Logging::LOG_LEVEL_DEBUG, (_msg), (_val))
 
 /** Log debug header. */
-#define LOG_DEBUG_HEAD(_filename) Logging::printHead((_filename), __LINE__, Logging::LOG_LEVEL_DEBUG)
+#define LOG_DEBUG_HEAD()          Logging::printHead(LOG_TAG, __LINE__, Logging::LOG_LEVEL_DEBUG)
 
 /** Log debug message, without line feed. */
 #define LOG_DEBUG_MSG(_msg)       Logging::printMsg(_msg)
@@ -260,6 +267,23 @@ namespace Logging
         LOG_LEVEL_INFO,    /**< General useful information for the user. */
         LOG_LEVEL_DEBUG,   /**< A diagnostic message helpful for the developer. */
     };
+
+    /**
+     * Is logging enabled?
+     *
+     * @return If enabled, it will return true otherwise false.
+     */
+    bool isEnabled();
+
+    /**
+     * Enable logging.
+     */
+    void enable();
+
+    /**
+     * Disable logging.
+     */
+    void disable();
 
     /**
      * Print log message header.
@@ -306,9 +330,12 @@ namespace Logging
     template<typename T>
     void print(const char* filename, int lineNumber, LogLevel level, const char* message, T value)
     {
-        printHead(filename, lineNumber, level);
-        Serial.print(message);
-        Serial.println(value);
+        if (true == isEnabled())
+        {
+            printHead(filename, lineNumber, level);
+            Serial.print(message);
+            Serial.println(value);
+        }
     }
 
 }; // namespace Logging

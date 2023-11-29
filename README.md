@@ -21,6 +21,9 @@ Several kind of exclusive applications are available:
   * [Build](#build)
   * [Preparation](#preparation)
   * [Running the robot on track](#running-the-robot-on-track)
+  * [Communicate with the DroidControlShip](#communicate-with-the-droidcontrolship)
+* [The target](#the-target)
+  * [Build and flash procedure](#build-and-flash-procedure)
 * [Documentation](#documentation)
 * [Used Libraries](#used-libraries)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
@@ -56,6 +59,7 @@ The simulation is based on the open source robot simulator *Webots*. The applica
         * Open MSYS2 shell.
             * Update package database: ```pacman -Sy pacman```
             * Install GCC: ```pacman -Sy mingw-w64-ucrt-x86_64-gcc```
+4. Ensure a current (>=3.9) Python3 version is installed on your machine.
 
 ## The Webots library
 To adapt the HAL to the simulation, some sourcecode files from Webots are necessary. Currently there is no Webots library in the platformio registry available. Therefore a local library is created during the build. Ensure that that Webots is already installed, before you try to build it!
@@ -63,22 +67,47 @@ To adapt the HAL to the simulation, some sourcecode files from Webots are necess
 The library creation is handled in the ```./scripts/create_webots_library.py``` script and runs automatically after building for the WebotsSim environment.
 
 ## Build
+1. Start VSCode.
+2. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Build
 
-Platformio project tasks --> WebotsSim --> Build
+For the simulation use only the applications with "Sim" as postfix, e.g. LineFollowerSim.
 
 ## Preparation
+The preparation is shown with the line follower application as example. It expects that the **LineFollowerSim** is already built.
 
 1. Start the Webots simulation.
 2. File --> Open World
-3. Select ```webots/LineFollower_track.wbt```.
+3. Select ```./webots/worlds/LineFollowerTrack.wbt```.
 4. The loaded world should now look like this: ![webots_world](./doc/webots_world.jpg)
-5. Open a command line (shell) and change to the folder with the built executable in ```.pio/build/native```. This folder contains all necessary shared libraries as well.
+5. Open a command line (shell) and change to the folder with the built executable in ```.pio/build/LineFollowerSim```. This folder contains all necessary shared libraries as well.
 6. Start the executable and the simulated display should show the name of the team and etc.
 
 ## Running the robot on track
 
-1. Click in simulation on the display to focus the simulation.
+1. Click in the simulation on the display to focus the simulation.
 2. Now the keyboard keys a, b and c can be used to control the robot according to the implemented application logic.
+
+## Communicate with the DroidControlShip
+For the communication with the DroidControlShip a socket server needs to be enabled, which is disabled by default.
+
+Use the -s flag to enable it with default port 65432. Note, this will disable the standard logging, because the serial communication will automatically be routed over the socket. The SerialMuxProt protocol is used to exchange data in both directions.
+```bash
+$ program.exe -s
+```
+
+The port can be changed via command line parameters, please use -? to get more details.
+```bash
+$ program.exe -?
+```
+
+# The target
+
+## Build and flash procedure
+1. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Build
+    * For the target use only the applications with "Target" as postfix, e.g. LineFollowerTarget.
+2. Start the bootloader by triggering twice the reset button. The yellow led will start blinking for 10s. Note, after 10s the target will leave the bootloader!
+3. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Upload
+4. Ready.
 
 # Documentation
 
@@ -87,10 +116,10 @@ Platformio project tasks --> WebotsSim --> Build
 
 # Used Libraries
 
-| Library | Description | License |
-| - | - | - |
-| [Zumo32U4 library](https://github.com/pololu/zumo-32u4-arduino-library) | Provides access to the Zumo32U4 hardware. | MIT |
-| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt) | Multiplexing Communication Protocol | MIT |
+| Library                                                                 | Description                               | License |
+| ----------------------------------------------------------------------- | ----------------------------------------- | ------- |
+| [Zumo32U4 library](https://github.com/pololu/zumo-32u4-arduino-library) | Provides access to the Zumo32U4 hardware. | MIT     |
+| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)          | Multiplexing Communication Protocol       | MIT     |
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.

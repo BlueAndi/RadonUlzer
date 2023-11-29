@@ -93,6 +93,9 @@ public:
     void loop();
 
 private:
+    /** Baudrate for Serial Communication */
+    static const uint32_t SERIAL_BAUDRATE = 115200U;
+
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
 

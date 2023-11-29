@@ -41,6 +41,7 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <Util.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -58,8 +59,8 @@
  * Prototypes
  *****************************************************************************/
 
-static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
-static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize);
+static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -74,6 +75,8 @@ static bool gIsRemoteCtrlActive = false;
 
 void App::setup()
 {
+    Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
     Board::getInstance().init();
 
     m_systemStateMachine.setState(&StartupState::getInstance());
@@ -191,9 +194,11 @@ void App::sendLineSensorsData() const
  *
  * @param[in] payload       Command id
  * @param[in] payloadSize   Size of command id
+ * @param[in] userData      User data
  */
-static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
+    (void)userData;
     if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize))
     {
         RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
@@ -207,9 +212,11 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds
+ * @param[in] userData      User data
  */
-static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize)
+static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
+    (void)userData;
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
