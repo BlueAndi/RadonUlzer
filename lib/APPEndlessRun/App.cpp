@@ -60,7 +60,7 @@
  * Prototypes
  *****************************************************************************/
 
-static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize);
+static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -111,7 +111,7 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    if ((true == m_reportTimer.isTimeout()) && (&DrivingState::getInstance() == m_systemStateMachine.getState()))
+    if (true == m_reportTimer.isTimeout())
     {
         /* Send current data to SerialMuxProt Client */
         sendCoordinates();
@@ -170,7 +170,7 @@ void App::sendCoordinates()
  * @param[in] payload Traffic light (integer) color value.
  * @param[in] payloadSize Size of color value.
  */
-static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize)
+static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     if ((nullptr != payload) && (TRAFFIC_LIGHT_COLORS_DLC == payloadSize))
     {
