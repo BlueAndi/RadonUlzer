@@ -107,12 +107,6 @@ private:
     bool IS_YELLOW_RG = false;
     bool IS_YELLOW_GR = false;
 
-    /* Current x coordinate. */
-    int32_t CURRENT_X_COORDINATE;
-
-    /* Current y coordinate. */
-    int32_t CURRENT_Y_COORDINATE;
-
     /**
      * The line detection status.
      */
