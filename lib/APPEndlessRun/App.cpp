@@ -172,10 +172,10 @@ void App::sendCoordinates()
  */
 static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
+    (void)userData;
     if ((nullptr != payload) && (TRAFFIC_LIGHT_COLORS_DLC == payloadSize))
     {
         ColorState::TLCId tlcId = *reinterpret_cast<const ColorState::TLCId*>(payload);
-
         ColorState::getInstance().execute(tlcId);
     }
 }
