@@ -65,12 +65,7 @@
 
 void ErrorState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-
-    display.clear();
-    display.print("Error");
-    display.gotoXY(0, 1);
-    display.print(m_errorMsg);
+    Board::getInstance().getRedLed().enable(true);
 }
 
 void ErrorState::process(StateMachine& sm)
