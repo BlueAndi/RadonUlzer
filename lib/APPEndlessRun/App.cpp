@@ -111,7 +111,8 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    if (true == m_reportTimer.isTimeout())
+    /** Send only when driving. */
+    if ((true == m_reportTimer.isTimeout()) && (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
         /* Send current data to SerialMuxProt Client */
         sendCoordinates();
