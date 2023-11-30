@@ -105,7 +105,7 @@ private:
     /**
      * Duration in ms about to wait, until the calibration drive starts.
      */
-    static const uint32_t WAIT_TIME = 1000;
+    static const uint32_t WAIT_TIME = 3000;
 
     /**
      * Calibration turn angle in mrad (corresponds to 60°).
