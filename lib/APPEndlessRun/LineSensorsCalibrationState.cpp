@@ -41,7 +41,7 @@
 #include <Util.h>
 
 #include "ErrorState.h"
-#include "DrivingState.h"
+#include "ReadyState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -128,7 +128,9 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
         break;
 
     case PHASE_5_FINISHED:
-        /* fallthrough */
+        /** Wait for buttonpress */
+        
+
     default:
         break;
     }
@@ -203,7 +205,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
     else
     {
         /* Jump to driving state, taking first (= default) Parameter set. */
-        sm.setState(&DrivingState::getInstance());
+        sm.setState(&ReadyState::getInstance());
     }
 }
 
