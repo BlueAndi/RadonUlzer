@@ -86,7 +86,7 @@ void App::setup()
 
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_reportTimer.start(250U);
+    m_reportTimer.start(150U);
 }
 
 void App::loop()
