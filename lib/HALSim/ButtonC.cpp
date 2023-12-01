@@ -60,12 +60,12 @@
 
 bool ButtonC::isPressed()
 {
-    return m_keyboard.buttonAPressed();
+    return m_keyboard.buttonCPressed();
 }
 
 void ButtonC::waitForRelease()
 {
-    m_keyboard.waitForReleaseA();
+    m_keyboard.waitForReleaseC();
 }
 
 /******************************************************************************
