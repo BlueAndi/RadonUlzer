@@ -61,6 +61,36 @@
  * Public Methods
  *****************************************************************************/
 
+void DifferentialDrive::enable()
+{
+    m_linearSpeedCenterSetPoint = 0;
+    m_linearSpeedLeftSetPoint   = 0;
+    m_linearSpeedRightSetPoint  = 0;
+    m_angularSpeedSetPoint      = 0;
+
+    m_motorSpeedLeftPID.clear();
+    m_motorSpeedRightPID.clear();
+
+    m_isEnabled = true;
+}
+
+void DifferentialDrive::disable()
+{
+    IMotors& motors = Board::getInstance().getMotors();
+
+    /* Ensure that the motors are stopped, otherwise it may happen that the
+     * set points of 0 by the PID controllers are not reached yet.
+     */
+    motors.setSpeeds(0, 0);
+
+    m_linearSpeedCenterSetPoint = 0;
+    m_linearSpeedLeftSetPoint   = 0;
+    m_linearSpeedRightSetPoint  = 0;
+    m_angularSpeedSetPoint      = 0;
+
+    m_isEnabled = false;
+}
+
 int16_t DifferentialDrive::getMaxMotorSpeed() const
 {
     return m_maxMotorSpeed;
@@ -107,7 +137,7 @@ int16_t DifferentialDrive::getAngularSpeed() const
 
 void DifferentialDrive::setAngularSpeed(int16_t angularSpeed)
 {
-    m_angularSpeedSetPoint = angularSpeed;
+    m_angularSpeedSetPoint = constrain(angularSpeed, -m_maxMotorSpeed, m_maxMotorSpeed);
     calculateLinearSpeedLeftRight(m_linearSpeedCenterSetPoint, m_angularSpeedSetPoint, m_linearSpeedLeftSetPoint,
                                   m_linearSpeedRightSetPoint);
 }
@@ -193,13 +223,18 @@ void DifferentialDrive::process(uint32_t period)
 void DifferentialDrive::calculateLinearSpeedLeftRight(int16_t linearSpeedCenter, int16_t angularSpeed,
                                                       int16_t& linearSpeedLeft, int16_t& linearSpeedRight)
 {
-    int32_t linearSpeedCenter32 = static_cast<int32_t>(linearSpeedCenter);              /* [steps/s] */
-    int32_t angularSpeed32      = static_cast<int32_t>(angularSpeed);                   /* [mrad/s] */
-    int32_t wheelDiameter32     = static_cast<int32_t>(RobotConstants::WHEEL_DIAMETER); /* [mm] */
-    int32_t wheelBase32         = static_cast<int32_t>(RobotConstants::WHEEL_BASE);     /* [mm] */
+    int32_t linearSpeedCenter32 = static_cast<int32_t>(linearSpeedCenter);          /* [steps/s] */
+    int32_t angularSpeed32      = static_cast<int32_t>(angularSpeed);               /* [mrad/s] */
+    int32_t wheelBase32         = static_cast<int32_t>(RobotConstants::WHEEL_BASE); /* [mm] */
 
-    linearSpeedLeft  = (linearSpeedCenter32 * 2 - (angularSpeed32 * wheelBase32) / 1000) / wheelDiameter32;
-    linearSpeedRight = (linearSpeedCenter32 * 2 + (angularSpeed32 * wheelBase32) / 1000) / wheelDiameter32;
+    /* angular speed = 2 * (linear speed right - linear speed left ) / wheel base
+     * linear speed right - linear speed left = angular speed * wheel base / 2
+     *
+     * linear speed right = - linear speed left
+     */
+
+    linearSpeedLeft  = linearSpeedCenter32 - (angularSpeed32 * wheelBase32) / 2;
+    linearSpeedRight = linearSpeedCenter32 + (angularSpeed32 * wheelBase32) / 2;
 }
 
 void DifferentialDrive::calculateLinearAndAngularSpeedCenter(int16_t linearSpeedLeft, int16_t linearSpeedRight,
@@ -209,9 +244,14 @@ void DifferentialDrive::calculateLinearAndAngularSpeedCenter(int16_t linearSpeed
     int32_t linearSpeedRight32  = static_cast<int32_t>(linearSpeedRight);                           /* [steps/s] */
     int32_t wheelDiameter32     = static_cast<int32_t>(RobotConstants::WHEEL_DIAMETER);             /* [mm] */
     int32_t wheelBase32         = static_cast<int32_t>(RobotConstants::WHEEL_BASE);                 /* [mm] */
-    int32_t linearSpeedCenter32 = (wheelDiameter32 * (linearSpeedRight32 + linearSpeedLeft32)) / 4; /* [steps/s] */
-    int32_t angularSpeed32 =
-        (wheelDiameter32 * (linearSpeedRight32 - linearSpeedLeft32) * 1000) / wheelBase32; /* [mrad/s] */
+    int32_t linearSpeedCenter32 = (wheelDiameter32 * (linearSpeedRight32 + linearSpeedLeft32)) / 2; /* [steps/s] */
+    int32_t angularSpeed32      = (2 * (linearSpeedRight32 - linearSpeedLeft32)) / wheelBase32;     /* [mrad/s] */
+
+    /* linear speed = (wheel radius / 2) * (linear speed right + linear speed left)
+     * linear speed = (wheel radius * (linear speed right + linear speed left)) / 2
+     *
+     * angular speed = 2 * (linear speed right - linear speed left ) / wheel base
+     */
 
     linearSpeedCenter = static_cast<int16_t>(linearSpeedCenter32);
     angularSpeed      = static_cast<int16_t>(angularSpeed32);
