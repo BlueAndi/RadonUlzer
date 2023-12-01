@@ -277,8 +277,8 @@ private:
      *
      * @param[in]   stepsCenter Number of steps center
      * @param[in]   orientation Orientation in mrad
-     * @param[out]  dX          Delta x-position on x-axis in steps
-     * @param[out]  dY          Delta y-position on y-axis in steps
+     * @param[out]  dXSteps     Delta x-position on x-axis in steps
+     * @param[out]  dYSteps     Delta y-position on y-axis in steps
      */
     void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dXSteps, int16_t& dYSteps) const;
 };
