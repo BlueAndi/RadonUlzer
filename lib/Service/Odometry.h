@@ -201,6 +201,12 @@ private:
     /** Absolute position on y-axis. Unit is mm. */
     int32_t m_posY;
 
+    /** Counting encoder steps on x-axis. Unit is in encoder steps. */
+    int32_t m_countingXSteps;
+
+    /** Counting encoder steps on y-axis. Unit is in encoder steps. */
+    int32_t m_countingYSteps;
+
     /** Timer used to detect standstill. */
     SimpleTimer m_timer;
 
@@ -218,6 +224,8 @@ private:
         m_orientation(FP_PI() / 2), /* 90° - heading to north */
         m_posX(0),
         m_posY(0),
+        m_countingXSteps(0),
+        m_countingYSteps(0),
         m_timer(),
         m_isStandstill(true)
     {
@@ -269,10 +277,10 @@ private:
      *
      * @param[in]   stepsCenter Number of steps center
      * @param[in]   orientation Orientation in mrad
-     * @param[out]  dX          Delta x-position on x-axis
-     * @param[out]  dY          Delta y-position on y-axis
+     * @param[out]  dXSteps     Delta x-position on x-axis in steps
+     * @param[out]  dYSteps     Delta y-position on y-axis in steps
      */
-    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dX, int16_t& dY) const;
+    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dXSteps, int16_t& dYSteps) const;
 };
 
 /******************************************************************************

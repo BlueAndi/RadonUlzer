@@ -76,8 +76,6 @@ void DrivingState::entry()
     m_lineStatus  = LINE_STATUS_FIND_START_LINE;
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
 
-    diffDrive.enable();
-
     /* Configure PID controller with selected parameter set. */
     m_topSpeed = parSet.topSpeed;
     m_pidCtrl.clear();

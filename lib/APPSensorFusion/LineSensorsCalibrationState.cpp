@@ -73,7 +73,6 @@ void LineSensorsCalibrationState::entry()
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
     m_orientation      = odometry.getOrientation();
-    diffDrive.enable();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
@@ -128,9 +127,6 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-    diffDrive.disable();
     m_timer.stop();
 }
 
