@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
@@ -76,8 +76,6 @@ void DrivingState::entry()
     m_lineStatus  = LINE_STATUS_FIND_START_LINE;
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
     m_posMovAvg.clear();
-
-    diffDrive.enable();
 
     /* Configure PID controller with selected parameter set. */
     m_topSpeed = parSet.topSpeed;
@@ -140,16 +138,17 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-    diffDrive.disable();
     m_observationTimer.stop();
     Board::getInstance().getYellowLed().enable(false);
 }
 
-/* PROTECTED METHODES *****************************************************************************/
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
 
-/* PRIVATE METHODES *******************************************************************************/
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
 
 void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorValues)
 {
@@ -362,14 +361,6 @@ void DrivingState::adaptDriving(int16_t position)
 
     diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
-
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
 
 /******************************************************************************
  * External Functions

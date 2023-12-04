@@ -208,6 +208,9 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
      */
     diffDrive.setMaxMotorSpeed(maxSpeed);
 
+    /* Differential drive can now be used. */
+    diffDrive.enable();
+    
     if (0 == maxSpeed)
     {
         ErrorState::getInstance().setErrorMsg("MS=0");

@@ -90,18 +90,7 @@ public:
      * unexpected driving behaviour. The internal PID controllers will
      * be reset.
      */
-    void enable()
-    {
-        m_linearSpeedCenterSetPoint = 0;
-        m_linearSpeedLeftSetPoint   = 0;
-        m_linearSpeedRightSetPoint  = 0;
-        m_angularSpeedSetPoint      = 0;
-
-        m_motorSpeedLeftPID.clear();
-        m_motorSpeedRightPID.clear();
-
-        m_isEnabled = true;
-    }
+    void enable();
 
     /**
      * Disable the differential drive control.
@@ -110,15 +99,7 @@ public:
      *
      * Important: Processing the differential drive control shall not be stopped.
      */
-    void disable()
-    {
-        m_linearSpeedCenterSetPoint = 0;
-        m_linearSpeedLeftSetPoint   = 0;
-        m_linearSpeedRightSetPoint  = 0;
-        m_angularSpeedSetPoint      = 0;
-
-        m_isEnabled = false;
-    }
+    void disable();
 
     /**
      * Get the max. motor speed in [steps/s].
@@ -148,7 +129,7 @@ public:
      * Set the linear speed center in [steps/s].
      * The speed will be limited to the max. motor speed.
      *
-     * @param[in] linearSpeed   Linear speed center [steps/]
+     * @param[in] linearSpeed   Linear speed center [steps/s]
      */
     void setLinearSpeed(int16_t linearSpeed);
 
