@@ -129,7 +129,6 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
     case PHASE_5_FINISHED:
         /** Wait for buttonpress */
-        
 
     default:
         break;
@@ -200,7 +199,8 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
         strncat(str, valueStr, sizeof(str) - strlen(valueStr) - 1);
 
         ErrorState::getInstance().setErrorMsg(str);
-        sm.setState(&ErrorState::getInstance());
+        // sm.setState(&ErrorState::getInstance());
+        sm.setState(&ReadyState::getInstance());
     }
     else
     {
