@@ -91,10 +91,12 @@ public:
 
 protected:
 private:
+    SimpleTimer m_waitTimer;
     /**
      * Default constructor.
      */
-    ReadyState()
+    ReadyState() :
+        m_waitTimer()
     {
     }
 

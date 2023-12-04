@@ -76,6 +76,11 @@ void ReadyState::process(StateMachine& sm)
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
+        m_waitTimer.start(3000U);
+    }
+
+    if (true == m_waitTimer.isTimeout())
+    {
         sm.setState(&DrivingState::getInstance());
     }
 }
@@ -83,6 +88,7 @@ void ReadyState::process(StateMachine& sm)
 void ReadyState::exit()
 {
     Board::getInstance().getGreenLed().enable(false);
+    m_waitTimer.stop();
 }
 
 /******************************************************************************
