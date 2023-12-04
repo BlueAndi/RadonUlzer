@@ -39,6 +39,7 @@
 #include <StateMachine.h>
 
 #include "MotorSpeedCalibrationState.h"
+#include "LineSensorsCalibrationState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -68,8 +69,11 @@ void StartupState::entry()
 {
     IDisplay& display = Board::getInstance().getDisplay();
 
-    /* Surprise the audience. */
-    Sound::playStartup();
+    /** Initialize HAL. */
+    Board::getInstance().init();
+
+    // /* Surprise the audience. */
+    // Sound::playBeep();
 
     /* Show operator info on LCD */
     display.clear();
