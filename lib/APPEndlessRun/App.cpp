@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+#include <Logging.h>
 
 #include "StartupState.h"
 #include "ColorState.h"
@@ -73,20 +74,30 @@ static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
     Board::getInstance().init();
-
-    /* Subscribe to TrafficLight SMP channel. */
-    m_smpServer.subscribeToChannel(TRAFFIC_LIGHT_COLORS_NAME, App_trafficLightColorsCallback);
-
-    /* Create Tx SMP Coordinates channel. */
-    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
 
     /* Jump to StartupState. */
     m_systemStateMachine.setState(&StartupState::getInstance());
 
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_reportTimer.start(150U);
+    /* Create Tx SMP Coordinates channel. */
+    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
+
+    /* Subscribe to TrafficLight SMP channel. */
+    m_smpServer.subscribeToChannel(TRAFFIC_LIGHT_COLORS_NAME, App_trafficLightColorsCallback);
+
+    /** Channel successfuly created? */
+    if (0U != m_serialMuxProtChannelIdOdometry)
+    {
+        m_reportTimer.start(100U);
+    }
+    else
+    {
+        /** Could not create SMP channel. */
+    }
+    // m_reportTimer.start(150U);
 }
 
 void App::loop()
@@ -176,7 +187,11 @@ static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t
     (void)userData;
     if ((nullptr != payload) && (TRAFFIC_LIGHT_COLORS_DLC == payloadSize))
     {
+        // DrivingState::TLCId....
         ColorState::TLCId tlcId = *reinterpret_cast<const ColorState::TLCId*>(payload);
+
+        // if(colors changed)
+        // DrivingState::getInstance().reportColor(tlcId);
         ColorState::getInstance().execute(tlcId);
     }
 }
