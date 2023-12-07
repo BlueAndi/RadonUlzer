@@ -27,6 +27,10 @@
 /**
  *  @brief  Channel structure definition for the SerialMuxProt.
  *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * 
+ * @addtogroup Application
+ *
+ * @{
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
@@ -80,3 +84,4 @@ typedef struct _OdometryData
  *****************************************************************************/
 
 #endif /* SERIAL_MUX_CHANNELS_H_ */
+/** @} */
