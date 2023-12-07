@@ -101,6 +101,26 @@ public:
      */
     void enableSpeedup(bool enableIt);
 
+    /**
+     * Set driving speed of the robot during line following.
+     *
+     * @param[in] topSpeed the speed the robot shall drive with.
+     */
+    void setTopSpeed(int16_t topSpeed)
+    {
+        m_topSpeed = topSpeed;
+    }
+
+    /**
+     * Get current speed of the robot during driving.
+     *
+     * @return speed in steps/s
+     */
+    uint16_t getTopSpeed()
+    {
+        return m_topSpeed;
+    }
+
 protected:
 private:
     /* Flags used for slowdown and speedup methods. */
