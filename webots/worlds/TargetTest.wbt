@@ -24,8 +24,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.30756896043089665 -0.12989268365458428 0.9426182818683646 3.899314227331621
-  position 2.1731516934411723 3.0173148845107924 2.7724894299355074
+  orientation -0.2757695295581181 -0.08367606649063483 0.9575747920992641 3.7071406627047567
+  position 2.460281026931554 1.8411639890079954 2.3474988426244
 }
 TexturedBackground {
 }
@@ -34,7 +34,7 @@ TexturedBackgroundLight {
 LineFollowerTrack {
 }
 TrafficLightDCS {
-  controller "<none>"
+  controller "<extern>"
 }
 Supervisor {
   name "Supervisor"
@@ -42,7 +42,7 @@ Supervisor {
   supervisor TRUE
 }
 Zumo32U4 {
-  translation -1.22403 -0.523682 0.02
+  translation -1.2265 -0.526403 0.02
   rotation 0 0 1 1.5708
   name "Zumo"
 }
