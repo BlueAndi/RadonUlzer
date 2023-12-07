@@ -375,7 +375,7 @@ void DrivingState::adaptDriving(int16_t position)
             leftSpeed  = (m_topSpeed - speedDifference);
             rightSpeed = (m_topSpeed + speedDifference);
 
-            m_topSpeed -= 20;
+            m_topSpeed -= 10;
         }
     }
     /** If the traffic light is transitioning from green to red, then speed up. */
@@ -384,7 +384,7 @@ void DrivingState::adaptDriving(int16_t position)
         leftSpeed  = (m_topSpeed - speedDifference);
         rightSpeed = (m_topSpeed + speedDifference);
 
-        m_topSpeed += 20;
+        m_topSpeed += 10;
     }
     /** Green light? Keep moving with original calibrated speed. */
     else
