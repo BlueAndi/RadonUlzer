@@ -110,8 +110,8 @@ void DrivingState::entry()
         SETUP_FLAG = true;
     }
 
-    /* Periodic callback timer to check for new colors and refresh current coordinates. */
-    m_callbackTimer.start(150U);
+    /* Periodic callback timer to check for new color IDs. */
+    m_callbackTimer.start(100U);
 
     /* DrivingState is marked with Red LED. */
     Board::getInstance().getRedLed().enable(true);
