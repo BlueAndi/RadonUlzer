@@ -128,7 +128,6 @@ void ColorState::process(StateMachine& sm)
 void ColorState::exit()
 {
     Board::getInstance().getGreenLed().enable(false);
-    Board::getInstance().getYellowLed().enable(false);
 }
 
 /******************************************************************************
