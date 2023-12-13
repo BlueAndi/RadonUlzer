@@ -103,14 +103,16 @@ void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
         if ((MAX_PATH_SIZE > (m_pathLen + wavFileLen)) && (nullptr != m_speaker))
         {
             char   fullPath[MAX_PATH_SIZE];
-            double simVolume = static_cast<double>(volume) / 255.0f;
-            double pitch     = 1.0f;
-            double balance   = 0.0f;
+            double simVolume = static_cast<double>(volume) / 255.0F;
+            double pitch     = 1.0F;
+            double balance   = 0.0F;
 
             strcpy(fullPath, m_path);
             strcpy(&fullPath[m_pathLen], soundFileToPlay);
 
             m_speaker->playSound(m_speaker, m_speaker, fullPath, simVolume, pitch, balance, false);
+
+            printf("%s\n", fullPath);
         }
     }
 }
