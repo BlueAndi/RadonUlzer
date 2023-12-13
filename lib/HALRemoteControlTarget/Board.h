@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -71,10 +71,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -201,7 +200,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -210,9 +209,7 @@ public:
     }
 
 protected:
-
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -252,22 +249,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        IBoard(),
-        m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
-        m_buzzer(),
-        m_display(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledRed(),
-        m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.
@@ -275,7 +257,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************
