@@ -102,11 +102,6 @@ public:
     {
         (void)str;
     }
-
-private:
-
-    /* Default constructor not allowed. */
-    Sender();
 };
 
 /******************************************************************************
