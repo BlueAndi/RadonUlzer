@@ -12,6 +12,8 @@ PROTO Zumo32U4 [
     translation IS translation
     rotation IS rotation
     children [
+      Speaker {
+      }
       DEF SHIELD Group {
         children [
           Transform {

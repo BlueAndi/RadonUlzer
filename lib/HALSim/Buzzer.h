@@ -27,7 +27,7 @@
 /**
  * @brief  Buzzer realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
@@ -62,11 +62,7 @@ public:
     /**
      * Constructs the buzzer.
      */
-    Buzzer(webots::Speaker* speaker) : 
-        IBuzzer(), 
-        m_speaker(speaker)
-    {
-    }
+    Buzzer(webots::Speaker* speaker);
 
     /**
      * Destroys the buzzer.
@@ -94,30 +90,21 @@ public:
      * @param[in] duration    Duration of the note in milliseconds.
      * @param[in] volume      Volume of the note (0-15).
      */
-    void playFrequency(uint16_t freq, uint16_t duration, uint8_t volume) final
-    {
-        /* TODO */
-    }
+    void playFrequency(uint16_t freq, uint16_t duration, uint8_t volume) final;
 
     /**
      * Plays a melody sequence out of RAM.
      *
      * @param[in] sequence Melody sequence in RAM
      */
-    void playMelody(const char* sequence) final
-    {
-        /* TODO */
-    }
+    void playMelody(const char* sequence) final;
 
     /**
      * Plays a melody sequence out of program space.
      *
      * @param[in] sequence Melody sequence in program space
      */
-    void playMelodyPGM(const char* sequence) final
-    {
-        /* TODO */
-    }
+    void playMelodyPGM(const char* sequence) final;
 
     /**
      * Checks whether a note, frequency, or sequence is being played.
@@ -125,20 +112,24 @@ public:
      * @return if the buzzer is current playing a note, frequency, or sequence it will
      * return true otherwise false.
      */
-    bool isPlaying() final
-    {
-        bool isPlaying = false;
-
-        if (nullptr != m_speaker)
-        {
-            isPlaying = m_speaker->isSoundPlaying("");
-        }
-
-        return isPlaying;
-    }
+    bool isPlaying() final;
 
 private:
-    webots::Speaker* m_speaker; /**< The robot simulated speaker. */
+    /** Max. size of a full path. */
+    static const size_t MAX_PATH_SIZE = 1024;
+
+    /** Sound file with 440 Hz signal. */
+    static const char* WAV_FILE_440_HZ;
+
+    /** Sound file with 4 kHz signal. */
+    static const char* WAV_FILE_4_KHZ;
+
+    /** Sound file with 10 kHz signal. */
+    static const char* WAV_FILE_10_KHZ;
+
+    webots::Speaker* m_speaker;             /**< The robot simulated speaker. */
+    char             m_path[MAX_PATH_SIZE]; /**< Absolute path of working directory. */
+    size_t           m_pathLen;             /**< Length of the absolute path. */
 
     /* Default constructor not allowed. */
     Buzzer();

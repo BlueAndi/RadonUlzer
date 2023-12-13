@@ -55,7 +55,7 @@
  *****************************************************************************/
 
 /* Name of the speaker in the robot simulation. */
-const char* Board::SPEAKER_NAME = "robot_speaker";
+const char* Board::SPEAKER_NAME = "speaker";
 
 /* Name of the display in the robot simulation. */
 const char* Board::DISPLAY_NAME = "robot_display";
