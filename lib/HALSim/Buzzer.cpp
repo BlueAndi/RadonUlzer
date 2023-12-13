@@ -111,8 +111,6 @@ void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
             strcpy(&fullPath[m_pathLen], soundFileToPlay);
 
             m_speaker->playSound(m_speaker, m_speaker, fullPath, simVolume, pitch, balance, false);
-
-            printf("%s\n", fullPath);
         }
     }
 }
