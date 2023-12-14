@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,76 +25,81 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Abstract sender interface
  * @author Andreas Merkle <web@blue-andi.de>
+ * 
+ * @addtogroup HALInterfaces
+ *
+ * @{
  */
+#ifndef ISENDER_H
+#define ISENDER_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <stddef.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void Board::init()
+/** The abstract sender interface. */
+class ISender
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-}
+public:
+    /**
+     * Destroys the interface.
+     */
+    virtual ~ISender()
+    {
+    }
+
+    /**
+     * Set channel which to send data to.
+     * 
+     * @param[in] channel   The channel which to use.
+     */
+    virtual void setChannel(int32_t channel) = 0;
+
+    /**
+     * Sends data to the configured channel.
+     *
+     * @param[in] data  Data buffer
+     * @param[in] size  Data buffer size in bytes.
+     */
+    virtual void send(const void* data, size_t size) const = 0;
+
+    /**
+     * Sends string to the configured channel.
+     *
+     * @param[in] str   String which to send.
+     */
+    virtual void send(const char* str) const = 0;
+
+protected:
+    /**
+     * Constructs the interface.
+     */
+    ISender()
+    {
+    }
+
+private:
+};
 
 /******************************************************************************
- * Protected Methods
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-Board::Board() :
-    IBoard(),
-    m_buttonA(),
-    m_buttonB(),
-    m_buttonC(),
-    m_buzzer(),
-    m_display(),
-    m_encoders(),
-    m_lineSensors(),
-    m_motors(),
-    m_ledRed(),
-    m_ledYellow(),
-    m_ledGreen(),
-    m_proximitySensors()
-{
-}
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* ISENDER_H */
+/** @} */

@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Buzzer realization
+ * @brief  Sender realization
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "Buzzer.h"
-
-#include <unistd.h>
+#include "Sender.h"
+#include <string.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -56,86 +55,32 @@
  * Local Variables
  *****************************************************************************/
 
-const char* Buzzer::WAV_FILE_440_HZ = "/sounds/440hz.wav";
-const char* Buzzer::WAV_FILE_4_KHZ  = "/sounds/4khz.wav";
-const char* Buzzer::WAV_FILE_10_KHZ = "/sounds/10khz.wav";
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-Buzzer::Buzzer(webots::Speaker* speaker) : IBuzzer(), m_speaker(speaker), m_path(), m_pathLen(0)
+void Sender::setChannel(int32_t channel)
 {
-    /* Get current working directory. */
-    if (nullptr != getcwd(m_path, sizeof(m_path)))
+    if (nullptr != m_emitter)
     {
-        m_pathLen = strlen(m_path);
+        m_emitter->setChannel(channel);
     }
 }
 
-void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
+void Sender::send(const void* data, size_t size) const
 {
-    const char* soundFileToPlay = nullptr;
-
-    (void)duration;
-
-    if (440 == freq)
+    if (nullptr != m_emitter)
     {
-        soundFileToPlay = WAV_FILE_440_HZ;
-    }
-    else if (4000 == freq)
-    {
-        soundFileToPlay = WAV_FILE_4_KHZ;
-    }
-    else if (10000 == freq)
-    {
-        soundFileToPlay = WAV_FILE_10_KHZ;
-    }
-    else
-    {
-        ;
-    }
-
-    if (nullptr != soundFileToPlay)
-    {
-        size_t wavFileLen = strlen(soundFileToPlay);
-
-        if ((MAX_PATH_SIZE > (m_pathLen + wavFileLen)) && (nullptr != m_speaker))
-        {
-            char   fullPath[MAX_PATH_SIZE];
-            double simVolume = static_cast<double>(volume) / 255.0F;
-            double pitch     = 1.0F;
-            double balance   = 0.0F;
-
-            strcpy(fullPath, m_path);
-            strcpy(&fullPath[m_pathLen], soundFileToPlay);
-
-            m_speaker->playSound(m_speaker, m_speaker, fullPath, simVolume, pitch, balance, false);
-        }
+        m_emitter->send(data, size);
     }
 }
 
-void Buzzer::playMelody(const char* sequence)
+void Sender::send(const char* str) const
 {
-    /* TODO */
-}
-
-void Buzzer::playMelodyPGM(const char* sequence)
-{
-    /* TODO */
-}
-
-bool Buzzer::isPlaying()
-{
-    bool isPlaying = false;
-
-    if (nullptr != m_speaker)
+    if (nullptr != m_emitter)
     {
-        /* Is any sound playing? */
-        isPlaying = m_speaker->isSoundPlaying("");
+        m_emitter->send(str, strlen(str));
     }
-
-    return isPlaying;
 }
 
 /******************************************************************************

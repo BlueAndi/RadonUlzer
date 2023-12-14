@@ -25,15 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Board interface, which abstracts the physical board
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup HALTarget
+ * 
+ * @addtogroup HALInterfaces
  *
  * @{
  */
-#ifndef BOARD_H
-#define BOARD_H
+
+#ifndef IBOARD_H
+#define IBOARD_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,19 +44,14 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IBoard.h>
-#include <ButtonA.h>
-#include <ButtonB.h>
-#include <ButtonC.h>
-#include <Buzzer.h>
-#include <Display.h>
-#include <Encoders.h>
-#include <LineSensors.h>
-#include <Motors.h>
-#include <LedRed.h>
-#include <LedYellow.h>
-#include <LedGreen.h>
-#include <ProximitySensors.h>
+#include <IButton.h>
+#include <IBuzzer.h>
+#include <IDisplay.h>
+#include <IEncoders.h>
+#include <ILineSensors.h>
+#include <IMotors.h>
+#include <ILed.h>
+#include <IProximitySensors.h>
 
 /******************************************************************************
  * Macros
@@ -66,202 +62,124 @@
  *****************************************************************************/
 
 /**
- * The concrete physical board.
+ * Abstracts the physical board interface.
  */
-class Board : public IBoard
+class IBoard
 {
 public:
-    /**
-     * Get board instance.
-     *
-     * @return Board instance
-     */
-    static Board& getInstance()
-    {
-        static Board instance; /* idiom */
 
-        return instance;
+    /**
+     * Destroys the board interface.
+     */
+    virtual ~IBoard()
+    {
     }
 
     /**
      * Initialize the hardware.
      */
-    void init() final;
+    virtual void init() = 0;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA() final
-    {
-        return m_buttonA;
-    }
+    virtual IButton& getButtonA() = 0;
 
     /**
      * Get button B driver.
      *
      * @return Button B driver.
      */
-    IButton& getButtonB() final
-    {
-        return m_buttonB;
-    }
+    virtual IButton& getButtonB() = 0;
 
     /**
      * Get button C driver.
      *
      * @return Button C driver.
      */
-    IButton& getButtonC() final
-    {
-        return m_buttonC;
-    }
+    virtual IButton& getButtonC() = 0;
 
     /**
      * Get buzzer driver.
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer() final
-    {
-        return m_buzzer;
-    }
+    virtual IBuzzer& getBuzzer() = 0;
 
     /**
      * Get LCD driver.
      *
      * @return LCD driver.
      */
-    IDisplay& getDisplay() final
-    {
-        return m_display;
-    }
+    virtual IDisplay& getDisplay() = 0;
 
     /**
-     * Get encoders.
-     *
+     * Get encoders driver.
+     * 
      * @return Encoders driver.
      */
-    IEncoders& getEncoders() final
-    {
-        return m_encoders;
-    }
+    virtual IEncoders& getEncoders() = 0;
 
     /**
      * Get line sensors driver.
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors() final
-    {
-        return m_lineSensors;
-    }
+    virtual ILineSensors& getLineSensors() = 0;
 
     /**
      * Get motor driver.
      *
      * @return Motor driver.
      */
-    IMotors& getMotors() final
-    {
-        return m_motors;
-    }
+    virtual IMotors& getMotors() = 0;
 
     /**
      * Get red LED driver.
      *
      * @return Red LED driver.
      */
-    ILed& getRedLed() final
-    {
-        return m_ledRed;
-    }
+    virtual ILed& getRedLed() = 0;
 
     /**
      * Get yellow LED driver.
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed() final
-    {
-        return m_ledYellow;
-    }
+    virtual ILed& getYellowLed() = 0;
 
     /**
      * Get green LED driver.
      *
      * @return Green LED driver.
      */
-    ILed& getGreenLed() final
-    {
-        return m_ledGreen;
-    }
+    virtual ILed& getGreenLed() = 0;
 
     /**
      * Get proximity sensors driver.
-     *
+     * 
      * @return Proximity sensors driver
      */
-    IProximitySensors& getProximitySensors() final
-    {
-        return m_proximitySensors;
-    }
+    virtual IProximitySensors& getProximitySensors() = 0;
 
 protected:
-private:
-    /** Button A driver */
-    ButtonA m_buttonA;
-
-    /** Button B driver */
-    ButtonB m_buttonB;
-
-    /** Button C driver */
-    ButtonC m_buttonC;
-
-    /** Buzzer driver */
-    Buzzer m_buzzer;
-
-    /** Display driver */
-    Display m_display;
-
-    /** Encoders driver */
-    Encoders m_encoders;
-
-    /** Line sensors driver */
-    LineSensors m_lineSensors;
-
-    /** Motors driver */
-    Motors m_motors;
-
-    /** Red LED driver */
-    LedRed m_ledRed;
-
-    /** Red LED driver */
-    LedYellow m_ledYellow;
-
-    /** Red LED driver */
-    LedGreen m_ledGreen;
-
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
 
     /**
-     * Constructs the concrete board.
+     * Constructs the board interface.
      */
-    Board();
-
-    /**
-     * Destroys the concrete board.
-     */
-    ~Board()
+    IBoard()
     {
     }
+
+private:
+
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* BOARD_H */
+#endif /* IBOARD_H */
 /** @} */

@@ -14,6 +14,10 @@ PROTO Zumo32U4 [
     children [
       Speaker {
       }
+      Emitter {
+        name "serialComTx"
+        type "serial"
+      }
       DEF SHIELD Group {
         children [
           Transform {

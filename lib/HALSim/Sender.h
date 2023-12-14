@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,76 +25,91 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Sender realization
  * @author Andreas Merkle <web@blue-andi.de>
+ *
+ * @addtogroup HALSim
+ *
+ * @{
  */
+
+#ifndef SENDER_H
+#define SENDER_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
+#include "ISender.h"
 
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <webots/emitter.hpp>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
-/******************************************************************************
- * Prototypes
- *****************************************************************************/
-
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void Board::init()
+/**
+ * This class provides a sender to communicate with other robots or the supervisor
+ * in the simulation.
+ */
+class Sender : public ISender
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-}
+public:
+    /**
+     * Constructs the sender adapter.
+     *
+     * @param[in] emitter   The emitter of the simulated robot.
+     */
+    Sender(webots::Emitter* emitter) : ISender(), m_emitter(emitter)
+    {
+    }
+
+    /**
+     * Destroys the sender adapter.
+     */
+    ~Sender()
+    {
+    }
+
+    /**
+     * Set channel which to send data to.
+     *
+     * @param[in] channel   The channel which to use.
+     */
+    void setChannel(int32_t channel) final;
+
+    /**
+     * Sends data to the configured channel.
+     *
+     * @param[in] data  Data buffer
+     * @param[in] size  Data buffer size in bytes.
+     */
+    void send(const void* data, size_t size) const final;
+
+    /**
+     * Sends string to the configured channel.
+     *
+     * @param[in] str   String which to send.
+     */
+    void send(const char* str) const final;
+
+private:
+    webots::Emitter* m_emitter; /**< The emitter on the simulated robot. */
+
+    /* Default constructor not allowed. */
+    Sender();
+};
 
 /******************************************************************************
- * Protected Methods
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-Board::Board() :
-    IBoard(),
-    m_buttonA(),
-    m_buttonB(),
-    m_buttonC(),
-    m_buzzer(),
-    m_display(),
-    m_encoders(),
-    m_lineSensors(),
-    m_motors(),
-    m_ledRed(),
-    m_ledYellow(),
-    m_ledGreen(),
-    m_proximitySensors()
-{
-}
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* SENDER_H */
+/** @} */
