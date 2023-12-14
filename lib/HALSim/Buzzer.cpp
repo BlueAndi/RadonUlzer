@@ -75,7 +75,8 @@ Buzzer::Buzzer(webots::Speaker* speaker) : IBuzzer(), m_speaker(speaker), m_path
 
 void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
 {
-    const char* soundFileToPlay = nullptr;
+    const uint8_t MAX_VOLUME      = 15;
+    const char*   soundFileToPlay = nullptr;
 
     (void)duration;
 
@@ -96,6 +97,11 @@ void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
         ;
     }
 
+    if (MAX_VOLUME < volume)
+    {
+        volume = MAX_VOLUME;
+    }
+
     if (nullptr != soundFileToPlay)
     {
         size_t wavFileLen = strlen(soundFileToPlay);
@@ -103,7 +109,7 @@ void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
         if ((MAX_PATH_SIZE > (m_pathLen + wavFileLen)) && (nullptr != m_speaker))
         {
             char   fullPath[MAX_PATH_SIZE];
-            double simVolume = static_cast<double>(volume) / 255.0F;
+            double simVolume = static_cast<double>(volume) / static_cast<double>(MAX_VOLUME);
             double pitch     = 1.0F;
             double balance   = 0.0F;
 
