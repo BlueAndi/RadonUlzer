@@ -65,8 +65,7 @@ public:
      * Construct the convoy leader application.
      */
     App() :
-        m_serialMuxProtChannelIdOdometry(0U),
-        m_serialMuxProtChannelIdSpeed(0U),
+        m_serialMuxProtChannelIdCurrentVehicleData(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_reportTimer(),
@@ -101,11 +100,8 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
-    /** SerialMuxProt Channel id for sending the current odometry. */
-    uint8_t m_serialMuxProtChannelIdOdometry;
-
-    /** SerialMuxProt Channel id for sending the current speed. */
-    uint8_t m_serialMuxProtChannelIdSpeed;
+    /** SerialMuxProt Channel id for sending the current vehicle data. */
+    uint8_t m_serialMuxProtChannelIdCurrentVehicleData;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -124,16 +120,12 @@ private:
     SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
 
     /**
+     * Report the current vehicle data.
      * Report the current position and heading of the robot using the Odometry data.
-     * Sends data through the SerialMuxProtServer.
-     */
-    void reportOdometry();
-
-    /**
      * Report the current motor speeds of the robot using the Speedometer data.
      * Sends data through the SerialMuxProtServer.
      */
-    void reportSpeed();
+    void reportVehicleData();
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */

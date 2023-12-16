@@ -1,0 +1,25 @@
+#VRML_SIM R2023a utf8
+
+PROTO Marker [
+  field SFVec3f    translation  0 0 0
+  field SFString   name         "marker"
+]
+{
+  Solid {
+    translation IS translation
+    name IS name
+    children [
+      Shape {
+        appearance PBRAppearance {
+          baseColor 0.666667 0 0
+          metalness 0
+          IBLStrength 0
+          emissiveIntensity 0
+        }
+        geometry Sphere {
+          radius 0.02
+        }
+      }
+    ]
+  }
+}
