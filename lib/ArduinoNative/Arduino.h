@@ -59,6 +59,10 @@
 #define PSTR
 #endif
 
+#ifndef PROGMEM
+#define PROGMEM
+#endif
+
 #define PI  M_PI
 
 /******************************************************************************

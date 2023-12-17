@@ -8,7 +8,8 @@ package "Service" as serviceLayer {
 
     note top of Sound
         Dedicated functions supporting the
-        standard beep and the alarm tone.
+        standard beep, the alarm tone and
+        some melodies.
     end note
 
     class SimpleTimer <<service>>

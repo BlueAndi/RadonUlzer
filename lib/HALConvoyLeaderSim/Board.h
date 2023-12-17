@@ -213,7 +213,14 @@ public:
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;

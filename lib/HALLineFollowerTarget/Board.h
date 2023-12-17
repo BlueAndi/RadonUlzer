@@ -209,6 +209,14 @@ public:
         return m_proximitySensors;
     }
 
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 protected:
 
 private:
