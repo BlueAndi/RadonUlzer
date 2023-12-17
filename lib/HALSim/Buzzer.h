@@ -165,7 +165,7 @@ private:
     uint32_t         m_wholeNoteDuration;            /**< The duration in ms of a whole note. */
     uint32_t         m_noteType;                     /**< 4 for quarter, etc. */
     uint8_t          m_volume;                       /**< The note volume. */
-    bool             m_staccato;                     /* true if playing staccato. */
+    bool             m_staccato;                     /**< true if playing staccato. */
     uint8_t          m_staccatoRestDuration; /**< Duration of a staccato rest or zero if it is time to play a note. */
     uint32_t         m_timestamp;            /**< Timestamp in ms to handle sound timings. */
     uint16_t         m_duration;             /**< Frequency/Note duration in ms how long it shall be played. */
