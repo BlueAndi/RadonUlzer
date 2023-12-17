@@ -13,7 +13,10 @@ package "HAL" as hal {
 
         interface "IBuzzer" as iBuzzer {
             + {abstract} playFrequency(freq : uint16_t, duration : uin16_t, volume : uint8_t) : void
+            + {abstract} playMelody(sequence : const char*) : void
+            + {abstract} playMelodyPGM(sequence : const char*) : void
             + {abstract} isPlaying() : bool
+            + {abstract} process() : void
         }
 
         interface "IEncoders" as iEncoders {
