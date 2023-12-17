@@ -71,7 +71,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "Test"]
+        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "TestSim"]
 
     steps:
     - name: Checkout repository
@@ -139,7 +139,7 @@ jobs:
         pip install --upgrade platformio
 
     - name: Run tests on native environment
-      run: platformio test --environment Test -vvv
+      run: platformio test --environment TestSim -vvv
 
   # Build documentation
   doc:
