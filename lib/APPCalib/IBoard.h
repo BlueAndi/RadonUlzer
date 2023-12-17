@@ -164,6 +164,11 @@ public:
      */
     virtual IProximitySensors& getProximitySensors() = 0;
 
+    /**
+     * Process actators and sensors.
+     */
+    virtual void process() = 0;
+
 protected:
 
     /**

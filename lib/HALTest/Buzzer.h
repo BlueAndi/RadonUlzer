@@ -123,6 +123,11 @@ public:
         return false;
     }
 
+    /**
+     * Process the buzzer to handle sound timings.
+     */
+    void process() final;
+
 private:
 
 };

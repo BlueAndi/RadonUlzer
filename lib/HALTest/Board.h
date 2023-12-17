@@ -209,6 +209,14 @@ public:
     }
 
     /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
+    /**
      * Get encoders test interface.
      *
      * @return Encoders test interface.
@@ -227,8 +235,6 @@ public:
     {
         return m_motors;
     }
-
-protected:
 
 private:
 
