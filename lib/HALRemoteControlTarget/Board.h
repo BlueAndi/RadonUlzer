@@ -208,7 +208,14 @@ public:
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+    
 private:
     /** Button A driver */
     ButtonA m_buttonA;

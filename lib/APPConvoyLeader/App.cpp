@@ -89,6 +89,7 @@ void App::setup()
 
 void App::loop()
 {
+    Board::getInstance().process();
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
 

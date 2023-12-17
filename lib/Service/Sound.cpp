@@ -58,19 +58,19 @@
  *****************************************************************************/
 
 /** Alarm frequency in Hz. */
-static const uint32_t ALARM_FREQ = 440;
+static const uint16_t ALARM_FREQ = 500;
 
 /** Alarm tone duration in ms. */
-static const uint32_t ALARM_DURATION = 333;
+static const uint16_t ALARM_DURATION = 333;
 
 /** Silence duration in ms, between two consecutive alarm tones. */
-static const uint32_t SILENCE_DURATION = 333;
+static const uint16_t SILENCE_DURATION = 333;
 
 /** Beep frequency in Hz. */
-static const uint32_t BEEP_FREQ = 4000;
+static const uint16_t BEEP_FREQ = 1000;
 
 /** Beep tone duration in ms. */
-static const uint32_t BEEP_DURATION = 333;
+static const uint16_t BEEP_DURATION = 333;
 
 /** General volume in digits. */
 static const uint8_t VOLUME = 10;
