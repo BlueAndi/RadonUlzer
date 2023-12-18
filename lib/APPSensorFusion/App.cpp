@@ -72,7 +72,7 @@ void App::setup()
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_sendSensorsDataInterval.start(SEND_SENSORS_DATA_PERIOD);
+    m_sendSensorsDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
     /* Providing Sensor data */
     m_smpChannelIdSensorData = m_smpServer.createChannel(SENSORDATA_CHANNEL_NAME, SENSORDATA_CHANNEL_DLC);
