@@ -74,6 +74,8 @@ void App::setup()
 
     m_sendSensorsDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
+    m_measurementTimer.start(0U);
+
     /* Providing Sensor data */
     m_smpChannelIdSensorData = m_smpServer.createChannel(SENSORDATA_CHANNEL_NAME, SENSORDATA_CHANNEL_DLC);
 
@@ -128,7 +130,7 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::sendSensorData() const
+void App::sendSensorData()
 {
     SensorData payload;
     IIMU&      imu      = Board::getInstance().getIMU();
@@ -163,6 +165,19 @@ void App::sendSensorData() const
     payload.magnetometerValueX  = magnetometerValues.valueX;
     payload.magnetometerValueY  = magnetometerValues.valueY;
     payload.turnRate            = turnRates.valueZ;
+
+    uint32_t duration = 0U;
+    if (true == m_firstIteration)
+    {
+        duration         = SEND_SENSOR_DATA_PERIOD;
+        m_firstIteration = false;
+    }
+    duration = m_measurementTimer.getCurrentDuration();
+    m_measurementTimer.restart();
+
+    /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
+     * bit unsigned integer. */
+    payload.timePeriod = static_cast<uint16_t>(duration);
 
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
