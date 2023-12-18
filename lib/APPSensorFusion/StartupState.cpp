@@ -25,115 +25,77 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Calibration state
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup HALInterfaces
- *
- * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include "StartupState.h"
+#include <Board.h>
+#include <StateMachine.h>
+#include "MotorSpeedCalibrationState.h"
+#include "Sound.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
-{
-public:
-    /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
-     *
-     * @return Number of sensors
-     */
-    uint8_t getNumSensors() const final
-    {
-        return 1U;
-    }
-
-    /**
-     * Emits IR pulses and gets readings from the sensors.
-     */
-    void read() final
-    {
-    }
-
-    /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels.
-     *
-     * @return Number of brightness levels.
-     */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
-
-protected:
-private:
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void StartupState::entry()
+{
+    /* Initialize HAL */
+    Board::getInstance().init();
+}
+
+void StartupState::process(StateMachine& sm)
+{
+    IButton& buttonA = Board::getInstance().getButtonA();
+
+    if (true == buttonA.isPressed())
+    {
+        buttonA.waitForRelease();
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
+    }
+}
+
+void StartupState::exit()
+{
+    /* Nothing to do */
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

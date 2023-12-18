@@ -25,15 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Parameter state
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALInterfaces
+ * @addtogroup Application
  *
  * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
+
+#ifndef PARAMETER_SETS_H
+#define PARAMETER_SETS_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,7 +44,6 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IProximitySensors.h>
 
 /******************************************************************************
  * Macros
@@ -53,87 +53,93 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
+/** Parameter set with different driving configurations. */
+class ParameterSets
 {
 public:
     /**
-     * Constructs the interface.
+     * A single parameter set.
      */
-    ProximitySensors() : IProximitySensors()
+    struct ParameterSet
     {
-    }
+        const char* name;          /**< Name of the parameter set */
+        int16_t     topSpeed;      /**< Top speed in steps/s */
+        int16_t     kPNumerator;   /**< Kp numerator value */
+        int16_t     kPDenominator; /**< Kp denominator value */
+        int16_t     kINumerator;   /**< Ki numerator value */
+        int16_t     kIDenominator; /**< Ki denominator value */
+        int16_t     kDNumerator;   /**< Kd numerator value */
+        int16_t     kDDenominator; /**< Kd denominator value */
+    };
 
     /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
+     * Get parameter set instance.
      *
-     * @return Number of sensors
+     * @return Parameter set instance.
      */
-    uint8_t getNumSensors() const final
+    static ParameterSets& getInstance()
     {
-        return 1U;
+        static ParameterSets instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Emits IR pulses and gets readings from the sensors.
-     */
-    void read() final
-    {
-    }
-
-    /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
+     * Choose a specific parameter set.
+     * If a invalid set id is given, nothing changes.
      *
-     * @return Number of brightness levels
+     * @param[in] setId Parameter set id
      */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
+    void choose(uint8_t setId);
 
     /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
+     * Change to next parameter set.
+     * After the last set, the first will be choosen.
      */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
+    void next();
 
     /**
-     * Returns the number of brightness levels.
+     * Get current set id.
      *
-     * @return Number of brightness levels.
+     * @return Parameter set id.
      */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
+    uint8_t getCurrentSetId() const;
+
+    /**
+     * Get selected parameter set.
+     *
+     * @return Parameter set
+     */
+    const ParameterSet& getParameterSet() const;
+
+    /** Max. number of parameter sets. */
+    static const uint8_t MAX_SETS = 3;
 
 protected:
 private:
+    uint8_t      m_currentSetId;      /**< Set id of current selected set. */
+    ParameterSet m_parSets[MAX_SETS]; /**< All parameter sets */
+
+    /**
+     * Default constructor.
+     */
+    ParameterSets();
+
+    /**
+     * Default destructor.
+     */
+    ~ParameterSets();
+
+    /* Not allowed. */
+    ParameterSets(const ParameterSets& set);            /**< Copy construction of an instance. */
+    ParameterSets& operator=(const ParameterSets& set); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
+#endif /* PARAMETER_SET_H */
 /** @} */

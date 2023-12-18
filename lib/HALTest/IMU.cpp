@@ -1,7 +1,7 @@
 /* MIT License
  *
  * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
- *
+ * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -25,115 +25,51 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  IMU implementation
+ * @author Juliane Kerpe <juliane.kerpe@web.de>
  *
- * @addtogroup HALInterfaces
- *
- * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include "IMU.h"
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
-{
-public:
-    /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
-     *
-     * @return Number of sensors
-     */
-    uint8_t getNumSensors() const final
-    {
-        return 1U;
-    }
-
-    /**
-     * Emits IR pulses and gets readings from the sensors.
-     */
-    void read() final
-    {
-    }
-
-    /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels.
-     *
-     * @return Number of brightness levels.
-     */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
-
-protected:
-private:
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

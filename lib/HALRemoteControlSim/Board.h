@@ -220,7 +220,7 @@ public:
     {
         m_buzzer.process();
     }
-    
+
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Calibration state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <Board.h>
+#include "ParameterSets.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -58,12 +58,28 @@
  * Public Methods
  *****************************************************************************/
 
-void Board::init()
+void ParameterSets::choose(uint8_t setId)
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
+    if (MAX_SETS > setId)
+    {
+        m_currentSetId = setId;
+    }
+}
+
+void ParameterSets::next()
+{
+    ++m_currentSetId;
+    m_currentSetId %= MAX_SETS;
+}
+
+uint8_t ParameterSets::getCurrentSetId() const
+{
+    return m_currentSetId;
+}
+
+const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
+{
+    return m_parSets[m_currentSetId];
 }
 
 /******************************************************************************
@@ -74,20 +90,43 @@ void Board::init()
  * Private Methods
  *****************************************************************************/
 
-Board::Board() :
-    IBoard(),
-    m_buttonA(),
-    m_buttonB(),
-    m_buttonC(),
-    m_buzzer(),
-    m_display(),
-    m_encoders(),
-    m_lineSensors(),
-    m_motors(),
-    m_ledRed(),
-    m_ledYellow(),
-    m_ledGreen(),
-    m_proximitySensors()
+ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
+{
+    m_parSets[0] = {
+        "PID Slow", /* Name */
+        1920,       /* Top speed in steps/s */
+        3,          /* Kp Numerator */
+        2,          /* Kp Denominator */
+        1,          /* Ki Numerator */
+        60,         /* Ki Denominator */
+        4,          /* Kd Numerator */
+        1           /* Kd Denominator */
+    };
+
+    m_parSets[1] = {
+        "PID Fast", /* Name */
+        2400,       /* Top speed in steps/s */
+        3,          /* Kp Numerator */
+        2,          /* Kp Denominator */
+        1,          /* Ki Numerator */
+        40,         /* Ki Denominator */
+        40,         /* Kd Numerator */
+        1           /* Kd Denominator */
+    };
+
+    m_parSets[2] = {
+        "PD Fast", /* Name */
+        2400,      /* Top speed in steps/s */
+        3,         /* Kp Numerator */
+        1,         /* Kp Denominator */
+        0,         /* Ki Numerator */
+        1,         /* Ki Denominator */
+        40,        /* Kd Numerator */
+        1          /* Kd Denominator */
+    };
+}
+
+ParameterSets::~ParameterSets()
 {
 }
 

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,19 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The physical robot board realization.
+ * @brief  Ready state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include "ReadyState.h"
 #include <Board.h>
+#include <StateMachine.h>
+#include "ReleaseTrackState.h"
+#include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -54,16 +59,78 @@
  * Local Variables
  *****************************************************************************/
 
+/**
+ * Logging source.
+ */
+LOG_TAG("RState");
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void Board::init()
+void ReadyState::entry()
 {
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
+    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
+
+    /* The line sensor value shall be output on console cyclic. */
+    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
+}
+
+void ReadyState::process(StateMachine& sm)
+{
+    IButton& buttonA = Board::getInstance().getButtonA();
+
+    /* Shall track be released? */
+    if (true == buttonA.isPressed())
+    {
+        buttonA.waitForRelease();
+        sm.setState(&ReleaseTrackState::getInstance());
+    }
+    /* Shall the line sensor values be printed out on console? */
+    else if (true == m_timer.isTimeout())
+    {
+        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
+        uint8_t         index        = 0;
+        int16_t         position     = lineSensors.readLine();
+        const uint16_t* sensorValues = lineSensors.getSensorValues();
+        char            valueStr[10];
+
+        LOG_DEBUG_HEAD();
+
+        /* Print line sensor value on console for debug purposes. */
+        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
+        {
+            if (0 < index)
+            {
+                LOG_DEBUG_MSG(" / ");
+            }
+
+            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
+
+            LOG_DEBUG_MSG(valueStr);
+        }
+
+        LOG_DEBUG_MSG(" -> ");
+
+        Util::intToStr(valueStr, sizeof(valueStr), position);
+        LOG_DEBUG_MSG(valueStr);
+
+        LOG_DEBUG_TAIL();
+
+        m_timer.restart();
+    }
+}
+
+void ReadyState::exit()
+{
+    m_timer.stop();
+    m_isLapTimeAvailable = false;
+}
+
+void ReadyState::setLapTime(uint32_t lapTime)
+{
+    m_isLapTimeAvailable = true;
+    m_lapTime            = lapTime;
 }
 
 /******************************************************************************
@@ -73,23 +140,6 @@ void Board::init()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-Board::Board() :
-    IBoard(),
-    m_buttonA(),
-    m_buttonB(),
-    m_buttonC(),
-    m_buzzer(),
-    m_display(),
-    m_encoders(),
-    m_lineSensors(),
-    m_motors(),
-    m_ledRed(),
-    m_ledYellow(),
-    m_ledGreen(),
-    m_proximitySensors()
-{
-}
 
 /******************************************************************************
  * External Functions

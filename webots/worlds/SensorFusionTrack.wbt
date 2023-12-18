@@ -3,7 +3,7 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
-EXTERNPROTO "../protos/LineFollowerTrack.proto"
+EXTERNPROTO "../protos/SensorFusionTrack.proto"
 IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
 
 WorldInfo {
@@ -30,7 +30,7 @@ TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-LineFollowerTrack {
+SensorFusionTrack {
 }
 DEF ROBOT Zumo32U4 {
   translation -0.24713614078815466 -0.04863962992854465 0.013994298332013683

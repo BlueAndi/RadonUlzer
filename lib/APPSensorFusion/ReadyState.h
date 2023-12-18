@@ -25,15 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Ready state
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALInterfaces
+ * @addtogroup Application
  *
  * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
+
+#ifndef READY_STATE_H
+#define READY_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -42,8 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include <IState.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -53,87 +54,76 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
+/** The system ready state. */
+class ReadyState : public IState
 {
 public:
     /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
+     * Get state instance.
      *
-     * @return Number of sensors
+     * @return State instance.
      */
-    uint8_t getNumSensors() const final
+    static ReadyState& getInstance()
     {
-        return 1U;
+        static ReadyState instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Emits IR pulses and gets readings from the sensors.
+     * If the state is entered, this method will called once.
      */
-    void read() final
-    {
-    }
+    void entry() final;
 
     /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
+     * Processing the state.
      *
-     * @return Number of brightness levels
+     * @param[in] sm State machine, which is calling this state.
      */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
+    void process(StateMachine& sm) final;
 
     /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
+     * If the state is left, this method will be called once.
      */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
+    void exit() final;
 
     /**
-     * Returns the number of brightness levels.
+     * Set lap time, which to show on the display.
      *
-     * @return Number of brightness levels.
+     * @param[in] lapTime   Lap time in ms
      */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
+    void setLapTime(uint32_t lapTime);
 
 protected:
 private:
+    SimpleTimer m_timer;              /**< Timer used for cyclic debug output. */
+    bool        m_isLapTimeAvailable; /**< Is set (true), if a lap time is available. */
+    uint32_t    m_lapTime;            /**< Lap time in ms of the last successful driven round. */
+
+    /**
+     * Default constructor.
+     */
+    ReadyState() : m_timer(), m_isLapTimeAvailable(false), m_lapTime(0)
+    {
+    }
+
+    /**
+     * Default destructor.
+     */
+    ~ReadyState()
+    {
+    }
+
+    /* Not allowed. */
+    ReadyState(const ReadyState& state);            /**< Copy construction of an instance. */
+    ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
+#endif /* READY_STATE_H */
 /** @} */

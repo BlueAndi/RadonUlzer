@@ -2,7 +2,7 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
 
-PROTO LineFollowerTrack [
+PROTO SensorFusionTrack [
 
 ]
 {
@@ -12,7 +12,7 @@ PROTO LineFollowerTrack [
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
-          "./track.png"
+          "./SensorFusionTrack.png"
         ]
       }
       roughness 1

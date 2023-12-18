@@ -25,15 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Error state
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALInterfaces
+ * @addtogroup Application
  *
  * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
+
+#ifndef ERROR_STATE_H
+#define ERROR_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -42,8 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include <stddef.h>
+#include <IState.h>
 
 /******************************************************************************
  * Macros
@@ -53,87 +54,81 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
+/** The system error state. */
+class ErrorState : public IState
 {
 public:
     /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
+     * Get state instance.
      *
-     * @return Number of sensors
+     * @return State instance.
      */
-    uint8_t getNumSensors() const final
+    static ErrorState& getInstance()
     {
-        return 1U;
+        static ErrorState instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Emits IR pulses and gets readings from the sensors.
+     * If the state is entered, this method will called once.
      */
-    void read() final
-    {
-    }
+    void entry() final;
 
     /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
+     * Processing the state.
      *
-     * @return Number of brightness levels
+     * @param[in] sm State machine, which is calling this state.
      */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
+    void process(StateMachine& sm) final;
 
     /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
+     * If the state is left, this method will be called once.
      */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
+    void exit() final;
 
     /**
-     * Returns the number of brightness levels.
+     * Set error message, which to show on the display.
      *
-     * @return Number of brightness levels.
+     * @param[in] msg   Error message
      */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
+    void setErrorMsg(const char* msg);
 
 protected:
 private:
+    /**
+     * The error message string size in bytes, which
+     * includes the terminating character.
+     */
+    static const size_t ERROR_MSG_SIZE = 20;
+
+    char m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
+
+    /**
+     * Default constructor.
+     */
+    ErrorState() : m_errorMsg()
+    {
+        m_errorMsg[0] = '\0';
+    }
+
+    /**
+     * Default destructor.
+     */
+    ~ErrorState()
+    {
+    }
+
+    /* Not allowed. */
+    ErrorState(const ErrorState& state);            /**< Copy construction of an instance. */
+    ErrorState& operator=(const ErrorState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
+#endif /* ERROR_STATE_H */
 /** @} */

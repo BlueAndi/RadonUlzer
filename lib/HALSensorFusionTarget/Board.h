@@ -25,15 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALInterfaces
+ * @addtogroup HALTarget
  *
  * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
+#ifndef BOARD_H
+#define BOARD_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,7 +43,14 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IProximitySensors.h>
+#include <IBoard.h>
+#include <ButtonA.h>
+#include <Buzzer.h>
+#include <Encoders.h>
+#include <LineSensors.h>
+#include <Motors.h>
+#include <LedYellow.h>
+#include <IMU.h>
 
 /******************************************************************************
  * Macros
@@ -53,87 +60,145 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
+/**
+ * The concrete physical board.
+ */
+class Board : public IBoard
 {
 public:
     /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
+     * Get board instance.
      *
-     * @return Number of sensors
+     * @return Board instance
      */
-    uint8_t getNumSensors() const final
+    static Board& getInstance()
     {
-        return 1U;
+        static Board instance; /* idiom */
+
+        return instance;
     }
 
     /**
-     * Emits IR pulses and gets readings from the sensors.
+     * Initialize the hardware.
      */
-    void read() final
-    {
-    }
+    void init() final;
 
     /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
+     * Get button A driver.
      *
-     * @return Number of brightness levels
+     * @return Button A driver.
      */
-    uint8_t countsFrontWithLeftLeds() const final
+    IButton& getButtonA() final
     {
-        return 0;
+        return m_buttonA;
     }
 
     /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
+     * Get buzzer driver.
      *
-     * @return Number of brightness levels
+     * @return Buzzer driver.
      */
-    uint8_t countsFrontWithRightLeds() const final
+    IBuzzer& getBuzzer() final
     {
-        return 0;
+        return m_buzzer;
     }
 
     /**
-     * Returns the number of brightness levels.
+     * Get encoders.
      *
-     * @return Number of brightness levels.
+     * @return Encoders driver.
      */
-    uint8_t getNumBrightnessLevels() const final
+    IEncoders& getEncoders() final
     {
-        return 1;
+        return m_encoders;
     }
 
-protected:
+    /**
+     * Get line sensors driver.
+     *
+     * @return Line sensor driver.
+     */
+    ILineSensors& getLineSensors() final
+    {
+        return m_lineSensors;
+    }
+
+    /**
+     * Get motor driver.
+     *
+     * @return Motor driver.
+     */
+    IMotors& getMotors() final
+    {
+        return m_motors;
+    }
+
+    /**
+     * Get yellow LED driver.
+     *
+     * @return Yellow LED driver.
+     */
+    ILed& getYellowLed() final
+    {
+        return m_ledYellow;
+    }
+
+    /**
+     * Get IMU (Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 private:
+    /** Button A driver */
+    ButtonA m_buttonA;
+
+    /** Buzzer driver */
+    Buzzer m_buzzer;
+
+    /** Encoders driver */
+    Encoders m_encoders;
+
+    /** Line sensors driver */
+    LineSensors m_lineSensors;
+
+    /** Motors driver */
+    Motors m_motors;
+
+    /** Yellow LED driver */
+    LedYellow m_ledYellow;
+
+    /** IMU driver */
+    IMU m_imu;
+
+    /**
+     * Constructs the concrete board.
+     */
+    Board();
+
+    /**
+     * Destroys the concrete board.
+     */
+    ~Board()
+    {
+    }
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
+#endif /* BOARD_H */
 /** @} */

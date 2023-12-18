@@ -57,9 +57,6 @@
 /* Name of the speaker in the robot simulation. */
 const char* Board::SPEAKER_NAME = "speaker";
 
-/* Name of the display in the robot simulation. */
-const char* Board::DISPLAY_NAME = "robot_display";
-
 /* Name of the left motor in the robot simulation. */
 const char* Board::LEFT_MOTOR_NAME = "motor_left";
 
@@ -102,20 +99,17 @@ const char* Board::LIGHT_SENSOR_3_NAME = "lightsensor_rm";
 /* Name of the light sensor 4 in the robot simulation. */
 const char* Board::LIGHT_SENSOR_4_NAME = "lightsensor_r";
 
-/* Name of the red LED in the robot simulation. */
-const char* Board::LED_RED_NAME = "led_red";
-
 /* Name of the yellow LED in the robot simulation. */
 const char* Board::LED_YELLOW_NAME = "led_yellow";
 
-/* Name of the green LED in the robot simulation. */
-const char* Board::LED_GREEN_NAME = "led_green";
+/* Name of the accelerometer in the robot simulation. */
+const char* Board::ACCELEROMETER_NAME = "accelerometer";
 
-/* Name of the front left proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
+/* Name of the gyro in the robot simulation. */
+const char* Board::GYRO_NAME = "gyro";
 
-/* Name of the front right proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
+/* Name of the magnetometer in the robot simulation. */
+const char* Board::MAGNETOMETER_NAME = "magnetometer";
 
 /******************************************************************************
  * Public Methods
@@ -127,7 +121,11 @@ void Board::init()
     m_keyboard.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
+    /*  TODO: TD084	React if IMU initialization fails */
+    (void)m_imu.init();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();
+    m_imu.calibrate();
 }
 
 /******************************************************************************
@@ -139,15 +137,11 @@ void Board::init()
  *****************************************************************************/
 
 Board::Board() :
-    IBoard(),
     m_robot(),
     m_simTime(m_robot),
     m_keyboard(m_simTime, m_robot.getKeyboard()),
     m_buttonA(m_keyboard),
-    m_buttonB(m_keyboard),
-    m_buttonC(m_keyboard),
     m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-    m_display(m_robot.getDisplay(DISPLAY_NAME)),
     m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
                m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
@@ -156,11 +150,9 @@ Board::Board() :
                   m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
                   m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
     m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
-    m_ledRed(m_robot.getLED(LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-    m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-    m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                       m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
+    m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+          m_robot.getCompass(MAGNETOMETER_NAME))
 {
 }
 

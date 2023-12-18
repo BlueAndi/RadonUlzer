@@ -25,115 +25,97 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Release track state
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup HALInterfaces
- *
- * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IProximitySensors.h>
+#include "ReleaseTrackState.h"
+#include <Board.h>
+#include <StateMachine.h>
+#include "DrivingState.h"
+#include "ParameterSets.h"
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
-{
-public:
-    /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
-     *
-     * @return Number of sensors
-     */
-    uint8_t getNumSensors() const final
-    {
-        return 1U;
-    }
-
-    /**
-     * Emits IR pulses and gets readings from the sensors.
-     */
-    void read() final
-    {
-    }
-
-    /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
-     */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels.
-     *
-     * @return Number of brightness levels.
-     */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
-
-protected:
-private:
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void ReleaseTrackState::entry()
+{
+    /* Start challenge after specific time. */
+    m_releaseTimer.start(TRACK_RELEASE_DURATION);
+
+    /* Choose parameter set 0 by default. */
+    ParameterSets::getInstance().choose(0);
+    showParSet();
+}
+
+void ReleaseTrackState::process(StateMachine& sm)
+{
+    IButton& buttonA = Board::getInstance().getButtonA();
+
+    /* Change parameter set? */
+    if (true == buttonA.isPressed())
+    {
+        /* Choose next parameter set (round-robin) */
+        ParameterSets::getInstance().next();
+        showParSet();
+
+        buttonA.waitForRelease();
+        m_releaseTimer.restart();
+    }
+
+    /* Release track after specific time. */
+    if (true == m_releaseTimer.isTimeout())
+    {
+        sm.setState(&DrivingState::getInstance());
+    }
+}
+
+void ReleaseTrackState::exit()
+{
+    m_releaseTimer.stop();
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+void ReleaseTrackState::showParSet() const
+{
+    /* Nothing to do. */
+}
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

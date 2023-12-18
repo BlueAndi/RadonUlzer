@@ -25,15 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Proximity sensors realization
+ * @brief  Release track state
  * @author Andreas Merkle <web@blue-andi.de>
  *
- * @addtogroup HALInterfaces
+ * @addtogroup Application
  *
  * @{
  */
-#ifndef PROXIMITYSENSORS_H
-#define PROXIMITYSENSORS_H
+
+#ifndef RELEASE_TRACK_STATE_H
+#define RELEASE_TRACK_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,7 +44,8 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IProximitySensors.h>
+#include <IState.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -53,87 +55,75 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The proximity sensors realization for testing purposes. */
-class ProximitySensors : public IProximitySensors
+/** The system release track state. */
+class ReleaseTrackState : public IState
 {
 public:
     /**
-     * Constructs the interface.
-     */
-    ProximitySensors() : IProximitySensors()
-    {
-    }
-
-    /**
-     * Destroys the interface.
-     */
-    virtual ~ProximitySensors()
-    {
-    }
-
-    /**
-     * Initialize only the front proximity sensor.
-     */
-    void initFrontSensor() final
-    {
-    }
-
-    /**
-     * Returns the number of sensors.
+     * Get state instance.
      *
-     * @return Number of sensors
+     * @return State instance.
      */
-    uint8_t getNumSensors() const final
+    static ReleaseTrackState& getInstance()
     {
-        return 1U;
+        static ReleaseTrackState instance;
+
+        /* Singleton idiom to force initialization during first usage. */
+
+        return instance;
     }
 
     /**
-     * Emits IR pulses and gets readings from the sensors.
+     * If the state is entered, this method will called once.
      */
-    void read() final
-    {
-    }
+    void entry() final;
 
     /**
-     * Returns the number of brightness levels for the left LEDs that
-     * activated the front proximity sensor.
+     * Processing the state.
      *
-     * @return Number of brightness levels
+     * @param[in] sm State machine, which is calling this state.
      */
-    uint8_t countsFrontWithLeftLeds() const final
-    {
-        return 0;
-    }
+    void process(StateMachine& sm) final;
 
     /**
-     * Returns the number of brightness levels for the right LEDs that
-     * activated the front proximity sensor.
-     *
-     * @return Number of brightness levels
+     * If the state is left, this method will be called once.
      */
-    uint8_t countsFrontWithRightLeds() const final
-    {
-        return 0;
-    }
-
-    /**
-     * Returns the number of brightness levels.
-     *
-     * @return Number of brightness levels.
-     */
-    uint8_t getNumBrightnessLevels() const final
-    {
-        return 1;
-    }
+    void exit() final;
 
 protected:
 private:
+    /** Track release timer duration in ms. */
+    static const uint32_t TRACK_RELEASE_DURATION = 5000;
+
+    SimpleTimer m_releaseTimer; /**< Track release timer */
+
+    /**
+     * Default constructor.
+     */
+    ReleaseTrackState()
+    {
+    }
+
+    /**
+     * Default destructor.
+     */
+    ~ReleaseTrackState()
+    {
+    }
+
+    /* Not allowed. */
+    ReleaseTrackState(const ReleaseTrackState& state);            /**< Copy construction of an instance. */
+    ReleaseTrackState& operator=(const ReleaseTrackState& state); /**< Assignment of an instance. */
+
+    /**
+     * Show choosen parameter set on LCD.
+     */
+    void showParSet() const;
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PROXIMITYSENSORS_H */
+#endif /* RELEASE_TRACK_STATE_H */
 /** @} */
