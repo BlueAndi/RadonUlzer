@@ -113,7 +113,6 @@ void App::loop()
     if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
         (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
-        m_sendSensorDataInterval.restart();
         sendSensorData();
 
         /* Send End line detection signal if the application is currently in the Driving state. */
@@ -121,6 +120,7 @@ void App::loop()
         {
             sendEndLineDetectionSignal();
         }
+        m_sendSensorDataInterval.restart();
     }
     m_systemStateMachine.process();
 }
