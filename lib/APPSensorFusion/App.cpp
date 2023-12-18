@@ -114,13 +114,13 @@ void App::loop()
         (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
         sendSensorData();
+        m_sendSensorDataInterval.restart();
 
         /* Send End line detection signal if the application is currently in the Driving state. */
         if (&DrivingState::getInstance() == m_systemStateMachine.getState())
         {
             sendEndLineDetectionSignal();
         }
-        m_sendSensorDataInterval.restart();
     }
     m_systemStateMachine.process();
 }
