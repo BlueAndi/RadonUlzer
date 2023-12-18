@@ -72,7 +72,7 @@ void App::setup()
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_sendSensorsDataInterval.start(SEND_SENSOR_DATA_PERIOD);
+    m_sendSensorDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
     m_measurementTimer.start(0U);
 
@@ -107,10 +107,10 @@ void App::loop()
     }
 
     /* Send sensor data periodically if new data is available. */
-    if ((true == m_sendSensorsDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
+    if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
         (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
-        m_sendSensorsDataInterval.restart();
+        m_sendSensorDataInterval.restart();
         sendSensorData();
 
         /* Send End line detection signal if the application is currently in the Driving state. */
