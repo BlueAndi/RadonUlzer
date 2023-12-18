@@ -173,7 +173,6 @@ void App::sendSensorData()
         m_firstIteration = false;
     }
     duration = m_measurementTimer.getCurrentDuration();
-    m_measurementTimer.restart();
 
     /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
      * bit unsigned integer. */
@@ -181,6 +180,7 @@ void App::sendSensorData()
 
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    m_measurementTimer.restart();
 }
 
 void App::sendEndLineDetectionSignal()
