@@ -43,6 +43,9 @@
  * Macros
  *****************************************************************************/
 
+/** Maximum number of SerialMuxProt Channels. */
+#define MAX_CHANNELS (10U)
+
 /** Name of Channel to send Sensor Data to. */
 #define SENSORDATA_CHANNEL_NAME "SENSOR_DATA"
 
@@ -54,9 +57,6 @@
 
 /** DLC of End Line Channel */
 #define ENDLINE_CHANNEL_DLC (sizeof(EndLineFlag))
-
-/** Maximum number of SerialMuxProt Channels. */
-#define MAX_CHANNELS (10U)
 
 /******************************************************************************
  * Types and Classes
