@@ -178,8 +178,16 @@ void App::sendSensorData()
     duration = m_measurementTimer.getCurrentDuration();
 
     /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
-     * bit unsigned integer. */
-    payload.timePeriod = static_cast<uint16_t>(duration);
+     * bit unsigned integer. However, if in one iteration the duration exceeds the numerical limits of uint16, the
+     * maximum value is being sent. */
+    if (UINT16_MAX > duration)
+    {
+        payload.timePeriod = static_cast<uint16_t>(duration);
+    }
+    else
+    {
+        payload.timePeriod = UINT16_MAX;
+    }
 
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
