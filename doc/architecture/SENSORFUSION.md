@@ -2,10 +2,11 @@
 
 * [General](#general)
   * [SerialMuxProt Channels](#serialmuxprot-channels)
-    * [Tx channel "LINE\_SENS"](#tx-channel-sensor_data)
+    * [Tx channel "SENSOR\_DATA"](#tx-channel-sensor_data)
 * [SW Architecture](#sw-architecture)
   * [Logical View](#logical-view)
     * [Application](#application)
+    * [HAL](#hal)
 * [Abbreviations](#abbreviations)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
 * [License](#license)
@@ -20,7 +21,7 @@ On target the physical communication uses the serial.
 On simulation the physical communication uses a socket connection.
 
 ## SerialMuxProt Channels
-
+TODO
 
 ### Tx channel "SENSOR_DATA"
 This channel is used to send raw sensor data used for Sensor Fusion on the ZumoComSystem.

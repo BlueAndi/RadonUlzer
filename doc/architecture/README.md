@@ -1,22 +1,22 @@
 # Radon Ulzer <!-- omit in toc -->
 
-- [SW Architecture](#sw-architecture)
-- [Abbreviations](#abbreviations)
-  - [Physical View](#physical-view)
-  - [Development View](#development-view)
-    - [Layers](#layers)
-  - [Logical View](#logical-view)
-    - [Application](#application)
-    - [Service](#service)
-      - [Differential Drive](#differential-drive)
-      - [Odometry](#odometry)
-      - [Speedometer](#speedometer)
-    - [HAL](#hal)
-  - [Process View](#process-view)
-    - [Differential Drive](#differential-drive-1)
-- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-- [License](#license)
-- [Contribution](#contribution)
+* [SW Architecture](#sw-architecture)
+* [Abbreviations](#abbreviations)
+  * [Physical View](#physical-view)
+  * [Development View](#development-view)
+    * [Layers](#layers)
+  * [Logical View](#logical-view)
+    * [Application](#application)
+    * [Service](#service)
+      * [Differential Drive](#differential-drive)
+      * [Odometry](#odometry)
+      * [Speedometer](#speedometer)
+    * [HAL](#hal)
+  * [Process View](#process-view)
+    * [Differential Drive](#differential-drive-1)
+* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+* [License](#license)
+* [Contribution](#contribution)
 
 # SW Architecture
 The Radon Ulzer repository contains several applications. Each application is described according to the 4+1 architectural view.
@@ -48,6 +48,7 @@ The following applications are supported:
 * [ConvoyLeader application](CONVOYLEADER.md)
 * [LineFollower application](LINEFOLLOWER.md)
 * [RemoteControl application](REMOTECONTROL.md)
+* [SensorFusion application](SENSORFUSION.md)
 
 ### Service
 
