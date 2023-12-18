@@ -74,6 +74,7 @@ void App::setup()
 
 void App::loop()
 {
+    Board::getInstance().process();
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())

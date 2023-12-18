@@ -55,7 +55,7 @@
  *****************************************************************************/
 
 /* Name of the speaker in the robot simulation. */
-const char* Board::SPEAKER_NAME = "robot_speaker";
+const char* Board::SPEAKER_NAME = "speaker";
 
 /* Name of the display in the robot simulation. */
 const char* Board::DISPLAY_NAME = "robot_display";
@@ -118,15 +118,7 @@ const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
 const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
 
 /******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
+ * Public Methods
  *****************************************************************************/
 
 void Board::init()
@@ -137,6 +129,44 @@ void Board::init()
     m_motors.init();
     m_proximitySensors.initFrontSensor();
 }
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+Board::Board() :
+    IBoard(),
+    m_robot(),
+    m_simTime(m_robot),
+    m_keyboard(m_simTime, m_robot.getKeyboard()),
+    m_buttonA(m_keyboard),
+    m_buttonB(m_keyboard),
+    m_buttonC(m_keyboard),
+    m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
+    m_display(m_robot.getDisplay(DISPLAY_NAME)),
+    m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
+               m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
+    m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
+                  m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
+                  m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
+                  m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
+                  m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
+    m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
+    m_ledRed(m_robot.getLED(LED_RED_NAME)),
+    m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
+    m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
+    m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
+                       m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
+{
+}
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
 
 /******************************************************************************
  * Local Functions

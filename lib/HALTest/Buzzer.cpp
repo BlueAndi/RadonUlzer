@@ -60,22 +60,18 @@
 
 void Buzzer::playFrequency(uint16_t freq, uint16_t duration, uint8_t volume)
 {
-    /* Not implemented*/
-    (void) freq;
-    (void) duration;
-    (void) volume;
 }
 
 void Buzzer::playMelody(const char* sequence)
 {
-    /* Not implemented*/
-    (void) sequence;
 }
 
 void Buzzer::playMelodyPGM(const char* sequence)
 {
-    /* Not implemented*/
-    (void) sequence;
+}
+
+void Buzzer::process()
+{
 }
 
 /******************************************************************************

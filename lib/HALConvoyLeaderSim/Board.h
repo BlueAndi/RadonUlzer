@@ -43,6 +43,7 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
@@ -72,7 +73,7 @@
 /**
  * The concrete simulation robot board.
  */
-class Board
+class Board : public IBoard
 {
 public:
     /**
@@ -90,14 +91,14 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init();
+    void init() final;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA()
+    IButton& getButtonA() final
     {
         return m_buttonA;
     }
@@ -107,7 +108,7 @@ public:
      *
      * @return Button B driver.
      */
-    IButton& getButtonB()
+    IButton& getButtonB() final
     {
         return m_buttonB;
     }
@@ -117,7 +118,7 @@ public:
      *
      * @return Button C driver.
      */
-    IButton& getButtonC()
+    IButton& getButtonC() final
     {
         return m_buttonC;
     }
@@ -127,7 +128,7 @@ public:
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer()
+    IBuzzer& getBuzzer() final
     {
         return m_buzzer;
     }
@@ -137,7 +138,7 @@ public:
      *
      * @return LCD driver.
      */
-    IDisplay& getDisplay()
+    IDisplay& getDisplay() final
     {
         return m_display;
     }
@@ -147,7 +148,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders()
+    IEncoders& getEncoders() final
     {
         return m_encoders;
     }
@@ -157,7 +158,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors()
+    ILineSensors& getLineSensors() final
     {
         return m_lineSensors;
     }
@@ -167,7 +168,7 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors()
+    IMotors& getMotors() final
     {
         return m_motors;
     }
@@ -177,7 +178,7 @@ public:
      *
      * @return Red LED driver.
      */
-    ILed& getRedLed()
+    ILed& getRedLed() final
     {
         return m_ledRed;
     }
@@ -187,7 +188,7 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed()
+    ILed& getYellowLed() final
     {
         return m_ledYellow;
     }
@@ -197,7 +198,7 @@ public:
      *
      * @return Green LED driver.
      */
-    ILed& getGreenLed()
+    ILed& getGreenLed() final
     {
         return m_ledGreen;
     }
@@ -207,12 +208,19 @@ public:
      *
      * @return Proximity sensors driver
      */
-    IProximitySensors& getProximitySensors()
+    IProximitySensors& getProximitySensors() final
     {
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;
@@ -313,10 +321,10 @@ private:
     /** Red LED driver */
     LedRed m_ledRed;
 
-    /** Yellow LED driver */
+    /** Red LED driver */
     LedYellow m_ledYellow;
 
-    /** Green LED driver */
+    /** Red LED driver */
     LedGreen m_ledGreen;
 
     /** Proximity sensors */
@@ -325,30 +333,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        m_robot(),
-        m_simTime(m_robot),
-        m_keyboard(m_simTime, m_robot.getKeyboard()),
-        m_buttonA(m_keyboard),
-        m_buttonB(m_keyboard),
-        m_buttonC(m_keyboard),
-        m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-        m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
-                   m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
-        m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
-                      m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
-                      m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
-        m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
-        m_ledRed(m_robot.getLED(LED_RED_NAME)),
-        m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-        m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.

@@ -70,7 +70,7 @@ void StartupState::entry()
     Board::getInstance().init();
 
     /* Surprise the audience. */
-    Sound::playStartup();
+    Sound::playMelody(Sound::MELODY_STAR_WARS);
 
     /* Show team id / team name */
     display.clear();

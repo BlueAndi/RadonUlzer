@@ -12,6 +12,12 @@ PROTO Zumo32U4 [
     translation IS translation
     rotation IS rotation
     children [
+      Speaker {
+      }
+      Emitter {
+        name "serialComTx"
+        type "serial"
+      }
       DEF SHIELD Group {
         children [
           Transform {

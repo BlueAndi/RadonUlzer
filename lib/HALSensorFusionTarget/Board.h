@@ -43,9 +43,9 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <IBoard.h>
 #include <ButtonA.h>
 #include <Buzzer.h>
-#include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
@@ -63,7 +63,7 @@
 /**
  * The concrete physical board.
  */
-class Board
+class Board : public IBoard
 {
 public:
     /**
@@ -81,14 +81,14 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init();
+    void init() final;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA()
+    IButton& getButtonA() final
     {
         return m_buttonA;
     }
@@ -98,7 +98,7 @@ public:
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer()
+    IBuzzer& getBuzzer() final
     {
         return m_buzzer;
     }
@@ -108,7 +108,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders()
+    IEncoders& getEncoders() final
     {
         return m_encoders;
     }
@@ -118,7 +118,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors()
+    ILineSensors& getLineSensors() final
     {
         return m_lineSensors;
     }
@@ -128,7 +128,7 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors()
+    IMotors& getMotors() final
     {
         return m_motors;
     }
@@ -138,7 +138,7 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed()
+    ILed& getYellowLed() final
     {
         return m_ledYellow;
     }
@@ -148,12 +148,19 @@ public:
      *
      * @return IMU driver
      */
-    IIMU& getIMU()
+    IIMU& getIMU() final
     {
         return m_imu;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 private:
     /** Button A driver */
     ButtonA m_buttonA;
@@ -173,22 +180,13 @@ private:
     /** Yellow LED driver */
     LedYellow m_ledYellow;
 
-    /** IMU Driver */
+    /** IMU driver */
     IMU m_imu;
 
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        m_buttonA(),
-        m_buzzer(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledYellow(),
-        m_imu()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.

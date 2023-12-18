@@ -43,6 +43,7 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <IBoard.h>
 #include <ButtonA.h>
 #include <Buzzer.h>
 #include <Encoders.h>
@@ -67,7 +68,7 @@
 /**
  * The concrete simulation robot board.
  */
-class Board
+class Board : public IBoard
 {
 public:
     /**
@@ -85,24 +86,24 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init();
+    void init() final;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA()
+    IButton& getButtonA() final
     {
         return m_buttonA;
     }
 
-        /**
+    /**
      * Get buzzer driver.
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer()
+    IBuzzer& getBuzzer() final
     {
         return m_buzzer;
     }
@@ -112,7 +113,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders()
+    IEncoders& getEncoders() final
     {
         return m_encoders;
     }
@@ -122,7 +123,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors()
+    ILineSensors& getLineSensors() final
     {
         return m_lineSensors;
     }
@@ -132,7 +133,7 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors()
+    IMotors& getMotors() final
     {
         return m_motors;
     }
@@ -142,7 +143,7 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed()
+    ILed& getYellowLed() final
     {
         return m_ledYellow;
     }
@@ -152,18 +153,22 @@ public:
      *
      * @return IMU driver
      */
-    IIMU& getIMU()
+    IIMU& getIMU() final
     {
         return m_imu;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;
-
-    /** Name of the display in the robot simulation. */
-    static const char* DISPLAY_NAME;
 
     /** Name of the left motor in the robot simulation. */
     static const char* LEFT_MOTOR_NAME;
@@ -243,7 +248,7 @@ private:
     /** Motors driver */
     Motors m_motors;
 
-    /** Red LED driver */
+    /** Yellow LED driver */
     LedYellow m_ledYellow;
 
     /** IMU driver */
@@ -252,25 +257,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        m_robot(),
-        m_simTime(m_robot),
-        m_keyboard(m_simTime, m_robot.getKeyboard()),
-        m_buttonA(m_keyboard),
-        m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-        m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
-                   m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
-        m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
-                      m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
-                      m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
-        m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
-        m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-        m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
-              m_robot.getCompass(MAGNETOMETER_NAME))
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.

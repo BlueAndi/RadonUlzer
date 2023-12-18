@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -43,6 +43,7 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
@@ -67,13 +68,12 @@
 /**
  * The concrete physical board.
  */
-class Board
+class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -86,14 +86,14 @@ public:
     /**
      * Initialize the hardware.
      */
-    void init();
+    void init() final;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    IButton& getButtonA()
+    IButton& getButtonA() final
     {
         return m_buttonA;
     }
@@ -103,7 +103,7 @@ public:
      *
      * @return Button B driver.
      */
-    IButton& getButtonB()
+    IButton& getButtonB() final
     {
         return m_buttonB;
     }
@@ -113,7 +113,7 @@ public:
      *
      * @return Button C driver.
      */
-    IButton& getButtonC()
+    IButton& getButtonC() final
     {
         return m_buttonC;
     }
@@ -123,7 +123,7 @@ public:
      *
      * @return Buzzer driver.
      */
-    IBuzzer& getBuzzer()
+    IBuzzer& getBuzzer() final
     {
         return m_buzzer;
     }
@@ -133,7 +133,7 @@ public:
      *
      * @return LCD driver.
      */
-    IDisplay& getDisplay()
+    IDisplay& getDisplay() final
     {
         return m_display;
     }
@@ -143,7 +143,7 @@ public:
      *
      * @return Encoders driver.
      */
-    IEncoders& getEncoders()
+    IEncoders& getEncoders() final
     {
         return m_encoders;
     }
@@ -153,7 +153,7 @@ public:
      *
      * @return Line sensor driver.
      */
-    ILineSensors& getLineSensors()
+    ILineSensors& getLineSensors() final
     {
         return m_lineSensors;
     }
@@ -163,7 +163,7 @@ public:
      *
      * @return Motor driver.
      */
-    IMotors& getMotors()
+    IMotors& getMotors() final
     {
         return m_motors;
     }
@@ -173,7 +173,7 @@ public:
      *
      * @return Red LED driver.
      */
-    ILed& getRedLed()
+    ILed& getRedLed() final
     {
         return m_ledRed;
     }
@@ -183,7 +183,7 @@ public:
      *
      * @return Yellow LED driver.
      */
-    ILed& getYellowLed()
+    ILed& getYellowLed() final
     {
         return m_ledYellow;
     }
@@ -193,25 +193,30 @@ public:
      *
      * @return Green LED driver.
      */
-    ILed& getGreenLed()
+    ILed& getGreenLed() final
     {
         return m_ledGreen;
     }
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
-    IProximitySensors& getProximitySensors()
+    IProximitySensors& getProximitySensors() final
     {
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
 
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -251,21 +256,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
-        m_buzzer(),
-        m_display(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledRed(),
-        m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.
@@ -273,7 +264,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

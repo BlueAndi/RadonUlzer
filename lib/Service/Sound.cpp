@@ -58,22 +58,71 @@
  *****************************************************************************/
 
 /** Alarm frequency in Hz. */
-static const uint32_t ALARM_FREQ = 500;
+static const uint16_t ALARM_FREQ = 500;
 
 /** Alarm tone duration in ms. */
-static const uint32_t ALARM_DURATION = 333;
+static const uint16_t ALARM_DURATION = 333;
 
 /** Silence duration in ms, between two consecutive alarm tones. */
-static const uint32_t SILENCE_DURATION = 333;
+static const uint16_t SILENCE_DURATION = 333;
 
 /** Beep frequency in Hz. */
-static const uint32_t BEEP_FREQ = 1000;
+static const uint16_t BEEP_FREQ = 1000;
 
 /** Beep tone duration in ms. */
-static const uint32_t BEEP_DURATION = 333;
+static const uint16_t BEEP_DURATION = 333;
 
 /** General volume in digits. */
 static const uint8_t VOLUME = 10;
+
+/** Welcome theme melody. */
+static const char gWelcomeMelody[] PROGMEM = "O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2";
+
+/** Star Wars theme melody. */
+static const char gStarWarsMelody[] PROGMEM = "! O2 T100 MS"
+                                              "a8. r16 a8. r16 a8. r16 f8 r16 >c16"
+                                              "ML"
+                                              "a8. r16 f8 r16"
+                                              "MS"
+                                              ">c16 a. r8"
+                                              "O3"
+                                              "e8. r16 e8. r16 e8. r16 f8 r16 <c16"
+                                              "O2 ML"
+                                              "a-8. r16"
+                                              "MS"
+                                              "f8 r16 >c16 a r"
+
+                                              "O3 ML"
+                                              "a8. r16 <a8 r16 <a16"
+                                              "MS"
+                                              "a8. r16 a-8 r16 g16"
+                                              "ML V10"
+                                              "g-16 f16 g-16 r16 r8 <b-16 r16"
+                                              "MS"
+                                              "e-8. r16 d8."
+                                              "ML"
+                                              "d-16"
+                                              "c16 <c-16 c16 r16 r8"
+                                              "MS O2"
+                                              "f16 r16 a-8. r16 f8. a-16"
+                                              "O3"
+                                              "c8. r16 <a8 r16 c16 e2. r8"
+
+                                              "O3 ML"
+                                              "a8. r16 <a8 r16 <a16"
+                                              "MS"
+                                              "a8. r16 a-8 r16 g16"
+                                              "ML V10"
+                                              "g-16 f16 g-16 r16 r8 <b-16 r16"
+                                              "MS"
+                                              "e-8. r16 d8."
+                                              "ML"
+                                              "d-16"
+                                              "c16 <c-16 c16 r16 r8"
+                                              "MS O2"
+                                              "f16 r16 a-8. r16 f8. >c16"
+                                              "ML"
+                                              "a8. r16 f8 r16 >c16 a2. r8";
 
 /******************************************************************************
  * Public Methods
@@ -116,11 +165,29 @@ void Sound::playBeep()
     buzzer.playFrequency(BEEP_FREQ, BEEP_DURATION, VOLUME);
 }
 
-void Sound::playStartup()
+void Sound::playMelody(Melody melody)
 {
-    IBuzzer& buzzer = Board::getInstance().getBuzzer();
+    IBuzzer&    buzzer = Board::getInstance().getBuzzer();
+    const char* song = nullptr;
 
-    buzzer.playMelodyPGM(PSTR("O4 T100 V15 L4 MS g12>c12>e12>G6>E12 ML>G2"));
+    switch(melody)
+    {
+    case MELODY_WELCOME:
+        song = gWelcomeMelody;
+        break;
+
+    case MELODY_STAR_WARS:
+        song = gStarWarsMelody;
+        break;
+
+    default:
+        break;
+    }
+
+    if (nullptr != song)
+    {
+        buzzer.playMelodyPGM(song);
+    }
 }
 
 /******************************************************************************

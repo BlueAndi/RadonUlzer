@@ -55,10 +55,7 @@
  *****************************************************************************/
 
 /* Name of the speaker in the robot simulation. */
-const char* Board::SPEAKER_NAME = "robot_speaker";
-
-/* Name of the display in the robot simulation. */
-const char* Board::DISPLAY_NAME = "robot_display";
+const char* Board::SPEAKER_NAME = "speaker";
 
 /* Name of the left motor in the robot simulation. */
 const char* Board::LEFT_MOTOR_NAME = "motor_left";
@@ -104,7 +101,7 @@ const char* Board::LIGHT_SENSOR_4_NAME = "lightsensor_r";
 
 /* Name of the yellow LED in the robot simulation. */
 const char* Board::LED_YELLOW_NAME = "led_yellow";
-#
+
 /* Name of the accelerometer in the robot simulation. */
 const char* Board::ACCELEROMETER_NAME = "accelerometer";
 
@@ -115,15 +112,7 @@ const char* Board::GYRO_NAME = "gyro";
 const char* Board::MAGNETOMETER_NAME = "magnetometer";
 
 /******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
+ * Public Methods
  *****************************************************************************/
 
 void Board::init()
@@ -135,9 +124,41 @@ void Board::init()
     /*  TODO: TD084	React if IMU initialization fails */
     (void)m_imu.init();
     m_imu.enableDefault();
-    m_imu.configureForTurnSensing();    
+    m_imu.configureForTurnSensing();
     m_imu.calibrate();
 }
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+Board::Board() :
+    m_robot(),
+    m_simTime(m_robot),
+    m_keyboard(m_simTime, m_robot.getKeyboard()),
+    m_buttonA(m_keyboard),
+    m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
+    m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
+               m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
+    m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
+                  m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
+                  m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
+                  m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
+                  m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
+    m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
+    m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
+    m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+          m_robot.getCompass(MAGNETOMETER_NAME))
+{
+}
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
 
 /******************************************************************************
  * Local Functions

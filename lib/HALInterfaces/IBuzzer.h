@@ -106,6 +106,11 @@ public:
      */
     virtual bool isPlaying() = 0;
 
+    /**
+     * Process the buzzer to handle sound timings.
+     */
+    virtual void process() = 0;
+
 protected:
     /**
      * Constructs the interface.
