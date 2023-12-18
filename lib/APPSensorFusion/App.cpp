@@ -72,8 +72,11 @@ void App::setup()
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
+    /* Periodically send Send Data via SerialMuxProt. */
     m_sendSensorDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
+    /* Measure the precise duration of each iteration.
+    This is necessary because the time required for each iteration can vary. */
     m_measurementTimer.start(0U);
 
     /* Providing Sensor data */
