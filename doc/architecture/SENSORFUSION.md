@@ -56,6 +56,7 @@ The application uses the same [States](https://github.com/BlueAndi/RadonUlzer/bl
 ### HAL
 Some changes have been made to the HAL compared to the HAL of the other Applications.
 ButtonB, ButtonC, LedYellow, LedRed, the Display and the ProximitySensors have been removed in the App specific HAL. 
+The Buzzer Component can not be removed since it is used inside the Service Layer. Instead, the Buzzer is replaced with a Dummy Buzzer without any Functionality.
 ![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
 
 An IMU has been added:
