@@ -370,21 +370,33 @@ void DrivingState::adaptDriving(int16_t position)
     /** If the traffic light is transitioning from green to red, then slow down. */
     if (true == IS_YELLOW_GR)
     {
-        if (true == (m_topSpeed > 100))
+        if (m_topSpeed > 100)
         {
             leftSpeed  = (m_topSpeed - speedDifference);
             rightSpeed = (m_topSpeed + speedDifference);
 
-            m_topSpeed -= 10;
+            m_topSpeed -= 15;
+        }
+        else
+        {
+            IS_YELLOW_GR = false;
         }
     }
     /** If the traffic light is transitioning from green to red, then speed up. */
-    else if (true == IS_YELLOW_RG)
+    else if ((true == IS_YELLOW_RG))
     {
-        leftSpeed  = (m_topSpeed - speedDifference);
-        rightSpeed = (m_topSpeed + speedDifference);
+        if (KEEP_TOP_SPEED != m_topSpeed)
+        {
+            leftSpeed  = (m_topSpeed - speedDifference);
+            rightSpeed = (m_topSpeed + speedDifference);
 
-        m_topSpeed += 10;
+            m_topSpeed += 10;
+        }
+        else
+        {
+            /** Force jumpout once speed is equal to operating top speed. */
+            IS_YELLOW_RG = false;
+        }
     }
     /** Green light? Keep moving with original calibrated speed. */
     else
