@@ -3,9 +3,11 @@
 * [General](#general)
   * [SerialMuxProt Channels](#serialmuxprot-channels)
     * [Tx channel "LINE\_SENS"](#tx-channel-sensor_data)
+    * [Tx channel "END\_LINE"](#tx-channel-end_line)
 * [SW Architecture](#sw-architecture)
   * [Logical View](#logical-view)
     * [Application](#application)
+    * [HAL](#hal)
 * [Abbreviations](#abbreviations)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
 * [License](#license)
@@ -20,7 +22,7 @@ On target the physical communication uses the serial.
 On simulation the physical communication uses a socket connection.
 
 ## SerialMuxProt Channels
-
+All channels are defined in the file [SerialMuxChannels.h](https://github.com/BlueAndi/RadonUlzer/blob/SensorFusion/ArchitectureUpdate/lib/APPSensorFusion/SerialMuxChannels.h)
 
 ### Tx channel "SENSOR_DATA"
 This channel is used to send raw sensor data used for Sensor Fusion on the ZumoComSystem.
@@ -36,6 +38,10 @@ This channel is used to send raw sensor data used for Sensor Fusion on the ZumoC
   * Position in X calculated by Odometry (in mm)
   * Position in Y calculated by Odometry (in mm)
 * Endianess: Big endian
+
+### Tx channel "END_LINE"
+This channel is used to send a flag to signal that a new End Line has been detected. This is used for testing purposes. 
+The only content that is sent is a boolean variable with the value true. 
 
 # SW Architecture
 The following part contains the specific details of the SensorFusion application.
