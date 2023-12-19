@@ -32,7 +32,7 @@ This channel is used to send raw sensor data used for Sensor Fusion on the ZumoC
 * Order:
   * Acceleration in X (raw sensor value in digits)
   * Acceleration in Y (raw sensor value in digits)
-  * turnRateZ around Z (raw sensor value in digits)
+  * Turnrate around Z (raw sensor value in digits)
   * Magnetometer value in X (raw sensor value in digits)
   * Magnetometer value in Y (raw sensor value in digits)
   * Angle calculated by Odometry (in mrad)
