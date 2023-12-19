@@ -23,7 +23,7 @@ On target the physical communication uses the serial.
 On simulation the physical communication uses a socket connection.
 
 ## SerialMuxProt Channels
-All channels are defined in the file [SerialMuxChannels.h](https://github.com/BlueAndi/RadonUlzer/blob/SensorFusion/ArchitectureUpdate/lib/APPSensorFusion/SerialMuxChannels.h)
+All channels are defined in the file [SerialMuxChannels.h](https://github.com/BlueAndi/RadonUlzer/blob/main/lib/APPSensorFusion/SerialMuxChannels.h)
 
 ### Tx channel "SENSOR_DATA"
 This channel is used to send raw sensor data used for Sensor Fusion on the ZumoComSystem.
@@ -38,6 +38,7 @@ This channel is used to send raw sensor data used for Sensor Fusion on the ZumoC
   * Angle calculated by Odometry (in mrad)
   * Position in X calculated by Odometry (in mm)
   * Position in Y calculated by Odometry (in mm)
+  * Time passed since the last sensor value (in ms)
 * Endianess: Big endian
 
 ### Tx channel "END_LINE"
@@ -53,11 +54,10 @@ The following part contains the specific details of the SensorFusion application
 The application uses the same [State Machine](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md) as the Line Follower Application.
 
 ### HAL
-Some changes have been made to the HAL.
+Some changes have been made to the HAL compared to the HAL of the other Applications.
+ButtonB, ButtonC, LedYellow, LedRed, the Display and the ProximitySensors have been removed in the App specific HAL. 
 ![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
 
-
-ButtonB, ButtonC, the ProximitySensor and the Buzzer have been removed. 
 An IMU has been added:
 ![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
 

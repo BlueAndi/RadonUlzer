@@ -11,6 +11,14 @@ package "HAL" as hal {
             + {abstract} waitForRelease() : void
         }
 
+        interface "IBuzzer" as iBuzzer {
+            + {abstract} playFrequency(freq : uint16_t, duration : uin16_t, volume : uint8_t) : void
+            + {abstract} playMelody(sequence : const char*) : void
+            + {abstract} playMelodyPGM(sequence : const char*) : void
+            + {abstract} isPlaying() : bool
+            + {abstract} process() : void
+        }
+
         interface "IEncoders" as iEncoders {
             + {abstract} getCountsLeft() : int16_t
             + {abstract} getCountsRight() : int16_t
@@ -90,6 +98,7 @@ package "HAL" as hal {
         class LineSensors
         class ButtonA
         class Motors
+        class Buzzer
         class Encoders
         class LedYellow
         class IMU
@@ -98,6 +107,7 @@ package "HAL" as hal {
     iLineSensors <|... LineSensors: <<realize>>
     iButton <|... ButtonA: <<realize>>
     iMotors <|... Motors: <<realize>>
+    iBuzzer <|... Buzzer: <<realize>>
     iEncoders <|... Encoders: <<realize>>
     iLed <|... LedYellow: <<realize>>
     iIMU <|... IMU: <<realize>>
@@ -107,7 +117,7 @@ package "Zumo32U4 library"  as zumo32u4Lib {
     class Zumo32U4LineSensors
     class Zumo32U4ButtonA
     class Zumo32U4Motors
-    class Zumo32U4LCD
+    class Zumo32U4Buzzer
     class Zumo32U4Encoders
     class Zumo32U4IMU
     class Zumo32U4 <<Functions>>
@@ -124,6 +134,7 @@ hal -[hidden]-- zumo32u4Lib
 LineSensors *--> Zumo32U4LineSensors
 ButtonA *--> Zumo32U4ButtonA
 Motors *--> Zumo32U4Motors
+Buzzer *--> Zumo32U4Buzzer
 Encoders *--> Zumo32U4Encoders
 IMU *--> Zumo32U4IMU
 LedYellow ..> Zumo32U4: <<use>>
