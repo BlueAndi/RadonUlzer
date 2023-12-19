@@ -6,10 +6,18 @@ package "HAL" as hal {
 
     package "Interfaces" as halInterfaces {
 
+        interface "IBuzzer" as iBuzzer {
+            + {abstract} playFrequency(freq : uint16_t, duration : uin16_t, volume : uint8_t) : void
+            + {abstract} playMelody(sequence : const char*) : void
+            + {abstract} playMelodyPGM(sequence : const char*) : void
+            + {abstract} isPlaying() : bool
+            + {abstract} process() : void
+        }
         interface "IButton" as iButton {
             + {abstract} isPressed() : bool
             + {abstract} waitForRelease() : void
         }
+
 
         interface "IEncoders" as iEncoders {
             + {abstract} getCountsLeft() : int16_t
@@ -90,14 +98,21 @@ package "HAL" as hal {
         class LineSensors
         class ButtonA
         class Motors
+        class NoBuzzer
         class Encoders
         class LedYellow
         class IMU
     }
 
+    note bottom of NoBuzzer
+        This is a Dummy Buzzer Component 
+        to save Flash Space.
+    end note
+
     iLineSensors <|... LineSensors: <<realize>>
     iButton <|... ButtonA: <<realize>>
     iMotors <|... Motors: <<realize>>
+    iBuzzer <|... NoBuzzer: <<realize>>
     iEncoders <|... Encoders: <<realize>>
     iLed <|... LedYellow: <<realize>>
     iIMU <|... IMU: <<realize>>
@@ -107,7 +122,6 @@ package "Zumo32U4 library"  as zumo32u4Lib {
     class Zumo32U4LineSensors
     class Zumo32U4ButtonA
     class Zumo32U4Motors
-    class Zumo32U4LCD
     class Zumo32U4Encoders
     class Zumo32U4IMU
     class Zumo32U4 <<Functions>>
