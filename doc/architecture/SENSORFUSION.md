@@ -8,6 +8,7 @@
   * [Logical View](#logical-view)
     * [Application](#application)
     * [HAL](#hal)
+  * [Process View](#process-view)
 * [Abbreviations](#abbreviations)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
 * [License](#license)
@@ -59,6 +60,10 @@ Some changes have been made to the HAL.
 ButtonB, ButtonC, the ProximitySensor and the Buzzer have been removed. 
 An IMU has been added:
 ![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
+
+## Process View
+Compared to the System States of the [Linefollower Application](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md), the only change that has been made is that the detection of an end line does not trigger a change of state from DrivingState to ReadyState. This is done for testing purposes.  
+![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/ProcessView/SensorFusion/SystemStates.puml)
 
 # Abbreviations
 
