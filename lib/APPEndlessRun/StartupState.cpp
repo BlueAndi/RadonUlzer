@@ -72,8 +72,8 @@ void StartupState::entry()
     /** Initialize HAL. */
     Board::getInstance().init();
 
-    // /* Surprise the audience. */
-    // Sound::playBeep();
+    /* Surprise the audience. */
+    Sound::playBeep();
 
     /* Show operator info on LCD */
     display.clear();
