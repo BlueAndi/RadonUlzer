@@ -2,7 +2,7 @@
 
 * [General](#general)
   * [SerialMuxProt Channels](#serialmuxprot-channels)
-    * [Tx channel "LINE\_SENS"](#tx-channel-sensor_data)
+    * [Tx channel "SENSOR\_DATA"](#tx-channel-sensor_data)
     * [Tx channel "END\_LINE"](#tx-channel-end_line)
 * [SW Architecture](#sw-architecture)
   * [Logical View](#logical-view)

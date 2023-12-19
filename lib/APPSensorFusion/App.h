@@ -70,7 +70,9 @@ public:
         m_smpChannelIdEndLine(0U),
         m_systemStateMachine(),
         m_controlInterval(),
-        m_sendSensorsDataInterval(),
+        m_sendSensorDataInterval(),
+        m_measurementTimer(),
+        m_firstIteration(true),
         m_lastLineDetectionStatus(DrivingState::LINE_STATUS_FIND_START_LINE),
         m_smpServer(Serial)
     {
@@ -95,7 +97,7 @@ public:
 
 private:
     /** Sending Data period in ms. */
-    static const uint32_t SEND_SENSORS_DATA_PERIOD = 20;
+    static const uint32_t SEND_SENSOR_DATA_PERIOD = 20U;
 
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
@@ -116,7 +118,13 @@ private:
     SimpleTimer m_controlInterval;
 
     /** Timer used for sending data periodically. */
-    SimpleTimer m_sendSensorsDataInterval;
+    SimpleTimer m_sendSensorDataInterval;
+
+    /** Timer used for measure the exact time since last sending data. */
+    SimpleTimer m_measurementTimer;
+
+    /** Flag if the current Iteration is the first one. */
+    bool m_firstIteration;
 
     /** End Line Status of the previous iteration */
     DrivingState::LineStatus m_lastLineDetectionStatus;
@@ -131,7 +139,7 @@ private:
     /**
      * Send the Sensor data as a SensorData struct via SerialMuxProt.
      */
-    void sendSensorData() const;
+    void sendSensorData();
 
     /**
      * Send the End Line Detection Flag as a EndLineFlag struct via SerialMuxProt.

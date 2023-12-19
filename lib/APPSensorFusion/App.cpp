@@ -72,7 +72,12 @@ void App::setup()
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    m_sendSensorsDataInterval.start(SEND_SENSORS_DATA_PERIOD);
+    /* Periodically send Send Data via SerialMuxProt. */
+    m_sendSensorDataInterval.start(SEND_SENSOR_DATA_PERIOD);
+
+    /* Measure the precise duration of each iteration.
+    This is necessary because the time required for each iteration can vary. */
+    m_measurementTimer.start(0U);
 
     /* Providing Sensor data */
     m_smpChannelIdSensorData = m_smpServer.createChannel(SENSORDATA_CHANNEL_NAME, SENSORDATA_CHANNEL_DLC);
@@ -105,11 +110,11 @@ void App::loop()
     }
 
     /* Send sensor data periodically if new data is available. */
-    if ((true == m_sendSensorsDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
+    if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
         (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
     {
-        m_sendSensorsDataInterval.restart();
         sendSensorData();
+        m_sendSensorDataInterval.restart();
 
         /* Send End line detection signal if the application is currently in the Driving state. */
         if (&DrivingState::getInstance() == m_systemStateMachine.getState())
@@ -128,7 +133,7 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::sendSensorData() const
+void App::sendSensorData()
 {
     SensorData payload;
     IIMU&      imu      = Board::getInstance().getIMU();
@@ -164,8 +169,29 @@ void App::sendSensorData() const
     payload.magnetometerValueY  = magnetometerValues.valueY;
     payload.turnRate            = turnRates.valueZ;
 
+    uint32_t duration = 0U;
+    if (true == m_firstIteration)
+    {
+        duration         = SEND_SENSOR_DATA_PERIOD;
+        m_firstIteration = false;
+    }
+    duration = m_measurementTimer.getCurrentDuration();
+
+    /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
+     * bit unsigned integer. However, if in one iteration the duration exceeds the numerical limits of uint16, the
+     * maximum value is being sent. */
+    if (UINT16_MAX > duration)
+    {
+        payload.timePeriod = static_cast<uint16_t>(duration);
+    }
+    else
+    {
+        payload.timePeriod = UINT16_MAX;
+    }
+
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    m_measurementTimer.restart();
 }
 
 void App::sendEndLineDetectionSignal()
