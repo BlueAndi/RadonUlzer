@@ -51,7 +51,7 @@ The following part contains the specific details of the SensorFusion application
 ## Logical View
 
 ### Application
-The application uses the same [State Machine](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md) as the Line Follower Application.
+The application uses the same [States](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md) as the Line Follower Application.
 
 ### HAL
 Some changes have been made to the HAL compared to the HAL of the other Applications.
