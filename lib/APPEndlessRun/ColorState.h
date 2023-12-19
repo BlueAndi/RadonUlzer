@@ -113,11 +113,12 @@ protected:
 private:
     TLCId m_tlcId; /* Current traffic light color ID. */
 
+    TLCId m_lastId; /** Last Id */
+
     /**
      * Default constructor.
      */
-    ColorState() : 
-        m_tlcId(COLOR_ID_IDLE)
+    ColorState() : m_tlcId(COLOR_ID_IDLE), m_lastId(COLOR_ID_IDLE)
     {
     }
 
