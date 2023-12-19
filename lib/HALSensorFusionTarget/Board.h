@@ -45,7 +45,7 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
-#include <Buzzer.h>
+#include <NoBuzzer.hpp>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
@@ -165,8 +165,8 @@ private:
     /** Button A driver */
     ButtonA m_buttonA;
 
-    /** Buzzer driver */
-    Buzzer m_buzzer;
+    /** Buzzer driver as a Dummy */
+    NoBuzzer m_buzzer;
 
     /** Encoders driver */
     Encoders m_encoders;
