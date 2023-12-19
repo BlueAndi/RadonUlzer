@@ -103,7 +103,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         1           /* Kd Denominator */
     };
 
-    /** target test shall be done with 1400 top speed in steps/s */
+    /** target test shall be done with 1000 top speed in steps/s */
     /** sim tests shall be done with 2400 */
     m_parSets[0] = {
         "PID Fast", /* Name */
