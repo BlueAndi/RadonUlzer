@@ -52,6 +52,8 @@
 #include <IMotors.h>
 #include <ILed.h>
 #include <IProximitySensors.h>
+#include <ISender.h>
+#include <ISettings.h>
 
 /******************************************************************************
  * Macros
@@ -163,6 +165,20 @@ public:
      * @return Proximity sensors driver
      */
     virtual IProximitySensors& getProximitySensors() = 0;
+
+    /**
+     * Get sender driver.
+     * 
+     * @return Sender driver
+     */
+    virtual ISender& getSender() = 0;
+
+    /**
+     * Get settings instance.
+     * 
+     * @return Settings
+     */
+    virtual ISettings& getSettings() = 0;
 
     /**
      * Process actators and sensors.
