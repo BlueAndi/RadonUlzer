@@ -1,0 +1,19 @@
+{
+    "name": "APPCalib",
+    "version": "0.1.0",
+    "description": "Calibration application",
+    "authors": [{
+        "name": "Andreas Merkle",
+        "email": "web@blue-andi.de",
+        "url": "https://github.com/BlueAndi",
+        "maintainer": true
+    }],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "Service"
+    }, {
+        "name": "HALInterfaces"
+    }],
+    "frameworks": "*",
+    "platforms": "*"
+}
