@@ -69,6 +69,12 @@
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
+/** Name of Channel to send Current Vehicle Data to. */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "CURR_DATA"
+
+/** DLC of Current Vehicle Data Channel */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -97,6 +103,17 @@ typedef struct _LineSensorData
 {
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
+
+/** Struct of the "Current Vehicle Data" channel payload. */
+typedef struct _VehicleData
+{
+    int32_t xPos;        /**< X position [mm]. */
+    int32_t yPos;        /**< Y position [mm]. */
+    int32_t orientation; /**< Orientation [mrad]. */
+    int16_t left;        /**< Left motor speed [steps/s]. */
+    int16_t right;       /**< Right motor speed [steps/s]. */
+    int16_t center;      /**< Center speed [steps/s]. */
+} __attribute__((packed)) VehicleData;
 
 /******************************************************************************
  * Functions
