@@ -68,9 +68,11 @@ public:
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendLineSensorsDataInterval(),
+        m_reportTimer(),
         m_smpServer(Serial),
         m_smpChannelIdRemoteCtrlRsp(0U),
         m_smpChannelIdLineSensors(0U),
+        m_smpChannelIdCurrentVehicleData(0U),
         m_lastRemoteControlRspId(RemoteCtrlState::RSP_ID_OK)
     {
     }
@@ -100,7 +102,10 @@ private:
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
 
     /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 10000U;
+
+    /** Current data reporting period in ms. */
+    static const uint32_t REPORTING_PERIOD = 50U;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -110,6 +115,9 @@ private:
 
     /** Timer used for sending data periodically. */
     SimpleTimer m_sendLineSensorsDataInterval;
+
+    /** Timer for reporting current data periodically. */
+    SimpleTimer m_reportTimer;
 
     /**
      * SerialMuxProt Server Instance
@@ -123,6 +131,9 @@ private:
 
     /** Channel id sending line sensors data. */
     uint8_t m_smpChannelIdLineSensors;
+
+    /** SerialMuxProt Channel id for sending the current vehicle data. */
+    uint8_t m_smpChannelIdCurrentVehicleData;
 
     /** Last remote control response id */
     RemoteCtrlState::RspId m_lastRemoteControlRspId;
@@ -140,6 +151,14 @@ private:
      * Send line sensors data via SerialMuxProt.
      */
     void sendLineSensorsData() const;
+
+    /**
+     * Report the current vehicle data.
+     * Report the current position and heading of the robot using the Odometry data.
+     * Report the current motor speeds of the robot using the Speedometer data.
+     * Sends data through the SerialMuxProtServer.
+     */
+    void reportVehicleData() const;
 };
 
 /******************************************************************************

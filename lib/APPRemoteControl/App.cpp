@@ -35,6 +35,7 @@
 #include "App.h"
 #include "StartupState.h"
 #include "RemoteCtrlState.h"
+#include "ErrorState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -81,7 +82,6 @@ void App::setup()
 
     m_systemStateMachine.setState(&StartupState::getInstance());
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-    m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
 
     /* Remote control commands/responses */
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
@@ -93,6 +93,22 @@ void App::setup()
 
     /* Providing line sensor data */
     m_smpChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
+
+    m_smpChannelIdCurrentVehicleData =
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+
+    if ((0U == m_smpChannelIdRemoteCtrlRsp) || (0U == m_smpChannelIdLineSensors) ||
+        (0U == m_smpChannelIdCurrentVehicleData))
+    {
+        /* Channels not successfully created. */
+        ErrorState::getInstance().setErrorMsg("SMP_CH=0");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+    }
+    else
+    {
+        m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
+        m_reportTimer.start(REPORTING_PERIOD);
+    }
 }
 
 void App::loop()
@@ -132,6 +148,14 @@ void App::loop()
         sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
+    }
+
+    if (true == m_reportTimer.isTimeout())
+    {
+        /* Send current data to SerialMuxProt Client */
+        reportVehicleData();
+
+        m_reportTimer.restart();
     }
 
     /* Send remote control command responses. */
@@ -179,7 +203,27 @@ void App::sendLineSensorsData() const
         }
     }
 
-    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, &payload, sizeof(payload));
+}
+
+void App::reportVehicleData() const
+{
+    Odometry&    odometry    = Odometry::getInstance();
+    Speedometer& speedometer = Speedometer::getInstance();
+    VehicleData  payload;
+    int32_t      xPos = 0;
+    int32_t      yPos = 0;
+
+    odometry.getPosition(xPos, yPos);
+    payload.xPos        = xPos;
+    payload.yPos        = yPos;
+    payload.orientation = odometry.getOrientation();
+    payload.left        = speedometer.getLinearSpeedLeft();
+    payload.right       = speedometer.getLinearSpeedRight();
+    payload.center      = speedometer.getLinearSpeedCenter();
+
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_smpChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
 }
 
 /******************************************************************************
