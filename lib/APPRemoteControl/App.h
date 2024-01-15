@@ -102,7 +102,7 @@ private:
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
 
     /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 10000;
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 10000U;
 
     /** Current data reporting period in ms. */
     static const uint32_t REPORTING_PERIOD = 50U;
