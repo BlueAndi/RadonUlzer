@@ -62,6 +62,7 @@
 
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -94,6 +95,10 @@ void App::setup()
     /* Providing line sensor data */
     m_smpChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
 
+    /* Receive initial vehicle data. */
+    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, App_initialDataChannelCallback);
+
+    /* Providing current vehicle data. */
     m_smpChannelIdCurrentVehicleData =
         m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
 
@@ -266,5 +271,27 @@ static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
         DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+    }
+}
+
+/**
+ * Receives initial data over SerialMuxProt channel. Triggers sending the max speed.
+ *
+ * @param[in] payload       Initial vehicle data. Position coordinates, orientation, and motor speeds
+ * @param[in] payloadSize   Size of VehicleData struct.
+ * @param[in] userData      User data
+ */
+static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    (void)userData;
+    if ((nullptr != payload) && (INITIAL_VEHICLE_DATA_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
+    {
+        const VehicleData* vehicleData = reinterpret_cast<const VehicleData*>(payload);
+        Odometry&          odometry    = Odometry::getInstance();
+
+        odometry.clearPosition();
+        odometry.clearMileage();
+        odometry.setPosition(vehicleData->xPos, vehicleData->yPos);
+        odometry.setOrientation(vehicleData->orientation);
     }
 }

@@ -75,6 +75,12 @@
 /** DLC of Current Vehicle Data Channel */
 #define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
 
+/** Name of Channel to send Initial Vehicle Data to. */
+#define INITIAL_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "INIT_DATA"
+
+/** DLC of Initial Vehicle Data Channel */
+#define INITIAL_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/

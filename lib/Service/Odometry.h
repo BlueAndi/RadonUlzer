@@ -127,6 +127,19 @@ public:
     }
 
     /**
+     * Set absolute position in coordinate system.
+     * The x- and y-axis unit is mm.
+     *
+     * @param[in] posX x-coordinate
+     * @param[in] posY y-coordinate
+     */
+    void setPosition(int32_t posX, int32_t posY)
+    {
+        m_posX = posX;
+        m_posY = posY;
+    }
+
+    /**
      * Set the orientation.
      * Use this to align the Y axis to north.
      *
