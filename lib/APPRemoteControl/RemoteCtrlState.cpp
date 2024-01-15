@@ -65,7 +65,16 @@
 
 void RemoteCtrlState::entry()
 {
-    DifferentialDrive::getInstance().enable();
+    IBoard&            board     = Board::getInstance();
+    ISettings&         settings  = board.getSettings();
+    int16_t            maxSpeed  = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Load the max. motor speed always from the settings, because
+     * it may happen that there was no calibration before.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+    diffDrive.enable();
 
     /* It is assumed that by entering this state, that a pending command will be complete. */
     finishCommand(RSP_ID_OK);
@@ -73,7 +82,7 @@ void RemoteCtrlState::entry()
 
 void RemoteCtrlState::process(StateMachine& sm)
 {
-    switch(m_cmdId)
+    switch (m_cmdId)
     {
     case CMD_ID_IDLE:
         /* Nothing to do. */
@@ -96,7 +105,7 @@ void RemoteCtrlState::process(StateMachine& sm)
          * controller executable.
          */
         Board::getInstance().init();
-        
+
         finishCommand(RSP_ID_OK);
         break;
 
@@ -125,5 +134,3 @@ void RemoteCtrlState::exit()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-
