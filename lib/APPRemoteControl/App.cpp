@@ -177,16 +177,17 @@ void App::loop()
 
 void App::sendRemoteControlResponses()
 {
-    RemoteCtrlState::RspId remoteControlRspId = RemoteCtrlState::getInstance().getCmdRsp();
+    CommandResponse remoteControlRspId = RemoteCtrlState::getInstance().getCmdRsp();
 
     /* Send only on change. */
-    if (remoteControlRspId != m_lastRemoteControlRspId)
+    if ((remoteControlRspId.responseId != m_lastRemoteControlRspId.responseId) ||
+        (remoteControlRspId.commandId != m_lastRemoteControlRspId.commandId))
     {
-        const CommandResponse* payload = reinterpret_cast<const CommandResponse*>(&remoteControlRspId);
-
-        (void)m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-
-        m_lastRemoteControlRspId = remoteControlRspId;
+        if (true == m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, reinterpret_cast<uint8_t*>(&remoteControlRspId),
+                                         sizeof(remoteControlRspId)))
+        {
+            m_lastRemoteControlRspId = remoteControlRspId;
+        }
     }
 }
 

@@ -73,7 +73,7 @@ public:
         m_smpChannelIdRemoteCtrlRsp(0U),
         m_smpChannelIdLineSensors(0U),
         m_smpChannelIdCurrentVehicleData(0U),
-        m_lastRemoteControlRspId(RemoteCtrlState::RSP_ID_OK)
+        m_lastRemoteControlRspId()
     {
     }
 
@@ -136,7 +136,7 @@ private:
     uint8_t m_smpChannelIdCurrentVehicleData;
 
     /** Last remote control response id */
-    RemoteCtrlState::RspId m_lastRemoteControlRspId;
+    CommandResponse m_lastRemoteControlRspId;
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */

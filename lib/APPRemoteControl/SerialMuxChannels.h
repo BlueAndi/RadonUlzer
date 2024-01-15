@@ -94,7 +94,9 @@ typedef struct _Command
 /** Struct of the "Command Response" channel payload. */
 typedef struct _CommandResponse
 {
-    uint8_t response; /**< Response to the command */
+    uint8_t commandId;  /**< Command ID */
+    uint8_t responseId; /**< Response to the command */
+    int16_t value;      /**< Value of the response */
 } __attribute__((packed)) CommandResponse;
 
 /** Struct of the "Speed" channel payload. */
