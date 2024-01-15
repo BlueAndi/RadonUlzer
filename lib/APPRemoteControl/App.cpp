@@ -179,7 +179,7 @@ void App::sendLineSensorsData() const
         }
     }
 
-    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, &payload, sizeof(payload));
 }
 
 /******************************************************************************
