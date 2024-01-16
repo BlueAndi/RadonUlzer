@@ -109,6 +109,11 @@ void RemoteCtrlState::process(StateMachine& sm)
         finishCommand(RSP_ID_OK);
         break;
 
+    case CMD_ID_GET_MAX_SPEED:
+        m_cmdRsp.maxMotorSpeed = DifferentialDrive::getInstance().getMaxMotorSpeed();
+        finishCommand(RSP_ID_OK);
+        break;
+
     default:
         break;
     }
