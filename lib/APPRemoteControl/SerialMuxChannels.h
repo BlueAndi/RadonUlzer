@@ -96,6 +96,8 @@ typedef struct _CommandResponse
 {
     uint8_t commandId;  /**< Command ID */
     uint8_t responseId; /**< Response to the command */
+
+    /** Response Payload. */
     union
     {
         int16_t maxMotorSpeed; /**< Max speed. */
