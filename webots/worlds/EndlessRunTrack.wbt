@@ -6,6 +6,8 @@ EXTERNPROTO "../protos/LineFollowerTrack.proto"
 IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
 EXTERNPROTO "../protos/TrafficLightDCS.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/DamascusSteel.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/appearances/protos/ScrewThread.proto"
 
 WorldInfo {
   info [
@@ -24,8 +26,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.3529848832303765 -0.15535239855312968 0.9226414820907562 3.9130472324021888
-  position 1.5874142219639298 2.233816386947119 2.7764558208996495
+  orientation -0.3667201560805988 -0.05246441524088616 0.9288508019362707 3.405822406127589
+  position 2.972698963078179 0.28628599447711456 3.0410170319093393
 }
 TexturedBackground {
 }
@@ -34,7 +36,13 @@ TexturedBackgroundLight {
 LineFollowerTrack {
 }
 TrafficLightDCS {
+  translation -0.52 -0.69 -0.35
   controller "<extern>"
+}
+TrafficLightDCS {
+  translation -0.69 -0.56 -0.25
+  name "TrafficLightDCS2"
+  controller "<none>"
 }
 Supervisor {
   name "Supervisor"
@@ -42,7 +50,95 @@ Supervisor {
   supervisor TRUE
 }
 Zumo32U4 {
-  translation -1.22537 -0.525861 0.02
+  translation -0.475823 -1.04849 0.02
   rotation 0 0 1 1.5708
   name "Zumo"
+}
+Robot {
+  translation 0 1.47 0.22
+  children [
+    Group {
+      children [
+        Pose {
+          translation 0 0.03 0.2
+          children [
+            Shape {
+              appearance DamascusSteel {
+              }
+              geometry Box {
+                size 0.06 0.06 0.27
+              }
+            }
+          ]
+        }
+        LED {
+          translation 0 0 0.1
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "GreenLight"
+          color [
+            1 0.7 0.1
+          ]
+          gradual TRUE
+        }
+        LED {
+          translation 0 0 0.2
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "OrangeLight"
+          color [
+            1 0.7 0.1
+          ]
+          gradual TRUE
+        }
+        LED {
+          translation 0 0 0.3
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "RedLight"
+          gradual TRUE
+        }
+      ]
+    }
+    Pose {
+      translation 0 0.03 0
+      children [
+        Shape {
+          appearance ScrewThread {
+          }
+          geometry Cylinder {
+            height 0.4
+            radius 0.02
+          }
+        }
+      ]
+    }
+  ]
 }

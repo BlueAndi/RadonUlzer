@@ -1,0 +1,46 @@
+@startuml
+
+title System States
+
+state StartupState: /entry Initialize HAL.
+state StartupState: /entry Initialize serial comunication.
+state StartupState: /do Wait for pushbutton A is triggered.
+
+state MotorSpeedCalibrationState: /entry Show operator info on LCD.
+state MotorSpeedCalibrationState: /do Perform calibration.
+
+state LineSensorsCalibrationState: /entry Show operator info on LCD.
+state LineSensorsCalibrationState: /do Perform calibration.
+
+state ErrorState: /entry Show error info on LCD.
+state ErrorState: /do Wait for pushbutton A is triggered.
+
+state ReadyState: /entry Show operator info on LCD.
+state ReadyState: /do Default parameter set [0] is picked.
+state ReadyState: /do Wait for pushbutton A is triggered.
+state ReadyState: /exit Wait after button A is pressed.
+
+state DrivingState: /entry Start callback timer.
+state DrivingState: /entry Enable red LED.
+state DrivingState: /do Perform driving.
+state DrivingState: /do Calculate odometry.
+state DrivingState: /do Send odometry information.
+state DrivingState: /exit Disable red LED.
+state DrivingState: /exit Stop callback timer.
+
+state ColorState: /entry Enable green LED.
+state ColorState: /do process color ID.
+state ColorState: /exit Disable green LED.
+
+[*] --> StartupState: Power up
+StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
+LineSensorsCalibrationState --> ReadyState: [Calibration finished]
+LineSensorsCalibrationState --> ErrorState: [Calibration failed]
+ReadyState --> DrivingState: [Pushbutton A triggered]
+DrivingState --> ColorState: [Callback timer is done]
+ColorState --> DrivingState: [Green/Yellow light]
+ColorState --> ColorState: [Red light]
+ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+
+@enduml
