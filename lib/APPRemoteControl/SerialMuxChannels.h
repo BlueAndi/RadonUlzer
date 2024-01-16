@@ -98,7 +98,7 @@ typedef struct _CommandResponse
     uint8_t responseId; /**< Response to the command */
     union
     {
-        int16_t maxMotorSpeed; /**< Value of the response */
+        int16_t maxMotorSpeed; /**< Max speed. */
     };
 } __attribute__((packed)) CommandResponse;
 
