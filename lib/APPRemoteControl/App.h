@@ -73,7 +73,7 @@ public:
         m_smpChannelIdRemoteCtrlRsp(0U),
         m_smpChannelIdLineSensors(0U),
         m_smpChannelIdCurrentVehicleData(0U),
-        m_lastRemoteControlRspId()
+        m_lastRemoteControlRspId{RemoteCtrlState::CMD_ID_IDLE, RemoteCtrlState::RSP_ID_OK, 0}
     {
     }
 

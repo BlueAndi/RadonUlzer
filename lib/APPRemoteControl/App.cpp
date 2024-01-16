@@ -276,7 +276,7 @@ static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t
 }
 
 /**
- * Receives initial data over SerialMuxProt channel. Triggers sending the max speed.
+ * Receives initial data over SerialMuxProt channel.
  *
  * @param[in] payload       Initial vehicle data. Position coordinates, orientation, and motor speeds
  * @param[in] payloadSize   Size of VehicleData struct.
