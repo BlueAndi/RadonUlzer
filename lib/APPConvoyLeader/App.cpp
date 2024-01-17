@@ -36,6 +36,7 @@
 #include "StartupState.h"
 #include "ErrorState.h"
 #include "RemoteCtrlState.h"
+#include "DrivingState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -235,7 +236,8 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+        /* Left speed equals right speed for the leader top speed. */
+        DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
     }
 }
 

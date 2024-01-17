@@ -101,8 +101,9 @@ typedef struct _CommandResponse
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;  /**< Left motor speed [steps/s] */
-    int16_t right; /**< Right motor speed [steps/s] */
+    int16_t left;   /**< Left motor speed [steps/s] */
+    int16_t right;  /**< Right motor speed [steps/s] */
+    int16_t center; /**< Center motor speed [steps/s] */
 } __attribute__((packed)) SpeedData;
 
 /** Struct of the "Current Vehicle Data" channel payload. */
