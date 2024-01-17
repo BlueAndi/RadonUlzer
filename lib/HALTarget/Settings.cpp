@@ -51,44 +51,51 @@
  * Prototypes
  *****************************************************************************/
 
-template<typename T>
-static T readData(const void* addr);
-template<typename T>
-static void writeData(const void* addr, T data);
-
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
 
 /**
- * Magic pattern address in EEPROM.
+ * The magic pattern which is used to determine whether the EEPROM
+ * is initialized or not.
  */
-static const void* MAGIC_PATTERN_ADDR = static_cast<const void*>(0x0000);
+static const uint32_t MAGIC_PATTERN = 0xC0FFEE;
 
 /**
- * Magic pattern size in byte.
+ * Data version is used to detect whether the data in the EEPROM is
+ * compatible with the current settings version.
+ *
+ * Increase the version number by 1 for every change!
  */
-static const size_t MAGIC_PATTERN_SIZE = sizeof(uint32_t);
+static const uint8_t DATA_VERSION = 1U;
 
 /**
- * Data version address in EEPROM.
+ * Max. speed default values in steps/s.
  */
-static const void* DATA_VERSION_ADDR = &static_cast<const uint8_t*>(MAGIC_PATTERN_ADDR)[MAGIC_PATTERN_SIZE];
+static const int16_t DEFAULT_MAX_SPEED = 0;
+
+/* ---------- Attention! ----------
+ * Keep the following order of variables in the EEPROM.
+ * Add new values at the tail.
+ * Increase the data version (DATA_VERSION) for every change!
+ */
 
 /**
- * Data version size in byte.
+ * Magic pattern in EEPROM.
  */
-static const size_t DATA_VERSION_SIZE = sizeof(uint8_t);
+static uint32_t EEMEM gMagicPattern = MAGIC_PATTERN;
 
 /**
- * Max. speed address in EEPROM.
+ * Data version in EEPROM.
  */
-static const void* MAX_SPEED_ADDR = &static_cast<const uint8_t*>(DATA_VERSION_ADDR)[DATA_VERSION_SIZE];
+static uint8_t EEMEM gDataVersion = DATA_VERSION;
 
 /**
- * Max. speed size in byte.
+ * Max. speed in EEPROM.
  */
-static const size_t MAX_SPEED_SIZE = sizeof(int16_t);
+static int16_t EEMEM gMaxSpeed = DEFAULT_MAX_SPEED;
+
+/* ---------- Tail of EEPROM data. ---------- */
 
 /******************************************************************************
  * Public Methods
@@ -96,28 +103,34 @@ static const size_t MAX_SPEED_SIZE = sizeof(int16_t);
 
 void Settings::init()
 {
-    uint32_t magicPattern = readData<uint32_t>(MAGIC_PATTERN_ADDR);
-    uint8_t  dataVersion  = readData<uint8_t>(DATA_VERSION_ADDR);
+    uint32_t magicPattern = getMagicPattern();
+    uint8_t  dataVersion  = getDataVersion();
 
     if ((MAGIC_PATTERN != magicPattern) || (DATA_VERSION != dataVersion))
     {
         /* Write default values. */
-        writeData<int16_t>(MAX_SPEED_ADDR, DEFAULT_MAX_SPEED);
+        setMaxSpeed(DEFAULT_MAX_SPEED);
 
         /* Mark data in EEPROM as valid. */
-        writeData<uint32_t>(MAGIC_PATTERN_ADDR, MAGIC_PATTERN);
-        writeData<uint8_t>(DATA_VERSION_ADDR, DATA_VERSION_SIZE);
+        setMagicPattern(MAGIC_PATTERN);
+        setDataVersion(DATA_VERSION);
     }
 }
 
 int16_t Settings::getMaxSpeed() const
 {
-    return readData<int16_t>(MAX_SPEED_ADDR);
+    void*     vAddr = &gMaxSpeed; /* Avoid reinterpret_cast<>() */
+    uint16_t* addr  = static_cast<uint16_t*>(vAddr);
+
+    return static_cast<int16_t>(eeprom_read_word(addr));
 }
 
 void Settings::setMaxSpeed(int16_t maxSpeed)
 {
-    writeData<int16_t>(MAX_SPEED_ADDR, maxSpeed);
+    void*     vAddr = &gMaxSpeed; /* Avoid reinterpret_cast<>() */
+    uint16_t* addr  = static_cast<uint16_t*>(vAddr);
+
+    eeprom_update_word(addr, static_cast<uint16_t>(maxSpeed));
 }
 
 /******************************************************************************
@@ -128,6 +141,26 @@ void Settings::setMaxSpeed(int16_t maxSpeed)
  * Private Methods
  *****************************************************************************/
 
+uint32_t Settings::getMagicPattern() const
+{
+    return eeprom_read_dword(&gMagicPattern);
+}
+
+void Settings::setMagicPattern(uint32_t value) const
+{
+    eeprom_update_dword(&gMagicPattern, value);
+}
+
+uint8_t Settings::getDataVersion() const
+{
+    return eeprom_read_byte(&gDataVersion);
+}
+
+void Settings::setDataVersion(uint8_t value) const
+{
+    eeprom_update_byte(&gDataVersion, value);
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/
@@ -135,36 +168,3 @@ void Settings::setMaxSpeed(int16_t maxSpeed)
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-/**
- * Read data from EEPROM.
- * 
- * @tparam T    Data type
- * 
- * @param[in]   addr    Address in the EEPROM.
- * 
- * @return Data
- */
-template<typename T>
-static T readData(const void* addr)
-{
-    T value;
-
-    eeprom_read_block(&value, addr, sizeof(T));
-
-    return value;
-}
-
-/**
- * Read data from EEPROM.
- * 
- * @tparam T    Data type
- * 
- * @param[in]   addr    Address in the EEPROM.
- * @param[in]   data    Data to write.
- */
-template<typename T>
-static void writeData(const void* addr, T data)
-{
-    eeprom_write_block(addr, &data, sizeof(T));
-}

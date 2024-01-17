@@ -94,24 +94,34 @@ public:
     void setMaxSpeed(int16_t maxSpeed) final;
 
 private:
-    /**
-     * The magic pattern which is used to determine whether the EEPROM
-     * is initialized or not.
-     */
-    static const uint32_t MAGIC_PATTERN = 0xC0FFEE;
 
     /**
-     * Data version is used to detect whether the data in the EEPROM is
-     * compatible with the current settings version.
+     * Get magic pattern.
      *
-     * Increase the version number by 1 for every change!
+     * @return Magic pattern
      */
-    static const uint8_t DATA_VERSION = 1U;
+    uint32_t getMagicPattern() const;
 
     /**
-     * Max. speed default values in steps/s.
+     * Set magic pattern.
+     *
+     * @param[in] value Magic pattern
      */
-    static const int16_t DEFAULT_MAX_SPEED = 0;
+    void setMagicPattern(uint32_t value) const;
+
+    /**
+     * Get data version.
+     *
+     * @return Data version
+     */
+    uint8_t getDataVersion() const;
+
+    /**
+     * Set data version.
+     *
+     * @param[in] value Data version
+     */
+    void setDataVersion(uint8_t value) const;
 };
 
 /******************************************************************************
