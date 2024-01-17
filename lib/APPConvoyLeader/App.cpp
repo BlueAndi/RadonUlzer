@@ -235,7 +235,6 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        /* Left speed equals right speed for the leader top speed. */
         DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
     }
 }
