@@ -100,6 +100,9 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /** SerialMuxProt Channel id for sending remote control command responses. */
+    uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
+
     /** SerialMuxProt Channel id for sending the current vehicle data. */
     uint8_t m_serialMuxProtChannelIdCurrentVehicleData;
 
@@ -119,6 +122,9 @@ private:
      */
     SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
 
+    /** Last remote control response id */
+    CommandResponse m_lastRemoteControlRspId;
+
     /**
      * Report the current vehicle data.
      * Report the current position and heading of the robot using the Odometry data.
@@ -126,6 +132,11 @@ private:
      * Sends data through the SerialMuxProtServer.
      */
     void reportVehicleData();
+
+    /**
+     * Send remote control command responses on change.
+     */
+    void sendRemoteControlResponses();
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */

@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include "App.h"
 #include "StartupState.h"
+#include "RemoteCtrlState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -57,6 +58,7 @@
  * Prototypes
  *****************************************************************************/
 
+static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
@@ -77,8 +79,11 @@ void App::setup()
 
     /* Setup SerialMuxProt Channels. */
     m_serialMuxProtChannelIdCurrentVehicleData =
-        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
+    m_serialMuxProtChannelIdRemoteCtrlRsp =
+        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
 
     /* Channel sucesfully created? */
     if ((0U != m_serialMuxProtChannelIdCurrentVehicleData))
@@ -120,6 +125,9 @@ void App::loop()
     m_smpServer.process(millis());
 
     m_systemStateMachine.process();
+
+    /* Send remote control command responses. */
+    sendRemoteControlResponses();
 }
 
 /******************************************************************************
@@ -150,6 +158,22 @@ void App::reportVehicleData()
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
 }
 
+void App::sendRemoteControlResponses()
+{
+    CommandResponse remoteControlRspId = RemoteCtrlState::getInstance().getCmdRsp();
+
+    /* Send only on change. */
+    if ((remoteControlRspId.responseId != m_lastRemoteControlRspId.responseId) ||
+        (remoteControlRspId.commandId != m_lastRemoteControlRspId.commandId))
+    {
+        if (true == m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &remoteControlRspId,
+                                         sizeof(remoteControlRspId)))
+        {
+            m_lastRemoteControlRspId = remoteControlRspId;
+        }
+    }
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/
@@ -157,6 +181,24 @@ void App::reportVehicleData()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
+/**
+ * Receives remote control commands over SerialMuxProt channel.
+ *
+ * @param[in] payload       Command id
+ * @param[in] payloadSize   Size of command id
+ * @param[in] userData      User data
+ */
+static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    (void)userData;
+    if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize))
+    {
+        RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
+
+        RemoteCtrlState::getInstance().execute(cmdId);
+    }
+}
 
 /**
  * Receives motor speed setpoints over SerialMuxProt channel.

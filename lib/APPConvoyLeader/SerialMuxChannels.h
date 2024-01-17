@@ -25,19 +25,12 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Channel structure definition for the SerialMuxProt.
- * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
- *
- * @addtogroup Application
- *
- * @{
+ *  @brief  Channel structure definition for the SerialMuxProt.
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
-#ifndef SERIAL_MUX_CHANNELS_H
-#define SERIAL_MUX_CHANNELS_H
 
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
+#ifndef SERIAL_MUX_CHANNELS_H_
+#define SERIAL_MUX_CHANNELS_H_
 
 /******************************************************************************
  * Includes
@@ -52,11 +45,17 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of Channel to send Current Vehicle Data to. */
-#define CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "CURR_DATA"
+/** Name of Channel to send Commands to. */
+#define COMMAND_CHANNEL_NAME "CMD"
 
-/** DLC of Current Vehicle Data Channel */
-#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+/** DLC of Command Channel. */
+#define COMMAND_CHANNEL_DLC (sizeof(Command))
+
+/** Name of Channel to receive Command Responses from. */
+#define COMMAND_RESPONSE_CHANNEL_NAME "CMD_RSP"
+
+/** DLC of Command Response Channel. */
+#define COMMAND_RESPONSE_CHANNEL_DLC (sizeof(CommandResponse))
 
 /** Name of Channel to send Motor Speed Setpoints to. */
 #define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
@@ -64,9 +63,47 @@
 /** DLC of Speedometer Channel */
 #define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
 
+/** Name of Channel to send Current Vehicle Data to. */
+#define CURRENT_VEHICLE_DATA_CHANNEL_NAME "CURR_DATA"
+
+/** DLC of Current Vehicle Data Channel */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
+/** Name of Channel to send Initial Vehicle Data to. */
+#define INITIAL_VEHICLE_DATA_CHANNEL_NAME "INIT_DATA"
+
+/** DLC of Initial Vehicle Data Channel */
+#define INITIAL_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
+
+/** Struct of the "Command" channel payload. */
+typedef struct _Command
+{
+    uint8_t commandId; /**< Command ID */
+} __attribute__((packed)) Command;
+
+/** Struct of the "Command Response" channel payload. */
+typedef struct _CommandResponse
+{
+    uint8_t commandId;  /**< Command ID */
+    uint8_t responseId; /**< Response to the command */
+
+    /** Response Payload. */
+    union
+    {
+        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
+    };
+} __attribute__((packed)) CommandResponse;
+
+/** Struct of the "Speed" channel payload. */
+typedef struct _SpeedData
+{
+    int16_t left;  /**< Left motor speed [steps/s] */
+    int16_t right; /**< Right motor speed [steps/s] */
+} __attribute__((packed)) SpeedData;
 
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
@@ -79,16 +116,8 @@ typedef struct _VehicleData
     int16_t center;      /**< Center speed [steps/s]. */
 } __attribute__((packed)) VehicleData;
 
-/** Struct of the "Speed" channel payload. */
-typedef struct _SpeedData
-{
-    int16_t left;  /**< Left motor speed [steps/s]. */
-    int16_t right; /**< Right motor speed [steps/s]. */
-} __attribute__((packed)) SpeedData;
-
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* SERIAL_MUX_CHANNELS_H */
-/** @} */
+#endif /* SERIAL_MUX_CHANNELS_H_ */
