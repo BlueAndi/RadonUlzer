@@ -70,13 +70,13 @@
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
 /** Name of Channel to send Current Vehicle Data to. */
-#define CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "CURR_DATA"
+#define CURRENT_VEHICLE_DATA_CHANNEL_NAME "CURR_DATA"
 
 /** DLC of Current Vehicle Data Channel */
 #define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
 
 /** Name of Channel to send Initial Vehicle Data to. */
-#define INITIAL_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "INIT_DATA"
+#define INITIAL_VEHICLE_DATA_CHANNEL_NAME "INIT_DATA"
 
 /** DLC of Initial Vehicle Data Channel */
 #define INITIAL_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
@@ -100,7 +100,7 @@ typedef struct _CommandResponse
     /** Response Payload. */
     union
     {
-        int16_t maxMotorSpeed; /**< Max speed. */
+        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
     };
 } __attribute__((packed)) CommandResponse;
 

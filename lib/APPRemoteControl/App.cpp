@@ -96,11 +96,11 @@ void App::setup()
     m_smpChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
 
     /* Receive initial vehicle data. */
-    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, App_initialDataChannelCallback);
+    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_NAME, App_initialDataChannelCallback);
 
     /* Providing current vehicle data. */
     m_smpChannelIdCurrentVehicleData =
-        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
 
     if ((0U == m_smpChannelIdRemoteCtrlRsp) || (0U == m_smpChannelIdLineSensors) ||
         (0U == m_smpChannelIdCurrentVehicleData))
