@@ -65,11 +65,13 @@ public:
      * Construct the convoy leader application.
      */
     App() :
+        m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
         m_serialMuxProtChannelIdCurrentVehicleData(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_reportTimer(),
-        m_smpServer(Serial)
+        m_smpServer(Serial),
+        m_lastRemoteControlRspId{RemoteCtrlState::CMD_ID_IDLE, RemoteCtrlState::RSP_ID_OK, 0}
     {
     }
 
