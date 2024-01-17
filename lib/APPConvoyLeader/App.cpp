@@ -67,6 +67,9 @@ static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t
  * Local Variables
  *****************************************************************************/
 
+/** Only in remote control state its possible to control the robot. */
+static bool gIsRemoteCtrlActive = false;
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -118,6 +121,16 @@ void App::loop()
         reportVehicleData();
 
         m_reportTimer.restart();
+    }
+
+    /* Determine whether the robot can be remote controlled or not. */
+    if (&RemoteCtrlState::getInstance() == m_systemStateMachine.getState())
+    {
+        gIsRemoteCtrlActive = true;
+    }
+    else
+    {
+        gIsRemoteCtrlActive = false;
     }
 
     m_smpServer.process(millis());
@@ -214,7 +227,7 @@ bool App::setupSerialMuxProt()
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize))
+    if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize) && (true == gIsRemoteCtrlActive))
     {
         RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
 
