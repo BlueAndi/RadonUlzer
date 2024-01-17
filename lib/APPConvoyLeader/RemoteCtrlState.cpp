@@ -35,6 +35,7 @@
 #include "RemoteCtrlState.h"
 #include "LineSensorsCalibrationState.h"
 #include "DrivingState.h"
+#include "ParameterSets.h"
 #include <Board.h>
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
@@ -116,7 +117,7 @@ void RemoteCtrlState::process(StateMachine& sm)
         break;
 
     case CMD_ID_GET_MAX_SPEED:
-        m_cmdRsp.maxMotorSpeed = DifferentialDrive::getInstance().getMaxMotorSpeed();
+        m_cmdRsp.maxMotorSpeed = ParameterSets::getInstance().getParameterSet().topSpeed;
         finishCommand(RSP_ID_OK);
         break;
 
