@@ -47,6 +47,7 @@
 #include <SimpleTimer.h>
 #include <SerialMuxProtServer.hpp>
 #include "SerialMuxChannels.h"
+#include "RemoteCtrlState.h"
 #include <Arduino.h>
 
 /******************************************************************************

@@ -35,7 +35,6 @@
 #include "App.h"
 #include "StartupState.h"
 #include "ErrorState.h"
-#include "RemoteCtrlState.h"
 #include "DrivingState.h"
 #include <Board.h>
 #include <Speedometer.h>
