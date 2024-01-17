@@ -89,6 +89,14 @@ public:
      */
     void exit() final;
 
+    /**
+     * Notify the state, that the initial data set was received.
+     */
+    void notifyInitialDataIsSet()
+    {
+        m_initialDataSet = true;
+    }
+
 protected:
 private:
     /**
@@ -97,9 +105,14 @@ private:
     static const uint32_t TEAM_NAME_DURATION = 2000;
 
     /**
+     * Flag to indicate, that the initial data was set.
+     */
+    bool m_initialDataSet;
+
+    /**
      * Default constructor.
      */
-    StartupState()
+    StartupState() : m_initialDataSet(false)
     {
     }
 

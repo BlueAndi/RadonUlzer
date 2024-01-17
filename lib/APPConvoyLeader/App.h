@@ -138,6 +138,13 @@ private:
      */
     void sendRemoteControlResponses();
 
+    /**
+     * Setup the SerialMuxProt channels.
+     *
+     * @return If successful returns true, otherwise false.
+     */
+    bool setupSerialMuxProt();
+
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
     App& operator=(const App& app); /**< Assignment of an instance. */

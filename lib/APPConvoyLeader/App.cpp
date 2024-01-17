@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include "App.h"
 #include "StartupState.h"
+#include "ErrorState.h"
 #include "RemoteCtrlState.h"
 #include <Board.h>
 #include <Speedometer.h>
@@ -60,6 +61,7 @@
 
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -234,5 +236,29 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
         DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+    }
+}
+
+/**
+ * Receives initial data over SerialMuxProt channel.
+ *
+ * @param[in] payload       Initial vehicle data. Position coordinates, orientation, and motor speeds
+ * @param[in] payloadSize   Size of VehicleData struct.
+ * @param[in] userData      User data
+ */
+static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    (void)userData;
+    if ((nullptr != payload) && (INITIAL_VEHICLE_DATA_CHANNEL_DLC == payloadSize))
+    {
+        const VehicleData* vehicleData = reinterpret_cast<const VehicleData*>(payload);
+        Odometry&          odometry    = Odometry::getInstance();
+
+        odometry.clearPosition();
+        odometry.clearMileage();
+        odometry.setPosition(vehicleData->xPos, vehicleData->yPos);
+        odometry.setOrientation(vehicleData->orientation);
+
+        StartupState::getInstance().notifyInitialDataIsSet();
     }
 }
