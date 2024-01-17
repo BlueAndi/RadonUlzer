@@ -38,7 +38,7 @@
 #include <Odometry.h>
 #include <StateMachine.h>
 #include <Util.h>
-#include "ReadyState.h"
+#include "RemoteCtrlState.h"
 #include "ErrorState.h"
 
 /******************************************************************************
@@ -74,7 +74,7 @@ void LineSensorsCalibrationState::entry()
     display.clear();
     display.print("Calib");
     display.gotoXY(0, 1);
-    display.print("LineS");
+    display.print("Lines");
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
@@ -196,7 +196,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
     }
     else
     {
-        sm.setState(&ReadyState::getInstance());
+        sm.setState(&RemoteCtrlState::getInstance());
     }
 }
 

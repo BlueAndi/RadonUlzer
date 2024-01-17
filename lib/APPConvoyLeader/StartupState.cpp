@@ -33,10 +33,11 @@
  * Includes
  *****************************************************************************/
 #include "StartupState.h"
+#include "ErrorState.h"
+#include "LineSensorsCalibrationState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
-#include "Sound.h"
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -69,26 +70,37 @@ void StartupState::entry()
     /* Initialize HAL */
     Board::getInstance().init();
 
-    /* Surprise the audience. */
-    Sound::playMelody(Sound::MELODY_STAR_WARS);
-
     /* Show team id / team name */
     display.clear();
     display.print(TEAM_NAME_LINE_1);
     display.gotoXY(0, 1);
     display.print(TEAM_NAME_LINE_2);
     delay(TEAM_NAME_DURATION);
-
-    /* Show operator info on LCD */
-    display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
 }
 
 void StartupState::process(StateMachine& sm)
 {
-    sm.setState(&MotorSpeedCalibrationState::getInstance());
+    IBoard&            board     = Board::getInstance();
+    ISettings&         settings  = board.getSettings();
+    int16_t            maxSpeed  = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Load the max. motor speed always from the settings, because
+     * it may happen that there was no calibration before.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+    diffDrive.enable();
+
+    if (0 == maxSpeed)
+    {
+        /* Missing calibration data. Run AppCalib first. */
+        ErrorState::getInstance().setErrorMsg("MCAL=0");
+        sm.setState(&ErrorState::getInstance());
+    }
+    else
+    {
+        sm.setState(&LineSensorsCalibrationState::getInstance());
+    }
 }
 
 void StartupState::exit()

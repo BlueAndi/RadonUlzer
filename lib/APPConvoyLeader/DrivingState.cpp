@@ -38,7 +38,7 @@
 #include <DifferentialDrive.h>
 #include <StateMachine.h>
 #include <Odometry.h>
-#include "ReadyState.h"
+#include "RemoteCtrlState.h"
 #include "ParameterSets.h"
 
 /******************************************************************************
@@ -70,6 +70,8 @@ void DrivingState::entry()
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
+
+    diffDrive.enable();
 
     m_observationTimer.start(OBSERVATION_DURATION);
     m_pidProcessTime.start(0); /* Immediate */
@@ -111,14 +113,14 @@ void DrivingState::process(StateMachine& sm)
 
     case TRACK_STATUS_FINISHED:
         /* Change to ready state. */
-        sm.setState(&ReadyState::getInstance());
+        sm.setState(&RemoteCtrlState::getInstance());
         break;
 
     default:
         /* Fatal error */
         diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
-        sm.setState(&ReadyState::getInstance());
+        sm.setState(&RemoteCtrlState::getInstance());
         break;
     }
 
@@ -197,9 +199,6 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
 
                 Sound::playBeep();
                 m_trackStatus = TRACK_STATUS_FINISHED;
-
-                /* Calculate lap time and show it*/
-                ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
             }
             else
             {
