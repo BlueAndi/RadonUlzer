@@ -74,21 +74,17 @@ void App::setup()
     Serial.begin(SERIAL_BAUDRATE);
     Logging::disable();
     Board::getInstance().init();
-    m_systemStateMachine.setState(&StartupState::getInstance());
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-    /* Setup SerialMuxProt Channels. */
-    m_serialMuxProtChannelIdCurrentVehicleData =
-        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
-    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
-    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
-    m_serialMuxProtChannelIdRemoteCtrlRsp =
-        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
-
-    /* Channel sucesfully created? */
-    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData))
+    if (false == setupSerialMuxProt())
+    {
+        ErrorState::getInstance().setErrorMsg("SMP=0");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+    }
+    else
     {
         m_reportTimer.start(REPORTING_PERIOD);
+        m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        m_systemStateMachine.setState(&StartupState::getInstance());
     }
 }
 
@@ -172,6 +168,30 @@ void App::sendRemoteControlResponses()
             m_lastRemoteControlRspId = remoteControlRspId;
         }
     }
+}
+
+bool App::setupSerialMuxProt()
+{
+    bool isSuccessful = false;
+
+    /* Channel subscription. */
+    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
+    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_NAME, App_initialDataChannelCallback);
+
+    /* Channel creation. */
+    m_serialMuxProtChannelIdRemoteCtrlRsp =
+        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
+    m_serialMuxProtChannelIdCurrentVehicleData =
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+
+    /* Channels succesfully created? */
+    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp))
+    {
+        isSuccessful = true;
+    }
+
+    return isSuccessful;
 }
 
 /******************************************************************************
