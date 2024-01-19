@@ -61,7 +61,6 @@
 
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
-static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -127,6 +126,7 @@ void App::loop()
     if (&RemoteCtrlState::getInstance() == m_systemStateMachine.getState())
     {
         gIsRemoteCtrlActive = true;
+        Board::getInstance().getYellowLed().enable(true);
     }
     else
     {
@@ -192,7 +192,6 @@ bool App::setupSerialMuxProt()
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
-    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_NAME, App_initialDataChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -227,7 +226,7 @@ bool App::setupSerialMuxProt()
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize) && (true == gIsRemoteCtrlActive))
+    if ((nullptr != payload) && (COMMAND_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
     {
         RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
 
@@ -249,29 +248,5 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
         DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
-    }
-}
-
-/**
- * Receives initial data over SerialMuxProt channel.
- *
- * @param[in] payload       Initial vehicle data. Position coordinates, orientation, and motor speeds
- * @param[in] payloadSize   Size of VehicleData struct.
- * @param[in] userData      User data
- */
-static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
-{
-    (void)userData;
-    if ((nullptr != payload) && (INITIAL_VEHICLE_DATA_CHANNEL_DLC == payloadSize))
-    {
-        const VehicleData* vehicleData = reinterpret_cast<const VehicleData*>(payload);
-        Odometry&          odometry    = Odometry::getInstance();
-
-        odometry.clearPosition();
-        odometry.clearMileage();
-        odometry.setPosition(vehicleData->xPos, vehicleData->yPos);
-        odometry.setOrientation(vehicleData->orientation);
-
-        StartupState::getInstance().notifyInitialDataIsSet();
     }
 }
