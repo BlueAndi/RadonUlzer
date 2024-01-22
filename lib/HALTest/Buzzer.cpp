@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,10 @@ void Buzzer::playMelody(const char* sequence)
 }
 
 void Buzzer::playMelodyPGM(const char* sequence)
+{
+}
+
+void Buzzer::process()
 {
 }
 

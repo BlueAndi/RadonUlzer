@@ -1,0 +1,105 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/GridTrack.proto"
+IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+EXTERNPROTO "../protos/Marker.proto"
+
+WorldInfo {
+  info [
+    "Test track for heading calculation."
+  ]
+  title "Heading Calculation Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "track material"
+      coulombFriction [
+        500
+      ]
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.5773502691896258 0.5773502691896258 0.5773502691896258 2.0944
+  position 0.10671907546426583 -0.02579754805239853 5.812574451661914
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+GridTrack {
+}
+DEF ROBOT Zumo32U4 {
+  translation 0 0 0.0139993
+  rotation 6.60216e-09 2.69589e-07 -1 -1.5286253071795866
+  name "zumo_0"
+}
+Supervisor {
+  name "Supervisor"
+  controller "Supervisor"
+  supervisor TRUE
+}
+Marker {
+  translation 0 0 0
+  name "marker_0"
+}
+Marker {
+  translation -0.3 0.6 0
+  name "marker_1"
+}
+Marker {
+  translation -0.6 0.6 0
+  name "marker_2"
+}
+Marker {
+  translation -0.9 0.3 0
+  name "marker_3"
+}
+Marker {
+  translation -0.9 0 0
+  name "marker_4"
+}
+Marker {
+  translation -0.9 -0.3 0
+  name "marker_5"
+}
+Marker {
+  translation -0.6 -0.6 0
+  name "marker_6"
+}
+Marker {
+  translation -0.3 -0.6 0
+  name "marker_7"
+}
+Marker {
+  translation 0.3 0.6 0
+  name "marker_10"
+}
+Marker {
+  translation 0.6 0.6 0
+  name "marker_11"
+}
+Marker {
+  translation 0.9 0.3 0
+  name "marker_12"
+}
+Marker {
+  translation 0.9 0 0
+  name "marker_13"
+}
+Marker {
+  translation 0.9 -0.3 0
+  name "marker_14"
+}
+Marker {
+  translation 0.6 -0.6 0
+  name "marker_15"
+}
+Marker {
+  translation 0.3 -0.6 0
+  name "marker_16"
+}

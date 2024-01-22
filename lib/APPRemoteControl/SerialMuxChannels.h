@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,18 @@
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
+/** Name of Channel to send Current Vehicle Data to. */
+#define CURRENT_VEHICLE_DATA_CHANNEL_NAME "CURR_DATA"
+
+/** DLC of Current Vehicle Data Channel */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
+/** Name of Channel to send Initial Vehicle Data to. */
+#define INITIAL_VEHICLE_DATA_CHANNEL_NAME "INIT_DATA"
+
+/** DLC of Initial Vehicle Data Channel */
+#define INITIAL_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -82,7 +94,14 @@ typedef struct _Command
 /** Struct of the "Command Response" channel payload. */
 typedef struct _CommandResponse
 {
-    uint8_t response; /**< Response to the command */
+    uint8_t commandId;  /**< Command ID */
+    uint8_t responseId; /**< Response to the command */
+
+    /** Response Payload. */
+    union
+    {
+        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
+    };
 } __attribute__((packed)) CommandResponse;
 
 /** Struct of the "Speed" channel payload. */
@@ -97,6 +116,17 @@ typedef struct _LineSensorData
 {
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
+
+/** Struct of the "Current Vehicle Data" channel payload. */
+typedef struct _VehicleData
+{
+    int32_t xPos;        /**< X position [mm]. */
+    int32_t yPos;        /**< Y position [mm]. */
+    int32_t orientation; /**< Orientation [mrad]. */
+    int16_t left;        /**< Left motor speed [steps/s]. */
+    int16_t right;       /**< Right motor speed [steps/s]. */
+    int16_t center;      /**< Center speed [steps/s]. */
+} __attribute__((packed)) VehicleData;
 
 /******************************************************************************
  * Functions

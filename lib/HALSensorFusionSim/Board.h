@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,9 +25,9 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  The robot board realization for testing purposes.
+ * @brief  The simulation robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
@@ -45,17 +45,17 @@
 #include <stdint.h>
 #include <IBoard.h>
 #include <ButtonA.h>
-#include <ButtonB.h>
-#include <ButtonC.h>
 #include <Buzzer.h>
-#include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
-#include <LedRed.h>
 #include <LedYellow.h>
-#include <LedGreen.h>
-#include <ProximitySensors.h>
+#include <IMU.h>
+
+#include <math.h>
+#include <webots/Robot.hpp>
+#include <Keyboard.h>
+#include <SimTime.h>
 
 /******************************************************************************
  * Macros
@@ -99,26 +99,6 @@ public:
     }
 
     /**
-     * Get button B driver.
-     *
-     * @return Button B driver.
-     */
-    IButton& getButtonB() final
-    {
-        return m_buttonB;
-    }
-
-    /**
-     * Get button C driver.
-     *
-     * @return Button C driver.
-     */
-    IButton& getButtonC() final
-    {
-        return m_buttonC;
-    }
-
-    /**
      * Get buzzer driver.
      *
      * @return Buzzer driver.
@@ -126,16 +106,6 @@ public:
     IBuzzer& getBuzzer() final
     {
         return m_buzzer;
-    }
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    IDisplay& getDisplay() final
-    {
-        return m_display;
     }
 
     /**
@@ -169,16 +139,6 @@ public:
     }
 
     /**
-     * Get red LED driver.
-     *
-     * @return Red LED driver.
-     */
-    ILed& getRedLed() final
-    {
-        return m_ledRed;
-    }
-
-    /**
      * Get yellow LED driver.
      *
      * @return Yellow LED driver.
@@ -189,63 +149,95 @@ public:
     }
 
     /**
-     * Get green LED driver.
+     * Get IMU (Inertial Measurement Unit) driver.
      *
-     * @return Green LED driver.
+     * @return IMU driver
      */
-    ILed& getGreenLed() final
+    IIMU& getIMU() final
     {
-        return m_ledGreen;
+        return m_imu;
     }
 
     /**
-     * Get proximity sensors driver.
-     * 
-     * @return Proximity sensors driver
+     * Process actuators and sensors.
      */
-    IProximitySensors& getProximitySensors() final
+    void process() final
     {
-        return m_proximitySensors;
+        m_buzzer.process();
     }
-
-    /**
-     * Get encoders test interface.
-     *
-     * @return Encoders test interface.
-     */
-    IEncodersTest& getEncodersTest()
-    {
-        return m_encoders;
-    }
-
-    /**
-     * Get motors test interface.
-     *
-     * @return Motors test interface.
-     */
-    IMotorsTest& getMotorsTest()
-    {
-        return m_motors;
-    }
-
-protected:
 
 private:
+    /** Name of the speaker in the robot simulation. */
+    static const char* SPEAKER_NAME;
+
+    /** Name of the left motor in the robot simulation. */
+    static const char* LEFT_MOTOR_NAME;
+
+    /** Name of the right motor in the robot simulation. */
+    static const char* RIGHT_MOTOR_NAME;
+
+    /** Name of the infrared emitter 0 in the robot simulation. */
+    static const char* EMITTER_0_NAME;
+
+    /** Name of the infrared emitter 1 in the robot simulation. */
+    static const char* EMITTER_1_NAME;
+
+    /** Name of the infrared emitter 2 in the robot simulation. */
+    static const char* EMITTER_2_NAME;
+
+    /** Name of the infrared emitter 3 in the robot simulation. */
+    static const char* EMITTER_3_NAME;
+
+    /** Name of the infrared emitter 4 in the robot simulation. */
+    static const char* EMITTER_4_NAME;
+
+    /** Name of the position sensor of the left motor in the robot simulation. */
+    static const char* POS_SENSOR_LEFT_NAME;
+
+    /** Name of the position sensor of the right motor in the robot simulation. */
+    static const char* POS_SENSOR_RIGHT_NAME;
+
+    /** Name of the light sensor 0 in the robot simulation. */
+    static const char* LIGHT_SENSOR_0_NAME;
+
+    /** Name of the light sensor 1 in the robot simulation. */
+    static const char* LIGHT_SENSOR_1_NAME;
+
+    /** Name of the light sensor 2 in the robot simulation. */
+    static const char* LIGHT_SENSOR_2_NAME;
+
+    /** Name of the light sensor 3 in the robot simulation. */
+    static const char* LIGHT_SENSOR_3_NAME;
+
+    /** Name of the light sensor 4 in the robot simulation. */
+    static const char* LIGHT_SENSOR_4_NAME;
+
+    /** Name of the yellow LED in the robot simulation. */
+    static const char* LED_YELLOW_NAME;
+
+    /** Name of the accelerometer in the robot simulation. */
+    static const char* ACCELEROMETER_NAME;
+
+    /** Name of the gyro in the robot simulation. */
+    static const char* GYRO_NAME;
+
+    /** Name of the Magnetometer in the robot simulation. */
+    static const char* MAGNETOMETER_NAME;
+
+    /** Simulated roboter instance. */
+    webots::Robot m_robot;
+
+    /** Simulation time handler */
+    SimTime m_simTime;
+
+    /** Own keyboard that wraps the webots keyboard. */
+    Keyboard m_keyboard;
 
     /** Button A driver */
     ButtonA m_buttonA;
 
-    /** Button B driver */
-    ButtonB m_buttonB;
-
-    /** Button C driver */
-    ButtonC m_buttonC;
-
     /** Buzzer driver */
     Buzzer m_buzzer;
-
-    /** Display driver */
-    Display m_display;
 
     /** Encoders driver */
     Encoders m_encoders;
@@ -256,37 +248,16 @@ private:
     /** Motors driver */
     Motors m_motors;
 
-    /** Red LED driver */
-    LedRed m_ledRed;
-
-    /** Red LED driver */
+    /** Yellow LED driver */
     LedYellow m_ledYellow;
 
-    /** Red LED driver */
-    LedGreen m_ledGreen;
-
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
+    /** IMU driver */
+    IMU m_imu;
 
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        IBoard(),
-        m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
-        m_buzzer(),
-        m_display(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledRed(),
-        m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.
@@ -294,6 +265,38 @@ private:
     ~Board()
     {
     }
+
+    /**
+     * Get the simulation time handler.
+     *
+     * @return Simulation time handler
+     */
+    SimTime& getSimTime()
+    {
+        return m_simTime;
+    }
+
+    /**
+     * Get the keyboard instance of the simulation.
+     *
+     * @return The keyboard.
+     */
+    Keyboard& getKeyboard()
+    {
+        return m_keyboard;
+    }
+
+    /**
+     * The main entry needs access to the simulation robot instance.
+     * But all other application parts shall have no access, which is
+     * solved by this friend.
+     *
+     * @param[in] argc  Number of arguments
+     * @param[in] argv  Arguments
+     *
+     * @return Exit code
+     */
+    friend int main(int argc, char** argv);
 };
 
 /******************************************************************************

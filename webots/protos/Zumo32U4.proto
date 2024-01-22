@@ -12,6 +12,12 @@ PROTO Zumo32U4 [
     translation IS translation
     rotation IS rotation
     children [
+      Speaker {
+      }
+      Emitter {
+        name "serialComTx"
+        type "serial"
+      }
       DEF SHIELD Group {
         children [
           Transform {
@@ -441,6 +447,47 @@ PROTO Zumo32U4 [
           }
         ]
       }
+    DEF IMU Group {
+        children [
+          Accelerometer {
+            name "accelerometer"
+            xAxis TRUE
+            yAxis TRUE
+            zAxis TRUE
+            resolution  0.001
+            lookupTable [
+              -19.62 -32768  0
+              0 0 0
+              19.62 32767  0
+            ]
+          }
+          Gyro {
+            name "gyro"
+            xAxis TRUE
+            yAxis TRUE
+            zAxis TRUE
+            resolution  0.001
+            lookupTable [
+              -4.276 -32768 0
+              0 0 0
+              4.276 32767 0
+            ]
+          }
+          Compass {
+            name "magnetometer"
+            xAxis TRUE
+            yAxis TRUE
+            zAxis TRUE
+            resolution  0.001
+            lookupTable [
+              -1 -32000 0
+              0 0 0
+              1 32000 0
+            ]
+          }
+        ]
+      }
+
       DEF LEDS Group {
         children [
           LED {

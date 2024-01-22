@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <Settings.h>
 
 /******************************************************************************
  * Macros
@@ -71,10 +72,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -201,7 +201,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -209,10 +209,25 @@ public:
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Get settings instance.
+     *
+     * @return Settings
+     */
+    ISettings& getSettings() final
+    {
+        return m_settings;
+    }
+
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
 
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -240,34 +255,22 @@ private:
     /** Red LED driver */
     LedRed m_ledRed;
 
-    /** Red LED driver */
+    /** Yellow LED driver */
     LedYellow m_ledYellow;
 
-    /** Red LED driver */
+    /** Green LED driver */
     LedGreen m_ledGreen;
 
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
 
+    /** Settings */
+    Settings m_settings;
+
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        IBoard(),
-        m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
-        m_buzzer(),
-        m_display(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledRed(),
-        m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.
@@ -275,7 +278,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

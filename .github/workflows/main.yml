@@ -30,7 +30,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget"]
+        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job.
     steps:
@@ -71,7 +71,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "Test"]
+        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "TestSim"]
 
     steps:
     - name: Checkout repository
@@ -139,7 +139,7 @@ jobs:
         pip install --upgrade platformio
 
     - name: Run tests on native environment
-      run: platformio test --environment Test -vvv
+      run: platformio test --environment TestSim -vvv
 
   # Build documentation
   doc:
@@ -148,7 +148,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim"]
+        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim", "SensorFusionSim"]
 
     steps:
     - name: Checkout repository

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,15 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Board interface, which abstracts the physical board
+ * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
- * @addtogroup HALInterfaces
+ *
+ * @addtogroup HALTarget
  *
  * @{
  */
-
-#ifndef IBOARD_H
-#define IBOARD_H
+#ifndef BOARD_H
+#define BOARD_H
 
 /******************************************************************************
  * Compile Switches
@@ -44,14 +43,21 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
-#include <IButton.h>
-#include <IBuzzer.h>
-#include <IDisplay.h>
-#include <IEncoders.h>
-#include <ILineSensors.h>
-#include <IMotors.h>
-#include <ILed.h>
-#include <IProximitySensors.h>
+#include <IBoard.h>
+#include <ButtonA.h>
+#include <ButtonB.h>
+#include <ButtonC.h>
+#include <Buzzer.h>
+#include <Display.h>
+#include <Encoders.h>
+#include <LineSensors.h>
+#include <Motors.h>
+#include <LedRed.h>
+#include <LedYellow.h>
+#include <LedGreen.h>
+#include <ProximitySensors.h>
+#include <Sender.h>
+#include <Settings.h>
 
 /******************************************************************************
  * Macros
@@ -62,124 +68,236 @@
  *****************************************************************************/
 
 /**
- * Abstracts the physical board interface.
+ * The concrete physical board.
  */
-class IBoard
+class Board : public IBoard
 {
 public:
-
     /**
-     * Destroys the board interface.
+     * Get board instance.
+     *
+     * @return Board instance
      */
-    virtual ~IBoard()
+    static Board& getInstance()
     {
+        static Board instance; /* idiom */
+
+        return instance;
     }
 
     /**
      * Initialize the hardware.
      */
-    virtual void init() = 0;
+    void init() final;
 
     /**
      * Get button A driver.
      *
      * @return Button A driver.
      */
-    virtual IButton& getButtonA() = 0;
+    IButton& getButtonA() final
+    {
+        return m_buttonA;
+    }
 
     /**
      * Get button B driver.
      *
      * @return Button B driver.
      */
-    virtual IButton& getButtonB() = 0;
+    IButton& getButtonB() final
+    {
+        return m_buttonB;
+    }
 
     /**
      * Get button C driver.
      *
      * @return Button C driver.
      */
-    virtual IButton& getButtonC() = 0;
+    IButton& getButtonC() final
+    {
+        return m_buttonC;
+    }
 
     /**
      * Get buzzer driver.
      *
      * @return Buzzer driver.
      */
-    virtual IBuzzer& getBuzzer() = 0;
+    IBuzzer& getBuzzer() final
+    {
+        return m_buzzer;
+    }
 
     /**
      * Get LCD driver.
      *
      * @return LCD driver.
      */
-    virtual IDisplay& getDisplay() = 0;
+    IDisplay& getDisplay() final
+    {
+        return m_display;
+    }
 
     /**
-     * Get encoders driver.
-     * 
+     * Get encoders.
+     *
      * @return Encoders driver.
      */
-    virtual IEncoders& getEncoders() = 0;
+    IEncoders& getEncoders() final
+    {
+        return m_encoders;
+    }
 
     /**
      * Get line sensors driver.
      *
      * @return Line sensor driver.
      */
-    virtual ILineSensors& getLineSensors() = 0;
+    ILineSensors& getLineSensors() final
+    {
+        return m_lineSensors;
+    }
 
     /**
      * Get motor driver.
      *
      * @return Motor driver.
      */
-    virtual IMotors& getMotors() = 0;
+    IMotors& getMotors() final
+    {
+        return m_motors;
+    }
 
     /**
      * Get red LED driver.
      *
      * @return Red LED driver.
      */
-    virtual ILed& getRedLed() = 0;
+    ILed& getRedLed() final
+    {
+        return m_ledRed;
+    }
 
     /**
      * Get yellow LED driver.
      *
      * @return Yellow LED driver.
      */
-    virtual ILed& getYellowLed() = 0;
+    ILed& getYellowLed() final
+    {
+        return m_ledYellow;
+    }
 
     /**
      * Get green LED driver.
      *
      * @return Green LED driver.
      */
-    virtual ILed& getGreenLed() = 0;
+    ILed& getGreenLed() final
+    {
+        return m_ledGreen;
+    }
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
-    virtual IProximitySensors& getProximitySensors() = 0;
-
-protected:
-
-    /**
-     * Constructs the board interface.
-     */
-    IBoard()
+    IProximitySensors& getProximitySensors() final
     {
+        return m_proximitySensors;
     }
 
-private:
+    /**
+     * Get sender driver.
+     *
+     * @return Sender driver
+     */
+    ISender& getSender() final
+    {
+        return m_sender;
+    }
 
+    /**
+     * Get settings instance.
+     *
+     * @return Settings
+     */
+    ISettings& getSettings() final
+    {
+        return m_settings;
+    }
+
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+
+protected:
+private:
+    /** Button A driver */
+    ButtonA m_buttonA;
+
+    /** Button B driver */
+    ButtonB m_buttonB;
+
+    /** Button C driver */
+    ButtonC m_buttonC;
+
+    /** Buzzer driver */
+    Buzzer m_buzzer;
+
+    /** Display driver */
+    Display m_display;
+
+    /** Encoders driver */
+    Encoders m_encoders;
+
+    /** Line sensors driver */
+    LineSensors m_lineSensors;
+
+    /** Motors driver */
+    Motors m_motors;
+
+    /** Red LED driver */
+    LedRed m_ledRed;
+
+    /** Red LED driver */
+    LedYellow m_ledYellow;
+
+    /** Red LED driver */
+    LedGreen m_ledGreen;
+
+    /** Proximity sensors */
+    ProximitySensors m_proximitySensors;
+
+    /** Sender */
+    Sender m_sender;
+
+    /** Settings */
+    Settings m_settings;
+
+    /**
+     * Constructs the concrete board.
+     */
+    Board();
+
+    /**
+     * Destroys the concrete board.
+     */
+    ~Board()
+    {
+    }
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* IBOARD_H */
+#endif /* BOARD_H */
 /** @} */

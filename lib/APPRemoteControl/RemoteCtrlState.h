@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IState.h>
+#include "SerialMuxChannels.h"
 
 /******************************************************************************
  * Macros
@@ -64,7 +65,8 @@ public:
         CMD_ID_IDLE = 0,                /**< Nothing to do. */
         CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
         CMD_ID_START_MOTOR_SPEED_CALIB, /**< Start motor speed calibration. */
-        CMD_ID_REINIT_BOARD             /**< Re-initialize the board. Required for webots simulation. */
+        CMD_ID_REINIT_BOARD,            /**< Re-initialize the board. Required for webots simulation. */
+        CMD_ID_GET_MAX_SPEED,           /**< Get maximum speed. */
 
     } CmdId;
 
@@ -118,8 +120,8 @@ public:
     {
         if (CMD_ID_IDLE == m_cmdId)
         {
-            m_cmdId = cmdId;
-            m_rspId = RSP_ID_PENDING;
+            m_cmdId             = cmdId;
+            m_cmdRsp.responseId = RSP_ID_PENDING;
         }
     }
 
@@ -128,20 +130,20 @@ public:
      *
      * @return Command response
      */
-    RspId getCmdRsp() const
+    CommandResponse getCmdRsp()
     {
-        return m_rspId;
+        return m_cmdRsp;
     }
 
 protected:
 private:
-    CmdId m_cmdId; /**< Current pending command. */
-    RspId m_rspId; /**< Current command response. */
+    CmdId           m_cmdId;  /**< Current pending command. */
+    CommandResponse m_cmdRsp; /**< Command response */
 
     /**
      * Default constructor.
      */
-    RemoteCtrlState() : m_cmdId(CMD_ID_IDLE), m_rspId(RSP_ID_OK)
+    RemoteCtrlState() : m_cmdId(CMD_ID_IDLE), m_cmdRsp()
     {
     }
 
@@ -162,8 +164,9 @@ private:
      */
     void finishCommand(RspId rsp)
     {
-        m_rspId = rsp;
-        m_cmdId = CMD_ID_IDLE;
+        m_cmdRsp.commandId  = m_cmdId;
+        m_cmdRsp.responseId = rsp;
+        m_cmdId             = CMD_ID_IDLE;
     }
 };
 

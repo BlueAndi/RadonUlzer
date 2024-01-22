@@ -1,0 +1,119 @@
+@startuml
+
+title RadonUlzer - Hardware Abstraction Layer
+
+package "HAL" as hal {
+
+    package "HAL Interfaces" as halInterfaces {
+        interface "IIMU" as iIMU {
+            + {abstract} init() : bool
+            + {abstract} readAccelerometer() : void
+            + {abstract} readGyro() : void
+            + {abstract} readMagnetometer() : void
+            + {abstract} accelerometerDataReady() : bool
+            + {abstract} gyroDataReady() : bool
+            + {abstract} magnetometerDataReady() : bool
+            + {abstract} getAccelerationValues(IMUData* accelerationValues) : void
+            + {abstract} getTurnRates(IMUData* turnRates) : void
+            + {abstract} getMagnetometerValues(IMUData* magnetometerValues) : void
+
+        }
+        struct IMUData {
+            + valueX: int16_t
+            + valueY: int16_t
+            + valueZ: int16_t
+        }
+    }
+
+    package "HAL Simulation" as simulation {
+        class "IMU" as ImuSim {
+            -  m_accelerationValues : IMUData
+            -  m_gyroValues : IMUData
+            -  m_magnetometerValues : IMUData
+        }
+        class "Board" as BoardSim {
+            - m_imu : IMU
+            + getIMU() : IMU&
+            + init() : void
+        }
+    }
+
+    package "HAL Target" as target {
+        class "IMU" as ImuTarget {
+            -  m_accelerationValues : IMUData
+            -  m_gyroValues : IMUData
+            -  m_magnetometerValues : IMUData
+        }
+        class "Board" as BoardTarget{
+            - m_imu : IMU
+            + getIMU() : IMU&
+            + init() : void
+        }
+    }
+
+    iIMU ..> IMUData: <<use>>
+    iIMU <|... ImuSim: <<realize>>
+    ImuTarget *- BoardTarget
+    ImuSim *- BoardSim
+
+    iIMU <|... ImuTarget: <<realize>>
+}
+package "Webots library"  as webotsLib {
+    class Accelerometer {
+        + getValues() : double *
+        + enable(int samplingPeriod) : void
+    }
+    class Gyro {
+        + getValues() : double *
+        + enable(int samplingPeriod) : void
+    }
+    class Compass {
+        + getValues() : double *
+        + enable(int samplingPeriod) : void
+    }
+}
+
+package "Zumo32U4 library"  as zumo32u4Lib {
+
+    class Zumo32U4IMU {
+        -  a[3] : vector<int16_t> 
+        -  g[3] : vector<int16_t> 
+        -  m[3] : vector<int16_t> 
+        +  init() : bool
+        +  readAcc() : void
+        +  readGyro() : void
+        +  readMag() : void
+        +  accDataReady() : bool
+        +  gyroDataReady() : bool
+        +  magDataReady() : bool
+    }
+}
+
+note bottom of zumo32u4Lib
+    Provided by Pololu.
+    https://pololu.github.io/zumo-32u4-arduino-library/index.html
+end note
+
+note bottom of webotsLib
+    Provided by Cyberbotics.
+    https://cyberbotics.com/doc/reference/thanks?version=R2023b
+end note
+
+ImuTarget *--> Zumo32U4IMU
+
+ImuSim *--> Accelerometer
+ImuSim *--> Gyro
+ImuSim *--> Compass
+
+note right of iIMU
+    IMU stands for Inertial Measurement Unit.
+end note
+
+note left of hal
+    This diagram shows the added IMU component.
+    Classes like the LineSensors or Encoders
+    are missing.
+end note
+
+
+@enduml

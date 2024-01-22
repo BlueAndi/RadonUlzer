@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,12 +76,12 @@ void App::setup()
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
     /* Setup SerialMuxProt Channels. */
-    m_serialMuxProtChannelIdOdometry = m_smpServer.createChannel(ODOMETRY_CHANNEL_NAME, ODOMETRY_CHANNEL_DLC);
-    m_serialMuxProtChannelIdSpeed    = m_smpServer.createChannel(SPEED_CHANNEL_NAME, SPEED_CHANNEL_DLC);
+    m_serialMuxProtChannelIdCurrentVehicleData =
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
 
     /* Channel sucesfully created? */
-    if ((0U != m_serialMuxProtChannelIdOdometry) && (0U != m_serialMuxProtChannelIdSpeed))
+    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData))
     {
         m_reportTimer.start(REPORTING_PERIOD);
     }
@@ -89,6 +89,7 @@ void App::setup()
 
 void App::loop()
 {
+    Board::getInstance().process();
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
@@ -112,8 +113,7 @@ void App::loop()
     if (true == m_reportTimer.isTimeout())
     {
         /* Send current data to SerialMuxProt Client */
-        reportOdometry();
-        reportSpeed();
+        reportVehicleData();
 
         m_reportTimer.restart();
     }
@@ -129,10 +129,11 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::reportOdometry()
+void App::reportVehicleData()
 {
-    Odometry&    odometry = Odometry::getInstance();
-    OdometryData payload;
+    Odometry&    odometry    = Odometry::getInstance();
+    Speedometer& speedometer = Speedometer::getInstance();
+    VehicleData  payload;
     int32_t      xPos = 0;
     int32_t      yPos = 0;
 
@@ -140,20 +141,12 @@ void App::reportOdometry()
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
+    payload.left        = speedometer.getLinearSpeedLeft();
+    payload.right       = speedometer.getLinearSpeedRight();
+    payload.center      = speedometer.getLinearSpeedCenter();
 
     /* Ignoring return value, as error handling is not available. */
-    (void)m_smpServer.sendData(m_serialMuxProtChannelIdOdometry, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-}
-
-void App::reportSpeed()
-{
-    Speedometer& speedometer = Speedometer::getInstance();
-    SpeedData    payload;
-    payload.left  = speedometer.getLinearSpeedLeft();
-    payload.right = speedometer.getLinearSpeedRight();
-
-    /* Ignoring return value, as error handling is not available. */
-    (void)m_smpServer.sendData(m_serialMuxProtChannelIdSpeed, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
 }
 
 /******************************************************************************

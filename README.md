@@ -8,9 +8,11 @@
 A robot as fast as the famous pod racer driven by Anakin Skywalker with the powerful engines from Radon Ulzer. :-)
 
 Several kind of exclusive applications are available:
-* Convoy leader - A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role.
-* Line follower - Just a line follower, using a PID controller.
+* Calib - Application used for motor speed calibration.
+* Convoy Leader - A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role.
+* Line Follower - Just a line follower, using a PID controller.
 * Remote Control - The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.
+* Sensor Fusion - The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information.
 
 ## Table of content
 
@@ -24,6 +26,7 @@ Several kind of exclusive applications are available:
   * [Communicate with the DroidControlShip](#communicate-with-the-droidcontrolship)
 * [The target](#the-target)
   * [Build and flash procedure](#build-and-flash-procedure)
+* [The Applications](#the-applications)
 * [Documentation](#documentation)
 * [Used Libraries](#used-libraries)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
@@ -108,6 +111,17 @@ $ program.exe -?
 2. Start the bootloader by triggering twice the reset button. The yellow led will start blinking for 10s. Note, after 10s the target will leave the bootloader!
 3. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Upload
 4. Ready.
+
+# The Applications
+
+| Application | Description | Standalone | DroidControlShop Required | Webots World |
+| - | - | - | - | - |
+| Calib | Application used for motor speed calibration. | Yes | No | ./webots/worlds/LineFollowerTrack.wbt |
+| ConvoyLeader | A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role. | No | Yes | ./webots/worlds/HeadingCalculation.wbt, ./webots/worlds/HeadingCalculation.wbt/GridWithMarkers.wbt |
+| LineFollower | Just a line follower, using a PID controller. | Yes | No | ./webots/worlds/LineFollowerTrack.wbt |
+| RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | Any |
+| SensorFusion | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No | Yes | ./webots/worlds/SensorFustion.wbt |
+| Test | Only for testing purposes on native environment. | Yes | No | N/A |
 
 # Documentation
 

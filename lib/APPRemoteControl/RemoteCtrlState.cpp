@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,16 @@
 
 void RemoteCtrlState::entry()
 {
-    DifferentialDrive::getInstance().enable();
+    IBoard&            board     = Board::getInstance();
+    ISettings&         settings  = board.getSettings();
+    int16_t            maxSpeed  = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Load the max. motor speed always from the settings, because
+     * it may happen that there was no calibration before.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+    diffDrive.enable();
 
     /* It is assumed that by entering this state, that a pending command will be complete. */
     finishCommand(RSP_ID_OK);
@@ -73,7 +82,7 @@ void RemoteCtrlState::entry()
 
 void RemoteCtrlState::process(StateMachine& sm)
 {
-    switch(m_cmdId)
+    switch (m_cmdId)
     {
     case CMD_ID_IDLE:
         /* Nothing to do. */
@@ -96,7 +105,12 @@ void RemoteCtrlState::process(StateMachine& sm)
          * controller executable.
          */
         Board::getInstance().init();
-        
+
+        finishCommand(RSP_ID_OK);
+        break;
+
+    case CMD_ID_GET_MAX_SPEED:
+        m_cmdRsp.maxMotorSpeed = DifferentialDrive::getInstance().getMaxMotorSpeed();
         finishCommand(RSP_ID_OK);
         break;
 
@@ -125,5 +139,3 @@ void RemoteCtrlState::exit()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,12 @@ public:
     }
 
     /**
+     * If the frequency is in 0.1 Hz, this bit must be set otherwise the
+     * frequency unit will be considered in Hz.
+     */
+    static const uint16_t DIV_BY_10_BIT = (1 << 15);
+
+    /**
      * Plays the specified frequency for the specified duration.
      *
      * This function plays the note in the background while your program continues
@@ -86,7 +92,7 @@ public:
      * this, you will produce an integer overflow that can result in unexpected
      * behavior.
      *
-     * @param[in] freq        Frequency to play in 0.1 Hz.
+     * @param[in] freq        Frequency to play in Hz or 0.1 Hz depended on divBy10 bit.
      * @param[in] duration    Duration of the note in milliseconds.
      * @param[in] volume      Volume of the note (0-15).
      */
@@ -116,6 +122,11 @@ public:
     {
         return false;
     }
+
+    /**
+     * Process the buzzer to handle sound timings.
+     */
+    void process() final;
 
 private:
 

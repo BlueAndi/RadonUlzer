@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,10 @@
  * Includes
  *****************************************************************************/
 
+/** The buzzer can play different kind of notification sounds. */
+namespace Sound
+{
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -52,13 +56,19 @@
  * Types and Classes
  *****************************************************************************/
 
+/**
+ * Supported melodies.
+ */
+typedef enum
+{
+    MELODY_WELCOME = 0, /**< Welcome theme */
+    MELODY_STAR_WARS    /**< Star Wars imperial march theme */
+
+} Melody;
+
 /******************************************************************************
  * Functions
  *****************************************************************************/
-
-/** The buzzer can play different kind of notification sounds. */
-namespace Sound
-{
 
 /**
  * Play alarm tone.
@@ -71,9 +81,11 @@ void playAlarm();
 void playBeep();
 
 /**
- * Play startup melody.
+ * Play melody.
+ * 
+ * @param[in] melody Choose the melody which to play.
  */
-void playStartup();
+void playMelody(Melody melody);
 
 }
 

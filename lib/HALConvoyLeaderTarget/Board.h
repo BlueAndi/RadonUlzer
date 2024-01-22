@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -209,7 +209,13 @@ public:
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
 
 private:
 
@@ -252,22 +258,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        IBoard(),
-        m_buttonA(),
-        m_buttonB(),
-        m_buttonC(),
-        m_buzzer(),
-        m_display(),
-        m_encoders(),
-        m_lineSensors(),
-        m_motors(),
-        m_ledRed(),
-        m_ledYellow(),
-        m_ledGreen(),
-        m_proximitySensors()
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.

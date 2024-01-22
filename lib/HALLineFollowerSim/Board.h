@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -213,7 +213,14 @@ public:
         return m_proximitySensors;
     }
 
-protected:
+    /**
+     * Process actuators and sensors.
+     */
+    void process() final
+    {
+        m_buzzer.process();
+    }
+    
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;
@@ -326,31 +333,7 @@ private:
     /**
      * Constructs the concrete board.
      */
-    Board() :
-        IBoard(),
-        m_robot(),
-        m_simTime(m_robot),
-        m_keyboard(m_simTime, m_robot.getKeyboard()),
-        m_buttonA(m_keyboard),
-        m_buttonB(m_keyboard),
-        m_buttonC(m_keyboard),
-        m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-        m_display(m_robot.getDisplay(DISPLAY_NAME)),
-        m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
-                   m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
-        m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
-                      m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
-                      m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
-                      m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
-        m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
-        m_ledRed(m_robot.getLED(LED_RED_NAME)),
-        m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-        m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-        m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                           m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
-    {
-    }
+    Board();
 
     /**
      * Destroys the concrete board.

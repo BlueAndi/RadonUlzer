@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2023 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2019 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,6 +58,15 @@
  * Public Methods
  *****************************************************************************/
 
+void Board::init()
+{
+    m_encoders.init();
+    m_lineSensors.init();
+    m_motors.init();
+    m_proximitySensors.initFrontSensor();
+    m_settings.init();
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
@@ -66,17 +75,27 @@
  * Private Methods
  *****************************************************************************/
 
+Board::Board() :
+    IBoard(),
+    m_buttonA(),
+    m_buttonB(),
+    m_buttonC(),
+    m_buzzer(),
+    m_display(),
+    m_encoders(),
+    m_lineSensors(),
+    m_motors(),
+    m_ledRed(),
+    m_ledYellow(),
+    m_ledGreen(),
+    m_proximitySensors(),
+    m_settings()
+{
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/
-
-void Board::init()
-{
-    m_encoders.init();
-    m_lineSensors.init();
-    m_motors.init();
-    m_proximitySensors.initFrontSensor();
-}
 
 /******************************************************************************
  * Local Functions
