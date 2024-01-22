@@ -1,0 +1,99 @@
+#VRML_SIM R2023b utf8
+# A traffic light
+
+
+PROTO TrafficLight [
+
+Robot {
+  translation 0 0.33 0.22
+  children [
+    Group {
+      children [
+        Transform {
+          translation 0 0.03 0.2
+          children [
+            Shape {
+              appearance DamascusSteel {
+              }
+              geometry Box {
+                size 0.06 0.06 0.27
+              }
+            }
+          ]
+        }
+        LED {
+          translation 0 0 0.1
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "GreenLight"
+          color [
+            1 0.7 0.1
+          ]
+          gradual TRUE
+        }
+        LED {
+          translation 0 0 0.2
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "OrangeLight"
+          color [
+            1 0.7 0.1
+          ]
+          gradual TRUE
+        }
+        LED {
+          translation 0 0 0.3
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "RedLight"
+          gradual TRUE
+        }
+      ]
+    }
+    Transform {
+      translation 0 0.03 0
+      children [
+        Shape {
+          appearance ScrewThread {
+          }
+          geometry Cylinder {
+            height 0.4
+            radius 0.02
+          }
+        }
+      ]
+    }
+  ]
+}
+
+]
+{
+
+}

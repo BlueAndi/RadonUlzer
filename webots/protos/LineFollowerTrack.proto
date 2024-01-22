@@ -7,13 +7,8 @@ PROTO LineFollowerTrack [
 ]
 {
   RectangleArena {
-<<<<<<< HEAD
     floorSize 4 4
     floorTileSize 6 6
-=======
-    floorSize 2 2
-    floorTileSize 4 4
->>>>>>> main
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
@@ -38,10 +33,5 @@ PROTO LineFollowerTrack [
         ]
       }
     }
-<<<<<<< HEAD
-=======
-    wallThickness 0.001
-    wallHeight 0.05
->>>>>>> main
   }
 }
