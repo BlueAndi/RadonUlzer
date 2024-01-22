@@ -26,8 +26,8 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.3667201560805988 -0.05246441524088616 0.9288508019362707 3.405822406127589
-  position 2.972698963078179 0.28628599447711456 3.0410170319093393
+  orientation -0.3897106908799336 -0.05774350399055049 0.9191252717452493 3.412308424645209
+  position 2.8067657522101817 0.3818560932460593 3.2263432088084665
 }
 TexturedBackground {
 }
@@ -42,7 +42,7 @@ TrafficLightDCS {
 TrafficLightDCS {
   translation -0.69 -0.56 -0.25
   name "TrafficLightDCS2"
-  controller "<none>"
+  controller "<extern>"
 }
 Supervisor {
   name "Supervisor"
