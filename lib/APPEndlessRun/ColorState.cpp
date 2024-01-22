@@ -80,7 +80,6 @@ void ColorState::process(StateMachine& sm)
         /* No new color received. */
         sm.setState(&DrivingState::getInstance());
 
-        m_lastId = COLOR_ID_IDLE;
         break;
     }
     case COLOR_ID_RED:
@@ -92,8 +91,6 @@ void ColorState::process(StateMachine& sm)
         /* Stop motors. */
         IMotors& motors = Board::getInstance().getMotors();
         motors.setSpeeds(0, 0);
-
-        m_lastId = COLOR_ID_RED;
         break;
     }
     case COLOR_ID_GREEN:
@@ -104,40 +101,22 @@ void ColorState::process(StateMachine& sm)
 
         /* Keep driving. */
         sm.setState(&DrivingState::getInstance());
-
-        m_lastId = COLOR_ID_GREEN;
         break;
     }
     case COLOR_ID_YELLOW_GR:
     {
-        if (m_lastId == COLOR_ID_GREEN)
-        {
-            /* code */
-        }
-
         /* Toggle slowdown flag. */
         DrivingState::getInstance().enableSlowdown(true);
 
         sm.setState(&DrivingState::getInstance());
-
-        m_lastId = COLOR_ID_YELLOW_GR;
-        m_tlcId = COLOR_ID_IDLE;
         break;
     }
     case COLOR_ID_YELLOW_RG:
     {
-        if (m_lastId == COLOR_ID_RED)
-        {
-            /* code */
-        }
-
         /* Toggle speedup flag. */
         DrivingState::getInstance().enableSpeedup(true);
 
         sm.setState(&DrivingState::getInstance());
-
-        m_lastId = COLOR_ID_YELLOW_RG;
-        m_tlcId = COLOR_ID_IDLE;
         break;
     }
     default:
