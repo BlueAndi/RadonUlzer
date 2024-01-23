@@ -173,7 +173,9 @@ public:
 
 private:
     /**
-     * If at least one side moved about 2 mm, a new calculation shall be done.
+     * If at least one side moved about 1 cm, a new calculation shall be done.
+     * Don't use values lower than 1 cm, because the accuracy of the orientation
+     * will decrease massively.
      *
      * Use a multiple of RobotConstants::ENCODER_STEPS_PER_MM for better
      * accuracy.

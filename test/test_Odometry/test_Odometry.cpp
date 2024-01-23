@@ -140,13 +140,15 @@ static void testOdometry()
     int32_t        posY         = 0;
     uint8_t        idx          = 0;
     /* Use multiple of RobotConstants::ENCODER_STEPS_PER_MM to avoid errors caused by divisions. */
-    int16_t  testVectorSteps[] = {8, 16, 32, 64, 128, 64, 32, 16, 8, 0, -8, -16, -32, -64, -128};
-    uint32_t mileageSteps      = 0;
-    int32_t  circumference     = RobotConstants::WHEEL_BASE * FP_2PI() / 2; /* [mm] */
-    int32_t  angleDeg          = 0;                                         /* [deg] */
-    int32_t  angleMRad         = 0;                                         /* [mrad] */
-    int32_t  epsilonMRad       = FP_2PI() / 360;                            /* [mrad] */
-    int32_t  epsilonPos        = 1;                                         /* [mm] */
+    int16_t       testVectorSteps[] = {8, 16, 32, 64, 128, 64, 32, 16, 8, 0, -8, -16, -32, -64, -128};
+    uint32_t      mileageSteps      = 0;
+    int32_t       circumference     = RobotConstants::WHEEL_BASE * FP_2PI() / 2; /* [mm] */
+    int32_t       angleDeg          = 0;                                         /* [deg] */
+    int32_t       angleMRad         = 0;                                         /* [mrad] */
+    int32_t       epsilonMRad       = FP_2PI() / 360;                            /* [mrad] */
+    int32_t       epsilonPos        = 1;                                         /* [mm] */
+    const int16_t ODO_CALC_PERIOD =
+        static_cast<uint16_t>(10U * RobotConstants::ENCODER_STEPS_PER_MM); /* equal to STEPS_THRESHOLD in [steps] */
 
     while (2 > idx)
     {
@@ -181,53 +183,54 @@ static void testOdometry()
             mileageSteps += abs(testVectorSteps[idx] - testVectorSteps[idx - 1]);
         }
 
-        TEST_ASSERT_EQUAL_UINT32(mileageSteps / RobotConstants::ENCODER_STEPS_PER_MM, odometry.getMileageCenter());
+        TEST_ASSERT_EQUAL_UINT32((mileageSteps / ODO_CALC_PERIOD) / RobotConstants::ENCODER_STEPS_PER_MM,
+                                 odometry.getMileageCenter() / ODO_CALC_PERIOD);
         TEST_ASSERT_EQUAL_INT16(FP_PI() / 2, odometry.getOrientation());
         odometry.getPosition(posX, posY);
         TEST_ASSERT_INT32_WITHIN(epsilonPos, 0, posX);
         TEST_ASSERT_INT32_WITHIN(epsilonPos,
-                                 static_cast<int32_t>(testVectorSteps[idx]) /
+                                 static_cast<int32_t>(testVectorSteps[idx] / ODO_CALC_PERIOD) /
                                      static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM),
-                                 posY);
+                                 posY / ODO_CALC_PERIOD);
         TEST_ASSERT_FALSE(odometry.isStandStill());
 
         ++idx;
     }
 
-    /* Verify wrap around in forward direction. Drive 2 mm forward. */
-    encodersTest.setCountsLeft(INT16_MAX - static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
-    encodersTest.setCountsRight(INT16_MAX - static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
+    /* Verify wrap around in forward direction. Drive 20 mm forward. */
+    encodersTest.setCountsLeft(INT16_MAX - static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsRight(INT16_MAX - static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
     odometry.process();
     odometry.setOrientation(FP_PI() / 2);
     odometry.clearPosition();
     odometry.clearMileage();
     TEST_ASSERT_EQUAL_UINT32(0, odometry.getMileageCenter());
-    encodersTest.setCountsLeft(INT16_MIN + static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
-    encodersTest.setCountsRight(INT16_MIN + static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsLeft(INT16_MIN + static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsRight(INT16_MIN + static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
     odometry.process();
-    TEST_ASSERT_EQUAL_UINT32(2, odometry.getMileageCenter());
+    TEST_ASSERT_EQUAL_UINT32(20, odometry.getMileageCenter());
     TEST_ASSERT_EQUAL_INT16(FP_PI() / 2, odometry.getOrientation());
     odometry.getPosition(posX, posY);
     TEST_ASSERT_EQUAL_INT32(0, posX);
-    TEST_ASSERT_EQUAL_INT32(2, posY);
+    TEST_ASSERT_EQUAL_INT32(20, posY);
     TEST_ASSERT_FALSE(odometry.isStandStill());
 
-    /* Verify wrap around in backward direction. Drive 2 mm backward. */
-    encodersTest.setCountsLeft(INT16_MIN + static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
-    encodersTest.setCountsRight(INT16_MIN + static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
+    /* Verify wrap around in backward direction. Drive 20 mm backward. */
+    encodersTest.setCountsLeft(INT16_MIN + static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsRight(INT16_MIN + static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
     odometry.process();
     odometry.setOrientation(FP_PI() / 2);
     odometry.clearPosition();
     odometry.clearMileage();
     TEST_ASSERT_EQUAL_UINT32(0, odometry.getMileageCenter());
-    encodersTest.setCountsLeft(INT16_MAX - static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
-    encodersTest.setCountsRight(INT16_MAX - static_cast<int16_t>(RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsLeft(INT16_MAX - static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
+    encodersTest.setCountsRight(INT16_MAX - static_cast<int16_t>(10 * RobotConstants::ENCODER_STEPS_PER_MM));
     odometry.process();
-    TEST_ASSERT_EQUAL_UINT32(2, odometry.getMileageCenter());
+    TEST_ASSERT_EQUAL_UINT32(20, odometry.getMileageCenter());
     TEST_ASSERT_EQUAL_INT16(FP_PI() / 2, odometry.getOrientation());
     odometry.getPosition(posX, posY);
     TEST_ASSERT_EQUAL_INT32(0, posX);
-    TEST_ASSERT_EQUAL_INT32(-2, posY);
+    TEST_ASSERT_EQUAL_INT32(-20, posY);
     TEST_ASSERT_FALSE(odometry.isStandStill());
 
     /* Turn left 45° on the same position. */
