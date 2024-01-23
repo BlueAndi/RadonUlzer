@@ -42,6 +42,7 @@ package "Application" as appLayer {
     class LineSensorsCalibrationState <<control>>
     class ErrorState <<control>>
     class DrivingState <<control>>
+    class ColorState <<control>>
     class ReadyState <<control>>
 
     class ParameterSets <<entity>>
@@ -78,6 +79,11 @@ package "Application" as appLayer {
         traffic light colors.
     end note
 
+    note bottom of ColorState
+        The robot checks if new color ID have been
+        received through SMP/USB.
+    end note
+
     note bottom of ReadyState
         The robot is stopped and waits for
         operator input.
@@ -104,6 +110,7 @@ IState <|.. LineSensorsCalibrationState: <<realize>>
 IState <|.... ErrorState: <<realize>>
 IState <|.. ReadyState: <<realize>>
 IState <|.... DrivingState: <<realize>>
+IState <|... ColorState: <<realize>>
 
 DrivingState ..> ParameterSets: <<use>>
 

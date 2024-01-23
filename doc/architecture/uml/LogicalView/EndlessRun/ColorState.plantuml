@@ -1,0 +1,48 @@
+@startuml
+
+title Application
+
+package "Application" as appLayer {
+
+    class ColorState <<control>> {
+        -TLCId m_tlcId
+        + enum TLCId
+        + getInstance() : ColorState
+        + entry() : void 
+        + process(StateMachine& sm) : void 
+        + exit() : void 
+        + storeColorID(TLCId tlcId) : void 
+    }
+
+    note bottom of appLayer
+        Entered into periodically while driving.
+    end note
+
+    class DrivingState <<control>> {
+
+    }
+
+
+    ColorState <|.right. DrivingState : <<use>>
+
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+        interface IMotors {
+            + {abstract} getInstance() : void 
+            + {abstract} getMotors() : void 
+            + {abstract} setSpeeds(int16_t leftSpeed, int16_t rightSpeed) : void 
+        }
+    }
+
+    class Board << namespace >> {
+        + getGreenLed() : IDisplay&
+    }
+}
+
+ColorState ..> Board
+ColorState ..> IMotors
+
+@enduml

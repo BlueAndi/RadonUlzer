@@ -1,0 +1,46 @@
+@startuml
+
+title Ready State
+
+package "Application" as appLayer {
+
+note bottom of appLayer
+    Entered into after caibration. After button A 
+    is pressed, wait 3 seconds.
+end note
+
+    class ReadyState <<control>> {
+        - SimpleTimer m_waitTimer
+        + {static} getInstance() : ReadyState
+        + entry() : void
+        + process(sm : StateMachine&) : void
+        + exit() : void
+    }
+
+    class ReleaseTrackState <<control>>
+
+    ReadyState .r.> ReleaseTrackState: <<use>>
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+
+        interface IButton {
+            + {abstract} isPressed() : bool
+            + {abstract} waitForRelease() : void
+        }
+
+    }
+
+    class Board << namespace >> {
+        + getDisplay() : IDisplay&
+        + getButtonA() : IButton&
+        + getLineSensors() : ILineSensors&
+    }
+}
+
+ReadyState ..> IButton: <<use>>
+ReadyState ..> Board:: <<use>>
+
+@enduml
