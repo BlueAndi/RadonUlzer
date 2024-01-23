@@ -58,7 +58,7 @@
  *****************************************************************************/
 
 /* Initialize static constant data. */
-const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(10U * RobotConstants::ENCODER_STEPS_PER_MM);
 
 /**
  * Logging source.
