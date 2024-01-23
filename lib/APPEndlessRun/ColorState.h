@@ -104,7 +104,7 @@ public:
      *
      * @param[in] tlcId The ID of the current traffic light color.
      */
-    void execute(TLCId tlcId)
+    void storeColorID(TLCId tlcId)
     {
         m_tlcId = tlcId;
     }

@@ -187,11 +187,8 @@ static void App_trafficLightColorsCallback(const uint8_t* payload, const uint8_t
     (void)userData;
     if ((nullptr != payload) && (TRAFFIC_LIGHT_COLORS_DLC == payloadSize))
     {
-        // DrivingState::TLCId....
         ColorState::TLCId tlcId = *reinterpret_cast<const ColorState::TLCId*>(payload);
 
-        // if(colors changed)
-        // DrivingState::getInstance().reportColor(tlcId);
-        ColorState::getInstance().execute(tlcId);
+        ColorState::getInstance().storeColorID(tlcId);
     }
 }
