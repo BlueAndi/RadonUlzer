@@ -126,6 +126,7 @@ void Board::init()
     m_imu.enableDefault();
     m_imu.configureForTurnSensing();
     m_imu.calibrate();
+    m_settings.init();
 }
 
 /******************************************************************************
@@ -152,7 +153,8 @@ Board::Board() :
     m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
     m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
-          m_robot.getCompass(MAGNETOMETER_NAME))
+          m_robot.getCompass(MAGNETOMETER_NAME)),
+    m_settings()
 {
 }
 

@@ -35,7 +35,7 @@
 #include "ErrorState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
+#include "ReadyState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -74,7 +74,7 @@ void ErrorState::process(StateMachine& sm)
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
+        sm.setState(&ReadyState::getInstance());
     }
 }
 
