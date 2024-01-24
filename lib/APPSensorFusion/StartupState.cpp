@@ -35,7 +35,8 @@
 #include "StartupState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
+#include "ErrorState.h"
+#include <DifferentialDrive.h>
 #include "Sound.h"
 
 /******************************************************************************
@@ -74,8 +75,29 @@ void StartupState::process(StateMachine& sm)
 
     if (true == buttonA.isPressed())
     {
+        IBoard&    board    = Board::getInstance();
+        ISettings& settings = board.getSettings();
+        int16_t    maxSpeed = settings.getMaxSpeed();
         buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
+
+        if (0 == maxSpeed)
+        {
+            /* If the max. Speed equals 0, the Motor Speed Calibration is missing. */
+            sm.setState(&ErrorState::getInstance());
+        }
+        else
+        {
+            DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+            /* With setting the max. motor speed in [steps/s] the differential drive control
+             * can now be used.
+             */
+            diffDrive.setMaxMotorSpeed(maxSpeed);
+
+            /* Differential drive can now be used. */
+            diffDrive.enable();
+            sm.setState(&LineSensorsCalibrationState::getInstance());
+        }
     }
 }
 
