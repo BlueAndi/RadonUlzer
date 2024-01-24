@@ -51,6 +51,7 @@
 #include <Motors.h>
 #include <LedYellow.h>
 #include <IMU.h>
+#include <Settings.h>
 
 #include <math.h>
 #include <webots/Robot.hpp>
@@ -159,6 +160,16 @@ public:
     }
 
     /**
+     * Get settings instance.
+     *
+     * @return Settings
+     */
+    ISettings& getSettings() final
+    {
+        return m_settings;
+    }
+
+    /**
      * Process actuators and sensors.
      */
     void process() final
@@ -253,6 +264,9 @@ private:
 
     /** IMU driver */
     IMU m_imu;
+
+    /** Settings */
+    Settings m_settings;
 
     /**
      * Constructs the concrete board.
