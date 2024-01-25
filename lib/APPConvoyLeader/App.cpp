@@ -36,6 +36,7 @@
 #include "StartupState.h"
 #include "ErrorState.h"
 #include "DrivingState.h"
+#include "ParameterSets.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -65,9 +66,6 @@ static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-/** Only in remote control state its possible to control the robot. */
-static bool gIsRemoteCtrlActive = false;
 
 /******************************************************************************
  * Public Methods
@@ -122,23 +120,38 @@ void App::loop()
         m_reportTimer.restart();
     }
 
-    /* Determine whether the robot can be remote controlled or not. */
-    if (&RemoteCtrlState::getInstance() == m_systemStateMachine.getState())
-    {
-        gIsRemoteCtrlActive = true;
-        Board::getInstance().getYellowLed().enable(true);
-    }
-    else
-    {
-        gIsRemoteCtrlActive = false;
-    }
-
     m_smpServer.process(millis());
 
     m_systemStateMachine.process();
+}
 
-    /* Send remote control command responses. */
-    sendRemoteControlResponses();
+void App::handleRemoteCommands(const Command& cmd)
+{
+    CommandResponse rsp = {cmd.commandId, SMPChannelPayload::RSP_ID_OK};
+
+    switch (cmd.commandId)
+    {
+    case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
+        rsp.maxMotorSpeed = ParameterSets::getInstance().getParameterSet().topSpeed;
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
+        Odometry::getInstance().clearPosition();
+        Odometry::getInstance().clearMileage();
+        Odometry::getInstance().setPosition(cmd.xPos, cmd.yPos);
+        Odometry::getInstance().setOrientation(cmd.orientation);
+
+        StartupState::getInstance().notifyInitialDataIsSet();
+        break;
+
+    default:
+        /* Command not known/relevant to the application. */
+        rsp.responseId = SMPChannelPayload::RSP_ID_ERROR;
+        break;
+    }
+
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &rsp, sizeof(rsp));
 }
 
 /******************************************************************************
@@ -167,22 +180,6 @@ void App::reportVehicleData()
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
-}
-
-void App::sendRemoteControlResponses()
-{
-    CommandResponse remoteControlRspId = RemoteCtrlState::getInstance().getCmdRsp();
-
-    /* Send only on change. */
-    if ((remoteControlRspId.responseId != m_lastRemoteControlRspId.responseId) ||
-        (remoteControlRspId.commandId != m_lastRemoteControlRspId.commandId))
-    {
-        if (true == m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &remoteControlRspId,
-                                         sizeof(remoteControlRspId)))
-        {
-            m_lastRemoteControlRspId = remoteControlRspId;
-        }
-    }
 }
 
 bool App::setupSerialMuxProt()
@@ -225,12 +222,11 @@ bool App::setupSerialMuxProt()
  */
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
-    if ((nullptr != payload) && (COMMAND_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
+    if ((nullptr != payload) && (COMMAND_CHANNEL_DLC == payloadSize) && (nullptr != userData))
     {
-        RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
-
-        RemoteCtrlState::getInstance().execute(cmdId);
+        App*          application = reinterpret_cast<App*>(userData);
+        const Command cmd         = *reinterpret_cast<const Command*>(payload);
+        application->handleRemoteCommands(cmd);
     }
 }
 

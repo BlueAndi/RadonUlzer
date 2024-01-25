@@ -38,7 +38,7 @@
 #include <DifferentialDrive.h>
 #include <StateMachine.h>
 #include <Odometry.h>
-#include "RemoteCtrlState.h"
+#include "ErrorState.h"
 #include "ParameterSets.h"
 
 /******************************************************************************
@@ -79,8 +79,10 @@ void DrivingState::entry()
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
     m_posMovAvg.clear();
 
+    /* Top speed is 0, and can only be set externally by DCS. */
+    m_topSpeed = 0;
+
     /* Configure PID controller with selected parameter set. */
-    m_topSpeed = parSet.topSpeed;
     m_pidCtrl.clear();
     m_pidCtrl.setPFactor(parSet.kPNumerator, parSet.kPDenominator);
     m_pidCtrl.setIFactor(parSet.kINumerator, parSet.kIDenominator);
@@ -113,14 +115,14 @@ void DrivingState::process(StateMachine& sm)
 
     case TRACK_STATUS_FINISHED:
         /* Change to ready state. */
-        sm.setState(&RemoteCtrlState::getInstance());
+        sm.setState(&ErrorState::getInstance());
         break;
 
     default:
         /* Fatal error */
         diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
-        sm.setState(&RemoteCtrlState::getInstance());
+        sm.setState(&ErrorState::getInstance());
         break;
     }
 

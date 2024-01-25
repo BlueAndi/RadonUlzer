@@ -47,7 +47,6 @@
 #include <SimpleTimer.h>
 #include <SerialMuxProtServer.hpp>
 #include "SerialMuxChannels.h"
-#include "RemoteCtrlState.h"
 #include <Arduino.h>
 
 /******************************************************************************
@@ -71,8 +70,7 @@ public:
         m_systemStateMachine(),
         m_controlInterval(),
         m_reportTimer(),
-        m_smpServer(Serial),
-        m_lastRemoteControlRspId{RemoteCtrlState::CMD_ID_IDLE, RemoteCtrlState::RSP_ID_OK, 0}
+        m_smpServer(Serial, this)
     {
     }
 
@@ -92,6 +90,13 @@ public:
      * Process the application periodically.
      */
     void loop();
+
+    /**
+     * Handle remote commands received via SerialMuxProt.
+     *
+     * @param[in] cmd Command to handle.
+     */
+    void handleRemoteCommands(const Command& cmd);
 
 private:
     /** Differential drive control period in ms. */
@@ -123,9 +128,6 @@ private:
      */
     SMPServer m_smpServer;
 
-    /** Last remote control response id */
-    CommandResponse m_lastRemoteControlRspId;
-
     /**
      * Report the current vehicle data.
      * Report the current position and heading of the robot using the Odometry data.
@@ -133,11 +135,6 @@ private:
      * Sends data through the SerialMuxProtServer.
      */
     void reportVehicleData();
-
-    /**
-     * Send remote control command responses on change.
-     */
-    void sendRemoteControlResponses();
 
     /**
      * Setup the SerialMuxProt channels.

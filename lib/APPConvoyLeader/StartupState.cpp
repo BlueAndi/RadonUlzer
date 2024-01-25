@@ -76,11 +76,6 @@ void StartupState::entry()
     display.gotoXY(0, 1);
     display.print(TEAM_NAME_LINE_2);
     delay(TEAM_NAME_DURATION);
-
-    display.clear();
-    display.print("WAITING");
-    display.gotoXY(0, 1);
-    display.print("FOR DCS");
 }
 
 void StartupState::process(StateMachine& sm)
