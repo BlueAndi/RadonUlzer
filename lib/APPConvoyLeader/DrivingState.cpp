@@ -67,6 +67,7 @@
 
 void DrivingState::entry()
 {
+    IDisplay&                          display   = Board::getInstance().getDisplay();
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
@@ -90,6 +91,11 @@ void DrivingState::entry()
     m_pidCtrl.setSampleTime(PID_PROCESS_PERIOD);
     m_pidCtrl.setLimits(-maxSpeed, maxSpeed);
     m_pidCtrl.setDerivativeOnMeasurement(true);
+
+    display.clear();
+    display.print("DRIVE");
+    display.gotoXY(0, 1);
+    display.print("GO");
 }
 
 void DrivingState::process(StateMachine& sm)
@@ -114,7 +120,8 @@ void DrivingState::process(StateMachine& sm)
         break;
 
     case TRACK_STATUS_FINISHED:
-        /* Change to ready state. */
+        /* Change to eror state because nothing else to do. */
+        ErrorState::getInstance().setErrorMsg("DONE");
         sm.setState(&ErrorState::getInstance());
         break;
 
@@ -122,6 +129,7 @@ void DrivingState::process(StateMachine& sm)
         /* Fatal error */
         diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
+        ErrorState::getInstance().setErrorMsg("DRV");
         sm.setState(&ErrorState::getInstance());
         break;
     }
