@@ -120,10 +120,8 @@ private:
 
     /**
      * SerialMuxProt Server Instance
-     *
-     * @tparam tMaxChannels set to MAX_CHANNELS, defined in SerialMuxChannels.h.
      */
-    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
+    SMPServer m_smpServer;
 
     /** Last remote control response id */
     CommandResponse m_lastRemoteControlRspId;

@@ -37,6 +37,7 @@
  *****************************************************************************/
 
 #include <Arduino.h>
+#include <SerialMuxProtServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -69,21 +70,78 @@
 /** DLC of Current Vehicle Data Channel */
 #define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
 
+/** Name of Channel to send system status to. */
+#define STATUS_CHANNEL_NAME "STATUS"
+
+/** DLC of Status Channel */
+#define STATUS_CHANNEL_DLC (sizeof(Status))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
 
+/** SerialMuxProt Server with fixed template argument. */
+typedef SerialMuxProtServer<MAX_CHANNELS> SMPServer;
+
+/** Channel payload constants. */
+namespace SMPChannelPayload
+{
+    /** Remote control commands. */
+    typedef enum : uint8_t
+    {
+        CMD_ID_IDLE = 0,                /**< Nothing to do. */
+        CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
+        CMD_ID_START_MOTOR_SPEED_CALIB, /**< Start motor speed calibration. */
+        CMD_ID_REINIT_BOARD,            /**< Re-initialize the board. Required for webots simulation. */
+        CMD_ID_GET_MAX_SPEED,           /**< Get maximum speed. */
+        CMD_ID_START_DRIVING,           /**< Start driving. */
+        CMD_ID_SET_INIT_POS             /**< Set initial position. */
+
+    } CmdId; /**< Command ID */
+
+    /** Remote control command responses. */
+    typedef enum : uint8_t
+    {
+        RSP_ID_OK = 0,  /**< Command successful executed. */
+        RSP_ID_PENDING, /**< Command is pending. */
+        RSP_ID_ERROR    /**< Command failed. */
+
+    } RspId; /**< Response ID */
+
+    /** Status flags. */
+    typedef enum : uint8_t
+    {
+        STATUS_FLAG_OK = 0, /**< Everything is fine. */
+        STATUS_FLAG_ERROR   /**< Something is wrong. */
+
+    } Status; /**< Status flag */
+
+} /* namespace SMPChannelPayload */
+
 /** Struct of the "Command" channel payload. */
 typedef struct _Command
 {
-    uint8_t commandId; /**< Command ID */
+    SMPChannelPayload::CmdId commandId; /**< Command ID */
+
+    /** Command payload. */
+    union
+    {
+        /** Init data command payload. */
+        struct
+        {
+            int32_t xPos;        /**< X position [mm]. */
+            int32_t yPos;        /**< Y position [mm]. */
+            int32_t orientation; /**< Orientation [mrad]. */
+        };
+    };
+
 } __attribute__((packed)) Command;
 
 /** Struct of the "Command Response" channel payload. */
 typedef struct _CommandResponse
 {
-    uint8_t commandId;  /**< Command ID */
-    uint8_t responseId; /**< Response to the command */
+    SMPChannelPayload::CmdId commandId;  /**< Command ID */
+    SMPChannelPayload::RspId responseId; /**< Response to the command */
 
     /** Response Payload. */
     union
@@ -110,6 +168,12 @@ typedef struct _VehicleData
     int16_t right;       /**< Right motor speed [steps/s]. */
     int16_t center;      /**< Center speed [steps/s]. */
 } __attribute__((packed)) VehicleData;
+
+/** Struct of the "Status" channel payload. */
+typedef struct _Status
+{
+    SMPChannelPayload::Status status; /**< Status */
+} __attribute__((packed)) Status;
 
 /******************************************************************************
  * Functions
