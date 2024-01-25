@@ -62,6 +62,7 @@
 
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -86,6 +87,7 @@ void App::setup()
     {
         m_reportTimer.start(REPORTING_PERIOD);
         m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_systemStateMachine.setState(&StartupState::getInstance());
     }
 }
@@ -112,12 +114,40 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    if (true == m_reportTimer.isTimeout())
+    if ((true == m_reportTimer.isTimeout()) && (true == m_smpServer.isSynced()))
     {
         /* Send current data to SerialMuxProt Client */
         reportVehicleData();
 
         m_reportTimer.restart();
+    }
+
+    if ((true == m_statusTimer.isTimeout()) && (true == m_smpServer.isSynced()))
+    {
+        Status payload = {SMPChannelPayload::Status::STATUS_FLAG_OK};
+
+        if (&ErrorState::getInstance() == m_systemStateMachine.getState())
+        {
+            payload.status = SMPChannelPayload::Status::STATUS_FLAG_ERROR;
+        }
+
+        /* Ignoring return value, as error handling is not available. */
+        (void)m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+
+        m_statusTimer.restart();
+    }
+
+    if ((false == m_statusTimeoutTimer.isRunning()) && (true == m_smpServer.isSynced()))
+    {
+        /* Start status timeout timer once SMP is synced the first time. */
+        m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
+    }
+    else if (true == m_statusTimeoutTimer.isTimeout())
+    {
+        /* Not receiving status from DCS. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("DCS_TO");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+        m_statusTimeoutTimer.stop();
     }
 
     m_smpServer.process(millis());
@@ -189,20 +219,44 @@ bool App::setupSerialMuxProt()
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
         m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
     m_serialMuxProtChannelIdCurrentVehicleData =
         m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+    m_serialMuxProtChannelIdStatus = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
 
     /* Channels succesfully created? */
-    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp))
+    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
+        (0U != m_serialMuxProtChannelIdStatus))
     {
         isSuccessful = true;
     }
 
     return isSuccessful;
+}
+
+void App::systemStatusCallback(SMPChannelPayload::Status status)
+{
+    switch (status)
+    {
+    case SMPChannelPayload::STATUS_FLAG_OK:
+        /* Nothing to do. All good. */
+        break;
+
+    case SMPChannelPayload::STATUS_FLAG_ERROR:
+        ErrorState::getInstance().setErrorMsg("DCS_ERR");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+        m_statusTimeoutTimer.stop();
+        break;
+
+    default:
+        break;
+    }
+
+    m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
 }
 
 /******************************************************************************
@@ -244,5 +298,22 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
         DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
+    }
+}
+
+/**
+ * Receives current status of the DCS over SerialMuxProt channel.
+ *
+ * @param[in] payload       Status of the DCS.
+ * @param[in] payloadSize   Size of the Status Flag
+ * @param[in] userData      Instance of App class.
+ */
+void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    if ((nullptr != payload) && (STATUS_CHANNEL_DLC == payloadSize) && (nullptr != userData))
+    {
+        const Status* currentStatus = reinterpret_cast<const Status*>(payload);
+        App*          application   = reinterpret_cast<App*>(userData);
+        application->systemStatusCallback(currentStatus->status);
     }
 }

@@ -67,9 +67,12 @@ public:
     App() :
         m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
         m_serialMuxProtChannelIdCurrentVehicleData(0U),
+        m_serialMuxProtChannelIdStatus(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_reportTimer(),
+        m_statusTimer(),
+        m_statusTimeoutTimer(),
         m_smpServer(Serial, this)
     {
     }
@@ -98,6 +101,13 @@ public:
      */
     void handleRemoteCommands(const Command& cmd);
 
+    /**
+     * System Status callback.
+     *
+     * @param[in] status    System status
+     */
+    void systemStatusCallback(SMPChannelPayload::Status status);
+
 private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
@@ -108,11 +118,20 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /** Send status timer interval in ms. */
+    static const uint32_t SEND_STATUS_TIMER_INTERVAL = 1000U;
+
+    /** Status timeout timer interval in ms. */
+    static const uint32_t STATUS_TIMEOUT_TIMER_INTERVAL = 2U * SEND_STATUS_TIMER_INTERVAL;
+
     /** SerialMuxProt Channel id for sending remote control command responses. */
     uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
 
     /** SerialMuxProt Channel id for sending the current vehicle data. */
     uint8_t m_serialMuxProtChannelIdCurrentVehicleData;
+
+    /** SerialMuxProt Channel id for sending system status. */
+    uint8_t m_serialMuxProtChannelIdStatus;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -122,6 +141,16 @@ private:
 
     /** Timer for reporting current data through SerialMuxProt. */
     SimpleTimer m_reportTimer;
+
+    /**
+     * Timer for sending system status to DCS.
+     */
+    SimpleTimer m_statusTimer;
+
+    /**
+     * Timer for timeout of system status of DCS.
+     */
+    SimpleTimer m_statusTimeoutTimer;
 
     /**
      * SerialMuxProt Server Instance
