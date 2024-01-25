@@ -36,6 +36,7 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include "StartupState.h"
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,6 +65,7 @@
 void ErrorState::entry()
 {
     IDisplay& display = Board::getInstance().getDisplay();
+    DifferentialDrive::getInstance().disable();
 
     display.clear();
     display.print("Error");
