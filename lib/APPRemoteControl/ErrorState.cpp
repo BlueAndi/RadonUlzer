@@ -35,6 +35,7 @@
 #include "ErrorState.h"
 #include <Board.h>
 #include <StateMachine.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -63,6 +64,7 @@
 void ErrorState::entry()
 {
     IDisplay& display = Board::getInstance().getDisplay();
+    DifferentialDrive::getInstance().disable();
 
     display.clear();
     display.print("Error");
@@ -72,14 +74,8 @@ void ErrorState::entry()
 
 void ErrorState::process(StateMachine& sm)
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
-
-    /* Restart calibration? */
-    if (true == buttonA.isPressed())
-    {
-        buttonA.waitForRelease();
-        // sm.setState(&MotorSpeedCalibrationState::getInstance());
-    }
+    /* Nothing to do. */
+    (void)sm;
 }
 
 void ErrorState::exit()
