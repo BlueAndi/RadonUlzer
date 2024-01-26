@@ -33,8 +33,11 @@
  * Includes
  *****************************************************************************/
 #include "StartupState.h"
+#include "ErrorState.h"
+#include "DrivingState.h"
 #include <Board.h>
 #include <StateMachine.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -76,7 +79,27 @@ void StartupState::entry()
 
 void StartupState::process(StateMachine& sm)
 {
-    // sm.setState(&RemoteCtrlState::getInstance());
+    IBoard&            board     = Board::getInstance();
+    ISettings&         settings  = board.getSettings();
+    int16_t            maxSpeed  = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Load the max. motor speed always from the settings, because
+     * it may happen that there was no calibration before.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+    diffDrive.enable();
+
+    if (0 == maxSpeed)
+    {
+        /* Missing calibration data. Run AppCalib first. */
+        ErrorState::getInstance().setErrorMsg("MCAL=0");
+        sm.setState(&ErrorState::getInstance());
+    }
+    else if (true == m_initialDataSet)
+    {
+        sm.setState(&DrivingState::getInstance());
+    }
 }
 
 void StartupState::exit()
