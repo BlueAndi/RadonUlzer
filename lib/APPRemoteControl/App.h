@@ -43,11 +43,10 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+
+#include "SerialMuxChannels.h"
 #include <StateMachine.h>
 #include <SimpleTimer.h>
-#include <SerialMuxProtServer.hpp>
-#include "SerialMuxChannels.h"
-#include "RemoteCtrlState.h"
 
 /******************************************************************************
  * Macros
@@ -65,15 +64,17 @@ public:
      * Construct the remote control application.
      */
     App() :
+        m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
+        m_serialMuxProtChannelIdCurrentVehicleData(0U),
+        m_serialMuxProtChannelIdStatus(0U),
+        m_serialMuxProtChannelIdLineSensors(0U),
         m_systemStateMachine(),
         m_controlInterval(),
-        m_sendLineSensorsDataInterval(),
         m_reportTimer(),
-        m_smpServer(Serial),
-        m_smpChannelIdRemoteCtrlRsp(0U),
-        m_smpChannelIdLineSensors(0U),
-        m_smpChannelIdCurrentVehicleData(0U),
-        m_lastRemoteControlRspId{RemoteCtrlState::CMD_ID_IDLE, RemoteCtrlState::RSP_ID_OK, 0}
+        m_statusTimer(),
+        m_statusTimeoutTimer(),
+        m_sendLineSensorsDataInterval(),
+        m_smpServer(Serial, this)
     {
     }
 
@@ -94,18 +95,50 @@ public:
      */
     void loop();
 
+    /**
+     * Handle remote commands received via SerialMuxProt.
+     *
+     * @param[in] cmd Command to handle.
+     */
+    void handleRemoteCommands(const Command& cmd);
+
+    /**
+     * System Status callback.
+     *
+     * @param[in] status    System status
+     */
+    void systemStatusCallback(SMPChannelPayload::Status status);
+
 private:
-    /** Baudrate for Serial Communication */
-    static const uint32_t SERIAL_BAUDRATE = 115200U;
-
     /** Differential drive control period in ms. */
-    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5;
-
-    /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 10000U;
+    static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
     /** Current data reporting period in ms. */
     static const uint32_t REPORTING_PERIOD = 50U;
+
+    /** Baudrate for Serial Communication */
+    static const uint32_t SERIAL_BAUDRATE = 115200U;
+
+    /** Send status timer interval in ms. */
+    static const uint32_t SEND_STATUS_TIMER_INTERVAL = 1000U;
+
+    /** Status timeout timer interval in ms. */
+    static const uint32_t STATUS_TIMEOUT_TIMER_INTERVAL = 2U * SEND_STATUS_TIMER_INTERVAL;
+
+    /** Sending Data period in ms. */
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20U;
+
+    /** SerialMuxProt Channel id for sending remote control command responses. */
+    uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
+
+    /** SerialMuxProt Channel id for sending the current vehicle data. */
+    uint8_t m_serialMuxProtChannelIdCurrentVehicleData;
+
+    /** SerialMuxProt Channel id for sending system status. */
+    uint8_t m_serialMuxProtChannelIdStatus;
+
+    /** SerialMuxProt Channel id for sending line sensors data. */
+    uint8_t m_serialMuxProtChannelIdLineSensors;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -113,44 +146,20 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
+    /** Timer for reporting current data through SerialMuxProt. */
+    SimpleTimer m_reportTimer;
+
+    /** Timer for sending system status to DCS. */
+    SimpleTimer m_statusTimer;
+
+    /** Timer for timeout of system status of DCS. */
+    SimpleTimer m_statusTimeoutTimer;
+
     /** Timer used for sending data periodically. */
     SimpleTimer m_sendLineSensorsDataInterval;
 
-    /** Timer for reporting current data periodically. */
-    SimpleTimer m_reportTimer;
-
-    /**
-     * SerialMuxProt Server Instance
-     *
-     * @tparam tMaxChannels set to MAX_CHANNELS, defined in SerialMuxChannels.h.
-     */
-    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
-
-    /** Channel id sending remote control command responses. */
-    uint8_t m_smpChannelIdRemoteCtrlRsp;
-
-    /** Channel id sending line sensors data. */
-    uint8_t m_smpChannelIdLineSensors;
-
-    /** SerialMuxProt Channel id for sending the current vehicle data. */
-    uint8_t m_smpChannelIdCurrentVehicleData;
-
-    /** Last remote control response id */
-    CommandResponse m_lastRemoteControlRspId;
-
-    /* Not allowed. */
-    App(const App& app);            /**< Copy construction of an instance. */
-    App& operator=(const App& app); /**< Assignment of an instance. */
-
-    /**
-     * Send remote control command responses on change.
-     */
-    void sendRemoteControlResponses();
-
-    /**
-     * Send line sensors data via SerialMuxProt.
-     */
-    void sendLineSensorsData() const;
+    /** SerialMuxProt Server Instance. */
+    SMPServer m_smpServer;
 
     /**
      * Report the current vehicle data.
@@ -158,7 +167,23 @@ private:
      * Report the current motor speeds of the robot using the Speedometer data.
      * Sends data through the SerialMuxProtServer.
      */
-    void reportVehicleData() const;
+    void reportVehicleData();
+
+    /**
+     * Setup the SerialMuxProt channels.
+     *
+     * @return If successful returns true, otherwise false.
+     */
+    bool setupSerialMuxProt();
+
+    /**
+     * Send line sensors data via SerialMuxProt.
+     */
+    void sendLineSensorsData() const;
+
+    /* Not allowed. */
+    App(const App& app);            /**< Copy construction of an instance. */
+    App& operator=(const App& app); /**< Assignment of an instance. */
 };
 
 /******************************************************************************

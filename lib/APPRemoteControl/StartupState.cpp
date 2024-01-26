@@ -35,7 +35,6 @@
 #include "StartupState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "RemoteCtrlState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -77,7 +76,7 @@ void StartupState::entry()
 
 void StartupState::process(StateMachine& sm)
 {
-    sm.setState(&RemoteCtrlState::getInstance());
+    // sm.setState(&RemoteCtrlState::getInstance());
 }
 
 void StartupState::exit()

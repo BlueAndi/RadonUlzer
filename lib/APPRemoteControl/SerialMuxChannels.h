@@ -76,6 +76,12 @@
 /** DLC of Status Channel */
 #define STATUS_CHANNEL_DLC (sizeof(Status))
 
+/** Name of the Channel to receive Line Sensor Data from. */
+#define LINE_SENSOR_CHANNEL_NAME "LINE_SENS"
+
+/** DLC of Line Sensor Channel */
+#define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -174,6 +180,12 @@ typedef struct _Status
 {
     SMPChannelPayload::Status status; /**< Status */
 } __attribute__((packed)) Status;
+
+/** Struct of the "Line Sensor" channel payload. */
+typedef struct _LineSensorData
+{
+    uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
+} __attribute__((packed)) LineSensorData;
 
 /******************************************************************************
  * Functions
