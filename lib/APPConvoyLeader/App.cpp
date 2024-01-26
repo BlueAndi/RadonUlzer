@@ -41,7 +41,6 @@
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
-#include <Util.h>
 #include <Logging.h>
 
 /******************************************************************************
@@ -184,6 +183,27 @@ void App::handleRemoteCommands(const Command& cmd)
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &rsp, sizeof(rsp));
 }
 
+void App::systemStatusCallback(SMPChannelPayload::Status status)
+{
+    switch (status)
+    {
+    case SMPChannelPayload::STATUS_FLAG_OK:
+        /* Nothing to do. All good. */
+        break;
+
+    case SMPChannelPayload::STATUS_FLAG_ERROR:
+        ErrorState::getInstance().setErrorMsg("DCS_ERR");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+        m_statusTimeoutTimer.stop();
+        break;
+
+    default:
+        break;
+    }
+
+    m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
@@ -236,27 +256,6 @@ bool App::setupSerialMuxProt()
     }
 
     return isSuccessful;
-}
-
-void App::systemStatusCallback(SMPChannelPayload::Status status)
-{
-    switch (status)
-    {
-    case SMPChannelPayload::STATUS_FLAG_OK:
-        /* Nothing to do. All good. */
-        break;
-
-    case SMPChannelPayload::STATUS_FLAG_ERROR:
-        ErrorState::getInstance().setErrorMsg("DCS_ERR");
-        m_systemStateMachine.setState(&ErrorState::getInstance());
-        m_statusTimeoutTimer.stop();
-        break;
-
-    default:
-        break;
-    }
-
-    m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
 }
 
 /******************************************************************************
