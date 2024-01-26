@@ -67,9 +67,6 @@ static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payl
  * Local Variables
  *****************************************************************************/
 
-/** Only in remote control state its possible to control the robot. */
-static bool gIsRemoteCtrlActive = false;
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
