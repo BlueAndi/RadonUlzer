@@ -180,7 +180,7 @@ void App::handleRemoteCommands(const Command& cmd)
         Odometry::getInstance().setPosition(cmd.xPos, cmd.yPos);
         Odometry::getInstance().setOrientation(cmd.orientation);
 
-        // StartupState::getInstance().notifyInitialDataIsSet();
+        StartupState::getInstance().notifyInitialDataIsSet();
         break;
 
     default:
