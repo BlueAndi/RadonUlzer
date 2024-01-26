@@ -62,8 +62,11 @@
 
 void DrivingState::entry()
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
     m_isActive = true;
-    DifferentialDrive::getInstance().enable();
+    diffDrive.setLinearSpeed(0, 0);
+    diffDrive.enable();
 }
 
 void DrivingState::process(StateMachine& sm)
