@@ -148,6 +148,10 @@ void App::loop()
         m_systemStateMachine.setState(&ErrorState::getInstance());
         m_statusTimeoutTimer.stop();
     }
+    else
+    {
+        /* Nothing to do. */
+    }
 
     m_smpServer.process(millis());
 

@@ -127,7 +127,6 @@ void DrivingState::process(StateMachine& sm)
 
     default:
         /* Fatal error */
-        diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
         ErrorState::getInstance().setErrorMsg("DRV");
         sm.setState(&ErrorState::getInstance());
