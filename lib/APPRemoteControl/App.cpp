@@ -36,6 +36,7 @@
 #include "StartupState.h"
 #include "ErrorState.h"
 #include "DrivingState.h"
+#include "LineSensorsCalibrationState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -171,6 +172,25 @@ void App::handleRemoteCommands(const Command& cmd)
 
     switch (cmd.commandId)
     {
+    case SMPChannelPayload::CmdId::CMD_ID_IDLE:
+        /* Nothing to do. */
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB:
+        m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_REINIT_BOARD:
+        /* Ensure that the motors are stopped, before re-initialize the board. */
+        DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+
+        /* Re-initialize the board. This is required for the webots simulation in
+         * case the world is reset by a supervisor without restarting the RadonUlzer
+         * controller executable.
+         */
+        Board::getInstance().init();
+        break;
+
     case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
         rsp.maxMotorSpeed = Board::getInstance().getSettings().getMaxSpeed();
         break;
