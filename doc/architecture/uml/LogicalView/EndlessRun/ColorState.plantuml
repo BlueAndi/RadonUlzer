@@ -4,7 +4,7 @@ title Application
 
 package "Application" as appLayer {
 
-    class ColorState <<control>> {
+    class ColorState {
         -TLCId m_tlcId
         + enum TLCId
         + getInstance() : ColorState
@@ -18,7 +18,7 @@ package "Application" as appLayer {
         Entered into periodically while driving.
     end note
 
-    class DrivingState <<control>> {
+    class DrivingState {
 
     }
 
@@ -37,9 +37,85 @@ package "HAL" as hal {
         }
     }
 
-    class Board << namespace >> {
-        + getGreenLed() : IDisplay&
+    class Board {
+        - static const char* SPEAKER_NAME
+        - static const char* DISPLAY_NAME
+        - static const char* LEFT_MOTOR_NAME
+        - static const char* RIGHT_MOTOR_NAME
+        - static const char* EMITTER_0_NAME
+        - static const char* EMITTER_1_NAME
+        - static const char* EMITTER_2_NAME
+        - static const char* EMITTER_3_NAME
+        - static const char* EMITTER_4_NAME
+        - static const char* POS_SENSOR_LEFT_NAME
+        - static const char* POS_SENSOR_RIGHT_NAME
+        - static const char* LIGHT_SENSOR_0_NAME
+        - static const char* LIGHT_SENSOR_1_NAME
+        - static const char* LIGHT_SENSOR_2_NAME
+        - static const char* LIGHT_SENSOR_3_NAME
+        - static const char* LIGHT_SENSOR_4_NAME
+        - static const char* LED_RED_NAME
+        - static const char* LED_YELLOW_NAME
+        - static const char* LED_GREEN_NAME
+        - static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME
+        - static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME
+        - webots::Robot m_robot
+        - SimTime m_simTime
+        - Keyboard m_keyboard
+        - ButtonA m_buttonA
+        - ButtonB m_buttonB
+        - ButtonC m_buttonC
+        - Buzzer m_buzzer
+        - Display m_display
+        - Encoders m_encoders
+        - LineSensors m_lineSensors
+        - Motors m_motors
+        - LedRed m_ledRed
+        - LedYellow m_ledYellow
+        - LedGreen m_ledGreen
+        - ProximitySensors m_proximitySensors
+        + getInstance() : Board
+        + init() : void 
+        + process() : void
+        + getButtonA() : IButton&
+        + getButtonB() : IButton&
+        + getButtonC() : IButton&
+        + getBuzzer() : IBuzzer&
+        + getDisplay() : IDisplay&
+        + getEncoders() : IEncoders&
+        + getLineSensors() : ILineSensors&
+        + getMotors() : IMotors&
+        + getRedLed() : ILed&
+        + getYellowLed() : ILed&
+        + getGreenLed() : ILed&
+        + getProximitySensor() : IProximitySensors& 
+        - getSimTime() : SimTime
+        - getKeyboard() : Keyboard 
     }
+
+    note "Ignored in Target context." as note 
+    Board::SPEAKER_NAME .left. note 
+    Board::DISPLAY_NAME .left. note 
+    Board::LEFT_MOTOR_NAME .left. note 
+    Board::RIGHT_MOTOR_NAME .left. note 
+    Board::EMITTER_0_NAME .left. note 
+    Board::EMITTER_1_NAME .left. note 
+    Board::EMITTER_2_NAME .left. note 
+    Board::EMITTER_3_NAME .left. note 
+    Board::EMITTER_4_NAME .left. note 
+    Board::POS_SENSOR_LEFT_NAME .left. note 
+    Board::POS_SENSOR_RIGHT_NAME .left. note 
+    Board::LIGHT_SENSOR_0_NAME .left. note  
+    Board::LIGHT_SENSOR_1_NAME .left. note 
+    Board::LIGHT_SENSOR_2_NAME .left. note 
+    Board::LIGHT_SENSOR_3_NAME .left. note 
+    Board::LIGHT_SENSOR_4_NAME .left. note 
+    Board::LED_RED_NAME .left. note 
+    Board::LED_YELLOW_NAME .left. note 
+    Board::LED_GREEN_NAME .left. note 
+    Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME .left. note  
+    Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME .left. note 
+    Board::m_robot .left. note 
 }
 
 ColorState ..> Board

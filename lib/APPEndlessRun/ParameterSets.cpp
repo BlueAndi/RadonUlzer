@@ -93,10 +93,10 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
 ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     /** target test shall be done with 1000 top speed in steps/s */
-    /** sim tests shall be done with 2400 */
+    /** sim tests shall be done with 2000 */
     m_parSets[0] = {
         "PID Fast", /* Name */
-        2000,       /* Top speed in steps/s */
+        1000,       /* Top speed in steps/s */
         3,          /* Kp Numerator */
         2,          /* Kp Denominator */
         1,          /* Ki Numerator */

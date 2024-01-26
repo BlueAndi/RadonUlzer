@@ -66,6 +66,23 @@
  * Private Methods
  *****************************************************************************/
 
+Board::Board() :
+    IBoard(),
+    m_buttonA(),
+    m_buttonB(),
+    m_buttonC(),
+    m_buzzer(),
+    m_display(),
+    m_encoders(),
+    m_lineSensors(),
+    m_motors(),
+    m_ledRed(),
+    m_ledYellow(),
+    m_ledGreen(),
+    m_proximitySensors()
+{
+}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/

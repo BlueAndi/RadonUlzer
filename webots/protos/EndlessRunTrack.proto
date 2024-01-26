@@ -2,7 +2,7 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
 
-PROTO EndlessRun [
+PROTO EndlessRunTrack [
 
 ]
 {
@@ -12,7 +12,7 @@ PROTO EndlessRun [
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
-          "./track.png"
+          "./IntersectionLarge.png"
         ]
       }
       roughness 1

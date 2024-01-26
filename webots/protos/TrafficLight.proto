@@ -1,44 +1,57 @@
 #VRML_SIM R2023b utf8
-# A traffic light
+# Describe the functionality of your PROTO here.
 
 
-PROTO TrafficLight [
-
-Robot {
-  translation 0 0.33 0.22
+PROTO TrafficLightDCS [
+  field SFVec3f translation 0 0 0
+  field SFRotation rotation 0 0 1 0
+  field SFString name "TrafficLight"
+  field SFString controller "<generic>"
+]
+{
+ Robot {
+  translation -1.25321 -0.407066 -0.22
+  rotation 0 0 1 0.261799
   children [
-    Group {
+    Pose {
+      translation 0 0 0.5
       children [
-        Transform {
-          translation 0 0.03 0.2
+        Pose {
+          translation 0 0.04 0.1
           children [
-            Shape {
-              appearance DamascusSteel {
-              }
-              geometry Box {
-                size 0.06 0.06 0.27
-              }
+            Group {
+              children [
+                DEF Pole Transform {
+                  translation 0 0 -0.11
+                  scale 0.5 0.5 1
+                  children [
+                    DEF Pole Shape {
+                      appearance PBRAppearance {
+                        baseColor 0.1 0.1 0.1
+                        metalness 0
+                      }
+                      geometry Cylinder {
+                        height 0.5
+                        radius 0.04
+                      }
+                    }
+                  ]
+                }
+                DEF Housing Pose {
+                  children [
+                    DEF Housing Shape {
+                      appearance PBRAppearance {
+                        metalness 0.8
+                      }
+                      geometry Box {
+                        size 0.1 0.08 0.3
+                      }
+                    }
+                  ]
+                }
+              ]
             }
           ]
-        }
-        LED {
-          translation 0 0 0.1
-          children [
-            Shape {
-              appearance PBRAppearance {
-                roughness 1
-                metalness 0
-              }
-              geometry Sphere {
-                radius 0.03
-              }
-            }
-          ]
-          name "GreenLight"
-          color [
-            1 0.7 0.1
-          ]
-          gradual TRUE
         }
         LED {
           translation 0 0 0.2
@@ -53,14 +66,11 @@ Robot {
               }
             }
           ]
-          name "OrangeLight"
-          color [
-            1 0.7 0.1
-          ]
+          name "RedLight"
           gradual TRUE
         }
         LED {
-          translation 0 0 0.3
+          translation 0 0 0.1
           children [
             Shape {
               appearance PBRAppearance {
@@ -72,28 +82,36 @@ Robot {
               }
             }
           ]
-          name "RedLight"
+          name "OrangeLight"
+          color [
+            1 0.8 0
+          ]
+          gradual TRUE
+        }
+        LED {
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Sphere {
+                radius 0.03
+              }
+            }
+          ]
+          name "GreenLight"
+          color [
+            0.2 1 0.1
+          ]
           gradual TRUE
         }
       ]
     }
-    Transform {
-      translation 0 0.03 0
-      children [
-        Shape {
-          appearance ScrewThread {
-          }
-          geometry Cylinder {
-            height 0.4
-            radius 0.02
-          }
-        }
-      ]
-    }
   ]
-}
-
-]
-{
-
+  name "TrafficLight"
+  name IS name
+  controller "<extern>"
+  controller IS controller 
+ }
 }

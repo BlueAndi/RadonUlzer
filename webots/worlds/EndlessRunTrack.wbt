@@ -2,10 +2,10 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "../protos/LineFollowerTrack.proto"
-IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
-EXTERNPROTO "../protos/TrafficLightDCS.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/TrafficLightDCS.proto"
+IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+EXTERNPROTO "../protos/EndlessRunTrack.proto"
 
 WorldInfo {
   info [
@@ -24,25 +24,26 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.30756896043089665 -0.12989268365458428 0.9426182818683646 3.899314227331621
-  position 3.806019707784478 4.5993656830132235 4.207634877548553
+  orientation -0.30030023157811303 -0.04988032837747745 0.9525396179451472 3.455437156759306
+  position 4.5012628912386266 1.3672409210268386 3.0428547964900385
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-LineFollowerTrack {
+DEF Zumo Zumo32U4 {
+  translation 0.560581 0.374846 0.0139943
+  rotation -1.05647e-06 8.74668e-07 1 1.58808
+  name "Zumo"
 }
 TrafficLightDCS {
-  controller "<none>"
+  translation 0 0 -0.2
+  controller "<extern>"
 }
 Supervisor {
   name "Supervisor"
   controller "Supervisor"
   supervisor TRUE
 }
-Zumo32U4 {
-  translation -1.22403 -0.523682 0.02
-  rotation 0 0 1 1.5708
-  name "Zumo"
+EndlessRunTrack {
 }
