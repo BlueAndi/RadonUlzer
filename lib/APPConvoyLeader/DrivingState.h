@@ -92,6 +92,16 @@ public:
      */
     void exit() final;
 
+    /**
+     * Set top speed.
+     *
+     * @param[in] topSpeed  Top speed in [steps/s]
+     */
+    void setTopSpeed(int16_t topSpeed)
+    {
+        m_topSpeed = topSpeed;
+    }
+
 protected:
 private:
     /**

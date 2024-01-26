@@ -38,7 +38,7 @@
 #include <DifferentialDrive.h>
 #include <StateMachine.h>
 #include <Odometry.h>
-#include "ReadyState.h"
+#include "ErrorState.h"
 #include "ParameterSets.h"
 
 /******************************************************************************
@@ -67,9 +67,12 @@
 
 void DrivingState::entry()
 {
+    IDisplay&                          display   = Board::getInstance().getDisplay();
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
+
+    diffDrive.enable();
 
     m_observationTimer.start(OBSERVATION_DURATION);
     m_pidProcessTime.start(0); /* Immediate */
@@ -77,8 +80,10 @@ void DrivingState::entry()
     m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
     m_posMovAvg.clear();
 
+    /* Top speed is 0, and can only be set externally by DCS. */
+    m_topSpeed = 0;
+
     /* Configure PID controller with selected parameter set. */
-    m_topSpeed = parSet.topSpeed;
     m_pidCtrl.clear();
     m_pidCtrl.setPFactor(parSet.kPNumerator, parSet.kPDenominator);
     m_pidCtrl.setIFactor(parSet.kINumerator, parSet.kIDenominator);
@@ -86,6 +91,11 @@ void DrivingState::entry()
     m_pidCtrl.setSampleTime(PID_PROCESS_PERIOD);
     m_pidCtrl.setLimits(-maxSpeed, maxSpeed);
     m_pidCtrl.setDerivativeOnMeasurement(true);
+
+    display.clear();
+    display.print("DRIVE");
+    display.gotoXY(0, 1);
+    display.print("GO");
 }
 
 void DrivingState::process(StateMachine& sm)
@@ -110,15 +120,16 @@ void DrivingState::process(StateMachine& sm)
         break;
 
     case TRACK_STATUS_FINISHED:
-        /* Change to ready state. */
-        sm.setState(&ReadyState::getInstance());
+        /* Change to eror state because nothing else to do. */
+        ErrorState::getInstance().setErrorMsg("DONE");
+        sm.setState(&ErrorState::getInstance());
         break;
 
     default:
         /* Fatal error */
-        diffDrive.setLinearSpeed(0, 0);
         Sound::playAlarm();
-        sm.setState(&ReadyState::getInstance());
+        ErrorState::getInstance().setErrorMsg("DRV");
+        sm.setState(&ErrorState::getInstance());
         break;
     }
 
@@ -197,9 +208,6 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
 
                 Sound::playBeep();
                 m_trackStatus = TRACK_STATUS_FINISHED;
-
-                /* Calculate lap time and show it*/
-                ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
             }
             else
             {

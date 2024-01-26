@@ -65,11 +65,15 @@ public:
      * Construct the convoy leader application.
      */
     App() :
+        m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
         m_serialMuxProtChannelIdCurrentVehicleData(0U),
+        m_serialMuxProtChannelIdStatus(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_reportTimer(),
-        m_smpServer(Serial)
+        m_statusTimer(),
+        m_statusTimeoutTimer(),
+        m_smpServer(Serial, this)
     {
     }
 
@@ -90,6 +94,20 @@ public:
      */
     void loop();
 
+    /**
+     * Handle remote commands received via SerialMuxProt.
+     *
+     * @param[in] cmd Command to handle.
+     */
+    void handleRemoteCommands(const Command& cmd);
+
+    /**
+     * System Status callback.
+     *
+     * @param[in] status    System status
+     */
+    void systemStatusCallback(SMPChannelPayload::Status status);
+
 private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
@@ -100,8 +118,20 @@ private:
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
 
+    /** Send status timer interval in ms. */
+    static const uint32_t SEND_STATUS_TIMER_INTERVAL = 1000U;
+
+    /** Status timeout timer interval in ms. */
+    static const uint32_t STATUS_TIMEOUT_TIMER_INTERVAL = 2U * SEND_STATUS_TIMER_INTERVAL;
+
+    /** SerialMuxProt Channel id for sending remote control command responses. */
+    uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
+
     /** SerialMuxProt Channel id for sending the current vehicle data. */
     uint8_t m_serialMuxProtChannelIdCurrentVehicleData;
+
+    /** SerialMuxProt Channel id for sending system status. */
+    uint8_t m_serialMuxProtChannelIdStatus;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -113,11 +143,19 @@ private:
     SimpleTimer m_reportTimer;
 
     /**
-     * SerialMuxProt Server Instance
-     *
-     * @tparam tMaxChannels set to MAX_CHANNELS, defined in SerialMuxChannels.h.
+     * Timer for sending system status to DCS.
      */
-    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
+    SimpleTimer m_statusTimer;
+
+    /**
+     * Timer for timeout of system status of DCS.
+     */
+    SimpleTimer m_statusTimeoutTimer;
+
+    /**
+     * SerialMuxProt Server Instance
+     */
+    SMPServer m_smpServer;
 
     /**
      * Report the current vehicle data.
@@ -126,6 +164,13 @@ private:
      * Sends data through the SerialMuxProtServer.
      */
     void reportVehicleData();
+
+    /**
+     * Setup the SerialMuxProt channels.
+     *
+     * @return If successful returns true, otherwise false.
+     */
+    bool setupSerialMuxProt();
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
