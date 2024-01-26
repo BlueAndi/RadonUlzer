@@ -35,6 +35,7 @@
 #include "App.h"
 #include "StartupState.h"
 #include "ErrorState.h"
+#include "DrivingState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
@@ -327,7 +328,7 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        // DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
+        DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
     }
 }
 
