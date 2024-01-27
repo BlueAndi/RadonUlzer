@@ -4,7 +4,7 @@ title System States
 
 state StartupState: /entry Initialize HAL.
 state StartupState: /entry Show operator info on LCD.
-state StartupState: /do Wait for pushbutton A is triggered.
+state StartupState: /do Wait for pushbutton A or B is triggered.
 
 state MotorSpeedCalibrationState: /entry Show operator info on LCD.
 state MotorSpeedCalibrationState: /do Perform calibration.
@@ -31,6 +31,7 @@ state DrivingState: /exit Stop observation timer.
 
 [*] --> StartupState: Power up
 StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+StartupState --> LineSensorsCalibrationState: [Pushbutton B triggered] and\n[Max. motor speed calib. is available in settings]
 MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
 LineSensorsCalibrationState --> ReadyState: [Calibration finished]
 LineSensorsCalibrationState --> ErrorState: [Calibration failed]

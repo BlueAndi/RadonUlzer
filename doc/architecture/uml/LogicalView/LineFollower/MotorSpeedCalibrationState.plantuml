@@ -54,12 +54,19 @@ package "HAL" as hal {
             + {abstract} getNumLineSensors() const : uint8_t
             + {abstract} getSensorValueMax() const : uint16_t
         }
+
+        interface ISettings {
+            + {abstract} init() : void
+            + {abstract} getMaxSpeed() : int16_t
+            + {abstract} setMaxSpeed(maxSpeed : int16_t) : void
+        }
     }
 
     class Board << namespace >> {
         + getDisplay() : IDisplay&
         + getMotors() : IMotors&
         + getLineSensors() : ILineSensors&
+        + getSettings() : ISettings&
     }
 }
 
@@ -69,6 +76,7 @@ serviceLayer -[hidden]-- hal
 MotorSpeedCalibrationState ....> IDisplay: <<use>>
 MotorSpeedCalibrationState ....> IMotors: <<use>>
 MotorSpeedCalibrationState ....> ILineSensors: <<use>>
+MotorSpeedCalibrationState ....> ISettings: <<use>>
 MotorSpeedCalibrationState ....> Board: <<use>>
 MotorSpeedCalibrationState *--> SimpleTimer
 MotorSpeedCalibrationState *--> RelativeEncoder
