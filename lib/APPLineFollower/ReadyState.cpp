@@ -80,6 +80,8 @@ void ReadyState::entry()
     {
         display.gotoXY(0, 1);
         display.print(m_lapTime);
+
+        LOG_INFO_VAL("Lap time: ", m_lapTime);
     }
 
     /* The line sensor value shall be output on console cyclic. */
@@ -128,6 +130,11 @@ void ReadyState::process(StateMachine& sm)
         LOG_DEBUG_TAIL();
 
         m_timer.restart();
+    }
+    else
+    {
+        /* Nothing to do. */
+        ;
     }
 }
 
