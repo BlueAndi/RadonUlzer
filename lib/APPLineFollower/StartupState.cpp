@@ -36,7 +36,9 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include "MotorSpeedCalibrationState.h"
+#include "LineSensorsCalibrationState.h"
 #include "Sound.h"
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -88,12 +90,52 @@ void StartupState::entry()
 
 void StartupState::process(StateMachine& sm)
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
+    Board&   board   = Board::getInstance();
+    IButton& buttonA = board.getButtonA();
+    IButton& buttonB = board.getButtonB();
 
+    /* Start max. motor speed calibration? */
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
         sm.setState(&MotorSpeedCalibrationState::getInstance());
+    }
+    /* Load max. motor speed from settings and start line sensor calibration? */
+    else if (true == buttonB.isPressed())
+    {
+        IDisplay&          display   = board.getDisplay();
+        ISettings&         settings  = board.getSettings();
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+        int16_t            maxSpeed  = settings.getMaxSpeed();
+
+        buttonB.waitForRelease();
+
+        /* If no calibration value is available, skip it and notify user. */
+        if (0 == maxSpeed)
+        {
+            display.clear();
+            display.print("Press A");
+            display.gotoXY(0, 1);
+            display.print("MCAL=0");
+        }
+        /* Calibration value is available. */
+        else
+        {
+            /* With setting the max. motor speed in [steps/s] the differential drive control
+             * can now be used.
+             */
+            diffDrive.setMaxMotorSpeed(maxSpeed);
+
+            /* Differential drive can now be used. */
+            diffDrive.enable();
+
+            sm.setState(&LineSensorsCalibrationState::getInstance());
+        }
+    }
+    else
+    {
+        /* Nothing to do. */
+        ;
     }
 }
 

@@ -41,6 +41,8 @@
 #include <Util.h>
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
+#include <Board.h>
+#include <Settings.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -197,11 +199,15 @@ void MotorSpeedCalibrationState::determineMaxMotorSpeed()
 void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    ISettings&         settings  = Board::getInstance().getSettings();
 
     /* Set the lower speed as max. motor speed to ensure that both motors
      * can reach the same max. speed.
      */
     int16_t maxSpeed = (m_maxSpeedLeft < m_maxSpeedRight) ? m_maxSpeedLeft : m_maxSpeedRight;
+
+    /* Store calibrated max. motor speed in the settings. */
+    settings.setMaxSpeed(maxSpeed);
 
     /* With setting the max. motor speed in [steps/s] the differential drive control
      * can now be used.
@@ -210,7 +216,7 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 
     /* Differential drive can now be used. */
     diffDrive.enable();
-    
+
     if (0 == maxSpeed)
     {
         ErrorState::getInstance().setErrorMsg("MS=0");
