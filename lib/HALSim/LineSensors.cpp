@@ -95,7 +95,6 @@ void LineSensors::calibrate()
 
 int16_t LineSensors::readLine()
 {
-    uint8_t        idx          = 0;
     uint32_t       estimatedPos = 0;
     uint32_t       numerator    = 0;
     uint32_t       denominator  = 0;
@@ -104,18 +103,18 @@ int16_t LineSensors::readLine()
 
     (void)getSensorValues();
 
-    while (MAX_SENSORS > idx)
+    for(uint32_t idx = 0; idx < MAX_SENSORS; ++idx)
     {
-        numerator += static_cast<uint32_t>(idx) * WEIGHT * static_cast<uint32_t>(m_sensorValuesU16[idx]);
-        denominator += static_cast<uint32_t>(m_sensorValuesU16[idx]);
+        uint32_t sensorValue = m_sensorValuesU16[idx];
+
+        numerator += idx * WEIGHT * sensorValue;
+        denominator += sensorValue;
 
         /* Keep track of whether we see the line at all. */
-        if (SENSOR_OFF_LINE_THRESHOLD < m_sensorValuesU16[idx])
+        if (SENSOR_OFF_LINE_THRESHOLD < sensorValue)
         {
             isOnLine = true;
         }
-
-        ++idx;
     }
 
     if (false == isOnLine)
@@ -134,12 +133,11 @@ int16_t LineSensors::readLine()
     else
     {
         /* Check to avoid division by zero. */
-        if (0 == denominator)
+        if (0 != denominator)
         {
-            denominator = 1;
+            estimatedPos = numerator / denominator;
         }
 
-        estimatedPos   = numerator / denominator;
         m_lastPosValue = estimatedPos;
     }
 
