@@ -95,34 +95,52 @@ void LineSensors::calibrate()
 
 int16_t LineSensors::readLine()
 {
-    const uint32_t WEIGHT0      = 0;
-    const uint32_t WEIGHT1      = 1000;
-    const uint32_t WEIGHT2      = 2000;
-    const uint32_t WEIGHT3      = 3000;
-    const uint32_t WEIGHT4      = 4000;
+    uint8_t        idx          = 0;
     uint32_t       estimatedPos = 0;
+    uint32_t       numerator    = 0;
+    uint32_t       denominator  = 0;
+    const uint32_t WEIGHT       = 1000;
+    bool           isOnLine     = false;
 
     (void)getSensorValues();
 
+    while (MAX_SENSORS > idx)
     {
-        uint32_t numerator =    (WEIGHT0 * m_sensorValuesU16[0] +
-                                 WEIGHT1 * m_sensorValuesU16[1] +
-                                 WEIGHT2 * m_sensorValuesU16[2] +
-                                 WEIGHT3 * m_sensorValuesU16[3] +
-                                 WEIGHT4 * m_sensorValuesU16[4]);
-        uint32_t denominator = (m_sensorValuesU16[0] +
-                                m_sensorValuesU16[1] +
-                                m_sensorValuesU16[2] +
-                                m_sensorValuesU16[3] +
-                                m_sensorValuesU16[4]);
+        numerator += static_cast<uint32_t>(idx) * WEIGHT * static_cast<uint32_t>(m_sensorValuesU16[idx]);
+        denominator += static_cast<uint32_t>(m_sensorValuesU16[idx]);
 
+        /* Keep track of whether we see the line at all. */
+        if (SENSOR_OFF_LINE_THRESHOLD < m_sensorValuesU16[idx])
+        {
+            isOnLine = true;
+        }
+
+        ++idx;
+    }
+
+    if (false == isOnLine)
+    {
+        /* If it last read to the left of center, return 0. */
+        if (m_lastPosValue < (((MAX_SENSORS - 1) * SENSOR_MAX_VALUE) / 2))
+        {
+            estimatedPos = 0;
+        }
+        /* If it last read to the right of center, return the max. value. */
+        else
+        {
+            estimatedPos = (MAX_SENSORS - 1) * SENSOR_MAX_VALUE;
+        }
+    }
+    else
+    {
         /* Check to avoid division by zero. */
         if (0 == denominator)
         {
             denominator = 1;
         }
 
-        estimatedPos = numerator / denominator;
+        estimatedPos   = numerator / denominator;
+        m_lastPosValue = estimatedPos;
     }
 
     return static_cast<int16_t>(estimatedPos);
