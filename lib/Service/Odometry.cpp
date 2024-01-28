@@ -35,7 +35,6 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <RobotConstants.h>
-#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -60,21 +59,16 @@
 /* Initialize static constant data. */
 const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(10U * RobotConstants::ENCODER_STEPS_PER_MM);
 
-/**
- * Logging source.
- */
-LOG_TAG("Odo");
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
 void Odometry::process()
 {
-    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();
-    int16_t  relStepsRight = m_relEncoders.getCountsRight();
-    uint16_t absStepsLeft  = abs(relStepsLeft);  /* Positive amount of delta steps left */
-    uint16_t absStepsRight = abs(relStepsRight); /* Positive amount of delta steps right*/
+    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();  /* [steps] */
+    int16_t  relStepsRight = m_relEncoders.getCountsRight(); /* [steps] */
+    uint16_t absStepsLeft  = abs(relStepsLeft);              /* Positive amount of delta steps left */
+    uint16_t absStepsRight = abs(relStepsRight);             /* Positive amount of delta steps right*/
     bool     isNoMovement  = detectStandStill(absStepsLeft, absStepsRight);
 
     /* Orientation shall not be calculated from stand still to driving,
@@ -110,10 +104,6 @@ void Odometry::process()
             m_countingXSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
             m_countingYSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
 
-            LOG_DEBUG_VAL("x: ", m_posX);
-            LOG_DEBUG_VAL("y: ", m_posY);
-            LOG_DEBUG_VAL("o (deg): ", MRAD2DEG(m_orientation));
-
             /* Reset to be able to calculate the next delta. */
             m_lastAbsRelEncStepsLeft  = 0;
             m_lastAbsRelEncStepsRight = 0;
@@ -124,7 +114,28 @@ void Odometry::process()
 
 uint32_t Odometry::getMileageCenter() const
 {
-    return m_mileage / RobotConstants::ENCODER_STEPS_PER_MM;
+    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();      /* [steps] */
+    int16_t  relStepsRight = m_relEncoders.getCountsRight();     /* [steps] */
+    int16_t  stepsCenter   = (relStepsLeft + relStepsRight) / 2; /* [steps] */
+    uint32_t mileage       = calculateMileage(m_mileage, stepsCenter);
+
+    /* For higher accuracy use the current relative steps left and right.
+     * The m_mileage will only be updated every STEPS_THRESHOLD, which
+     * will reset the relative encoders to 0.
+     */
+    return mileage / RobotConstants::ENCODER_STEPS_PER_MM;
+}
+
+int32_t Odometry::getOrientation() const
+{
+    int16_t relStepsLeft  = m_relEncoders.getCountsLeft();  /* [steps] */
+    int16_t relStepsRight = m_relEncoders.getCountsRight(); /* [steps] */
+
+    /* For higher accuracy use the current relative steps left and right.
+     * The m_orientation will only be updated every STEPS_THRESHOLD, which
+     * will reset the relative encoders to 0.
+     */
+    return calculateOrientation(m_orientation, relStepsLeft, relStepsRight);
 }
 
 void Odometry::clearPosition()
@@ -191,7 +202,7 @@ bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
     return m_isStandstill;
 }
 
-int32_t Odometry::calculateMileage(uint32_t mileage, int16_t stepsCenter)
+int32_t Odometry::calculateMileage(uint32_t mileage, int16_t stepsCenter) const
 {
     return mileage + static_cast<uint32_t>(abs(stepsCenter));
 }
