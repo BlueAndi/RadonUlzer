@@ -72,9 +72,9 @@ void LineSensorsCalibrationState::entry()
     Odometry&          odometry  = Odometry::getInstance();
 
     display.clear();
-    display.print("Calib");
+    display.print("Run");
     display.gotoXY(0, 1);
-    display.print("LineS");
+    display.print("LCAL");
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;

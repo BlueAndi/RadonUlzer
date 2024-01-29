@@ -41,7 +41,6 @@
 #include <Util.h>
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
-#include <Board.h>
 #include <Settings.h>
 
 /******************************************************************************
@@ -78,9 +77,9 @@ void MotorSpeedCalibrationState::entry()
     IDisplay& display = Board::getInstance().getDisplay();
 
     display.clear();
-    display.print("Calib");
+    display.print("Run");
     display.gotoXY(0, 1);
-    display.print("MSpeed");
+    display.print("MCAL");
 
     /* Setup relative encoders */
     m_relEncoders.clear();

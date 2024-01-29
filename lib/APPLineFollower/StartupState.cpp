@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
@@ -66,13 +66,31 @@
 
 void StartupState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    Board&     board         = Board::getInstance();
+    IDisplay&  display       = board.getDisplay();
+    ISettings& settings      = board.getSettings();
+    int16_t    maxMotorSpeed = settings.getMaxSpeed();
 
     /* Initialize HAL */
     Board::getInstance().init();
 
     /* Surprise the audience. */
     Sound::playMelody(Sound::MELODY_WELCOME);
+
+    if (0 < maxMotorSpeed)
+    {
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+        /* With setting the max. motor speed in [steps/s] the differential drive control
+         * can now be used.
+         */
+        diffDrive.setMaxMotorSpeed(maxMotorSpeed);
+
+        /* Differential drive can now be used. */
+        diffDrive.enable();
+
+        m_isMaxMotorSpeedCalibAvailable = true;
+    }
 
     /* Show team id / team name */
     display.clear();
@@ -83,16 +101,19 @@ void StartupState::entry()
 
     /* Show operator info on LCD */
     display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
+    display.print("A: MCAL");
+
+    if (true == m_isMaxMotorSpeedCalibAvailable)
+    {
+        display.gotoXY(0, 1);
+        display.print("B: LCAL");
+    }
 }
 
 void StartupState::process(StateMachine& sm)
 {
     Board&   board   = Board::getInstance();
     IButton& buttonA = board.getButtonA();
-    IButton& buttonB = board.getButtonB();
 
     /* Start max. motor speed calibration? */
     if (true == buttonA.isPressed())
@@ -100,42 +121,17 @@ void StartupState::process(StateMachine& sm)
         buttonA.waitForRelease();
         sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
-    /* Load max. motor speed from settings and start line sensor calibration? */
-    else if (true == buttonB.isPressed())
+
+    if (true == m_isMaxMotorSpeedCalibAvailable)
     {
-        IDisplay&          display   = board.getDisplay();
-        ISettings&         settings  = board.getSettings();
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-        int16_t            maxSpeed  = settings.getMaxSpeed();
+        IButton& buttonB = board.getButtonB();
 
-        buttonB.waitForRelease();
-
-        /* If no calibration value is available, skip it and notify user. */
-        if (0 == maxSpeed)
+        /* Load max. motor speed from settings and start line sensor calibration? */
+        if (true == buttonB.isPressed())
         {
-            display.clear();
-            display.print("Press A");
-            display.gotoXY(0, 1);
-            display.print("MCAL=0");
-        }
-        /* Calibration value is available. */
-        else
-        {
-            /* With setting the max. motor speed in [steps/s] the differential drive control
-             * can now be used.
-             */
-            diffDrive.setMaxMotorSpeed(maxSpeed);
-
-            /* Differential drive can now be used. */
-            diffDrive.enable();
-
+            buttonB.waitForRelease();
             sm.setState(&LineSensorsCalibrationState::getInstance());
         }
-    }
-    else
-    {
-        /* Nothing to do. */
-        ;
     }
 }
 

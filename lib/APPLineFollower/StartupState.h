@@ -96,10 +96,12 @@ private:
      */
     static const uint32_t TEAM_NAME_DURATION = 2000;
 
+    bool m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
+
     /**
      * Default constructor.
      */
-    StartupState()
+    StartupState() : m_isMaxMotorSpeedCalibAvailable(false)
     {
     }
 
