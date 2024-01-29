@@ -89,7 +89,8 @@ public:
         m_sensorCalibStarted(false),
         m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED),
         m_sensorMinValues(),
-        m_sensorMaxValues()
+        m_sensorMaxValues(),
+        m_lastPosValue(SENSOR_MAX_VALUE * (MAX_SENSORS / 2))
     {
     }
 
@@ -194,6 +195,11 @@ private:
      */
     static const int16_t SENSOR_MAX_VALUE = 1000;
 
+    /**
+     * If above the threshold, it will be assumed that the sensor see's the line.
+     */
+    static const uint16_t SENSOR_OFF_LINE_THRESHOLD = 200;
+
     const SimTime&   m_simTime;                      /**< Simulation time */
     uint16_t         m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
     webots::Emitter* m_emitters[MAX_SENSORS];        /**< The infrared emitters (0: most left) */
@@ -203,6 +209,7 @@ private:
     uint8_t  m_calibErrorInfo; /**< Indicates which sensor failed the calibration, if the calibration failed. */
     uint16_t m_sensorMinValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
     uint16_t m_sensorMaxValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
+    int16_t  m_lastPosValue;                 /**< Last valid line sensor position value. */
 
     /* Default constructor not allowed. */
     LineSensors();
