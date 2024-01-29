@@ -4,13 +4,18 @@
 
 import math
 import sys
+import paho.mqtt.client as mqtt
+import json
 from controller import Supervisor
 
 # Create the Supervisor instance.
 supervisor = Supervisor()
+root_node = supervisor.getRoot()
+children_field = root_node.getField('children')
 
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
+
 
 def get_robot_translation_values(robot_node):
     """Get robot translation field values.
@@ -24,6 +29,7 @@ def get_robot_translation_values(robot_node):
     robot_field_translation = robot_node.getField("translation")
     return robot_field_translation.getSFVec3f()
 
+
 def get_robot_rotation_values(robot_node):
     """Get robot rotation field values.
 
@@ -35,6 +41,7 @@ def get_robot_rotation_values(robot_node):
     """
     robot_field_rotation = robot_node.getField("rotation")
     return robot_field_rotation.getSFRotation()
+
 
 def get_robot_3d_rel_position(robot_node, prev_translation_values):
     """Get robot 3d relative position (x, y).
@@ -49,18 +56,19 @@ def get_robot_3d_rel_position(robot_node, prev_translation_values):
     vector_idx_x = 0
     vector_idx_y = 1
     vector_idx_z = 2
-    factor_m_to_mm = 1000 # Conversion factor from [m] to [mm]
+    factor_m_to_mm = 1000  # Conversion factor from [m] to [mm]
 
     robot_translation_values = get_robot_translation_values(robot_node)
 
-    rel_pos_x = ( robot_translation_values[vector_idx_x] - prev_translation_values[vector_idx_x] ) \
-                * factor_m_to_mm # [mm]
-    rel_pos_y = ( robot_translation_values[vector_idx_y] - prev_translation_values[vector_idx_y] ) \
-                * factor_m_to_mm # [mm]
-    rel_pos_z = ( robot_translation_values[vector_idx_z] - prev_translation_values[vector_idx_z] ) \
-                * factor_m_to_mm # [mm]
+    rel_pos_x = (robot_translation_values[vector_idx_x] - prev_translation_values[vector_idx_x]) \
+        * factor_m_to_mm  # [mm]
+    rel_pos_y = (robot_translation_values[vector_idx_y] - prev_translation_values[vector_idx_y]) \
+        * factor_m_to_mm  # [mm]
+    rel_pos_z = (robot_translation_values[vector_idx_z] - prev_translation_values[vector_idx_z]) \
+        * factor_m_to_mm  # [mm]
 
     return rel_pos_x, rel_pos_y, rel_pos_z
+
 
 def get_robot_2d_orientation(robot_node):
     """Get the robot 2d orientation angle [-PI, PI].
@@ -77,6 +85,16 @@ def get_robot_2d_orientation(robot_node):
 
     return robot_rotation_values[vector_idx_angle]
 
+
+def topic_callback(client, userdata, message) -> None:
+    jsonPayload = json.loads(message.payload.decode('utf-8'))
+    print(f"{jsonPayload.get('X')}:{jsonPayload.get('Y')}")
+    x = (jsonPayload.get('X') / 1000)
+    y = (jsonPayload.get('Y') / 1000)
+    children_field.importMFNodeFromString(
+        -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name ""}')
+
+
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller-
@@ -85,6 +103,12 @@ def main_loop():
         number: Status
     """
     status = 0
+
+    client = mqtt.Client()
+    client.on_message = topic_callback
+    client.connect("localhost")
+    client.subscribe("platoons/0/vehicles/1/targetWaypoint")
+    client.loop_start()
 
     # Get the time step of the current world.
     timestep = int(supervisor.getBasicTimeStep())
@@ -100,14 +124,16 @@ def main_loop():
     else:
 
         # Get robot absolute start position
-        robot_start_translation_values = get_robot_translation_values(robot_node)
+        robot_start_translation_values = get_robot_translation_values(
+            robot_node)
 
         prev_pos_x = -1
         prev_pos_y = -1
         prev_orientation_deg = -1
 
         while supervisor.step(timestep) != -1:
-            pos_x, pos_y, _ = get_robot_3d_rel_position(robot_node, robot_start_translation_values)
+            pos_x, pos_y, _ = get_robot_3d_rel_position(
+                robot_node, robot_start_translation_values)
             orientation = get_robot_2d_orientation(robot_node)
             orientation_deg = math.degrees(orientation)
 
@@ -124,6 +150,8 @@ def main_loop():
                 prev_pos_y = pos_y
                 prev_orientation_deg = orientation_deg
 
+    client.loop_stop()
     return status
+
 
 sys.exit(main_loop())

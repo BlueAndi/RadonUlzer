@@ -4,6 +4,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/project
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
 EXTERNPROTO "../protos/LineFollowerTrack.proto"
+IMPORTABLE EXTERNPROTO "../protos/Marker.proto"
 IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
 
 WorldInfo {
@@ -33,9 +34,14 @@ TexturedBackgroundLight {
 LineFollowerTrack {
 }
 DEF ROBOT Zumo32U4 {
-  translation -0.24713614078815466 -0.04863962992854465 0.013994298332013683
+  translation -0.25 -0.05 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
-  name "Zumo"
+  name "leader"
+}
+Zumo32U4 {
+  translation -0.25 -0.2 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_1"
 }
 Supervisor {
   name "Supervisor"
