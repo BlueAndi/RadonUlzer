@@ -120,9 +120,7 @@ void DrivingState::process(StateMachine& sm)
         break;
 
     case TRACK_STATUS_FINISHED:
-        /* Change to eror state because nothing else to do. */
-        ErrorState::getInstance().setErrorMsg("DONE");
-        sm.setState(&ErrorState::getInstance());
+        m_trackStatus = TRACK_STATUS_ON_TRACK;
         break;
 
     default:
