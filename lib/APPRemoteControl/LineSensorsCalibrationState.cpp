@@ -38,8 +38,8 @@
 #include <Odometry.h>
 #include <StateMachine.h>
 #include <Util.h>
-#include "RemoteCtrlState.h"
 #include "ErrorState.h"
+#include "DrivingState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -196,7 +196,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
     }
     else
     {
-        sm.setState(&RemoteCtrlState::getInstance());
+        sm.setState(&DrivingState::getInstance());
     }
 }
 

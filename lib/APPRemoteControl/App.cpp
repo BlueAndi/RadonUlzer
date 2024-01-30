@@ -34,14 +34,13 @@
  *****************************************************************************/
 #include "App.h"
 #include "StartupState.h"
-#include "RemoteCtrlState.h"
 #include "ErrorState.h"
+#include "DrivingState.h"
+#include "LineSensorsCalibrationState.h"
 #include <Board.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
-#include <Board.h>
-#include <Util.h>
 #include <Logging.h>
 
 /******************************************************************************
@@ -61,15 +60,12 @@
  *****************************************************************************/
 
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
-static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
-static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-/** Only in remote control state its possible to control the robot. */
-static bool gIsRemoteCtrlActive = false;
 
 /******************************************************************************
  * Public Methods
@@ -81,49 +77,32 @@ void App::setup()
     Logging::disable();
     Board::getInstance().init();
 
-    m_systemStateMachine.setState(&StartupState::getInstance());
-    m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
-
-    /* Remote control commands/responses */
-    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
-    m_smpChannelIdRemoteCtrlRsp =
-        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
-
-    /* Receiving linear motor speed left/right */
-    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedsChannelCallback);
-
-    /* Providing line sensor data */
-    m_smpChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
-
-    /* Receive initial vehicle data. */
-    m_smpServer.subscribeToChannel(INITIAL_VEHICLE_DATA_CHANNEL_NAME, App_initialDataChannelCallback);
-
-    /* Providing current vehicle data. */
-    m_smpChannelIdCurrentVehicleData =
-        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
-
-    if ((0U == m_smpChannelIdRemoteCtrlRsp) || (0U == m_smpChannelIdLineSensors) ||
-        (0U == m_smpChannelIdCurrentVehicleData))
+    if (false == setupSerialMuxProt())
     {
-        /* Channels not successfully created. */
-        ErrorState::getInstance().setErrorMsg("SMP_CH=0");
+        ErrorState::getInstance().setErrorMsg("SMP=0");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
     else
     {
-        m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
         m_reportTimer.start(REPORTING_PERIOD);
+        m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
+        m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
+        m_systemStateMachine.setState(&StartupState::getInstance());
     }
 }
 
 void App::loop()
 {
     Board::getInstance().process();
-    m_smpServer.process(millis());
     Speedometer::getInstance().process();
 
     if (true == m_controlInterval.isTimeout())
     {
+        /* The differential drive control needs the measured speed of the
+         * left and right wheel. Therefore it shall be processed after
+         * the speedometer.
+         */
         DifferentialDrive::getInstance().process(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
         /* The odometry unit needs to detect motor speed changes to be able to
@@ -135,16 +114,40 @@ void App::loop()
         m_controlInterval.restart();
     }
 
-    m_systemStateMachine.process();
+    if ((true == m_reportTimer.isTimeout()) && (true == m_smpServer.isSynced()))
+    {
+        /* Send current data to SerialMuxProt Client */
+        reportVehicleData();
 
-    /* Determine whether the robot can be remote controlled or not. */
-    if (&RemoteCtrlState::getInstance() == m_systemStateMachine.getState())
-    {
-        gIsRemoteCtrlActive = true;
+        m_reportTimer.restart();
     }
-    else
+
+    if ((true == m_statusTimer.isTimeout()) && (true == m_smpServer.isSynced()))
     {
-        gIsRemoteCtrlActive = false;
+        Status payload = {SMPChannelPayload::Status::STATUS_FLAG_OK};
+
+        if (&ErrorState::getInstance() == m_systemStateMachine.getState())
+        {
+            payload.status = SMPChannelPayload::Status::STATUS_FLAG_ERROR;
+        }
+
+        /* Ignoring return value, as error handling is not available. */
+        (void)m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+
+        m_statusTimer.restart();
+    }
+
+    if ((false == m_statusTimeoutTimer.isRunning()) && (true == m_smpServer.isSynced()))
+    {
+        /* Start status timeout timer once SMP is synced the first time. */
+        m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
+    }
+    else if (true == m_statusTimeoutTimer.isTimeout())
+    {
+        /* Not receiving status from DCS. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("DCS_TO");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+        m_statusTimeoutTimer.stop();
     }
 
     /* Send periodically line sensor data. */
@@ -155,16 +158,78 @@ void App::loop()
         m_sendLineSensorsDataInterval.restart();
     }
 
-    if (true == m_reportTimer.isTimeout())
-    {
-        /* Send current data to SerialMuxProt Client */
-        reportVehicleData();
+    m_smpServer.process(millis());
 
-        m_reportTimer.restart();
+    m_systemStateMachine.process();
+}
+
+void App::handleRemoteCommand(const Command& cmd)
+{
+    CommandResponse rsp = {cmd.commandId, SMPChannelPayload::RSP_ID_OK};
+
+    switch (cmd.commandId)
+    {
+    case SMPChannelPayload::CmdId::CMD_ID_IDLE:
+        /* Nothing to do. */
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB:
+        m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_REINIT_BOARD:
+        /* Ensure that the motors are stopped, before re-initialize the board. */
+        DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+
+        /* Re-initialize the board. This is required for the webots simulation in
+         * case the world is reset by a supervisor without restarting the RadonUlzer
+         * controller executable.
+         */
+        Board::getInstance().init();
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
+        rsp.maxMotorSpeed = Board::getInstance().getSettings().getMaxSpeed();
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
+        Odometry::getInstance().clearPosition();
+        Odometry::getInstance().clearMileage();
+        Odometry::getInstance().setPosition(cmd.xPos, cmd.yPos);
+        Odometry::getInstance().setOrientation(cmd.orientation);
+
+        StartupState::getInstance().notifyInitialDataIsSet();
+        break;
+
+    default:
+        /* Command not known/relevant to the application. */
+        rsp.responseId = SMPChannelPayload::RSP_ID_ERROR;
+        break;
     }
 
-    /* Send remote control command responses. */
-    sendRemoteControlResponses();
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &rsp, sizeof(rsp));
+}
+
+void App::systemStatusCallback(SMPChannelPayload::Status status)
+{
+    switch (status)
+    {
+    case SMPChannelPayload::STATUS_FLAG_OK:
+        /* Nothing to do. All good. */
+        break;
+
+    case SMPChannelPayload::STATUS_FLAG_ERROR:
+        ErrorState::getInstance().setErrorMsg("DCS_ERR");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+        m_statusTimeoutTimer.stop();
+        break;
+
+    default:
+        break;
+    }
+
+    m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
 }
 
 /******************************************************************************
@@ -175,20 +240,50 @@ void App::loop()
  * Private Methods
  *****************************************************************************/
 
-void App::sendRemoteControlResponses()
+void App::reportVehicleData()
 {
-    CommandResponse remoteControlRspId = RemoteCtrlState::getInstance().getCmdRsp();
+    Odometry&    odometry    = Odometry::getInstance();
+    Speedometer& speedometer = Speedometer::getInstance();
+    VehicleData  payload;
+    int32_t      xPos = 0;
+    int32_t      yPos = 0;
 
-    /* Send only on change. */
-    if ((remoteControlRspId.responseId != m_lastRemoteControlRspId.responseId) ||
-        (remoteControlRspId.commandId != m_lastRemoteControlRspId.commandId))
+    odometry.getPosition(xPos, yPos);
+    payload.xPos        = xPos;
+    payload.yPos        = yPos;
+    payload.orientation = odometry.getOrientation();
+    payload.left        = speedometer.getLinearSpeedLeft();
+    payload.right       = speedometer.getLinearSpeedRight();
+    payload.center      = speedometer.getLinearSpeedCenter();
+
+    /* Ignoring return value, as error handling is not available. */
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
+}
+
+bool App::setupSerialMuxProt()
+{
+    bool isSuccessful = false;
+
+    /* Channel subscription. */
+    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
+    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
+
+    /* Channel creation. */
+    m_serialMuxProtChannelIdRemoteCtrlRsp =
+        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
+    m_serialMuxProtChannelIdCurrentVehicleData =
+        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+    m_serialMuxProtChannelIdStatus = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
+
+    /* Channels succesfully created? */
+    if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
+        (0U != m_serialMuxProtChannelIdStatus))
     {
-        if (true == m_smpServer.sendData(m_smpChannelIdRemoteCtrlRsp, reinterpret_cast<uint8_t*>(&remoteControlRspId),
-                                         sizeof(remoteControlRspId)))
-        {
-            m_lastRemoteControlRspId = remoteControlRspId;
-        }
+        isSuccessful = true;
     }
+
+    return isSuccessful;
 }
 
 void App::sendLineSensorsData() const
@@ -209,27 +304,7 @@ void App::sendLineSensorsData() const
         }
     }
 
-    (void)m_smpServer.sendData(m_smpChannelIdLineSensors, &payload, sizeof(payload));
-}
-
-void App::reportVehicleData() const
-{
-    Odometry&    odometry    = Odometry::getInstance();
-    Speedometer& speedometer = Speedometer::getInstance();
-    VehicleData  payload;
-    int32_t      xPos = 0;
-    int32_t      yPos = 0;
-
-    odometry.getPosition(xPos, yPos);
-    payload.xPos        = xPos;
-    payload.yPos        = yPos;
-    payload.orientation = odometry.getOrientation();
-    payload.left        = speedometer.getLinearSpeedLeft();
-    payload.right       = speedometer.getLinearSpeedRight();
-    payload.center      = speedometer.getLinearSpeedCenter();
-
-    /* Ignoring return value, as error handling is not available. */
-    (void)m_smpServer.sendData(m_smpChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
 }
 
 /******************************************************************************
@@ -249,50 +324,44 @@ void App::reportVehicleData() const
  */
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
-    if ((nullptr != payload) && (sizeof(RemoteCtrlState::CmdId) == payloadSize))
+    if ((nullptr != payload) && (COMMAND_CHANNEL_DLC == payloadSize) && (nullptr != userData))
     {
-        RemoteCtrlState::CmdId cmdId = *reinterpret_cast<const RemoteCtrlState::CmdId*>(payload);
-
-        RemoteCtrlState::getInstance().execute(cmdId);
+        App*          application = reinterpret_cast<App*>(userData);
+        const Command cmd         = *reinterpret_cast<const Command*>(payload);
+        application->handleRemoteCommand(cmd);
     }
 }
 
 /**
- * Receives motor speeds over SerialMuxProt channel.
+ * Receives motor speed setpoints over SerialMuxProt channel.
  *
  * @param[in] payload       Motor speed left/right
  * @param[in] payloadSize   Size of twice motor speeds
  * @param[in] userData      User data
  */
-static void App_motorSpeedsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
+    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        DifferentialDrive::getInstance().setLinearSpeed(motorSpeedData->left, motorSpeedData->right);
+        DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
     }
 }
 
 /**
- * Receives initial data over SerialMuxProt channel.
+ * Receives current status of the DCS over SerialMuxProt channel.
  *
- * @param[in] payload       Initial vehicle data. Position coordinates, orientation, and motor speeds
- * @param[in] payloadSize   Size of VehicleData struct.
- * @param[in] userData      User data
+ * @param[in] payload       Status of the DCS.
+ * @param[in] payloadSize   Size of the Status Flag
+ * @param[in] userData      Instance of App class.
  */
-static void App_initialDataChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
-    if ((nullptr != payload) && (INITIAL_VEHICLE_DATA_CHANNEL_DLC == payloadSize) && (true == gIsRemoteCtrlActive))
+    if ((nullptr != payload) && (STATUS_CHANNEL_DLC == payloadSize) && (nullptr != userData))
     {
-        const VehicleData* vehicleData = reinterpret_cast<const VehicleData*>(payload);
-        Odometry&          odometry    = Odometry::getInstance();
-
-        odometry.clearPosition();
-        odometry.clearMileage();
-        odometry.setPosition(vehicleData->xPos, vehicleData->yPos);
-        odometry.setOrientation(vehicleData->orientation);
+        const Status* currentStatus = reinterpret_cast<const Status*>(payload);
+        App*          application   = reinterpret_cast<App*>(userData);
+        application->systemStatusCallback(currentStatus->status);
     }
 }

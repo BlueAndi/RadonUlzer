@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Motor speed calibration state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef MOTOR_SPEED_CALIBRATION_STATE_H
-#define MOTOR_SPEED_CALIBRATION_STATE_H
+#ifndef DRIVING_STATE_H
+#define DRIVING_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,10 +43,9 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <stdint.h>
 #include <IState.h>
 #include <SimpleTimer.h>
-#include <Board.h>
-#include <RelativeEncoders.h>
 
 /******************************************************************************
  * Macros
@@ -56,8 +55,8 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The motor speed calibration state. */
-class MotorSpeedCalibrationState : public IState
+/** The system driving state. */
+class DrivingState : public IState
 {
 public:
     /**
@@ -65,9 +64,9 @@ public:
      *
      * @return State instance.
      */
-    static MotorSpeedCalibrationState& getInstance()
+    static DrivingState& getInstance()
     {
-        static MotorSpeedCalibrationState instance;
+        static DrivingState instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -91,75 +90,41 @@ public:
      */
     void exit() final;
 
+    /**
+     * Set target motor speeds.
+     *
+     * @param[in] leftMotor  Left motor speed. [steps/s]
+     * @param[in] rightMotor Right motor speed. [steps/s]
+     */
+    void setTargetSpeeds(int16_t leftMotor, int16_t rightMotor);
+
 protected:
 private:
-    /** Calibration phases */
-    enum Phase
-    {
-        PHASE_1_BACK,    /**< Drive with max. speed backwards. */
-        PHASE_2_FORWARD, /**< Drive with max. speed forwards. */
-        PHASE_3_FINISHED /**< Calibration is finished. */
-    };
-
-    /**
-     * Duration in ms about to wait, until the calibration drive starts.
-     */
-    static const uint32_t WAIT_TIME = 1000;
-
-    /**
-     * Calibration drive duration in ms.
-     * It means how long the robot is driven with max. speed forward/backward.
-     */
-    static const uint32_t CALIB_DURATION = 1000;
-
-    SimpleTimer      m_timer; /**< Timer used to wait, until the calibration drive starts and for drive duration. */
-    Phase            m_phase; /**< Current calibration phase */
-    int16_t          m_maxSpeedLeft;  /**< Max. determined left motor speed [steps/s]. */
-    int16_t          m_maxSpeedRight; /**< Max. determined right motor speed [steps/s]. */
-    RelativeEncoders m_relEncoders;   /**< Relative encoders left/right. */
+    /** Flag: State is active. */
+    bool m_isActive;
 
     /**
      * Default constructor.
      */
-    MotorSpeedCalibrationState() :
-        m_timer(),
-        m_phase(PHASE_1_BACK),
-        m_maxSpeedLeft(0),
-        m_maxSpeedRight(0),
-        m_relEncoders(Board::getInstance().getEncoders())
+    DrivingState() : IState(), m_isActive(false)
     {
     }
 
     /**
      * Default destructor.
      */
-    ~MotorSpeedCalibrationState()
+    ~DrivingState()
     {
     }
 
     /* Not allowed. */
-    MotorSpeedCalibrationState(const MotorSpeedCalibrationState& state); /**< Copy construction of an instance. */
-    MotorSpeedCalibrationState& operator=(const MotorSpeedCalibrationState& state); /**< Assignment of an instance. */
-
-    /**
-     * Determine the max. motor speed, considering both driving directions.
-     * There are two steps necessary:
-     * - Drive full backward and call this method to determine.
-     * - Drive full forward and call this method to determine.
-     */
-    void determineMaxMotorSpeed();
-
-    /**
-     * Finish the calibration and determine next state.
-     *
-     * @param[in] sm    State machine
-     */
-    void finishCalibration(StateMachine& sm);
+    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
+    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* MOTOR_SPEED_CALIBRATION_STATE_H */
+#endif /* DRIVING_STATE_H */
 /** @} */

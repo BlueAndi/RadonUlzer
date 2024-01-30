@@ -25,19 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Remote control state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "RemoteCtrlState.h"
-#include <Board.h>
+#include "DrivingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
-#include "LineSensorsCalibrationState.h"
-#include "MotorSpeedCalibrationState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -63,65 +60,36 @@
  * Public Methods
  *****************************************************************************/
 
-void RemoteCtrlState::entry()
+void DrivingState::entry()
 {
-    IBoard&            board     = Board::getInstance();
-    ISettings&         settings  = board.getSettings();
-    int16_t            maxSpeed  = settings.getMaxSpeed();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
-    /* Load the max. motor speed always from the settings, because
-     * it may happen that there was no calibration before.
-     */
-    diffDrive.setMaxMotorSpeed(maxSpeed);
+    m_isActive = true;
+    diffDrive.setLinearSpeed(0, 0);
     diffDrive.enable();
-
-    /* It is assumed that by entering this state, that a pending command will be complete. */
-    finishCommand(RSP_ID_OK);
 }
 
-void RemoteCtrlState::process(StateMachine& sm)
+void DrivingState::process(StateMachine& sm)
 {
-    switch (m_cmdId)
-    {
-    case CMD_ID_IDLE:
-        /* Nothing to do. */
-        break;
-
-    case CMD_ID_START_LINE_SENSOR_CALIB:
-        sm.setState(&LineSensorsCalibrationState::getInstance());
-        break;
-
-    case CMD_ID_START_MOTOR_SPEED_CALIB:
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
-        break;
-
-    case CMD_ID_REINIT_BOARD:
-        /* Ensure that the motors are stopped, before re-initialize the board. */
-        DifferentialDrive::getInstance().setLinearSpeed(0, 0);
-
-        /* Re-initialize the board. This is required for the webots simulation in
-         * case the world is reset by a supervisor without restarting the RadonUlzer
-         * controller executable.
-         */
-        Board::getInstance().init();
-
-        finishCommand(RSP_ID_OK);
-        break;
-
-    case CMD_ID_GET_MAX_SPEED:
-        m_cmdRsp.maxMotorSpeed = DifferentialDrive::getInstance().getMaxMotorSpeed();
-        finishCommand(RSP_ID_OK);
-        break;
-
-    default:
-        break;
-    }
+    /* Nothing to do. */
+    (void)sm;
 }
 
-void RemoteCtrlState::exit()
+void DrivingState::exit()
 {
+    m_isActive = false;
+
+    /* Stop motors. */
+    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
     DifferentialDrive::getInstance().disable();
+}
+
+void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+{
+    if (true == m_isActive)
+    {
+        DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+    }
 }
 
 /******************************************************************************
