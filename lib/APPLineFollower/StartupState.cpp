@@ -67,16 +67,12 @@
 void StartupState::entry()
 {
     Board&     board         = Board::getInstance();
-    IDisplay&  display       = board.getDisplay();
     ISettings& settings      = board.getSettings();
     int16_t    maxMotorSpeed = settings.getMaxSpeed();
 
-    /* Initialize HAL */
-    Board::getInstance().init();
-
-    /* Surprise the audience. */
-    Sound::playMelody(Sound::MELODY_WELCOME);
-
+    /* If max. motor speed calibration value is available, the differential
+     * drive will be enabled.
+     */
     if (0 < maxMotorSpeed)
     {
         DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
@@ -92,22 +88,7 @@ void StartupState::entry()
         m_isMaxMotorSpeedCalibAvailable = true;
     }
 
-    /* Show team id / team name */
-    display.clear();
-    display.print(TEAM_NAME_LINE_1);
-    display.gotoXY(0, 1);
-    display.print(TEAM_NAME_LINE_2);
-    delay(TEAM_NAME_DURATION);
-
-    /* Show operator info on LCD */
-    display.clear();
-    display.print("A: MCAL");
-
-    if (true == m_isMaxMotorSpeedCalibAvailable)
-    {
-        display.gotoXY(0, 1);
-        display.print("B: LCAL");
-    }
+    showUserInfo(m_userInfoState);
 }
 
 void StartupState::process(StateMachine& sm)
@@ -122,22 +103,40 @@ void StartupState::process(StateMachine& sm)
         sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 
+    /* If the max. motor speed calibration is done, it will be possible to
+     * start the line sensor calibration immediately.
+     */
     if (true == m_isMaxMotorSpeedCalibAvailable)
     {
         IButton& buttonB = board.getButtonB();
 
-        /* Load max. motor speed from settings and start line sensor calibration? */
+        /* Start line sensor calibration? */
         if (true == buttonB.isPressed())
         {
             buttonB.waitForRelease();
             sm.setState(&LineSensorsCalibrationState::getInstance());
         }
     }
+
+    /* Periodically change the user info on the display. */
+    if (true == m_timer.isTimeout())
+    {
+        int8_t next = m_userInfoState + 1;
+
+        if (USER_INFO_COUNT <= next)
+        {
+            next = 0;
+        }
+
+        showUserInfo(static_cast<UserInfo>(next));
+        m_timer.restart();
+    }
 }
 
 void StartupState::exit()
 {
-    /* Nothing to do */
+    /* Next time start again from begin with the info. */
+    m_userInfoState = USER_INFO_TEAM_NAME;
 }
 
 /******************************************************************************
@@ -147,6 +146,51 @@ void StartupState::exit()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void StartupState::showUserInfo(UserInfo next)
+{
+    Board&     board    = Board::getInstance();
+    IDisplay&  display  = board.getDisplay();
+    ISettings& settings = board.getSettings();
+
+    display.clear();
+
+    switch (next)
+    {
+    case USER_INFO_TEAM_NAME:
+        display.print(TEAM_NAME_LINE_1);
+        display.gotoXY(0, 1);
+        display.print(TEAM_NAME_LINE_2);
+        break;
+
+    case USER_INFO_MAX_MOTOR_SPEED:
+        display.print("maxSpeed");
+        display.gotoXY(0, 1);
+        display.print(settings.getMaxSpeed());
+        break;
+
+    case USER_INFO_UI:
+        display.print("A: MCAL");
+
+        if (true == m_isMaxMotorSpeedCalibAvailable)
+        {
+            display.gotoXY(0, 1);
+            display.print("B: LCAL");
+        }
+        break;
+
+    case USER_INFO_COUNT:
+        /* fallthrough */
+    default:
+        display.print("?");
+        next = USER_INFO_TEAM_NAME;
+        break;
+    }
+
+    m_userInfoState = next;
+
+    m_timer.start(INFO_DURATION);
+}
 
 /******************************************************************************
  * External Functions
