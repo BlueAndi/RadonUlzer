@@ -186,7 +186,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
 
         Util::uintToStr(valueStr, sizeof(valueStr), lineSensors.getCalibErrorInfo());
 
-        strncpy(str, "Cal=", sizeof(str) - 1);
+        strncpy(str, "ELCAL ", sizeof(str) - 1);
         str[sizeof(str) - 1] = '\0';
 
         strncat(str, valueStr, sizeof(str) - strlen(valueStr) - 1);

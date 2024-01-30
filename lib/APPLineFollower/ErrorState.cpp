@@ -35,7 +35,7 @@
 #include "ErrorState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
+#include "StartupState.h"
 #include <DifferentialDrive.h>
 #include <Logging.h>
 
@@ -98,7 +98,7 @@ void ErrorState::process(StateMachine& sm)
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
+        sm.setState(&StartupState::getInstance());
     }
 }
 
