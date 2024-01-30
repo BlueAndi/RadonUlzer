@@ -158,7 +158,7 @@ void App::loop()
     m_systemStateMachine.process();
 }
 
-void App::handleRemoteCommands(const Command& cmd)
+void App::handleRemoteCommand(const Command& cmd)
 {
     CommandResponse rsp = {cmd.commandId, SMPChannelPayload::RSP_ID_OK};
 
@@ -283,7 +283,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
     {
         App*          application = reinterpret_cast<App*>(userData);
         const Command cmd         = *reinterpret_cast<const Command*>(payload);
-        application->handleRemoteCommands(cmd);
+        application->handleRemoteCommand(cmd);
     }
 }
 

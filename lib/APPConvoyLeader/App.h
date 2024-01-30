@@ -95,11 +95,11 @@ public:
     void loop();
 
     /**
-     * Handle remote commands received via SerialMuxProt.
+     * Handle remote command received via SerialMuxProt.
      *
      * @param[in] cmd Command to handle.
      */
-    void handleRemoteCommands(const Command& cmd);
+    void handleRemoteCommand(const Command& cmd);
 
     /**
      * System Status callback.
