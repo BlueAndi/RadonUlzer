@@ -73,9 +73,25 @@ static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payl
 
 void App::setup()
 {
+    IDisplay& display = Board::getInstance().getDisplay();
+
     Serial.begin(SERIAL_BAUDRATE);
+
+    /* Disable logging, because the serial interface is used
+     * for the serial multiplexer protocol to communicate with
+     * the DroidControlSystem.
+     */
     Logging::disable();
+
+    /* Initialize HAL */
     Board::getInstance().init();
+
+    /* Show team id / team name */
+    display.clear();
+    display.print(TEAM_NAME_LINE_1);
+    display.gotoXY(0, 1);
+    display.print(TEAM_NAME_LINE_2);
+    delay(TEAM_NAME_DURATION);
 
     if (false == setupSerialMuxProt())
     {

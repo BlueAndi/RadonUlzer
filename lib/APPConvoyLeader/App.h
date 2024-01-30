@@ -109,6 +109,11 @@ public:
     void systemStatusCallback(SMPChannelPayload::Status status);
 
 private:
+    /**
+     * Duration in ms how long the team id or team name shall be shown at startup.
+     */
+    static const uint32_t TEAM_NAME_DURATION = 2000U;
+
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
