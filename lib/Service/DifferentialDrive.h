@@ -228,27 +228,7 @@ private:
      * Construct differential drive control.
      * It is disabled by default.
      */
-    DifferentialDrive() :
-        m_isInit(false),
-        m_isEnabled(false),
-        m_maxMotorSpeed(0),
-        m_linearSpeedCenterSetPoint(0),
-        m_angularSpeedSetPoint(0),
-        m_linearSpeedLeftSetPoint(0),
-        m_linearSpeedRightSetPoint(0),
-        m_motorSpeedLeftPID(),
-        m_motorSpeedRightPID(),
-        m_lastLinearSpeedLeft(0),
-        m_lastLinearSpeedRight(0)
-    {
-        m_motorSpeedLeftPID.setPFactor(PID_P_NUMERATOR, PID_P_DENOMINATOR);
-        m_motorSpeedLeftPID.setIFactor(PID_I_NUMERATOR, PID_I_DENOMINATOR);
-        m_motorSpeedLeftPID.setDFactor(PID_D_NUMERATOR, PID_D_DENOMINATOR);
-
-        m_motorSpeedRightPID.setPFactor(PID_P_NUMERATOR, PID_P_DENOMINATOR);
-        m_motorSpeedRightPID.setIFactor(PID_I_NUMERATOR, PID_I_DENOMINATOR);
-        m_motorSpeedRightPID.setDFactor(PID_D_NUMERATOR, PID_D_DENOMINATOR);
-    }
+    DifferentialDrive();
 
     /**
      * Destroy differential drive control.

@@ -74,12 +74,13 @@ void ReadyState::entry()
     const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
 
     display.clear();
-    display.print("Rdy.");
+    display.print("A: Go");
 
     if (true == m_isLapTimeAvailable)
     {
         display.gotoXY(0, 1);
         display.print(m_lapTime);
+        display.print("ms");
 
         LOG_INFO_VAL("Lap time: ", m_lapTime);
     }
