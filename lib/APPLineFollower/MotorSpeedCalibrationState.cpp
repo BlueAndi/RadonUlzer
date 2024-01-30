@@ -74,12 +74,16 @@ LOG_TAG("MSCState");
 
 void MotorSpeedCalibrationState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    IDisplay&          display   = Board::getInstance().getDisplay();
 
     display.clear();
     display.print("Run");
     display.gotoXY(0, 1);
     display.print("MCAL");
+
+    /* Disable differential drive to avoid any bad influence. */
+    diffDrive.disable();
 
     /* Setup relative encoders */
     m_relEncoders.clear();
@@ -218,7 +222,7 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 
     if (0 == maxSpeed)
     {
-        ErrorState::getInstance().setErrorMsg("MS=0");
+        ErrorState::getInstance().setErrorMsg("EMCAL 0");
         sm.setState(&ErrorState::getInstance());
     }
     else
