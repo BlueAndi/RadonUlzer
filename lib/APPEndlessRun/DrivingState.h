@@ -92,12 +92,16 @@ public:
     void exit() final;
 
     /**
-     * Toggle slowdown for a 1.5 slowdown of the motor.
+     * Toggle slowdown of the motor.
+     *
+     * @param[in] enableIt enables/disables the slowing down of the robot.
      */
     void enableSlowdown(bool enableIt);
 
     /**
-     * Toggle speedup for a 1.5 speedup of the motor.
+     * Toggle speedup of the motor.
+     *
+     * @param[in] enableIt enables/disables the speed up of the robot.
      */
     void enableSpeedup(bool enableIt);
 

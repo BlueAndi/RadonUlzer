@@ -422,7 +422,6 @@ void DrivingState::adaptDriving(int16_t position)
     diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
 
-/** Slowdown toggle function. */
 void DrivingState::enableSlowdown(bool enableIt)
 {
     if (false == enableIt)
@@ -435,7 +434,6 @@ void DrivingState::enableSlowdown(bool enableIt)
     }
 }
 
-/** Speedup toggle function. */
 void DrivingState::enableSpeedup(bool enableIt)
 {
     if (false == enableIt)
