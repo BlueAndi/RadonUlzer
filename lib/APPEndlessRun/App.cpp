@@ -25,8 +25,8 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  LineFollower application
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  EndlessRun application
+ * @author Paul Gramescu <web@blue-andi.de>
  */
 
 /******************************************************************************
@@ -97,7 +97,6 @@ void App::setup()
     {
         /** Could not create SMP channel. */
     }
-    // m_reportTimer.start(150U);
 }
 
 void App::loop()
