@@ -73,7 +73,7 @@ void StartupState::entry()
     Board::getInstance().init();
 
     /* Surprise the audience. */
-    // Sound::playBeep();
+    Sound::playBeep();
 
     /* Show operator info on LCD */
     display.clear();
