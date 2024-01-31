@@ -25,8 +25,8 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Remote control state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @brief  Color state
+ * @author Paul Gramescu <paul.gramescu@gmail.com>
  */
 
 /******************************************************************************
@@ -39,6 +39,7 @@
 
 #include "StartupState.h"
 #include "DrivingState.h"
+#include "DifferentialDrive.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -79,7 +80,6 @@ void ColorState::process(StateMachine& sm)
     {
         /* No new color received. */
         sm.setState(&DrivingState::getInstance());
-
         break;
     }
     case COLOR_ID_RED:
@@ -88,9 +88,7 @@ void ColorState::process(StateMachine& sm)
         DrivingState::getInstance().enableSlowdown(false);
         DrivingState::getInstance().enableSpeedup(false);
 
-        /* Stop motors. */
-        IMotors& motors = Board::getInstance().getMotors();
-        motors.setSpeeds(0, 0);
+        DifferentialDrive::getInstance().setLinearSpeed(0, 0);
         break;
     }
     case COLOR_ID_GREEN:
@@ -105,6 +103,8 @@ void ColorState::process(StateMachine& sm)
     }
     case COLOR_ID_YELLOW_GR:
     {
+        DrivingState::getInstance().enableSlowdown(false);
+
         /* Toggle slowdown flag. */
         DrivingState::getInstance().enableSlowdown(true);
 
@@ -113,6 +113,8 @@ void ColorState::process(StateMachine& sm)
     }
     case COLOR_ID_YELLOW_RG:
     {
+        DrivingState::getInstance().enableSlowdown(false);
+
         /* Toggle speedup flag. */
         DrivingState::getInstance().enableSpeedup(true);
 
