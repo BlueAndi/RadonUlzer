@@ -45,10 +45,6 @@
 #include "ParameterSets.h"
 #include "ColorState.h"
 
-// #include <stdio.h>
-// #include <stdlib.h>
-
-// using namespace std;
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
