@@ -370,32 +370,36 @@ void DrivingState::adaptDriving(int16_t position)
     /** If the traffic light is transitioning from green to red, then slow down. */
     if (true == IS_YELLOW_GR)
     {
-        if (m_topSpeed > 100)
+        if (m_topSpeed > 50)
         {
             leftSpeed  = (m_topSpeed - speedDifference);
             rightSpeed = (m_topSpeed + speedDifference);
 
-            m_topSpeed -= 15;
+            m_topSpeed -= 8;
         }
         else
         {
-            IS_YELLOW_GR = false;
+            m_topSpeed = 40;
         }
     }
     /** If the traffic light is transitioning from green to red, then speed up. */
-    else if ((true == IS_YELLOW_RG))
+    else if (true == IS_YELLOW_RG)
     {
-        if (KEEP_TOP_SPEED != m_topSpeed)
+        /** Avoid staying in place after the color red. */
+        if (true == (DifferentialDrive::getInstance().getLinearSpeed() == 0))
         {
-            leftSpeed  = (m_topSpeed - speedDifference);
-            rightSpeed = (m_topSpeed + speedDifference);
-
-            m_topSpeed += 10;
+            DifferentialDrive::getInstance().setLinearSpeed(10, 10);
         }
-        else
+
+        leftSpeed  = (m_topSpeed - speedDifference);
+        rightSpeed = (m_topSpeed + speedDifference);
+
+        m_topSpeed += 2;
+
+        /** Constrain the current speed to the initial one. */
+        if (m_topSpeed > KEEP_TOP_SPEED)
         {
-            /** Force jumpout once speed is equal to operating top speed. */
-            IS_YELLOW_RG = false;
+            m_topSpeed = KEEP_TOP_SPEED;
         }
     }
     /** Green light? Keep moving with original calibrated speed. */
