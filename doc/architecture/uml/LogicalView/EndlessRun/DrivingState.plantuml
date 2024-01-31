@@ -1,6 +1,6 @@
 @startuml
 
-title Release Track State
+title Driving State
 
 package "Application" as appLayer {
 
@@ -17,24 +17,13 @@ package "Application" as appLayer {
 
     class ParameterSet <<struct>>
 
-    class ParameterSets <<entity>> {
-        + {static} getInstance() : ParameterSets&
-        + choose(setId : uint8_t) : void
-        + next() : void
-        + getCurrentSetId() const : uint8_t
-        + getParameterSet() : ParameterSet&
-    }
-
-    ParameterSet --+ ParameterSets
-    ParameterSet "1" <--* ParameterSets
-
     note right of ParameterSet
         Selects the default set of parameters.
     end note
 
     DrivingState .right.> ReadyState: <<use>>
     DrivingState .left.> ColorState: <<use>>
-    DrivingState .u.> ParameterSets: <<use>>
+    DrivingState .u.> ParameterSet: <<use>>
 }
 
 package "Service" as serviceLayer {
