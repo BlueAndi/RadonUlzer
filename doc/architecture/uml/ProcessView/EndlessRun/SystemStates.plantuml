@@ -20,13 +20,13 @@ state ReadyState: /do Default parameter set [0] is picked.
 state ReadyState: /do Wait for pushbutton A is triggered.
 state ReadyState: /exit Wait after button A is pressed.
 
-state DrivingState: /entry Start callback timer.
+state DrivingState: /entry Start intrerrupt timer.
 state DrivingState: /entry Enable red LED.
 state DrivingState: /do Perform driving.
 state DrivingState: /do Calculate odometry.
 state DrivingState: /do Send odometry information.
 state DrivingState: /exit Disable red LED.
-state DrivingState: /exit Stop callback timer.
+state DrivingState: /exit Stop intrerrupt timer.
 
 state ColorState: /entry Enable green LED.
 state ColorState: /do process color ID.
