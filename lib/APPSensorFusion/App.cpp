@@ -91,7 +91,6 @@ void App::loop()
     Board::getInstance().process();
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
-    IIMU& imu = Board::getInstance().getIMU();
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -111,8 +110,7 @@ void App::loop()
     }
 
     /* Send sensor data periodically if new data is available. */
-    if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
-        (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
+    if (true == m_sendSensorDataInterval.isTimeout())
     {
         sendSensorData();
         m_sendSensorDataInterval.restart();
