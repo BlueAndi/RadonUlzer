@@ -33,6 +33,8 @@
  * Includes
  *****************************************************************************/
 #include "IMU.h"
+#include <Arduino.h>
+#include <Wire.h>
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -56,32 +58,10 @@
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
-
 bool IMU::init()
 {
-    bool isInitSuccessful = m_imuDrv.init();
-    if (true == isInitSuccessful)
-    {
-        m_imuDrv.enableDefault();
-        /* TODO: TD074  Make sure that a Full Scale of 245 dps of the gyros are enough */
-        /* TODO: TD075	Make sure that it is valid to make the Full Scale setting in IMU::init() */
-        switch (m_imuDrv.getType())
-        {
-        case Zumo32U4IMUType::LSM303D_L3GD20H:
-            /* 0x00  means +/- 245 dps according to L3GD20H data sheet */
-            m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
-            break;
-        case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
-            /* 0x00  means +/- 245 dps according to LSM6DS33 data sheet */
-            m_imuDrv.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
-            break;
-        default:
-            isInitSuccessful = false;
-            break;
-        }
-    }
-
-    return isInitSuccessful;
+    Wire.begin();
+    return m_imuDrv.init();
 }
 
 void IMU::enableDefault()
@@ -92,13 +72,29 @@ void IMU::enableDefault()
 void IMU::configureForTurnSensing()
 {
     m_imuDrv.configureForTurnSensing();
+    /* Set a different Full Scale Factor. The Original Function uses +/- 2000 dps which is far too high for the our
+     * purposes. The values are defined in the Data Sheets of the gyros L3GD20H and LSM6DS33. */
+    switch (m_imuDrv.getType())
+    {
+    case Zumo32U4IMUType::LSM303D_L3GD20H:
+        /* Set the Full Scale factor of the L3GD20H to +/- 500 dps (0x10 = 0b00010000) */
+        m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x10);
+        break;
+    case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
+        /* Set the Full Scale factor of the LSM6DS33  to +/- 500 dps (0x7C = 0b01110100). Also set the Output Data Rate 
+         * to 833 Hz (high performance).  */
+        m_imuDrv.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x74);
+        break;
+    default:
+        return;
+    }
 }
 
 void IMU::readAccelerometer()
 {
     m_imuDrv.readAcc();
-    m_accelerometerValues.valueX = m_imuDrv.a.x;
-    m_accelerometerValues.valueY = m_imuDrv.a.y;
+    m_accelerometerValues.valueX = m_imuDrv.a.x - m_rawAccelerometerOffsetX;
+    m_accelerometerValues.valueY = m_imuDrv.a.y - m_rawAccelerometerOffsetY;
     m_accelerometerValues.valueZ = m_imuDrv.a.z;
 }
 
@@ -107,7 +103,7 @@ void IMU::readGyro()
     m_imuDrv.readGyro();
     m_gyroValues.valueX = m_imuDrv.g.x;
     m_gyroValues.valueY = m_imuDrv.g.y;
-    m_gyroValues.valueZ = m_imuDrv.g.z;
+    m_gyroValues.valueZ = m_imuDrv.g.z - m_rawGyroOffsetZ;
 }
 
 void IMU::readMagnetometer()
@@ -137,9 +133,9 @@ const void IMU::getAccelerationValues(IMUData* accelerationValues)
 {
     if (nullptr != accelerationValues)
     {
-        accelerationValues->valueX = m_accelerometerValues.valueX - m_rawAccelerometerOffsetX;
-        accelerationValues->valueY = m_accelerometerValues.valueY - m_rawAccelerometerOffsetY;
-        accelerationValues->valueZ = m_accelerometerValues.valueZ - m_rawAccelerometerOffsetZ;
+        accelerationValues->valueX = m_accelerometerValues.valueX;
+        accelerationValues->valueY = m_accelerometerValues.valueY;
+        accelerationValues->valueZ = m_accelerometerValues.valueZ;
     }
 }
 
@@ -147,9 +143,9 @@ const void IMU::getTurnRates(IMUData* turnRates)
 {
     if (nullptr != turnRates)
     {
-        turnRates->valueX = m_gyroValues.valueX - m_rawGyroOffsetX;
-        turnRates->valueY = m_gyroValues.valueY - m_rawGyroOffsetY;
-        turnRates->valueZ = m_gyroValues.valueZ - m_rawGyroOffsetZ;
+        turnRates->valueX = m_gyroValues.valueX;
+        turnRates->valueY = m_gyroValues.valueY;
+        turnRates->valueZ = m_gyroValues.valueZ;
     }
 }
 
@@ -168,46 +164,38 @@ const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 void IMU::calibrate()
 {
     /* Define how many measurements should be made for calibration. */
-    const uint8_t NUMBER_OF_MEASUREMENTS = 10;
+    const int32_t NUMBER_OF_MEASUREMENTS = 50;
 
     /* Calibration takes place while the robot doesn't move. Therefore the Acceleration and turn values are near 0 and
      * int16_t values are enough. */
-    int16_t sumOfRawAccelValuesX = 0;
-    int16_t sumOfRawAccelValuesY = 0;
-    int16_t sumOfRawAccelValuesZ = 0;
+    int32_t sumOfRawAccelValuesX = 0;
+    int32_t sumOfRawAccelValuesY = 0;
 
-    int16_t sumOfRawGyroValuesX = 0;
-    int16_t sumOfRawGyroValuesY = 0;
-    int16_t sumOfRawGyroValuesZ = 0;
+    int32_t sumOfRawGyroValuesZ = 0;
 
-    for (uint8_t measurementIdx = 0; measurementIdx < NUMBER_OF_MEASUREMENTS; ++measurementIdx)
+    int32_t measurementIndex = 0;
+    while (measurementIndex < NUMBER_OF_MEASUREMENTS)
     {
-        while (!m_imuDrv.accDataReady())
+        if ((true == m_imuDrv.accDataReady()) && (true == m_imuDrv.gyroDataReady()))
         {
-            /* Do nothing and wait until new Accelerometer Data is available. */
+            m_imuDrv.readAcc();
+            m_imuDrv.readGyro();
+            sumOfRawGyroValuesZ += m_imuDrv.g.z;
+            sumOfRawAccelValuesX += m_imuDrv.a.x;
+            sumOfRawAccelValuesY += m_imuDrv.a.y;
+            ++measurementIndex;
         }
-        m_imuDrv.readAcc();
-        sumOfRawAccelValuesX += m_imuDrv.a.x;
-        sumOfRawAccelValuesY += m_imuDrv.a.y;
-        sumOfRawAccelValuesZ += m_imuDrv.a.z;
-
-        while (!m_imuDrv.gyroDataReady())
+        else
         {
-            /* Do nothing and wait until new Gyro Data is available. */
+            /* Do nothing and wati until new Sensor Data is available. */
+            delay(20U);
         }
-        m_imuDrv.readGyro();
-        sumOfRawGyroValuesX += m_imuDrv.g.x;
-        sumOfRawGyroValuesY += m_imuDrv.g.y;
-        sumOfRawGyroValuesZ += m_imuDrv.g.z;
     }
 
-    m_rawAccelerometerOffsetX = sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS;
-    m_rawAccelerometerOffsetY = sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS;
-    m_rawAccelerometerOffsetZ = sumOfRawAccelValuesZ / NUMBER_OF_MEASUREMENTS;
+    m_rawAccelerometerOffsetX = static_cast<int16_t>(sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS); /* In digits */
+    m_rawAccelerometerOffsetY = static_cast<int16_t>(sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS); /* In digits */
 
-    m_rawGyroOffsetX = sumOfRawGyroValuesX / NUMBER_OF_MEASUREMENTS;
-    m_rawGyroOffsetY = sumOfRawGyroValuesY / NUMBER_OF_MEASUREMENTS;
-    m_rawGyroOffsetZ = sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS;
+    m_rawGyroOffsetZ = static_cast<int16_t>(sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS); /* In digits */
 }
 
 /******************************************************************************

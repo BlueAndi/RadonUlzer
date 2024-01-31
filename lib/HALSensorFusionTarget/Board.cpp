@@ -65,7 +65,6 @@ void Board::init()
     m_motors.init();
     /*  TODO: TD084	React if IMU initialization fails */
     (void)m_imu.init();
-    m_imu.enableDefault();
     m_imu.configureForTurnSensing();
     m_imu.calibrate();
     m_settings.init();
