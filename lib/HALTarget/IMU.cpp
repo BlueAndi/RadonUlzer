@@ -65,25 +65,9 @@ bool IMU::init()
     if (true == isInitSuccessful)
     {
         m_imuDrv.enableDefault();
-        /* TODO: TD074  Make sure that a Full Scale of 245 dps of the gyros are enough */
-        /* TODO: TD075	Make sure that it is valid to make the Full Scale setting in IMU::init() */
-        switch (m_imuDrv.getType())
-        {
-        case Zumo32U4IMUType::LSM303D_L3GD20H:
-            /* 0x00  means +/- 245 dps according to L3GD20H data sheet */
-            m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x00);
-            break;
-        case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
-            /* 0x00  means +/- 245 dps according to LSM6DS33 data sheet */
-            m_imuDrv.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x00);
-            break;
-        default:
-            isInitSuccessful = false;
-            break;
-        }
     }
 
-    return isInitSuccessful;
+    return m_imuDrv.init();
 }
 
 void IMU::enableDefault()
