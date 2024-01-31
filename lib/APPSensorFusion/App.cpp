@@ -150,11 +150,6 @@ void App::sendSensorData()
     imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
-    /* Read the magnetometer. */
-    IMUData magnetometerValues;
-    imu.readMagnetometer();
-    imu.getMagnetometerValues(&magnetometerValues);
-
     /* Read the gyro. */
     IMUData turnRates;
     imu.readGyro();
@@ -165,9 +160,6 @@ void App::sendSensorData()
     payload.positionOdometryY   = positionOdometryY;
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
-    payload.accelerationY       = accelerationValues.valueY;
-    payload.magnetometerValueX  = magnetometerValues.valueX;
-    payload.magnetometerValueY  = magnetometerValues.valueY;
     payload.turnRate            = turnRates.valueZ;
 
     uint32_t duration = 0U;
