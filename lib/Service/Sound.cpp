@@ -150,7 +150,18 @@ void Sound::playAlarm()
      */
     buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
     while (true == buzzer.isPlaying())
-        ;
+    {
+        /* Only required for simulation:
+         * 1) The sound is stopped by the buzzer process(). Without stopping it,
+         * the isPlaying() will always return true.
+         * 2) The simulation time must be stepped forward, otherwise during process()
+         * the sound won't stop. The workaround is here to use a delay() which
+         * internally ticks the simulation time.
+         */
+        buzzer.process();
+        delay(1U);
+    }
+
     delay(SILENCE_DURATION);
     buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
 }
