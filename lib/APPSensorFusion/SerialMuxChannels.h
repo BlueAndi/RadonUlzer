@@ -80,24 +80,6 @@ typedef struct _SensorData
      */
     int16_t accelerationX;
 
-    /** Acceleration in y direction as a raw sensor value in digits.
-     * It can be converted into a physical acceleration value in mm/s^2 via the
-     * multiplication with a sensitivity factor in mm/s^2/digit.
-     */
-    int16_t accelerationY;
-
-    /** Magnetometer value in x direction as a raw sensor value in digits.
-     * It does not require conversion into a physical magnetometer value since only the
-     * ratio with the value in y direction is important.
-     */
-    int16_t magnetometerValueX;
-
-    /** Magnetometer value in y direction as a raw sensor value in digits.
-     * It does not require conversion into a physical magnetometer value since only the
-     * ratio with the value in x direction is important.
-     */
-    int16_t magnetometerValueY;
-
     /** Gyro value around z axis as a raw sensor value in digits.
      * It can be converted into a physical turn rate in mrad/s via the multiplication
      * with a sensitivity factor in mrad/s/digit.

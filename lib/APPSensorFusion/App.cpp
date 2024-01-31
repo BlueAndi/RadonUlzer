@@ -91,7 +91,6 @@ void App::loop()
     Board::getInstance().process();
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
-    IIMU& imu = Board::getInstance().getIMU();
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -111,8 +110,7 @@ void App::loop()
     }
 
     /* Send sensor data periodically if new data is available. */
-    if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
-        (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
+    if (true == m_sendSensorDataInterval.isTimeout())
     {
         sendSensorData();
         m_sendSensorDataInterval.restart();
@@ -150,11 +148,6 @@ void App::sendSensorData()
     imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
-    /* Read the magnetometer. */
-    IMUData magnetometerValues;
-    imu.readMagnetometer();
-    imu.getMagnetometerValues(&magnetometerValues);
-
     /* Read the gyro. */
     IMUData turnRates;
     imu.readGyro();
@@ -165,9 +158,6 @@ void App::sendSensorData()
     payload.positionOdometryY   = positionOdometryY;
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
-    payload.accelerationY       = accelerationValues.valueY;
-    payload.magnetometerValueX  = magnetometerValues.valueX;
-    payload.magnetometerValueY  = magnetometerValues.valueY;
     payload.turnRate            = turnRates.valueZ;
 
     uint32_t duration = 0U;
