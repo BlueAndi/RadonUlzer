@@ -24,21 +24,26 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation -0.30030023157811303 -0.04988032837747745 0.9525396179451472 3.455437156759306
-  position 4.5012628912386266 1.3672409210268386 3.0428547964900385
+  orientation -0.30528237822119686 -0.03204915121292966 0.9517223972641082 3.3407683483106103
+  position 4.980495289978594 1.0814266297805717 3.565853675440393
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
 DEF Zumo Zumo32U4 {
-  translation 0.560581 0.374846 0.0139943
+  translation 1.33081 -1.61973 0.0139943
   rotation -1.05647e-06 8.74668e-07 1 1.58808
   name "Zumo"
 }
 TrafficLightDCS {
-  translation 0 0 -0.2
+  translation 0.61 0.79 -0.44
   controller "<extern>"
+}
+TrafficLightDCS {
+  translation 0.45 0.91 -0.34
+  name "TrafficLightDCS2"
+  controller "<none>"
 }
 Supervisor {
   name "Supervisor"
