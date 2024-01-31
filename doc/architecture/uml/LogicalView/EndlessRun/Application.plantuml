@@ -13,7 +13,7 @@ package "Application" as appLayer {
         The program entry point.
     end note
 
-    class StateMachine <<control>> {
+    class StateMachine {
         + setState(state : IState*) : void
         + getState() : IState*
         + process() : void
@@ -37,13 +37,13 @@ package "Application" as appLayer {
         to realize it.
     end note
 
-    class StartupState <<control>>
-    class MotorSpeedCalibrationState <<control>>
-    class LineSensorsCalibrationState <<control>>
-    class ErrorState <<control>>
-    class DrivingState <<control>>
-    class ColorState <<control>>
-    class ReadyState <<control>>
+    class StartupState 
+    class MotorSpeedCalibrationState 
+    class LineSensorsCalibrationState 
+    class ErrorState 
+    class DrivingState 
+    class ColorState 
+    class ReadyState 
 
     class ParameterSets <<entity>>
 
