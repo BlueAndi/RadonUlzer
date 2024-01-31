@@ -33,7 +33,6 @@
  * Includes
  *****************************************************************************/
 #include <Board.h>
-#include <Wire.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -61,7 +60,6 @@
 
 void Board::init()
 {
-    Wire.begin();
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();

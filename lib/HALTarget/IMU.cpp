@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include "IMU.h"
 #include <Arduino.h>
+#include <Wire.h>
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -59,6 +60,7 @@
  *****************************************************************************/
 bool IMU::init()
 {
+    Wire.begin();
     return m_imuDrv.init();
 }
 
@@ -162,7 +164,7 @@ const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 void IMU::calibrate()
 {
     /* Define how many measurements should be made for calibration. */
-    const int32_t NUMBER_OF_MEASUREMENTS = 50U;
+    const int32_t NUMBER_OF_MEASUREMENTS = 50;
 
     /* Calibration takes place while the robot doesn't move. Therefore the Acceleration and turn values are near 0 and
      * int16_t values are enough. */
@@ -174,7 +176,7 @@ void IMU::calibrate()
     int32_t measurementIndex = 0;
     while (measurementIndex < NUMBER_OF_MEASUREMENTS)
     {
-        if (true == m_imuDrv.accDataReady() && true == m_imuDrv.gyroDataReady())
+        if ((true == m_imuDrv.accDataReady()) && (true == m_imuDrv.gyroDataReady()))
         {
             m_imuDrv.readAcc();
             m_imuDrv.readGyro();
@@ -185,14 +187,15 @@ void IMU::calibrate()
         }
         else
         {
+            /* Do nothing and wati until new Sensor Data is available. */
             delay(20U);
         }
     }
 
-    m_rawAccelerometerOffsetX = static_cast<int16_t>(sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS);
-    m_rawAccelerometerOffsetY = static_cast<int16_t>(sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS);
+    m_rawAccelerometerOffsetX = static_cast<int16_t>(sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS); /* In digits */
+    m_rawAccelerometerOffsetY = static_cast<int16_t>(sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS); /* In digits */
 
-    m_rawGyroOffsetZ = static_cast<int16_t>(sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS);
+    m_rawGyroOffsetZ = static_cast<int16_t>(sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS); /* In digits */
 }
 
 /******************************************************************************
