@@ -27,7 +27,7 @@
 /**
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <Settings.h>
 
 /******************************************************************************
  * Macros
@@ -71,10 +72,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -201,12 +201,22 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
     {
         return m_proximitySensors;
+    }
+
+    /**
+     * Get settings instance.
+     *
+     * @return Settings
+     */
+    ISettings& getSettings() final
+    {
+        return m_settings;
     }
 
     /**
@@ -218,7 +228,6 @@ public:
     }
 
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -255,6 +264,9 @@ private:
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
 
+    /** Settings */
+    Settings m_settings;
+
     /**
      * Constructs the concrete board.
      */
@@ -266,7 +278,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

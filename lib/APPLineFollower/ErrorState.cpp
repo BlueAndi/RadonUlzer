@@ -36,6 +36,8 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include "MotorSpeedCalibrationState.h"
+#include <DifferentialDrive.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -57,6 +59,11 @@
  * Local Variables
  *****************************************************************************/
 
+/**
+ * Error logging tag.
+ */
+LOG_TAG("EState");
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -64,11 +71,23 @@
 void ErrorState::entry()
 {
     IDisplay& display = Board::getInstance().getDisplay();
+    
+    DifferentialDrive::getInstance().disable();
 
     display.clear();
-    display.print("Error");
+    display.print("A: CONT");
     display.gotoXY(0, 1);
-    display.print(m_errorMsg);
+
+    if ('\0' == m_errorMsg[0])
+    {
+        display.print("ERR");
+    }
+    else
+    {
+        display.print(m_errorMsg);
+    }
+
+    LOG_ERROR_VAL("Error: ", m_errorMsg);
 }
 
 void ErrorState::process(StateMachine& sm)

@@ -128,6 +128,7 @@ void Board::init()
     m_lineSensors.init();
     m_motors.init();
     m_proximitySensors.initFrontSensor();
+    m_settings.init();
 }
 
 /******************************************************************************
@@ -160,7 +161,8 @@ Board::Board() :
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
     m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                       m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME))
+                       m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
+    m_settings()
 {
 }
 

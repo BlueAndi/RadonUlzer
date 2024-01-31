@@ -25,25 +25,19 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Channel structure definition for the SerialMuxProt.
- * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
- *
- * @addtogroup Application
- *
- * @{
+ *  @brief  Channel structure definition for the SerialMuxProt.
+ *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
  */
-#ifndef SERIAL_MUX_CHANNELS_H
-#define SERIAL_MUX_CHANNELS_H
 
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
+#ifndef SERIAL_MUX_CHANNELS_H_
+#define SERIAL_MUX_CHANNELS_H_
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
 
 #include <Arduino.h>
+#include <SerialMuxProtServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -52,11 +46,17 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of Channel to send Current Vehicle Data to. */
-#define CURRENT_VEHICLE_DATA_CHANNEL_DLC_CHANNEL_NAME "CURR_DATA"
+/** Name of Channel to send Commands to. */
+#define COMMAND_CHANNEL_NAME "CMD"
 
-/** DLC of Current Vehicle Data Channel */
-#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+/** DLC of Command Channel. */
+#define COMMAND_CHANNEL_DLC (sizeof(Command))
+
+/** Name of Channel to receive Command Responses from. */
+#define COMMAND_RESPONSE_CHANNEL_NAME "CMD_RSP"
+
+/** DLC of Command Response Channel. */
+#define COMMAND_RESPONSE_CHANNEL_DLC (sizeof(CommandResponse))
 
 /** Name of Channel to send Motor Speed Setpoints to. */
 #define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
@@ -64,9 +64,99 @@
 /** DLC of Speedometer Channel */
 #define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
 
+/** Name of Channel to send Current Vehicle Data to. */
+#define CURRENT_VEHICLE_DATA_CHANNEL_NAME "CURR_DATA"
+
+/** DLC of Current Vehicle Data Channel */
+#define CURRENT_VEHICLE_DATA_CHANNEL_DLC (sizeof(VehicleData))
+
+/** Name of Channel to send system status to. */
+#define STATUS_CHANNEL_NAME "STATUS"
+
+/** DLC of Status Channel */
+#define STATUS_CHANNEL_DLC (sizeof(Status))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
+
+/** SerialMuxProt Server with fixed template argument. */
+typedef SerialMuxProtServer<MAX_CHANNELS> SMPServer;
+
+/** Channel payload constants. */
+namespace SMPChannelPayload
+{
+    /** Remote control commands. */
+    typedef enum : uint8_t
+    {
+        CMD_ID_IDLE = 0,                /**< Nothing to do. */
+        CMD_ID_START_LINE_SENSOR_CALIB, /**< Start line sensor calibration. */
+        CMD_ID_START_MOTOR_SPEED_CALIB, /**< Start motor speed calibration. */
+        CMD_ID_REINIT_BOARD,            /**< Re-initialize the board. Required for webots simulation. */
+        CMD_ID_GET_MAX_SPEED,           /**< Get maximum speed. */
+        CMD_ID_START_DRIVING,           /**< Start driving. */
+        CMD_ID_SET_INIT_POS             /**< Set initial position. */
+
+    } CmdId; /**< Command ID */
+
+    /** Remote control command responses. */
+    typedef enum : uint8_t
+    {
+        RSP_ID_OK = 0,  /**< Command successful executed. */
+        RSP_ID_PENDING, /**< Command is pending. */
+        RSP_ID_ERROR    /**< Command failed. */
+
+    } RspId; /**< Response ID */
+
+    /** Status flags. */
+    typedef enum : uint8_t
+    {
+        STATUS_FLAG_OK = 0, /**< Everything is fine. */
+        STATUS_FLAG_ERROR   /**< Something is wrong. */
+
+    } Status; /**< Status flag */
+
+} /* namespace SMPChannelPayload */
+
+/** Struct of the "Command" channel payload. */
+typedef struct _Command
+{
+    SMPChannelPayload::CmdId commandId; /**< Command ID */
+
+    /** Command payload. */
+    union
+    {
+        /** Init data command payload. */
+        struct
+        {
+            int32_t xPos;        /**< X position [mm]. */
+            int32_t yPos;        /**< Y position [mm]. */
+            int32_t orientation; /**< Orientation [mrad]. */
+        };
+    };
+
+} __attribute__((packed)) Command;
+
+/** Struct of the "Command Response" channel payload. */
+typedef struct _CommandResponse
+{
+    SMPChannelPayload::CmdId commandId;  /**< Command ID */
+    SMPChannelPayload::RspId responseId; /**< Response to the command */
+
+    /** Response Payload. */
+    union
+    {
+        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
+    };
+} __attribute__((packed)) CommandResponse;
+
+/** Struct of the "Speed" channel payload. */
+typedef struct _SpeedData
+{
+    int16_t left;   /**< Left motor speed [steps/s] */
+    int16_t right;  /**< Right motor speed [steps/s] */
+    int16_t center; /**< Center motor speed [steps/s] */
+} __attribute__((packed)) SpeedData;
 
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
@@ -79,16 +169,14 @@ typedef struct _VehicleData
     int16_t center;      /**< Center speed [steps/s]. */
 } __attribute__((packed)) VehicleData;
 
-/** Struct of the "Speed" channel payload. */
-typedef struct _SpeedData
+/** Struct of the "Status" channel payload. */
+typedef struct _Status
 {
-    int16_t left;  /**< Left motor speed [steps/s]. */
-    int16_t right; /**< Right motor speed [steps/s]. */
-} __attribute__((packed)) SpeedData;
+    SMPChannelPayload::Status status; /**< Status */
+} __attribute__((packed)) Status;
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* SERIAL_MUX_CHANNELS_H */
-/** @} */
+#endif /* SERIAL_MUX_CHANNELS_H_ */

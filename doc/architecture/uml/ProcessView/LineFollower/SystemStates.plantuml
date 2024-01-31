@@ -12,6 +12,7 @@ state ReleaseTrackState
 
 [*] --> StartupState: Power up
 StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+StartupState --> LineSensorsCalibrationState: [Pushbutton B triggered] and\n[Max. motor speed calib. is available in settings]
 MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
 LineSensorsCalibrationState --> ReadyState: [Calibration finished]
 LineSensorsCalibrationState --> ErrorState: [Calibration failed]
@@ -29,6 +30,8 @@ end note
 note right of MotorSpeedCalibrationState
     Measures the max. left/right encoder steps / s with
     100% motor speed. Required for the motor speed PID.
+
+    Stores the calibration value in the settings persistent.
 end note
 
 note right of LineSensorsCalibrationState

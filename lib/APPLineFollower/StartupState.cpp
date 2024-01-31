@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
@@ -36,7 +36,9 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include "MotorSpeedCalibrationState.h"
+#include "LineSensorsCalibrationState.h"
 #include "Sound.h"
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,13 +66,31 @@
 
 void StartupState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    Board&     board         = Board::getInstance();
+    IDisplay&  display       = board.getDisplay();
+    ISettings& settings      = board.getSettings();
+    int16_t    maxMotorSpeed = settings.getMaxSpeed();
 
     /* Initialize HAL */
     Board::getInstance().init();
 
     /* Surprise the audience. */
     Sound::playMelody(Sound::MELODY_WELCOME);
+
+    if (0 < maxMotorSpeed)
+    {
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+        /* With setting the max. motor speed in [steps/s] the differential drive control
+         * can now be used.
+         */
+        diffDrive.setMaxMotorSpeed(maxMotorSpeed);
+
+        /* Differential drive can now be used. */
+        diffDrive.enable();
+
+        m_isMaxMotorSpeedCalibAvailable = true;
+    }
 
     /* Show team id / team name */
     display.clear();
@@ -81,19 +101,37 @@ void StartupState::entry()
 
     /* Show operator info on LCD */
     display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
+    display.print("A: MCAL");
+
+    if (true == m_isMaxMotorSpeedCalibAvailable)
+    {
+        display.gotoXY(0, 1);
+        display.print("B: LCAL");
+    }
 }
 
 void StartupState::process(StateMachine& sm)
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
+    Board&   board   = Board::getInstance();
+    IButton& buttonA = board.getButtonA();
 
+    /* Start max. motor speed calibration? */
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
         sm.setState(&MotorSpeedCalibrationState::getInstance());
+    }
+
+    if (true == m_isMaxMotorSpeedCalibAvailable)
+    {
+        IButton& buttonB = board.getButtonB();
+
+        /* Load max. motor speed from settings and start line sensor calibration? */
+        if (true == buttonB.isPressed())
+        {
+            buttonB.waitForRelease();
+            sm.setState(&LineSensorsCalibrationState::getInstance());
+        }
     }
 }
 

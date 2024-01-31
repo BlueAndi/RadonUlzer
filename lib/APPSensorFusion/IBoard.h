@@ -51,6 +51,7 @@
 #include <IMotors.h>
 #include <ILed.h>
 #include <IMU.h>
+#include <ISettings.h>
 
 /******************************************************************************
  * Macros
@@ -126,6 +127,13 @@ public:
      * @return IMU driver
      */
     virtual IIMU& getIMU() = 0;
+
+    /**
+     * Get settings instance.
+     *
+     * @return Settings
+     */
+    virtual ISettings& getSettings() = 0;
 
     /**
      * Process actuators and sensors.

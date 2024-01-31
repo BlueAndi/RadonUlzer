@@ -108,10 +108,7 @@ public:
      *
      * @return Orientation in mrad
      */
-    int32_t getOrientation() const
-    {
-        return m_orientation;
-    }
+    int32_t getOrientation() const;
 
     /**
      * Get absolute position in coordinatesystem.
@@ -173,7 +170,9 @@ public:
 
 private:
     /**
-     * If at least one side moved about 2 mm, a new calculation shall be done.
+     * If at least one side moved about 1 cm, a new calculation shall be done.
+     * Don't use values lower than 1 cm, because the accuracy of the orientation
+     * will decrease massively.
      *
      * Use a multiple of RobotConstants::ENCODER_STEPS_PER_MM for better
      * accuracy.
@@ -272,7 +271,7 @@ private:
      *
      * @return Mileage in mm
      */
-    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter);
+    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter) const;
 
     /**
      * Calculate the orientation in mrad.

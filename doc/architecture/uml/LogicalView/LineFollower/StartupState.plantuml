@@ -11,9 +11,16 @@ package "Application" as appLayer {
         + exit() : void
     }
 
-    class CalibrationState <<control>>
+    class MotorSpeedCalibrationState <<control>>
+    class LineSensorsCalibrationState <<control>>
 
-    StartupState .r.> CalibrationState: <<use>>
+    StartupState .l.> MotorSpeedCalibrationState: <<use>>
+    StartupState .r.> LineSensorsCalibrationState: <<use>>
+}
+
+package "Service" as serviceLayer {
+
+    class DifferentialDrve <<service>>
 }
 
 package "HAL" as hal {
@@ -36,16 +43,26 @@ package "HAL" as hal {
             + {abstract} isPressed() : bool
             + {abstract} waitForRelease() : void
         }
+
+        interface ISettings {
+            + {abstract} init() : void
+            + {abstract} getMaxSpeed() : int16_t
+            + {abstract} setMaxSpeed(maxSpeed : int16_t) : void
+        }
     }
 
     class Board << namespace >> {
         + getDisplay() : IDisplay&
         + getButtonA() : IButton&
+        + getButtonB() : IButton&
+        + getSettings() : ISettings&
     }
 }
 
-StartupState ..> IDisplay: <<use>>
-StartupState ..> IButton: <<use>>
-StartupState ..> Board:: <<use>>
+StartupState ..> DifferentialDrve: <<use>>
+StartupState ...> IDisplay: <<use>>
+StartupState ...> IButton: <<use>>
+StartupState ...> ISettings: <<use>>
+StartupState ...> Board:: <<use>>
 
 @enduml

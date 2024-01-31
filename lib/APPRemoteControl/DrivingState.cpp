@@ -25,105 +25,85 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Release track state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup Application
- *
- * @{
  */
-
-#ifndef RELEASE_TRACK_STATE_H
-#define RELEASE_TRACK_STATE_H
-
-/******************************************************************************
- * Compile Switches
- *****************************************************************************/
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdint.h>
-#include <IState.h>
-#include <SimpleTimer.h>
+#include "DrivingState.h"
+#include <StateMachine.h>
+#include <DifferentialDrive.h>
+
+/******************************************************************************
+ * Compiler Switches
+ *****************************************************************************/
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and Classes
+ * Types and classes
  *****************************************************************************/
-
-/** The system release track state. */
-class ReleaseTrackState : public IState
-{
-public:
-    /**
-     * Get state instance.
-     *
-     * @return State instance.
-     */
-    static ReleaseTrackState& getInstance()
-    {
-        static ReleaseTrackState instance;
-
-        /* Singleton idiom to force initialization during first usage. */
-
-        return instance;
-    }
-
-    /**
-     * If the state is entered, this method will called once.
-     */
-    void entry() final;
-
-    /**
-     * Processing the state.
-     *
-     * @param[in] sm State machine, which is calling this state.
-     */
-    void process(StateMachine& sm) final;
-
-    /**
-     * If the state is left, this method will be called once.
-     */
-    void exit() final;
-
-protected:
-private:
-    /** Track release timer duration in ms. */
-    static const uint32_t TRACK_RELEASE_DURATION = 5000;
-
-    SimpleTimer m_releaseTimer; /**< Track release timer */
-
-    /**
-     * Default constructor.
-     */
-    ReleaseTrackState()
-    {
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~ReleaseTrackState()
-    {
-    }
-
-    /* Not allowed. */
-    ReleaseTrackState(const ReleaseTrackState& state);            /**< Copy construction of an instance. */
-    ReleaseTrackState& operator=(const ReleaseTrackState& state); /**< Assignment of an instance. */
-
-    /**
-     * Show choosen parameter set on LCD.
-     */
-    void showParSet() const;
-};
 
 /******************************************************************************
- * Functions
+ * Prototypes
  *****************************************************************************/
 
-#endif /* RELEASE_TRACK_STATE_H */
-/** @} */
+/******************************************************************************
+ * Local Variables
+ *****************************************************************************/
+
+/******************************************************************************
+ * Public Methods
+ *****************************************************************************/
+
+void DrivingState::entry()
+{
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    m_isActive = true;
+    diffDrive.setLinearSpeed(0, 0);
+    diffDrive.enable();
+}
+
+void DrivingState::process(StateMachine& sm)
+{
+    /* Nothing to do. */
+    (void)sm;
+}
+
+void DrivingState::exit()
+{
+    m_isActive = false;
+
+    /* Stop motors. */
+    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+    DifferentialDrive::getInstance().disable();
+}
+
+void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+{
+    if (true == m_isActive)
+    {
+        DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+    }
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/
