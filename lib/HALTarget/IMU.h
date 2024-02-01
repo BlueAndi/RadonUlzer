@@ -166,6 +166,7 @@ public:
 
     /**
      * Calibrate the IMU.
+     * Only the used axes (acceleration along x and y and turn rate around z) are calibrated.
      */
     void calibrate();
 

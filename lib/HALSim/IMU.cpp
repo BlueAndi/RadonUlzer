@@ -147,7 +147,7 @@ const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
 
 void IMU::calibrate()
 {
-    /* TODO: implement TD067 */
+    /* Nothing to do. */
 }
 
 int16_t IMU::convertFromDoubleToInt16(double originalValue)
