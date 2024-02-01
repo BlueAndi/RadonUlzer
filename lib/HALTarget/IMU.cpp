@@ -159,10 +159,11 @@ const void IMU::getMagnetometerValues(IMUData* magnetometerValues)
     }
 }
 
-/* TODO:  TD076	Make sure that it is necessary to read and calibrate all sensor values, if only 1 of the gyro values and
- 2 of the acceleration values are being used.*/
 void IMU::calibrate()
 {
+    /* Wait for a short amount of time to make sure, the IMU is done setting up. */
+    delay(100U);
+
     /* Define how many measurements should be made for calibration. */
     const int32_t NUMBER_OF_MEASUREMENTS = 50;
 

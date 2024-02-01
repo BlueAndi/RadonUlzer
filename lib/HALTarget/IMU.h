@@ -70,9 +70,6 @@ public:
         m_magnetometerValues{0, 0, 0},
         m_rawAccelerometerOffsetX(0),
         m_rawAccelerometerOffsetY(0),
-        m_rawAccelerometerOffsetZ(0),
-        m_rawGyroOffsetX(0),
-        m_rawGyroOffsetY(0),
         m_rawGyroOffsetZ(0)
     {
     }
@@ -166,6 +163,7 @@ public:
 
     /**
      * Calibrate the IMU.
+     * Only the used axes (acceleration along x and y and turn rate around z) are calibrated.
      */
     void calibrate();
 
@@ -179,9 +177,6 @@ private:
 
     int16_t m_rawAccelerometerOffsetX; /**< Mean raw accelerometer offset in x-direction determined by calibration. */
     int16_t m_rawAccelerometerOffsetY; /**< Mean raw accelerometer offset in y-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetZ; /**< Mean raw accelerometer offset in z-direction determined by calibration. */
-    int16_t m_rawGyroOffsetX;          /**< Mean raw gyro offset in x-direction determined by calibration. */
-    int16_t m_rawGyroOffsetY;          /**< Mean raw gyro offset in y-direction determined by calibration. */
     int16_t m_rawGyroOffsetZ;          /**< Mean raw gyro offset in z-direction determined by calibration. */
 };
 
