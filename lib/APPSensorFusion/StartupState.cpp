@@ -65,8 +65,7 @@
 
 void StartupState::entry()
 {
-    /* Initialize HAL */
-    Board::getInstance().init();
+    /* Nothing to do. */
 }
 
 void StartupState::process(StateMachine& sm)
