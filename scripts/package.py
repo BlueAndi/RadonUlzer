@@ -1,4 +1,4 @@
-"""Copies the Webots shared libraries."""
+"""Pack the executable and its dependencies into a ZIP file."""
 
 # MIT License
 #
@@ -63,6 +63,8 @@ def zip_executable(source, target, env):
         for fileName in FILE_NAME_LIST:
             fullPath = WORKDIR_PATH + fileName
             zip_object.write(fullPath, PIO_ENV_NAME + fileName)
+
+    print("Packed executable found in: " + OUT_PATH)
 
 ################################################################################
 # Main
