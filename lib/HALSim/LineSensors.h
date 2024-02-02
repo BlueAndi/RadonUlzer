@@ -178,7 +178,7 @@ public:
      *
      * @return Max. line sensor value
      */
-    uint16_t getSensorValueMax() const final
+    int16_t getSensorValueMax() const final
     {
         return SENSOR_MAX_VALUE;
     }
