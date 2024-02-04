@@ -98,9 +98,9 @@ private:
      */
     enum LineStatus
     {
-        LINE_STATUS_FIND_START_LINE = 0, /**< Find the start line. */
-        LINE_STATUS_START_LINE_DETECTED, /**< Start line detected. */
-        LINE_STATUS_FIND_END_LINE        /**< Find the end line. */
+        LINE_STATUS_NO_START_STOP_LINE_DETECTED = 0, /**< No start/stop line detected. */
+        LINE_STATUS_START_LINE_DETECTED,             /**< Start line detected. */
+        LINE_STATUS_STOP_LINE_DETECTED               /**< Stop line detected. */
     };
 
     /**
@@ -122,6 +122,34 @@ private:
     /** Period in ms for PID processing. */
     static const uint32_t PID_PROCESS_PERIOD = 10;
 
+    /**
+     * The line sensor threshold (normalized) used to detect the track.
+     * The track is detected in case the received value is greater or equal than
+     * the threshold.
+     */
+    static const uint16_t LINE_SENSOR_ON_TRACK_VALUE = 200U;
+
+    /**
+     * Position set point which is the perfect on track position.
+     * This is the goal to achieve.
+     */
+    static const int16_t POSITION_SET_POINT;
+
+    /**
+     * ID of most left sensor.
+     */
+    static const uint8_t SENSOR_ID_MOST_LEFT;
+
+    /**
+     * ID of most right sensor.
+     */
+    static const uint8_t SENSOR_ID_MIDDLE;
+
+    /**
+     * ID of middle sensor.
+     */
+    static const uint8_t SENSOR_ID_MOST_RIGHT;
+
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
     SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
@@ -129,22 +157,14 @@ private:
     int16_t                m_topSpeed;    /**< Top speed in [steps/s]. It might be lower or equal to the max. speed! */
     LineStatus             m_lineStatus;  /**< Status of start-/end line detection */
     TrackStatus            m_trackStatus; /**< Status of track which means on track or track lost, etc. */
-    uint8_t m_startEndLineDebounce;       /**< Counter used for easys debouncing of the start-/end line detection. */
+    bool                   m_isStartStopLineDetected; /**< Is the start/stop line detected? */
+    uint8_t                m_lastSensorIdSawTrack;    /**< The sensor id of the sensor which saw the track as last. */
+    int16_t                m_lastPosition; /**< Last position, used to decide strategy in case of a track gap. */
 
     /**
      * Default constructor.
      */
-    DrivingState() :
-        m_observationTimer(),
-        m_lapTime(),
-        m_pidProcessTime(),
-        m_pidCtrl(),
-        m_topSpeed(0),
-        m_lineStatus(LINE_STATUS_FIND_START_LINE),
-        m_trackStatus(TRACK_STATUS_ON_TRACK),
-        m_startEndLineDebounce(0)
-    {
-    }
+    DrivingState();
 
     /**
      * Default destructor.
@@ -158,49 +178,60 @@ private:
     DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 
     /**
-     * Control driving in case the robot is on track.
+     * Is the start/stop line detected?
      *
-     * @param[in] position           Current position on track
-     * @param[in] lineSensorValues   Value of each line sensor
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     *
+     * @return If start/stop line detected, it will return true otherwise false.
      */
-    void processOnTrack(int16_t position, const uint16_t* lineSensorValues);
+    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length);
 
     /**
-     * Control driving in case the robot lost the track.
-     * It handles the track search algorithm.
+     * Is right angle curve to the left detected?
      *
-     * @param[in] position           Current position on track
-     * @param[in] lineSensorValues   Value of each line sensor
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     *
+     * @return If right angle curve to the left is detected, it will return true otherwise false.
      */
-    void processTrackLost(int16_t position, const uint16_t* lineSensorValues);
+    bool isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length);
 
     /**
-     * Is start-/endline detected?
+     * Is right angle curve to the right detected?
      *
-     * @param[in] lineSensorValues  Line sensor values
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
      *
-     * @return If a start-/endline is detected, it will return true otherwise false.
+     * @return If right angle curve to the right is detected, it will return true otherwise false.
      */
-    bool isStartEndLineDetected(const uint16_t* lineSensorValues);
+    bool isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length);
 
     /**
-     * Is a track gap detected?
-     * Note, it contains no debouncing inside. If necessary, it shall be
-     * done outside.
+     * Is track gap detected?
      *
-     * @param[in] position Determined position in digits
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
      *
-     * @return If a track gap is detected, it will return true otherwise false.
+     * @return If track gap is detected, it will return true otherwise false.
      */
-    bool isTrackGapDetected(int16_t position) const;
+    bool isGapDetected(const uint16_t* lineSensorValues, uint8_t length);
 
     /**
      * Adapt driving by using a PID algorithm, depended on the position
      * input.
      *
-     * @param[in] position  Position in digits
+     * @param[in] position                  Position in digits
+     * @param[in] allowNegativeMotorSpeed   Allow negative motor speed.
      */
-    void adaptDriving(int16_t position);
+    void adaptDriving(int16_t position, bool allowNegativeMotorSpeed);
+
+    /**
+     * Check the abort conditions while driving the challenge.
+     *
+     * @return If abort is required, it will return true otherwise false.
+     */
+    bool isAbortRequired();
 };
 
 /******************************************************************************
