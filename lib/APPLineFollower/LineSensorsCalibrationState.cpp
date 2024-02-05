@@ -77,7 +77,7 @@ void LineSensorsCalibrationState::entry()
     display.print("LCAL");
 
     /* Prepare calibration drive. */
-    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
+    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 4;
     m_orientation      = odometry.getOrientation();
 
     /* Wait some time, before starting the calibration drive. */
