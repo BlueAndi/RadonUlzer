@@ -105,7 +105,7 @@ PROTO Zumo32U4 [
         device [
           LinearMotor {
             name "motor_left"
-            maxVelocity 0.3
+            maxVelocity 0.525
           }
           PositionSensor {
             name "position_sensor_left"
@@ -159,7 +159,7 @@ PROTO Zumo32U4 [
         device [
           LinearMotor {
             name "motor_right"
-            maxVelocity 0.3
+            maxVelocity 0.525
           }
           PositionSensor {
             name "position_sensor_right"
