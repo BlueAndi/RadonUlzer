@@ -105,11 +105,13 @@ void Odometry::process()
             m_countingYSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
 
             /* Reset to be able to calculate the next delta. */
-            m_lastAbsRelEncStepsLeft  = 0;
-            m_lastAbsRelEncStepsRight = 0;
+            absStepsLeft  = 0U; /* [steps] */
+            absStepsRight = 0U; /* [steps] */
             m_relEncoders.clear();
         }
     }
+    m_lastAbsRelEncStepsLeft  = absStepsLeft;  /* [steps] */
+    m_lastAbsRelEncStepsRight = absStepsRight; /* [steps] */
 }
 
 uint32_t Odometry::getMileageCenter() const
