@@ -81,6 +81,11 @@ void MotorSpeedCalibrationState::entry()
     display.gotoXY(0, 1);
     display.print("MCAL");
 
+    /* Disable differential drive control, because the max. motor speed is
+     * determined by this calibration.
+     */
+    DifferentialDrive::getInstance().disable();
+
     /* Setup relative encoders */
     m_relEncoders.clear();
 
