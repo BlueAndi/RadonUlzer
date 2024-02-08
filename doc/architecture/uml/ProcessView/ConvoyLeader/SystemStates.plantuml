@@ -1,0 +1,41 @@
+@startuml
+
+title System States
+
+state StartupState
+state LineSensorsCalibrationState
+state ErrorState
+state DrivingState
+
+[*] --> StartupState: Power up
+StartupState --> LineSensorsCalibrationState: [Initial positional data is set]
+StartupState --> ErrorState: [Missing motor calibration data]
+
+LineSensorsCalibrationState --> DrivingState: [Calibration finished]
+LineSensorsCalibrationState --> ErrorState: [Calibration failed]
+
+DrivingState --> ErrorState: [Error occured]
+
+note left of StartupState
+    Initialize the system and wait until 
+    DroidControlShip sends initial positional data.
+end note
+
+note left of LineSensorsCalibrationState
+    Calibrates the line sensors on the playfield by
+    measuring the the darkness and brightness values.
+end note
+
+note left of ErrorState
+    Shows error to the operator.
+end note
+
+note left of DrivingState
+    The system drives autonomous on track, detects
+    start and end line. Additional it handles a
+    detected gap as well.
+    
+    Top speed is set remotely by DroidControlShip.
+end note
+
+@enduml
