@@ -1,0 +1,43 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+EXTERNPROTO "../protos/LineFollowerTrack.proto"
+
+WorldInfo {
+  info [
+    "LineFollower Track for platooning using ConvoyLeader and RemoteControl applications."
+  ]
+  title "Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "track material"
+      coulombFriction [
+        500
+      ]
+      softCFM 0.0001
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
+  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+LineFollowerTrack {
+}
+Zumo32U4 {
+  translation -0.25 -0.05 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "leader"
+}
+Zumo32U4 {
+  translation -0.25 -0.20 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_1"
+}
