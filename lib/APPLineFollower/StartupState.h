@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IState.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -92,16 +93,31 @@ public:
 protected:
 private:
     /**
-     * Duration in ms how long the team id or team name shall be shown at startup.
+     * This type defines different kind of information, which will be shown
+     * to the user in the same order as defined.
      */
-    static const uint32_t TEAM_NAME_DURATION = 2000;
+    enum UserInfo
+    {
+        USER_INFO_TEAM_NAME = 0,   /**< Show the team name. */
+        USER_INFO_MAX_MOTOR_SPEED, /**< Show the max. motor speed. */
+        USER_INFO_UI,              /**< Show the user interface. */
+        USER_INFO_COUNT            /**< Number of user infos. */
+    };
 
-    bool m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
+    /**
+     * Duration in ms how long a info on the display shall be shown, until
+     * the next info appears.
+     */
+    static const uint32_t INFO_DURATION = 2000;
+
+    bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
+    SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
+    UserInfo    m_userInfoState; /**< Current user info state. */
 
     /**
      * Default constructor.
      */
-    StartupState() : m_isMaxMotorSpeedCalibAvailable(false)
+    StartupState() : m_isMaxMotorSpeedCalibAvailable(false), m_timer(), m_userInfoState(USER_INFO_TEAM_NAME)
     {
     }
 
@@ -115,6 +131,13 @@ private:
     /* Not allowed. */
     StartupState(const StartupState& state);            /**< Copy construction of an instance. */
     StartupState& operator=(const StartupState& state); /**< Assignment of an instance. */
+
+    /**
+     * Show next user info.
+     *
+     * @param[in] next  Next user info which to show.
+     */
+    void showUserInfo(UserInfo next);
 };
 
 /******************************************************************************

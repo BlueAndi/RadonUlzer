@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
@@ -37,6 +37,7 @@
 #include <StateMachine.h>
 #include "MotorSpeedCalibrationState.h"
 #include "ReadyState.h"
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -64,12 +65,29 @@
 
 void StartupState::entry()
 {
-    /* Initialize HAL */
-    Board::getInstance().init();
+    Board&     board         = Board::getInstance();
+    ISettings& settings      = board.getSettings();
+    int16_t    maxMotorSpeed = settings.getMaxSpeed();
 
-    m_page = PAGE_CALIB;
-    showCurrentPage();
-    m_pageTimer.start(NEXT_PAGE_PERIOD);
+    /* If max. motor speed calibration value is available, the differential
+     * drive will be enabled.
+     */
+    if (0 < maxMotorSpeed)
+    {
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+        /* With setting the max. motor speed in [steps/s] the differential drive control
+         * can now be used.
+         */
+        diffDrive.setMaxMotorSpeed(maxMotorSpeed);
+
+        /* Differential drive can now be used. */
+        diffDrive.enable();
+
+        m_isMaxMotorSpeedCalibAvailable = true;
+    }
+
+    showUserInfo(m_userInfoState);
 }
 
 void StartupState::process(StateMachine& sm)
@@ -78,38 +96,45 @@ void StartupState::process(StateMachine& sm)
     IButton& buttonA = board.getButtonA();
     IButton& buttonB = board.getButtonB();
 
-    /* Flip display page periodically. */
-    if (true == m_pageTimer.isTimeout())
-    {
-        if (PAGE_CALIB == m_page)
-        {
-            m_page = PAGE_CONTINUE;
-        }
-        else
-        {
-            m_page = PAGE_CALIB;
-        }
-
-        showCurrentPage();
-        m_pageTimer.restart();
-    }
-
+    /* Start max. motor speed calibration? */
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
         sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 
-    if (true == buttonB.isPressed())
+    /* If the max. motor speed calibration is done, it will be possible to
+     * continue immediately.
+     */
+    if (true == m_isMaxMotorSpeedCalibAvailable)
     {
-        buttonB.waitForRelease();
-        sm.setState(&ReadyState::getInstance());
+        /* Ready to drive? */
+        if (true == buttonB.isPressed())
+        {
+            buttonB.waitForRelease();
+            sm.setState(&ReadyState::getInstance());
+        }
+    }
+
+    /* Periodically change the user info on the display. */
+    if (true == m_timer.isTimeout())
+    {
+        int8_t next = m_userInfoState + 1;
+
+        if (USER_INFO_COUNT <= next)
+        {
+            next = 0;
+        }
+
+        showUserInfo(static_cast<UserInfo>(next));
+        m_timer.restart();
     }
 }
 
 void StartupState::exit()
 {
-    m_pageTimer.stop();
+    /* Next time start again from begin with the info. */
+    m_userInfoState = USER_INFO_TEAM_NAME;
 }
 
 /******************************************************************************
@@ -120,41 +145,42 @@ void StartupState::exit()
  * Private Methods
  *****************************************************************************/
 
-void StartupState::showCurrentPage()
+void StartupState::showUserInfo(UserInfo next)
 {
-    switch(m_page)
+    Board&    board   = Board::getInstance();
+    IDisplay& display = board.getDisplay();
+
+    display.clear();
+
+    switch (next)
     {
-    case PAGE_CALIB:
-        showCalibrationPage();
+    case USER_INFO_TEAM_NAME:
+        display.print(TEAM_NAME_LINE_1);
+        display.gotoXY(0, 1);
+        display.print(TEAM_NAME_LINE_2);
         break;
 
-    case PAGE_CONTINUE:
-        showContinuePage();
+    case USER_INFO_UI:
+        display.print("A: MCAL");
+
+        if (true == m_isMaxMotorSpeedCalibAvailable)
+        {
+            display.gotoXY(0, 1);
+            display.print("B: DRV");
+        }
         break;
 
+    case USER_INFO_COUNT:
+        /* fallthrough */
     default:
+        display.print("?");
+        next = USER_INFO_TEAM_NAME;
         break;
     }
-}
 
-void StartupState::showCalibrationPage()
-{
-    IDisplay& display = Board::getInstance().getDisplay();
+    m_userInfoState = next;
 
-    display.clear();
-    display.print("Press A");
-    display.gotoXY(0, 1);
-    display.print("to calib");
-}
-
-void StartupState::showContinuePage()
-{
-    IDisplay& display = Board::getInstance().getDisplay();
-
-    display.clear();
-    display.print("Press B");
-    display.gotoXY(0, 1);
-    display.print("to cont");
+    m_timer.start(INFO_DURATION);
 }
 
 /******************************************************************************

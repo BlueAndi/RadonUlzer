@@ -20,7 +20,7 @@ ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
 ReleaseTrackState --> DrivingState: [After 5s]
 ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
 DrivingState --> ReadyState: [End line detected] or\n[Track lost] or\n[End line not found after 5 min.]
-ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+ErrorState --> StartupState: [Pushbutton A triggered]
 
 note right of StartupState
     Initialize the system and wait till
@@ -34,16 +34,16 @@ note right of MotorSpeedCalibrationState
     Stores the calibration value in the settings persistent.
 end note
 
-note right of LineSensorsCalibrationState
+note left of LineSensorsCalibrationState
     Calibrates the line sensors on the playfield by
     measuring the the darkness and brightness values.
 end note
 
-note left of ErrorState
+note bottom of ErrorState
     Shows error to the operator.
 end note
 
-note right of ReadyState
+note left of ReadyState
     Waits for the operator to start the competition.
 end note
 

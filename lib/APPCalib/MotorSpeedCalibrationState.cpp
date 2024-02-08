@@ -35,12 +35,13 @@
 #include "MotorSpeedCalibrationState.h"
 #include <Board.h>
 #include <RobotConstants.h>
+#include <DifferentialDrive.h>
 #include <StateMachine.h>
 #include <Logging.h>
 #include <Util.h>
-#include <Settings.h>
 #include "ReadyState.h"
 #include "ErrorState.h"
+#include <Settings.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -73,12 +74,16 @@ LOG_TAG("MSCState");
 
 void MotorSpeedCalibrationState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    IDisplay&          display   = Board::getInstance().getDisplay();
 
     display.clear();
-    display.print("Calib");
+    display.print("Run");
     display.gotoXY(0, 1);
-    display.print("MSpeed");
+    display.print("MCAL");
+
+    /* Disable differential drive to avoid any bad influence. */
+    diffDrive.disable();
 
     /* Setup relative encoders */
     m_relEncoders.clear();
@@ -196,25 +201,34 @@ void MotorSpeedCalibrationState::determineMaxMotorSpeed()
 
 void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    ISettings&         settings  = Board::getInstance().getSettings();
+
     /* Set the lower speed as max. motor speed to ensure that both motors
      * can reach the same max. speed.
      */
     int16_t maxSpeed = (m_maxSpeedLeft < m_maxSpeedRight) ? m_maxSpeedLeft : m_maxSpeedRight;
 
+    /* Store calibrated max. motor speed in the settings. */
+    settings.setMaxSpeed(maxSpeed);
+
+    /* With setting the max. motor speed in [steps/s] the differential drive control
+     * can now be used.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+
+    /* Differential drive can now be used. */
+    diffDrive.enable();
+
     if (0 == maxSpeed)
     {
-        ErrorState::getInstance().setErrorMsg("MS=0");
+        ErrorState::getInstance().setErrorMsg("EMCAL 0");
         sm.setState(&ErrorState::getInstance());
     }
     else
     {
-        ISettings& settings = Board::getInstance().getSettings();
-
         LOG_INFO_VAL("Calibrated max. speed (steps/s): ", maxSpeed);
         LOG_INFO_VAL("Calibrated max. speed (mm/s): ", maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
-
-        /* Store max. speed in the settings for other applications. */
-        settings.setMaxSpeed(maxSpeed);
 
         sm.setState(&ReadyState::getInstance());
     }

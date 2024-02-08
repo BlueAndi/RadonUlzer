@@ -74,12 +74,12 @@ void StartupState::process(StateMachine& sm)
 
     if (true == buttonA.isPressed())
     {
-        IBoard&    board    = Board::getInstance();
-        ISettings& settings = board.getSettings();
-        int16_t    maxSpeed = settings.getMaxSpeed();
+        IBoard&    board         = Board::getInstance();
+        ISettings& settings      = board.getSettings();
+        int16_t    maxMotorSpeed = settings.getMaxSpeed();
         buttonA.waitForRelease();
 
-        if (0 == maxSpeed)
+        if (0 == maxMotorSpeed)
         {
             /* If the max. Speed equals 0, the Motor Speed Calibration is missing. */
             sm.setState(&ErrorState::getInstance());
@@ -91,7 +91,7 @@ void StartupState::process(StateMachine& sm)
             /* With setting the max. motor speed in [steps/s] the differential drive control
              * can now be used.
              */
-            diffDrive.setMaxMotorSpeed(maxSpeed);
+            diffDrive.setMaxMotorSpeed(maxMotorSpeed);
 
             /* Differential drive can now be used. */
             diffDrive.enable();
@@ -102,7 +102,7 @@ void StartupState::process(StateMachine& sm)
 
 void StartupState::exit()
 {
-    /* Nothing to do */
+    /* Nothing to do. */
 }
 
 /******************************************************************************

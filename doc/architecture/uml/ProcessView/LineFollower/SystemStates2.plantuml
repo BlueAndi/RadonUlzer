@@ -39,6 +39,6 @@ ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
 ReleaseTrackState --> DrivingState: [Release timer timeout]
 ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
 DrivingState --> ReadyState: [End line detected] or\n[Track lost] or\n[Observation timer timeout]
-ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+ErrorState --> StartupState: [Pushbutton A triggered]
 
 @enduml

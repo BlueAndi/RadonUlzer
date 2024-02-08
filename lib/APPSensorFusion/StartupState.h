@@ -92,11 +92,6 @@ public:
 protected:
 private:
     /**
-     * Duration in ms how long the team id or team name shall be shown at startup.
-     */
-    static const uint32_t TEAM_NAME_DURATION = 2000;
-
-    /**
      * Default constructor.
      */
     StartupState()
