@@ -63,11 +63,6 @@ void ProximitySensors::initFrontSensor()
     for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
     {
         m_sensorValuesU8[sensorIndex] = 0;
-
-        if (nullptr != m_proximitySensors[sensorIndex])
-        {
-            m_proximitySensors[sensorIndex]->enable(m_simTime.getTimeStep());
-        }
     }
 }
 

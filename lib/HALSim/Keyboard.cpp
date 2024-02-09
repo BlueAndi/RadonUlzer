@@ -58,14 +58,6 @@
  * Public Methods
  *****************************************************************************/
 
-void Keyboard::init()
-{
-    if (nullptr != m_keyboard)
-    {
-        m_keyboard->enable(m_simTime.getTimeStep());
-    }
-}
-
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
@@ -81,7 +73,7 @@ bool Keyboard::isButtonPressed(char lowerCaseChar, char upperCaseChar) const
     /* Checks if button is existing in the new values, but not the old ones.
      * If so, it's newly pressed and true is returned.
      */
-    if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), upperCaseChar, lowerCaseChar)) && 
+    if ((false == arrayContains(m_oldKeys, sizeof(m_oldKeys), upperCaseChar, lowerCaseChar)) &&
         (true == arrayContains(m_newKeys, sizeof(m_newKeys), upperCaseChar, lowerCaseChar)))
     {
         buttonPressed = true;
@@ -97,7 +89,7 @@ bool Keyboard::isButtonReleased(char lowerCaseChar, char upperCaseChar) const
     /* Checks if button is existing in the new values, but not the old ones.
      * If so, it's newly released and true is returned.
      */
-    if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), upperCaseChar, lowerCaseChar)) && 
+    if ((false == arrayContains(m_newKeys, sizeof(m_newKeys), upperCaseChar, lowerCaseChar)) &&
         (true == arrayContains(m_oldKeys, sizeof(m_oldKeys), upperCaseChar, lowerCaseChar)))
     {
         buttonReleased = true;
@@ -112,9 +104,11 @@ bool Keyboard::arrayContains(const uint16_t array[], uint16_t arraySize, char el
 
     for (uint8_t arrayIndex = 0; arrayIndex < (arraySize / sizeof(*array)); ++arrayIndex)
     {
-        if((array[arrayIndex] == static_cast<uint8_t>(elemLowerCase)) || (array[arrayIndex] == static_cast<uint8_t>(elemUppercase)))
+        if ((array[arrayIndex] == static_cast<uint8_t>(elemLowerCase)) ||
+            (array[arrayIndex] == static_cast<uint8_t>(elemUppercase)))
         {
-            elementFound = true;;
+            elementFound = true;
+            ;
         }
     }
 

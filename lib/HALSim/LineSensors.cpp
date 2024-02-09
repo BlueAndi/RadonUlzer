@@ -65,11 +65,6 @@ void LineSensors::init()
         m_sensorValuesU16[sensorIndex] = 0;
         m_sensorMaxValues[sensorIndex] = 0;
         m_sensorMinValues[sensorIndex] = SENSOR_MAX_VALUE;
-
-        if (nullptr != m_lightSensors[sensorIndex])
-        {
-            m_lightSensors[sensorIndex]->enable(m_simTime.getTimeStep());
-        }
     }
 }
 
@@ -103,7 +98,7 @@ int16_t LineSensors::readLine()
 
     (void)getSensorValues();
 
-    for(uint32_t idx = 0; idx < MAX_SENSORS; ++idx)
+    for (uint32_t idx = 0; idx < MAX_SENSORS; ++idx)
     {
         uint32_t sensorValue = m_sensorValuesU16[idx];
 

@@ -64,7 +64,6 @@ public:
     /**
      * Constructs the line sensors adapter.
      *
-     * @param[in] simTime       Simulation time
      * @param[in] emitter0      The most left infrared emitter 0
      * @param[in] emitter1      The infrared emitter 1
      * @param[in] emitter2      The infrared emitter 2
@@ -76,12 +75,11 @@ public:
      * @param[in] lightSensor3  The light sensor 3
      * @param[in] lightSensor4  The most right light sensor 4
      */
-    LineSensors(const SimTime& simTime, webots::Emitter* emitter0, webots::Emitter* emitter1, webots::Emitter* emitter2,
+    LineSensors(webots::Emitter* emitter0, webots::Emitter* emitter1, webots::Emitter* emitter2,
                 webots::Emitter* emitter3, webots::Emitter* emitter4, webots::DistanceSensor* lightSensor0,
                 webots::DistanceSensor* lightSensor1, webots::DistanceSensor* lightSensor2,
                 webots::DistanceSensor* lightSensor3, webots::DistanceSensor* lightSensor4) :
         ILineSensors(),
-        m_simTime(simTime),
         m_sensorValuesU16(),
         m_emitters{emitter0, emitter1, emitter2, emitter3, emitter4},
         m_lightSensors{lightSensor0, lightSensor1, lightSensor2, lightSensor3, lightSensor4},
@@ -200,7 +198,6 @@ private:
      */
     static const uint16_t SENSOR_OFF_LINE_THRESHOLD = 200;
 
-    const SimTime&   m_simTime;                      /**< Simulation time */
     uint16_t         m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
     webots::Emitter* m_emitters[MAX_SENSORS];        /**< The infrared emitters (0: most left) */
     webots::DistanceSensor* m_lightSensors[MAX_SENSORS]; /**< The light sensors (0: most left) */
