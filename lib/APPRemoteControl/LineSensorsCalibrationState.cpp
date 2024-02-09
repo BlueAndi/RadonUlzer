@@ -81,7 +81,7 @@ void LineSensorsCalibrationState::entry()
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
     m_orientation      = odometry.getOrientation();
 
-    /* Reset calibration. */
+    /* Mandatory for each new calibration. */
     lineSensors.resetCalibration();
 
     /* Wait some time, before starting the calibration drive. */
