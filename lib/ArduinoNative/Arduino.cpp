@@ -265,7 +265,7 @@ extern int main(int argc, char** argv)
             /* A simulation step is required between enabling the simulation devices and the Arduino setup.
              * Otherwise, devices such as sensors will provide NaN.
              */
-            gSimTime->step();
+            (void)gSimTime->step();
 
             /* Call the setup function, which is the entry point of the Arduino application. */
             setup();
