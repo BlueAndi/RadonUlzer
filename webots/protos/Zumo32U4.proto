@@ -456,9 +456,9 @@ PROTO Zumo32U4 [
             zAxis TRUE
             resolution  0.001
             lookupTable [
-              -19.62 -32768  0
-              0 0 0
-              19.62 32767  0
+              -19.62 -32768 0.001
+              0 0  0.001
+              19.62 32767 0.001
             ]
           }
           Gyro {
@@ -468,9 +468,9 @@ PROTO Zumo32U4 [
             zAxis TRUE
             resolution  0.001
             lookupTable [
-              -4.276 -32768 0
-              0 0 0
-              4.276 32767 0
+              -12.647 -32768 0.001
+              0 0 0.001
+              12.647 32767 0.001
             ]
           }
           Compass {
