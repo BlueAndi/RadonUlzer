@@ -124,7 +124,6 @@ const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
 void Board::init()
 {
     m_encoders.init();
-    m_keyboard.init();
     m_lineSensors.init();
     m_motors.init();
     m_proximitySensors.initFrontSensor();
@@ -149,9 +148,8 @@ Board::Board() :
     m_buttonC(m_keyboard),
     m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
     m_display(m_robot.getDisplay(DISPLAY_NAME)),
-    m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
-               m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
-    m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
+    m_encoders(m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME), m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
+    m_lineSensors(m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                   m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
                   m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
                   m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
@@ -160,7 +158,7 @@ Board::Board() :
     m_ledRed(m_robot.getLED(LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-    m_proximitySensors(m_simTime, m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
+    m_proximitySensors(m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
                        m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
     m_settings()
 {
