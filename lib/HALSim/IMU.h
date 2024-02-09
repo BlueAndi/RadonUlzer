@@ -67,17 +67,15 @@ public:
     /**
      * Constructs the IMU adapter.
      *
-     * @param[in] simTime       Simulation time
      * @param[in] accelerometer The accelerometer
      * @param[in] gyro          The gyro
      * @param[in] compass       The compass
      */
-    IMU(const SimTime& simTime, webots::Accelerometer* accelerometer, webots::Gyro* gyro, webots::Compass* compass) :
+    IMU(webots::Accelerometer* accelerometer, webots::Gyro* gyro, webots::Compass* compass) :
         IIMU(),
         m_accelerationValues{0, 0, 0},
         m_gyroValues{0, 0, 0},
         m_magnetometerValues{0, 0, 0},
-        m_simTime(simTime),
         m_accelerometer(accelerometer),
         m_gyro(gyro),
         m_magnetometer(compass)
@@ -203,7 +201,6 @@ private:
     IMUData m_gyroValues;         /**< Struct to store the current gyro data. */
     IMUData m_magnetometerValues; /**< Struct to store the current magnotometer data. */
 
-    const SimTime&         m_simTime;       /**< Simulation time. */
     webots::Accelerometer* m_accelerometer; /**< The accelerometer of Webots. */
     webots::Gyro*          m_gyro;          /**< The gyro of Webots. */
     webots::Compass*       m_magnetometer;  /**< The magnetometer of Webots. */

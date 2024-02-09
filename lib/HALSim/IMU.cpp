@@ -60,15 +60,8 @@
 
 bool IMU::init()
 {
-    bool isInitializationSuccessful = false;
-    if ((nullptr != m_accelerometer) && (nullptr != m_gyro) && (nullptr != m_magnetometer))
-    {
-        m_accelerometer->enable(m_simTime.getTimeStep());
-        m_gyro->enable(m_simTime.getTimeStep());
-        m_magnetometer->enable(m_simTime.getTimeStep());
-        isInitializationSuccessful = true;
-    }
-    return isInitializationSuccessful;
+    /* Nothing to do. */
+    return true;
 }
 
 void IMU::readAccelerometer()

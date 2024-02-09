@@ -259,6 +259,15 @@ extern int main(int argc, char** argv)
         }
         else
         {
+            /* Enable all simulation devices. Must be done before any other access to the devices. */
+            Board::getInstance().enableSimulationDevices();
+
+            /* A simulation step is required between enabling the simulation devices and the Arduino setup.
+             * Otherwise, devices such as sensors will provide NaN.
+             */
+            (void)gSimTime->step();
+
+            /* Call the setup function, which is the entry point of the Arduino application. */
             setup();
 
             while (true == gSimTime->step())
