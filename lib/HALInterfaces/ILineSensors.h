@@ -137,6 +137,11 @@ public:
     virtual int16_t getSensorValueMax() const = 0;
 
     /**
+     * Resets all calibration that has been done.
+     */
+    virtual void resetCalibration() = 0;
+
+    /**
      * Calibration error information: Calibration successful.
      */
     static const uint8_t    CALIB_ERROR_OK              = 0xFF;

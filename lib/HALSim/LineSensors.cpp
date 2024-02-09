@@ -196,6 +196,18 @@ bool LineSensors::isCalibrationSuccessful()
     return isSuccessful;
 }
 
+void LineSensors::resetCalibration()
+{
+    for (uint8_t sensorIndex = 0; sensorIndex < MAX_SENSORS; ++sensorIndex)
+    {
+        m_sensorValuesU16[sensorIndex] = 0;
+        m_sensorMaxValues[sensorIndex] = 0;
+        m_sensorMinValues[sensorIndex] = SENSOR_MAX_VALUE;
+    }
+
+    m_sensorCalibStarted = false;
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
