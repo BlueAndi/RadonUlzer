@@ -166,6 +166,7 @@ void App::sendSensorData()
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
     payload.turnRate            = turnRates.valueZ;
+    payload.isStandStill        = odometry.isStandStill();
 
     uint32_t duration = 0U;
     if (true == m_firstIteration)
