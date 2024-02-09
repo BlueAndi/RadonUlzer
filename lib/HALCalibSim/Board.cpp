@@ -172,7 +172,18 @@ Board::Board() :
 
 void Board::enableSimulationDevices()
 {
-    /* TODO: Enable all devices. */
+    const int timeStep = m_simTime.getTimeStep();
+
+    m_robot.getKeyboard()->enable(timeStep);
+    m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME)->enable(timeStep);
+    m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)->enable(timeStep);
 }
 
 /******************************************************************************
