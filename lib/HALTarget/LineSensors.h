@@ -184,7 +184,7 @@ public:
     }
 
     /**
-     * Resets all calibration that has been done.
+     * Resets the maximum and minimum values measured by each sensor.
      */
     void resetCalibration() final
     {

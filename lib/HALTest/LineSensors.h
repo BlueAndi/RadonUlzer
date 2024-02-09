@@ -161,6 +161,13 @@ public:
         return SENSOR_MAX_VALUE;
     }
 
+    /**
+     * Resets the maximum and minimum values measured by each sensor.
+     */
+    void resetCalibration() final
+    {
+    }
+
 private:
     /**
      * Number of used line sensors. This depends on the Zumo hardware configuration.
