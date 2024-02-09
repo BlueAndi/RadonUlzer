@@ -248,9 +248,14 @@ extern int main(int argc, char** argv)
          * https://cyberbotics.com/doc/reference/robot#synchronous-versus-asynchronous-controllers
          */
 
+        /* Enable all simulation devices. Must be done before any other access to the devices. */
+        Board::getInstance().enableSimulationDevices();
+
         /* Do one single simulation step to force that all sensors will deliver already data.
          * Otherwise e.g. the position sensor will provide NaN.
          * This must be done before setup() is called!
+         * 
+         * Prerequisite: The sensors must be enabled!
          */
         if (false == gSimTime->step())
         {
@@ -259,14 +264,6 @@ extern int main(int argc, char** argv)
         }
         else
         {
-            /* Enable all simulation devices. Must be done before any other access to the devices. */
-            Board::getInstance().enableSimulationDevices();
-
-            /* A simulation step is required between enabling the simulation devices and the Arduino setup.
-             * Otherwise, devices such as sensors will provide NaN.
-             */
-            (void)gSimTime->step();
-
             /* Call the setup function, which is the entry point of the Arduino application. */
             setup();
 
