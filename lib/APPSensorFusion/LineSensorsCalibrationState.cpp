@@ -67,12 +67,16 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-    Odometry&          odometry  = Odometry::getInstance();
+    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
+    Odometry&          odometry    = Odometry::getInstance();
+    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
     m_orientation      = odometry.getOrientation();
+
+    /* Reset calibration. */
+    lineSensors.resetCalibration();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;

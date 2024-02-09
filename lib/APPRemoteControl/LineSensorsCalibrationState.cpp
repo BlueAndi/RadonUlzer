@@ -67,18 +67,22 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-    Odometry&          odometry  = Odometry::getInstance();
+    IDisplay&          display     = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
+    Odometry&          odometry    = Odometry::getInstance();
+    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
 
     display.clear();
     display.print("Calib");
     display.gotoXY(0, 1);
-    display.print("LineS");
+    display.print("Lines");
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
     m_orientation      = odometry.getOrientation();
+
+    /* Reset calibration. */
+    lineSensors.resetCalibration();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
