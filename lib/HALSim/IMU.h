@@ -96,43 +96,43 @@ public:
      *
      * @return True if the sensor type was detected succesfully; false otherwise.
      */
-    bool init();
+    bool init() final;
 
     /**
      * Enables all of the inertial sensors with a default configuration.
      */
-    void enableDefault()
+    void enableDefault() final
     {
     }
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.
      */
-    void configureForTurnSensing()
+    void configureForTurnSensing() final
     {
     }
 
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
      */
-    void readAccelerometer();
+    void readAccelerometer() final;
 
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
      */
-    void readGyro();
+    void readGyro() final;
 
     /**
      * Takes a reading from the magnetometer and makes the measurements available in m.
      */
-    void readMagnetometer();
+    void readMagnetometer() final;
 
     /**
      * Indicates whether the accelerometer has new measurement data ready.
      *
      * @return True if there is new accelerometer data available; false otherwise.
      */
-    bool accelerometerDataReady()
+    bool accelerometerDataReady() final
     {
         return true;
     }
@@ -142,7 +142,7 @@ public:
      *
      * @return True if there is new gyro data available; false otherwise.
      */
-    bool gyroDataReady()
+    bool gyroDataReady() final
     {
         return true;
     }
@@ -152,7 +152,7 @@ public:
      *
      * @return True if there is new magnetometer data available; false otherwise.
      */
-    bool magnetometerDataReady()
+    bool magnetometerDataReady() final
     {
         return true;
     }
@@ -164,7 +164,7 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
      * multiplication with a sensitivity factor in mm/s^2/digit.
      */
-    void const getAccelerationValues(IMUData* accelerationValues);
+    void const getAccelerationValues(IMUData* accelerationValues) final;
 
     /**
      * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
@@ -173,7 +173,7 @@ public:
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
      * with a sensitivity factor in mrad/s/digit.
      */
-    void const getTurnRates(IMUData* turnRates);
+    void const getTurnRates(IMUData* turnRates) final;
 
     /**
      * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z in digits.
@@ -182,12 +182,12 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
      * multiplication with a sensitivity factor in mgauss/digit.
      */
-    void const getMagnetometerValues(IMUData* magnetometerValues);
+    void const getMagnetometerValues(IMUData* magnetometerValues) final;
 
     /**
      * Calibrate the IMU.
      */
-    void calibrate();
+    void calibrate() final;
 
 private:
     /**
