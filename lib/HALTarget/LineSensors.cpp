@@ -85,9 +85,10 @@ bool LineSensors::isCalibrationSuccessful()
             }
 
             /* The assumption here is, that the distance (max. value - min. value) must be
-             * higher than a quarter of the max. measure duration.
+             * higher than a sixth of the max. measure duration.
+             * Measured example values from left to right when on the line:  1092 / 436 / 384 / 596 / 996
              */
-            if ((MEASURE_DURATION / 4) > distance)
+            if ((MEASURE_DURATION / 6) > distance)
             {
                 m_calibErrorInfo = index;
                 isSuccessful = false;
