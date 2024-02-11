@@ -118,12 +118,12 @@ void App::loop()
     /* Send sensor data periodically if new data is available. */
     if (true == m_sendSensorDataInterval.isTimeout())
     {
-        sendSensorData();
         m_sendSensorDataInterval.restart();
 
         /* Send End line detection signal if the application is currently in the Driving state. */
         if (&DrivingState::getInstance() == m_systemStateMachine.getState())
         {
+            sendSensorData();
             sendEndLineDetectionSignal();
         }
     }
