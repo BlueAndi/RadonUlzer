@@ -97,7 +97,7 @@ public:
 
 private:
     /** Sending Data period in ms. */
-    static const uint32_t SEND_SENSOR_DATA_PERIOD = 20U;
+    static const uint32_t SEND_SENSOR_DATA_PERIOD = 25U;
 
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
