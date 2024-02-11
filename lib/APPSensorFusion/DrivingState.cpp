@@ -67,6 +67,10 @@
 
 void DrivingState::entry()
 {
+    /* Clear the Odometry Position in favor of reproducibility. */
+    Odometry::getInstance().clearPosition();
+    Odometry::getInstance().setOrientation(FP_PI() / 2);
+
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
