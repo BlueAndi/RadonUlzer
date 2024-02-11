@@ -112,6 +112,12 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
+        /* Read the IMU so when the Measurement Timer runs out the Sensor Data can be accessed directly without having
+         * to wait for the reading. */
+        IIMU& imu = Board::getInstance().getIMU();
+        imu.readGyro();
+        imu.readAccelerometer();
+
         m_controlInterval.restart();
     }
 
@@ -127,7 +133,7 @@ void App::loop()
             sendEndLineDetectionSignal();
         }
     }
-    
+
     m_systemStateMachine.process();
 }
 
@@ -150,14 +156,12 @@ void App::sendSensorData()
     /* Get the current values from the Odometry. */
     odometry.getPosition(positionOdometryX, positionOdometryY);
 
-    /* Read the accelerometer. */
+    /* Access the Accelerometer Data (the Accelerometer is read out during the Control Interval Timeout). */
     IMUData accelerationValues;
-    imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
-    /* Read the gyro. */
+    /* Access the Gyro Data (the Gyro is read out during the Control Interval Timeout). */
     IMUData turnRates;
-    imu.readGyro();
     imu.getTurnRates(&turnRates);
 
     /* Write the sensor data in the SensorData Struct. */
