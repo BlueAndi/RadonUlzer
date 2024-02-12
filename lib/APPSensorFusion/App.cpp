@@ -178,7 +178,10 @@ void App::sendSensorData()
         duration         = SEND_SENSOR_DATA_PERIOD;
         m_firstIteration = false;
     }
-    duration = m_measurementTimer.getCurrentDuration();
+    else
+    {
+        duration = m_measurementTimer.getCurrentDuration();
+    }
 
     /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
      * bit unsigned integer. However, if in one iteration the duration exceeds the numerical limits of uint16, the
