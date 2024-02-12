@@ -104,6 +104,7 @@ void App::setup()
         m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_systemStateMachine.setState(&StartupState::getInstance());
+        ParameterSets::getInstance().choose(1U); /* Choose second fastest set. */
     }
 }
 
