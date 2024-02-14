@@ -65,17 +65,7 @@
 
 void StartupState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-
-    /* Initialize HAL */
-    Board::getInstance().init();
-
-    /* Show team id / team name */
-    display.clear();
-    display.print(TEAM_NAME_LINE_1);
-    display.gotoXY(0, 1);
-    display.print(TEAM_NAME_LINE_2);
-    delay(TEAM_NAME_DURATION);
+    /* Nothing to do. */
 }
 
 void StartupState::process(StateMachine& sm)
@@ -105,7 +95,7 @@ void StartupState::process(StateMachine& sm)
 
 void StartupState::exit()
 {
-    /* Nothing to do */
+    /* Nothing to do. */
 }
 
 /******************************************************************************

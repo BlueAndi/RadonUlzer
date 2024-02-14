@@ -67,16 +67,22 @@
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+
+    /* Initialize HAL */
     Board::getInstance().init();
 
+    /* Setup the state machine with the first state. */
     m_systemStateMachine.setState(&StartupState::getInstance());
+
+    /* Setup the periodically processing of robot control.  */
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
     /* Periodically send Send Data via SerialMuxProt. */
     m_sendSensorDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
     /* Measure the precise duration of each iteration.
-    This is necessary because the time required for each iteration can vary. */
+     * This is necessary because the time required for each iteration can vary.
+     */
     m_measurementTimer.start(0U);
 
     /* Providing Sensor data */
@@ -91,7 +97,6 @@ void App::loop()
     Board::getInstance().process();
     m_smpServer.process(millis());
     Speedometer::getInstance().process();
-    IIMU& imu = Board::getInstance().getIMU();
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -111,8 +116,7 @@ void App::loop()
     }
 
     /* Send sensor data periodically if new data is available. */
-    if ((true == m_sendSensorDataInterval.isTimeout()) && (true == imu.accelerometerDataReady()) &&
-        (true == imu.gyroDataReady()) && (true == imu.magnetometerDataReady()))
+    if (true == m_sendSensorDataInterval.isTimeout())
     {
         sendSensorData();
         m_sendSensorDataInterval.restart();
@@ -123,6 +127,7 @@ void App::loop()
             sendEndLineDetectionSignal();
         }
     }
+    
     m_systemStateMachine.process();
 }
 
@@ -150,11 +155,6 @@ void App::sendSensorData()
     imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
-    /* Read the magnetometer. */
-    IMUData magnetometerValues;
-    imu.readMagnetometer();
-    imu.getMagnetometerValues(&magnetometerValues);
-
     /* Read the gyro. */
     IMUData turnRates;
     imu.readGyro();
@@ -165,10 +165,8 @@ void App::sendSensorData()
     payload.positionOdometryY   = positionOdometryY;
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
-    payload.accelerationY       = accelerationValues.valueY;
-    payload.magnetometerValueX  = magnetometerValues.valueX;
-    payload.magnetometerValueY  = magnetometerValues.valueY;
     payload.turnRate            = turnRates.valueZ;
+    payload.isStandStill        = odometry.isStandStill();
 
     uint32_t duration = 0U;
     if (true == m_firstIteration)

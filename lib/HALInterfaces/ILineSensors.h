@@ -134,7 +134,12 @@ public:
      *
      * @return Max. line sensor value
      */
-    virtual uint16_t getSensorValueMax() const = 0;
+    virtual int16_t getSensorValueMax() const = 0;
+
+    /**
+     * Resets the maximum and minimum values measured by each sensor.
+     */
+    virtual void resetCalibration() = 0;
 
     /**
      * Calibration error information: Calibration successful.

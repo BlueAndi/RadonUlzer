@@ -108,10 +108,7 @@ public:
      *
      * @return Orientation in mrad
      */
-    int32_t getOrientation() const
-    {
-        return m_orientation;
-    }
+    int32_t getOrientation() const;
 
     /**
      * Get absolute position in coordinatesystem.
@@ -274,7 +271,7 @@ private:
      *
      * @return Mileage in mm
      */
-    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter);
+    int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter) const;
 
     /**
      * Calculate the orientation in mrad.

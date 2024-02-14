@@ -41,6 +41,7 @@
 #include <Util.h>
 #include "LineSensorsCalibrationState.h"
 #include "ErrorState.h"
+#include <Settings.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -73,12 +74,16 @@ LOG_TAG("MSCState");
 
 void MotorSpeedCalibrationState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    IDisplay&          display   = Board::getInstance().getDisplay();
 
     display.clear();
-    display.print("Calib");
+    display.print("Run");
     display.gotoXY(0, 1);
-    display.print("MSpeed");
+    display.print("MCAL");
+
+    /* Disable differential drive to avoid any bad influence. */
+    diffDrive.disable();
 
     /* Setup relative encoders */
     m_relEncoders.clear();
@@ -197,11 +202,15 @@ void MotorSpeedCalibrationState::determineMaxMotorSpeed()
 void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    ISettings&         settings  = Board::getInstance().getSettings();
 
     /* Set the lower speed as max. motor speed to ensure that both motors
      * can reach the same max. speed.
      */
     int16_t maxSpeed = (m_maxSpeedLeft < m_maxSpeedRight) ? m_maxSpeedLeft : m_maxSpeedRight;
+
+    /* Store calibrated max. motor speed in the settings. */
+    settings.setMaxSpeed(maxSpeed);
 
     /* With setting the max. motor speed in [steps/s] the differential drive control
      * can now be used.
@@ -210,10 +219,10 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
 
     /* Differential drive can now be used. */
     diffDrive.enable();
-    
+
     if (0 == maxSpeed)
     {
-        ErrorState::getInstance().setErrorMsg("MS=0");
+        ErrorState::getInstance().setErrorMsg("EMCAL 0");
         sm.setState(&ErrorState::getInstance());
     }
     else

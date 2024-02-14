@@ -118,7 +118,6 @@ const char* Board::MAGNETOMETER_NAME = "magnetometer";
 void Board::init()
 {
     m_encoders.init();
-    m_keyboard.init();
     m_lineSensors.init();
     m_motors.init();
     /*  TODO: TD084	React if IMU initialization fails */
@@ -143,19 +142,35 @@ Board::Board() :
     m_keyboard(m_simTime, m_robot.getKeyboard()),
     m_buttonA(m_keyboard),
     m_buzzer(m_robot.getSpeaker(SPEAKER_NAME)),
-    m_encoders(m_simTime, m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME),
-               m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
-    m_lineSensors(m_simTime, m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
+    m_encoders(m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME), m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)),
+    m_lineSensors(m_robot.getEmitter(EMITTER_0_NAME), m_robot.getEmitter(EMITTER_1_NAME),
                   m_robot.getEmitter(EMITTER_2_NAME), m_robot.getEmitter(EMITTER_3_NAME),
                   m_robot.getEmitter(EMITTER_4_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME),
                   m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME),
                   m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME), m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)),
     m_motors(m_robot.getMotor(LEFT_MOTOR_NAME), m_robot.getMotor(RIGHT_MOTOR_NAME)),
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
-    m_imu(m_simTime, m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
+    m_imu(m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
           m_robot.getCompass(MAGNETOMETER_NAME)),
     m_settings()
 {
+}
+
+void Board::enableSimulationDevices()
+{
+    const int timeStep = m_simTime.getTimeStep();
+
+    m_robot.getKeyboard()->enable(timeStep);
+    m_robot.getPositionSensor(POS_SENSOR_LEFT_NAME)->enable(timeStep);
+    m_robot.getPositionSensor(POS_SENSOR_RIGHT_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_0_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_1_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME)->enable(timeStep);
+    m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(timeStep);
+    m_robot.getAccelerometer(ACCELEROMETER_NAME)->enable(timeStep);
+    m_robot.getGyro(GYRO_NAME)->enable(timeStep);
+    m_robot.getCompass(MAGNETOMETER_NAME)->enable(timeStep);
 }
 
 /******************************************************************************

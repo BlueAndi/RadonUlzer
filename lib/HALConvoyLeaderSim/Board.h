@@ -377,6 +377,14 @@ private:
     }
 
     /**
+     * Enable all simulation devices.
+     * It is called by the main entry only.
+     * Devices must be enabled before they can be used, and a simulation step must be performed before the application
+     * initialization.
+     */
+    void enableSimulationDevices();
+
+    /**
      * The main entry needs access to the simulation robot instance.
      * But all other application parts shall have no access, which is
      * solved by this friend.

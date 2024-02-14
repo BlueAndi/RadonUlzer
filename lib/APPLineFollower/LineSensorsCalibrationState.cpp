@@ -67,18 +67,22 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-    Odometry&          odometry  = Odometry::getInstance();
+    IDisplay&          display     = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
+    Odometry&          odometry    = Odometry::getInstance();
+    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
 
     display.clear();
-    display.print("Calib");
+    display.print("Run");
     display.gotoXY(0, 1);
-    display.print("LineS");
+    display.print("LCAL");
 
     /* Prepare calibration drive. */
-    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
+    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 4;
     m_orientation      = odometry.getOrientation();
+
+    /* Mandatory for each new calibration. */
+    lineSensors.resetCalibration();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
@@ -186,7 +190,7 @@ void LineSensorsCalibrationState::finishCalibration(StateMachine& sm)
 
         Util::uintToStr(valueStr, sizeof(valueStr), lineSensors.getCalibErrorInfo());
 
-        strncpy(str, "Cal=", sizeof(str) - 1);
+        strncpy(str, "ELCAL ", sizeof(str) - 1);
         str[sizeof(str) - 1] = '\0';
 
         strncat(str, valueStr, sizeof(str) - strlen(valueStr) - 1);

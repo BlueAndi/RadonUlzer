@@ -185,27 +185,27 @@ private:
     /**
      * The PID proportional factor denominator for the speed control.
      */
-    static const int16_t PID_P_DENOMINATOR = 10;
+    static const int16_t PID_P_DENOMINATOR = 5;
 
     /**
      * The PID integral factor numerator for the speed control.
      */
-    static const int16_t PID_I_NUMERATOR = 1;
+    static const int16_t PID_I_NUMERATOR = 0;
 
     /**
      * The PID integral factor denominator for the speed control.
      */
-    static const int16_t PID_I_DENOMINATOR = 100;
+    static const int16_t PID_I_DENOMINATOR = 1;
 
     /**
      * The PID derivative factor numerator for the speed control.
      */
-    static const int16_t PID_D_NUMERATOR = 1;
+    static const int16_t PID_D_NUMERATOR = 2;
 
     /**
      * The PID derivative factor denominator for the speed control.
      */
-    static const int16_t PID_D_DENOMINATOR = 400;
+    static const int16_t PID_D_DENOMINATOR = 1;
 
     int16_t m_isInit;    /**< Used to determine the initialization in the first time process() is called. */
     bool    m_isEnabled; /**< Enable/Disable the differential drive control. */
@@ -228,27 +228,7 @@ private:
      * Construct differential drive control.
      * It is disabled by default.
      */
-    DifferentialDrive() :
-        m_isInit(false),
-        m_isEnabled(false),
-        m_maxMotorSpeed(0),
-        m_linearSpeedCenterSetPoint(0),
-        m_angularSpeedSetPoint(0),
-        m_linearSpeedLeftSetPoint(0),
-        m_linearSpeedRightSetPoint(0),
-        m_motorSpeedLeftPID(),
-        m_motorSpeedRightPID(),
-        m_lastLinearSpeedLeft(0),
-        m_lastLinearSpeedRight(0)
-    {
-        m_motorSpeedLeftPID.setPFactor(PID_P_NUMERATOR, PID_P_DENOMINATOR);
-        m_motorSpeedLeftPID.setIFactor(PID_I_NUMERATOR, PID_I_DENOMINATOR);
-        m_motorSpeedLeftPID.setDFactor(PID_D_NUMERATOR, PID_D_DENOMINATOR);
-
-        m_motorSpeedRightPID.setPFactor(PID_P_NUMERATOR, PID_P_DENOMINATOR);
-        m_motorSpeedRightPID.setIFactor(PID_I_NUMERATOR, PID_I_DENOMINATOR);
-        m_motorSpeedRightPID.setDFactor(PID_D_NUMERATOR, PID_D_DENOMINATOR);
-    }
+    DifferentialDrive();
 
     /**
      * Destroy differential drive control.

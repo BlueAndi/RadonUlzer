@@ -1,6 +1,6 @@
 @startuml
 
-title Release Track State
+title Driving State
 
 package "Application" as appLayer {
 
@@ -72,6 +72,8 @@ package "Service" as serviceLayer {
         + write(value : T) : T
         + getResult() : T
     }
+    
+    class DifferentialDrive <<service>>
 }
 
 package "HAL" as hal {
@@ -88,11 +90,6 @@ package "HAL" as hal {
             + {abstract} print(value : int8_t) : size_t
             + {abstract} print(value : int16_t) : size_t
             + {abstract} print(value : int32_t) : size_t
-        }
-
-        interface IMotors {
-            + {abstract} setSpeeds(leftSpeed : int16_t, rightSpeed : int16_t) : void
-            + {abstract} getMaxSpeed() : int16_t
         }
 
         interface ILineSensors {
@@ -113,19 +110,18 @@ package "HAL" as hal {
 
     class Board << namespace >> {
         + getDisplay() : IDisplay&
-        + getMotors() : IMotors&
         + getLineSensors() : ILineSensors&
         + getLedYellow() : ILed&
     }
 }
 
-DrivingState *--> SimpleTimer
-DrivingState *--> Sound
-DrivingState *--> Odometry
-DrivingState *--> PIDController
-DrivingState *--> MovAvg
+DrivingState *-> SimpleTimer
+DrivingState ..> Sound: <<use>>
+DrivingState ..> Odometry: <<use>>
+DrivingState *-> PIDController
+DrivingState *-> MovAvg
+DrivingState ..> DifferentialDrive: <<use>>
 DrivingState ...> IDisplay: <<use>>
-DrivingState ...> IMotors: <<use>>
 DrivingState ...> ILineSensors: <<use>>
 DrivingState ...> ILed: <<use>>
 DrivingState ...> Board:: <<use>>

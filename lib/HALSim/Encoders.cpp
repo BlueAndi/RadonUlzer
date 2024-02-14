@@ -63,8 +63,6 @@ void Encoders::init()
 {
     if (nullptr != m_posSensorLeft)
     {
-        m_posSensorLeft->enable(m_simTime.getTimeStep());
-        
         /* If robot reconnets, the position sensor will provide its position.
          * Ensure that the left encoder will start at 0.
          */
@@ -73,8 +71,6 @@ void Encoders::init()
 
     if (nullptr != m_posSensorRight)
     {
-        m_posSensorRight->enable(m_simTime.getTimeStep());
-
         /* If robot reconnets, the position sensor will provide its position.
          * Ensure that the right encoder will start at 0.
          */

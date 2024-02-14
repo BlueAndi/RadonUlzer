@@ -70,9 +70,6 @@ public:
         m_magnetometerValues{0, 0, 0},
         m_rawAccelerometerOffsetX(0),
         m_rawAccelerometerOffsetY(0),
-        m_rawAccelerometerOffsetZ(0),
-        m_rawGyroOffsetX(0),
-        m_rawGyroOffsetY(0),
         m_rawGyroOffsetZ(0)
     {
     }
@@ -89,53 +86,53 @@ public:
      *
      * @return True if the sensor type was detected succesfully; false otherwise.
      */
-    bool init();
+    bool init() final;
 
     /**
      * Enables all of the inertial sensors with a default configuration.
      */
-    void enableDefault();
+    void enableDefault() final;
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.
      */
-    void configureForTurnSensing();
+    void configureForTurnSensing() final;
 
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
      */
-    void readAccelerometer();
+    void readAccelerometer() final;
 
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
      */
-    void readGyro();
+    void readGyro() final;
 
     /**
      * Takes a reading from the magnetometer and makes the measurements available in m.
      */
-    void readMagnetometer();
+    void readMagnetometer() final;
 
     /**
      * Indicates whether the accelerometer has new measurement data ready.
      *
      * @return True if there is new accelerometer data available; false otherwise.
      */
-    bool accelerometerDataReady();
+    bool accelerometerDataReady() final;
 
     /**
      * Indicates whether the gyro  has new measurement data ready.
      *
      * @return True if there is new gyro data available; false otherwise.
      */
-    bool gyroDataReady();
+    bool gyroDataReady() final;
 
     /**
      * Indicates whether the magnetometer  has new measurement data ready.
      *
      * @return True if there is new magnetometer data available; false otherwise.
      */
-    bool magnetometerDataReady();
+    bool magnetometerDataReady() final;
 
     /**
      * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z in digits.
@@ -144,7 +141,7 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
      * multiplication with a sensitivity factor in mm/s^2/digit.
      */
-    const void getAccelerationValues(IMUData* accelerationValues);
+    const void getAccelerationValues(IMUData* accelerationValues) final;
 
     /**
      * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
@@ -153,7 +150,7 @@ public:
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
      * with a sensitivity factor in mrad/s/digit.
      */
-    const void getTurnRates(IMUData* turnRates);
+    const void getTurnRates(IMUData* turnRates) final;
 
     /**
      * Get last raw Magnetometer values as an IMUData struct containing values in x, y and z in digits.
@@ -162,12 +159,13 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
      * multiplication with a sensitivity factor in mgauss/digit.
      */
-    const void getMagnetometerValues(IMUData* magnetometerValues);
+    const void getMagnetometerValues(IMUData* magnetometerValues) final;
 
     /**
      * Calibrate the IMU.
+     * Only the used axes (acceleration along x and y and turn rate around z) are calibrated.
      */
-    void calibrate();
+    void calibrate() final;
 
 protected:
 private:
@@ -179,9 +177,6 @@ private:
 
     int16_t m_rawAccelerometerOffsetX; /**< Mean raw accelerometer offset in x-direction determined by calibration. */
     int16_t m_rawAccelerometerOffsetY; /**< Mean raw accelerometer offset in y-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetZ; /**< Mean raw accelerometer offset in z-direction determined by calibration. */
-    int16_t m_rawGyroOffsetX;          /**< Mean raw gyro offset in x-direction determined by calibration. */
-    int16_t m_rawGyroOffsetY;          /**< Mean raw gyro offset in y-direction determined by calibration. */
     int16_t m_rawGyroOffsetZ;          /**< Mean raw gyro offset in z-direction determined by calibration. */
 };
 

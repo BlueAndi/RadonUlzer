@@ -64,7 +64,6 @@ public:
     /**
      * Constructs the line sensors adapter.
      *
-     * @param[in] simTime       Simulation time
      * @param[in] emitter0      The most left infrared emitter 0
      * @param[in] emitter1      The infrared emitter 1
      * @param[in] emitter2      The infrared emitter 2
@@ -76,12 +75,11 @@ public:
      * @param[in] lightSensor3  The light sensor 3
      * @param[in] lightSensor4  The most right light sensor 4
      */
-    LineSensors(const SimTime& simTime, webots::Emitter* emitter0, webots::Emitter* emitter1, webots::Emitter* emitter2,
+    LineSensors(webots::Emitter* emitter0, webots::Emitter* emitter1, webots::Emitter* emitter2,
                 webots::Emitter* emitter3, webots::Emitter* emitter4, webots::DistanceSensor* lightSensor0,
                 webots::DistanceSensor* lightSensor1, webots::DistanceSensor* lightSensor2,
                 webots::DistanceSensor* lightSensor3, webots::DistanceSensor* lightSensor4) :
         ILineSensors(),
-        m_simTime(simTime),
         m_sensorValuesU16(),
         m_emitters{emitter0, emitter1, emitter2, emitter3, emitter4},
         m_lightSensors{lightSensor0, lightSensor1, lightSensor2, lightSensor3, lightSensor4},
@@ -89,7 +87,8 @@ public:
         m_sensorCalibStarted(false),
         m_calibErrorInfo(CALIB_ERROR_NOT_CALIBRATED),
         m_sensorMinValues(),
-        m_sensorMaxValues()
+        m_sensorMaxValues(),
+        m_lastPosValue(SENSOR_MAX_VALUE * (MAX_SENSORS / 2))
     {
     }
 
@@ -177,10 +176,15 @@ public:
      *
      * @return Max. line sensor value
      */
-    uint16_t getSensorValueMax() const final
+    int16_t getSensorValueMax() const final
     {
         return SENSOR_MAX_VALUE;
     }
+
+    /**
+     * Resets the maximum and minimum values measured by each sensor.
+     */
+    void resetCalibration() final;
 
 private:
     /**
@@ -194,7 +198,11 @@ private:
      */
     static const int16_t SENSOR_MAX_VALUE = 1000;
 
-    const SimTime&   m_simTime;                      /**< Simulation time */
+    /**
+     * If above the threshold, it will be assumed that the sensor see's the line.
+     */
+    static const uint16_t SENSOR_OFF_LINE_THRESHOLD = 200;
+
     uint16_t         m_sensorValuesU16[MAX_SENSORS]; /**< The last value of each sensor as unsigned 16-bit values. */
     webots::Emitter* m_emitters[MAX_SENSORS];        /**< The infrared emitters (0: most left) */
     webots::DistanceSensor* m_lightSensors[MAX_SENSORS]; /**< The light sensors (0: most left) */
@@ -203,6 +211,7 @@ private:
     uint8_t  m_calibErrorInfo; /**< Indicates which sensor failed the calibration, if the calibration failed. */
     uint16_t m_sensorMinValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
     uint16_t m_sensorMaxValues[MAX_SENSORS]; /**< Stores the minimal calibration values for the sensors. */
+    int16_t  m_lastPosValue;                 /**< Last valid line sensor position value. */
 
     /* Default constructor not allowed. */
     LineSensors();

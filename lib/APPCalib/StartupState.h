@@ -93,32 +93,30 @@ public:
 protected:
 private:
     /**
-     * Display pages which are showing different kind of information.
+     * This type defines different kind of information, which will be shown
+     * to the user in the same order as defined.
      */
-    enum Page
+    enum UserInfo
     {
-        PAGE_CALIB = 0, /**< Show button to use for calibration. */
-        PAGE_CONTINUE   /**< Show button to use to continue without calibration. */
+        USER_INFO_TEAM_NAME = 0, /**< Show the team name. */
+        USER_INFO_UI,            /**< Show the user interface. */
+        USER_INFO_COUNT          /**< Number of user infos. */
     };
 
     /**
-     * Duration in ms how long the team id or team name shall be shown at startup.
+     * Duration in ms how long a info on the display shall be shown, until
+     * the next info appears.
      */
-    static const uint32_t TEAM_NAME_DURATION = 2000;
+    static const uint32_t INFO_DURATION = 2000;
 
-    /**
-     * Period in ms how long a page is shown on the display,
-     * before the next page.
-     */
-    static const uint32_t NEXT_PAGE_PERIOD = 1000;
-
-    SimpleTimer m_pageTimer; /**< Timer for display handling. */
-    Page        m_page;      /**< Current shown display page. */
+    bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
+    SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
+    UserInfo    m_userInfoState; /**< Current user info state. */
 
     /**
      * Default constructor.
      */
-    StartupState() : m_pageTimer(), m_page(PAGE_CALIB)
+    StartupState() : m_isMaxMotorSpeedCalibAvailable(false), m_timer(), m_userInfoState(USER_INFO_TEAM_NAME)
     {
     }
 
@@ -133,20 +131,12 @@ private:
     StartupState(const StartupState& state);            /**< Copy construction of an instance. */
     StartupState& operator=(const StartupState& state); /**< Assignment of an instance. */
 
-    /** 
-     * Show current page on the display.
-     */
-    void showCurrentPage();
-
     /**
-     * Show calibration info page on the display.
+     * Show next user info.
+     *
+     * @param[in] next  Next user info which to show.
      */
-    void showCalibrationPage();
-
-    /**
-     * Show how to continue without calibration page on the display.
-     */
-    void showContinuePage();
+    void showUserInfo(UserInfo next);
 };
 
 /******************************************************************************

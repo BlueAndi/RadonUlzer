@@ -163,7 +163,7 @@ void App::loop()
     m_systemStateMachine.process();
 }
 
-void App::handleRemoteCommands(const Command& cmd)
+void App::handleRemoteCommand(const Command& cmd)
 {
     CommandResponse rsp = {cmd.commandId, SMPChannelPayload::RSP_ID_OK};
 
@@ -242,11 +242,16 @@ void App::systemStatusCallback(SMPChannelPayload::Status status)
 
 void App::reportVehicleData()
 {
-    Odometry&    odometry    = Odometry::getInstance();
-    Speedometer& speedometer = Speedometer::getInstance();
-    VehicleData  payload;
-    int32_t      xPos = 0;
-    int32_t      yPos = 0;
+    IProximitySensors& proximitySensors = Board::getInstance().getProximitySensors();
+    Odometry&          odometry         = Odometry::getInstance();
+    Speedometer&       speedometer      = Speedometer::getInstance();
+    VehicleData        payload;
+    int32_t            xPos          = 0;
+    int32_t            yPos          = 0;
+    uint8_t            averageCounts = 0U;
+
+    proximitySensors.read();
+    averageCounts = (proximitySensors.countsFrontWithLeftLeds() + proximitySensors.countsFrontWithRightLeds()) / 2U;
 
     odometry.getPosition(xPos, yPos);
     payload.xPos        = xPos;
@@ -255,6 +260,7 @@ void App::reportVehicleData()
     payload.left        = speedometer.getLinearSpeedLeft();
     payload.right       = speedometer.getLinearSpeedRight();
     payload.center      = speedometer.getLinearSpeedCenter();
+    payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
@@ -328,7 +334,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
     {
         App*          application = reinterpret_cast<App*>(userData);
         const Command cmd         = *reinterpret_cast<const Command*>(payload);
-        application->handleRemoteCommands(cmd);
+        application->handleRemoteCommand(cmd);
     }
 }
 

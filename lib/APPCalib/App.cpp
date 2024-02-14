@@ -67,8 +67,14 @@
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+    
+    /* Initialize HAL */
     Board::getInstance().init();
+
+    /* Setup the state machine with the first state. */
     m_systemStateMachine.setState(&StartupState::getInstance());
+
+    /* Setup the periodically processing of robot control.  */
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 }
 

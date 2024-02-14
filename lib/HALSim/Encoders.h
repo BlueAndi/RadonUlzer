@@ -63,13 +63,11 @@ public:
     /**
      * Constructs the encoders adapter.
      *
-     * @param[in] simTime               Simulation time
      * @param[in] posSensorLeft         The left position sensor
      * @param[in] posSensorRight        The right position sensor
      */
-    Encoders(const SimTime& simTime, webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) :
+    Encoders(webots::PositionSensor* posSensorLeft, webots::PositionSensor* posSensorRight) :
         IEncoders(),
-        m_simTime(simTime),
         m_posSensorLeft(posSensorLeft),
         m_posSensorRight(posSensorRight),
         m_lastResetValueLeft(0.0f),
@@ -130,9 +128,6 @@ public:
     int16_t getCountsAndResetRight() final;
 
 private:
-    /** Simulation time */
-    const SimTime& m_simTime;
-
     /** The position sensor of the left motor in the robot simulation. */
     webots::PositionSensor* m_posSensorLeft;
 
@@ -151,7 +146,7 @@ private:
      * Calling this method will prevent that the difference between the
      * reference point and the current position will overflow the target
      * data type.
-     * 
+     *
      * @param[in,out]   lastPos   Last position in [m]
      * @param[in]       pos       Current position in [m]
      */

@@ -92,32 +92,34 @@ public:
 protected:
 private:
     /**
-     * Display pages which are showing different kind of information.
+     * This type defines different kind of information, which will be shown
+     * to the user in the same order as defined.
      */
-    enum Page
+    enum UserInfo
     {
-        PAGE_DRIVE_FORWARD = 0, /**< Show button to use to drive forward. */
-        PAGE_TURN_LEFT,         /**< Show button to use to turn left 90°. */
-        PAGE_TURN_RIGHT         /**< Show button to use to turn right 90°. */
+        USER_INFO_DRIVE_FORWARD = 0, /**< Show button to use to drive forward. */
+        USER_INFO_TURN_LEFT,         /**< Show button to use to turn left 90°. */
+        USER_INFO_TURN_RIGHT,        /**< Show button to use to turn right 90°. */
+        USER_INFO_COUNT              /**< Number of user infos. */
     };
 
     /** Release timer duration in ms. */
     static const uint32_t RELEASE_DURATION = 2000;
 
     /**
-     * Period in ms how long a page is shown on the display,
-     * before the next page.
+     * Duration in ms how long a info on the display shall be shown, until
+     * the next info appears.
      */
-    static const uint32_t NEXT_PAGE_PERIOD = 1000;
+    static const uint32_t INFO_DURATION = 2000;
 
-    SimpleTimer m_pageTimer;    /**< Timer for display handling. */
-    Page        m_page;         /**< Current shown display page. */
-    SimpleTimer m_releaseTimer; /**< Release timer */
+    SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
+    UserInfo    m_userInfoState; /**< Current user info state. */
+    SimpleTimer m_releaseTimer;  /**< Release timer */
 
     /**
      * Default constructor.
      */
-    ReadyState() : m_pageTimer(), m_page(PAGE_DRIVE_FORWARD), m_releaseTimer()
+    ReadyState() : m_timer(), m_userInfoState(USER_INFO_DRIVE_FORWARD), m_releaseTimer()
     {
     }
 
@@ -133,24 +135,11 @@ private:
     ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
 
     /**
-     * Show current page on the display.
+     * Show next user info.
+     *
+     * @param[in] next  Next user info which to show.
      */
-    void showCurrentPage();
-
-    /**
-     * Show button to drive forward on the display.
-     */
-    void showDriveForwardPage();
-
-    /**
-     * Show button to turn left 90° on the display.
-     */
-    void showTurnLeftPage();
-
-    /**
-     * Show button to turn right 90° on the display.
-     */
-    void showTurnRightPage();
+    void showUserInfo(UserInfo next);
 };
 
 /******************************************************************************

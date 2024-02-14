@@ -122,8 +122,11 @@ public:
 
     /**
      * Checks whether a note, frequency, or sequence is being played.
+     * 
+     * Note: Avoid calling this method inside a loop without processing the
+     * buzzer. On the simulation additional the simulation time needs to run!
      *
-     * @return if the buzzer is current playing a note, frequency, or sequence it will
+     * @return If the buzzer is current playing a note, frequency, or sequence it will
      * return true otherwise false.
      */
     bool isPlaying() final

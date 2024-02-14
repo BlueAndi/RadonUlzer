@@ -203,7 +203,7 @@ bool Buzzer::isPlaying()
     if (nullptr != m_speaker)
     {
         /* Is any sound playing? */
-        isPlaying = m_speaker->isSoundPlaying("");
+        isPlaying = m_speaker->isSoundPlaying(m_pathToWavFile);
     }
 
     return isPlaying;

@@ -67,6 +67,12 @@ package "HAL" as hal {
             + {abstract} countsFrontWithLeftLeds() : uint8_t
             + {abstract} countsFrontWithRightLeds() : uint8_t
         }
+
+        interface "ISettings" as iSettings {
+            + {abstract} init() : void
+            + {abstract} getMaxSpeed() : int16_t
+            + {abstract} setMaxSpeed(maxSpeed : int16_t) : void
+        }
     }
 
     class Board << namespace >> {
@@ -80,6 +86,8 @@ package "HAL" as hal {
         + getLedGreen() : iLed&
         + getLineSensors() : ILineSensors&
         + getMotors() : IMotors&
+        + getProximitySensors() : IProximitySensors&
+        + getSettings() : ISettings&
     }
 
     class RobotConstants {
@@ -114,6 +122,7 @@ package "HAL" as hal {
         class LedYellow
         class LedGreen
         class ProximitySensors
+        class Settings
     }
 
     iLineSensors <|... LineSensors: <<realize>>
@@ -128,6 +137,7 @@ package "HAL" as hal {
     iLed <|... LedYellow: <<realize>>
     iLed <|... LedGreen: <<realize>>
     iProximitySensors <|... ProximitySensors: <<realize>>
+    iSettings <|... Settings: <<realize>>
 }
 
 package "Zumo32U4 library"  as zumo32u4Lib {

@@ -61,10 +61,12 @@ class ProximitySensors : public IProximitySensors
 public:
     /**
      * Constructs the interface.
+     *
+     * @param[in] proxSensor0   Front left proximity sensor
+     * @param[in] proxSensor1   Front right proximity sensor
      */
-    ProximitySensors(const SimTime& simTime, webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
+    ProximitySensors(webots::DistanceSensor* proxSensor0, webots::DistanceSensor* proxSensor1) :
         IProximitySensors(),
-        m_simTime(simTime),
         m_proximitySensors{proxSensor0, proxSensor1},
         m_sensorValuesU8{0U}
     {
@@ -162,11 +164,6 @@ private:
         LEFT = 0U,
         RIGHT
     };
-
-    /**
-     * Simulation time
-     */
-    const SimTime& m_simTime;
 
     /**
      * The frontal proximity sensors

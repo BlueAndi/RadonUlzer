@@ -12,9 +12,9 @@ package "Application" as appLayer {
         + setErrorMsg(msg : const String&) : void
     }
 
-    class MotorSpeedCalibrationState <<control>>
+    class StartupState <<control>>
 
-    ErrorState .r.> MotorSpeedCalibrationState: <<use>>
+    ErrorState .r.> StartupState: <<use>>
 }
 
 package "HAL" as hal {

@@ -114,10 +114,10 @@ void ReleaseTrackState::showParSet() const
     const char* parSetName = ParameterSets::getInstance().getParameterSet().name;
 
     display.clear();
-    display.print("Set ");
-    display.print(parSetId);
+    display.print("A: CHG SET");
     display.gotoXY(0, 1);
     display.print(parSetName);
+    display.print(parSetId);
 }
 
 /******************************************************************************

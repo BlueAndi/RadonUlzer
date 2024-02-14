@@ -56,6 +56,7 @@
 #include <LedYellow.h>
 #include <LedGreen.h>
 #include <ProximitySensors.h>
+#include <Settings.h>
 
 /******************************************************************************
  * Macros
@@ -210,6 +211,16 @@ public:
     }
 
     /**
+     * Get the settings.
+     * 
+     * @return Settings
+     */
+    ISettings& getSettings() final
+    {
+        return m_settings;
+    }
+
+    /**
      * Process actuators and sensors.
      */
     void process() final
@@ -256,6 +267,9 @@ private:
 
     /** Proximity sensors */
     ProximitySensors m_proximitySensors;
+
+    /** Settings */
+    Settings m_settings;
 
     /**
      * Constructs the concrete board.

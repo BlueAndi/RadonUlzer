@@ -108,9 +108,9 @@ private:
     static const uint32_t WAIT_TIME = 1000;
 
     /**
-     * Calibration turn angle in mrad (corresponds to 60°).
+     * Calibration turn angle in mrad (corresponds to 72°).
      */
-    static const int32_t CALIB_ANGLE = (FP_2PI() / 6);
+    static const int32_t CALIB_ANGLE = (FP_2PI() / 5);
 
     SimpleTimer m_timer;            /**< Timer used to wait, until the calibration drive starts. */
     Phase       m_phase;            /**< Current calibration phase */
