@@ -104,6 +104,7 @@ void App::setup()
         m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_systemStateMachine.setState(&StartupState::getInstance());
+        ParameterSets::getInstance().choose(1U); /* Choose second fastest set. */
     }
 }
 
@@ -238,12 +239,13 @@ void App::reportVehicleData()
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
     VehicleData        payload;
-    int32_t            xPos          = 0;
-    int32_t            yPos          = 0;
-    uint8_t            averageCounts = 0U;
+    int32_t            xPos        = 0;
+    int32_t            yPos        = 0;
+    uint8_t            leftCounts  = proximitySensors.countsFrontWithLeftLeds();
+    uint8_t            rightCounts = proximitySensors.countsFrontWithRightLeds();
+    uint8_t            maxCounts   = (leftCounts > rightCounts) ? leftCounts : rightCounts;
 
     proximitySensors.read();
-    averageCounts = (proximitySensors.countsFrontWithLeftLeds() + proximitySensors.countsFrontWithRightLeds()) / 2U;
 
     odometry.getPosition(xPos, yPos);
     payload.xPos        = xPos;
@@ -252,7 +254,7 @@ void App::reportVehicleData()
     payload.left        = speedometer.getLinearSpeedLeft();
     payload.right       = speedometer.getLinearSpeedRight();
     payload.center      = speedometer.getLinearSpeedCenter();
-    payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
+    payload.proximity   = static_cast<SMPChannelPayload::Range>(maxCounts);
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
