@@ -87,12 +87,24 @@ def get_robot_2d_orientation(robot_node):
 
 
 def topic_callback(client, userdata, message) -> None:
-    jsonPayload = json.loads(message.payload.decode('utf-8'))
-    print(f"{jsonPayload.get('X')}:{jsonPayload.get('Y')}")
-    x = (jsonPayload.get('X') / 1000)
-    y = (jsonPayload.get('Y') / 1000)
-    children_field.importMFNodeFromString(
-        -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name ""}')
+    if message.topic == "reset":
+        print("Resetting")
+        supervisor.worldReload()
+    else:
+        jsonPayload = json.loads(message.payload.decode('utf-8'))
+        x = (jsonPayload["data"]["X"] / 1000)
+        y = (jsonPayload["data"]["Y"] / 1000)
+        print(f"{x}:{y}")
+
+        if message.topic == "platoons/0/vehicles/1/inputWaypoint":
+            children_field.importMFNodeFromString(
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0.666667 0 0}')
+        elif message.topic == "platoons/0/vehicles/2/inputWaypoint":
+            children_field.importMFNodeFromString(
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0.666667 0}')
+        elif message.topic == "platoons/0/vehicles/3/inputWaypoint":
+            children_field.importMFNodeFromString(
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0 0.666667}')
 
 
 def main_loop():
@@ -107,7 +119,8 @@ def main_loop():
     client = mqtt.Client()
     client.on_message = topic_callback
     client.connect("localhost")
-    client.subscribe("platoons/0/vehicles/1/targetWaypoint")
+    client.subscribe([("platoons/0/vehicles/1/inputWaypoint", 0),
+                     ("platoons/0/vehicles/2/inputWaypoint", 0), ("platoons/0/vehicles/3/inputWaypoint", 0), ("reset", 0)])
     client.loop_start()
 
     # Get the time step of the current world.
