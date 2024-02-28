@@ -27,6 +27,8 @@
 ################################################################################
 import shutil
 import os
+import platform
+import sys
 
 Import("env") # type: ignore
 
@@ -34,9 +36,35 @@ Import("env") # type: ignore
 # Variables
 ################################################################################
 
-SHARED_FILES_LIST = [
+################################################################################
+# Variables
+################################################################################
+
+# 2024_02_27 eble: Make this script platform independant since
+# There are no *.dll on Linux or on Macs
+WINDOWS_PLATFORM_NAME = 'Windows'
+MACOS_PLATFORM_NAME = 'Darwin'
+LINUX_PLATFORM_NAME = 'Linux'
+
+SHARED_FILES_LIST = []
+
+if platform.system() == WINDOWS_PLATFORM_NAME:
+    SHARED_FILES_LIST = [
     '/lib/controller/Controller.dll',
     '/lib/controller/CppController.dll']
+elif platform.system() == MACOS_PLATFORM_NAME:
+        SHARED_FILES_LIST = [
+    '/lib/controller/libController.dylib',
+    '/lib/controller/libCppController.dylib']
+elif platform.system() == LINUX_PLATFORM_NAME:
+    SHARED_FILES_LIST = [
+    '/lib/controller/libController.so',
+    '/lib/controller/libCppController.so']
+else:
+    print("I don't know your platform, it's neither Windows nor Linux nor Mac. Exiting script.")
+    sys.exit(1)
+
+
 
 PIO_ENV_NAME = env["PIOENV"] # type: ignore
 
