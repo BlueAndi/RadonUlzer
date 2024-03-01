@@ -3,9 +3,10 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
 
 PROTO Zumo32U4 [
-  field SFVec3f    translation  0 0 0
-  field SFRotation rotation     0 0 1 0
-  field SFString   name         "robot"
+  field SFVec3f     translation     0 0 0
+  field SFRotation  rotation        0 0 1 0
+  field SFString    name            "robot"
+  field SFString    contactMaterial "default" # Contact material of the tracks
 ]
 {
   Robot {
@@ -37,6 +38,7 @@ PROTO Zumo32U4 [
         ]
       }
       DEF TRACK_LEFT Track {
+        contactMaterial IS contactMaterial
         translation 0 0.0375 0
         rotation 0 1 0 0
         children [
@@ -121,6 +123,7 @@ PROTO Zumo32U4 [
         geometriesCount 70
       }
       DEF TRACK_RIGHT Track {
+        contactMaterial IS contactMaterial
         translation 0 -0.0375 0
         children [
           DEF WHEEL_FR TrackWheel {
@@ -565,6 +568,7 @@ PROTO Zumo32U4 [
     ]
     boundingObject USE BODY
     physics Physics {
+      mass 0.2
     }
     name IS name
     controller "<extern>"
