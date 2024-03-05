@@ -3,10 +3,11 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
 
 PROTO HeadingCalculationTrack [
-
+  field SFString  contactMaterial "default" # Is `Solid.contactMaterial`.
 ]
 {
   RectangleArena {
+    contactMaterial IS contactMaterial
     floorSize 2 2
     floorTileSize 2 2
     floorAppearance PBRAppearance {
