@@ -569,6 +569,7 @@ PROTO Zumo32U4 [
     boundingObject USE BODY
     physics Physics {
       mass 0.2
+      density -1
     }
     name IS name
     controller "<extern>"
