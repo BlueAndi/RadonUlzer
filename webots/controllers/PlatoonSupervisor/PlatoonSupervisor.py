@@ -12,6 +12,10 @@ supervisor = Supervisor()
 root_node = supervisor.getRoot()
 children_field = root_node.getField('children')
 
+# The PROTO DEF names must be given!
+LEADER_NAME = "LEADER"
+FOLLOWER1_NAME = "FOLLOWER1"
+
 
 def topic_callback(client, userdata, message) -> None:
     if message.topic == "reset":
@@ -21,15 +25,17 @@ def topic_callback(client, userdata, message) -> None:
         jsonPayload = json.loads(message.payload.decode('utf-8'))
         x = (jsonPayload["data"]["X"] / 1000)
         y = (jsonPayload["data"]["Y"] / 1000)
-        print(f"{x}:{y}")
 
         if message.topic == "platoons/0/vehicles/1/inputWaypoint":
+            print(f"Leader: {x}:{y}")
             children_field.importMFNodeFromString(
                 -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0.666667 0 0}')
         elif message.topic == "platoons/0/vehicles/2/inputWaypoint":
+            print(f"Follower 1: {x}:{y}")
             children_field.importMFNodeFromString(
                 -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0.666667 0}')
         elif message.topic == "platoons/0/vehicles/3/inputWaypoint":
+            print(f"Follower 2: {x}:{y}")
             children_field.importMFNodeFromString(
                 -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0 0.666667}')
 
@@ -42,6 +48,7 @@ def main_loop():
         number: Status
     """
     status = 0
+    supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_REAL_TIME)
 
     client = mqtt.Client()
     client.on_message = topic_callback
@@ -53,8 +60,26 @@ def main_loop():
     # Get the time step of the current world.
     timestep = int(supervisor.getBasicTimeStep())
 
-    while supervisor.step(timestep) != -1:
-        pass
+    leader_node = supervisor.getFromDef(LEADER_NAME)
+    follower1_node = supervisor.getFromDef(FOLLOWER1_NAME)
+
+    if leader_node is None or follower1_node is None:
+        print(
+            f"Robot DEF {LEADER_NAME} or {FOLLOWER1_NAME} not found.")
+        status = -1
+    else:
+
+        initial_contact_leader = 16
+        initial_contact_follower1 = 16
+
+        while supervisor.step(timestep) != -1:
+            contact_leader = len(leader_node.getContactPoints(True))
+            contact_follower1 = len(follower1_node.getContactPoints(True))
+
+            if (contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1):
+                print("Collision detected")
+                supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
+                break
 
     client.loop_stop()
     return status

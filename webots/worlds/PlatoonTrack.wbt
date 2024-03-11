@@ -34,13 +34,13 @@ TexturedBackgroundLight {
 LineFollowerTrack {
   contactMaterial "cardboard"
 }
-DEF ROBOT Zumo32U4 {
+DEF LEADER Zumo32U4 {
   translation -0.25 -1.05 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "leader"
   contactMaterial "rubber"
 }
-Zumo32U4 {
+DEF FOLLOWER1 Zumo32U4 {
   translation -0.25 -1.2 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "follower_1"
