@@ -8,12 +8,12 @@ PROTO LineFollowerTrack [
 {
   RectangleArena {
     contactMaterial IS contactMaterial
-    floorSize 2 2
+    floorSize 2 4
     floorTileSize 4 4
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
-          "./track.png"
+          "./track_long.png"
         ]
       }
       roughness 1
