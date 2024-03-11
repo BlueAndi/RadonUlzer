@@ -415,7 +415,8 @@ PROTO Zumo32U4 [
             aperture 0.35
           }
           DistanceSensor {
-            translation 0.055 0.02 0.02
+            translation 0.055 0.03 -0.003
+            rotation 0.01 0.0050 0 -0.55
             name "proxim_sensor_fl"
             lookupTable [
               0 6 0
@@ -428,11 +429,13 @@ PROTO Zumo32U4 [
               0.301 0 0
             ]
             type "infra-red"
-            numberOfRays 4
-            aperture 0.7
+            aperture 0.8
+            numberOfRays 10
+            gaussianWidth 1000
           }
           DistanceSensor {
-            translation 0.055 -0.02 0.02
+            translation 0.055 -0.03 -0.003
+            rotation 0.01 -0.005 0 0.55
             name "proxim_sensor_fr"
             lookupTable [
               0 6 0
@@ -445,8 +448,9 @@ PROTO Zumo32U4 [
               0.301 0 0
             ]
             type "infra-red"
-            numberOfRays 4
-            aperture 0.7
+            numberOfRays 10
+            aperture 0.8
+            gaussianWidth 1000
           }
         ]
       }

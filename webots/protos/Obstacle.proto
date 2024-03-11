@@ -1,0 +1,40 @@
+#VRML_SIM R2023b utf8
+
+PROTO Obstacle [
+  field SFVec3f     translation     0 0 0
+  field SFRotation  rotation        0 0 1 0
+  field SFString    name            "touch"
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    children [
+      DEF SENSORS Group {
+        children [
+          TouchSensor {
+            children [
+              DEF BODY Group {
+                children [
+                  Shape {
+                    appearance PBRAppearance {
+                      emissiveColor 0.5 0 0
+                    }
+                    geometry Box {
+                      size 0.8 0.01 0.1
+                    }
+                  }
+                ]
+              }
+            ]
+            name "touch"
+            boundingObject USE BODY
+          }
+        ]
+      }
+    ]
+    name IS name
+    boundingObject USE BODY
+    controller "Obstacle"
+  }
+}
