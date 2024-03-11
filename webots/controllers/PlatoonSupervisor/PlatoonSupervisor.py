@@ -15,6 +15,7 @@ children_field = root_node.getField('children')
 # The PROTO DEF names must be given!
 LEADER_NAME = "LEADER"
 FOLLOWER1_NAME = "FOLLOWER1"
+FOLLOWER2_NAME = "FOLLOWER2"
 
 
 def topic_callback(client, userdata, message) -> None:
@@ -62,26 +63,30 @@ def main_loop():
 
     leader_node = supervisor.getFromDef(LEADER_NAME)
     follower1_node = supervisor.getFromDef(FOLLOWER1_NAME)
+    follower2_node = supervisor.getFromDef(FOLLOWER2_NAME)
 
-    if leader_node is None or follower1_node is None:
+    if leader_node is None or follower1_node is None or follower2_node is None:
         print(
-            f"Robot DEF {LEADER_NAME} or {FOLLOWER1_NAME} not found.")
+            f"Robot DEF {LEADER_NAME} or {FOLLOWER1_NAME} or {FOLLOWER2_NAME} not found.")
         status = -1
     else:
 
         initial_contact_leader = 16
         initial_contact_follower1 = 16
+        initial_contact_follower2 = 16
 
         while supervisor.step(timestep) != -1:
             contact_leader = len(leader_node.getContactPoints(True))
             contact_follower1 = len(follower1_node.getContactPoints(True))
+            contact_follower2 = len(follower2_node.getContactPoints(True))
 
-            if (contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1):
+            if (contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1) or (contact_follower2 > initial_contact_follower2):
                 print("Collision detected")
-                supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
+                supervisor.worldReload()
+                client.disconnect()
+                client.loop_stop()
                 break
 
-    client.loop_stop()
     return status
 
 

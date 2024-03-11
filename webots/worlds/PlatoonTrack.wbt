@@ -46,6 +46,12 @@ DEF FOLLOWER1 Zumo32U4 {
   name "follower_1"
   contactMaterial "rubber"
 }
+DEF FOLLOWER2 Zumo32U4 {
+  translation -0.25 -1.35 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_2"
+  contactMaterial "rubber"
+}
 Supervisor {
   name "PlatoonSupervisor"
   controller "PlatoonSupervisor"
