@@ -296,7 +296,19 @@ bool DrivingState::isStartEndLineDetected(const uint16_t* lineSensorValues)
 
         if (DEBOUNCE_CNT <= m_startEndLineDebounce)
         {
-            isDetected = true;
+            /* Run endlessly. */
+            isDetected = false;
+
+            /* Robot loses it's orientation over time. Reassure reorientation. */
+            Odometry::getInstance().setOrientation(FP_PI() / 2);
+            Odometry::getInstance().clearPosition();
+
+            /* Clear the controller for any extra errors so that they don't stack over time. */
+            m_pidCtrl.clear();
+        }
+        else
+        {
+            isDetected = false;
         }
     }
     else
