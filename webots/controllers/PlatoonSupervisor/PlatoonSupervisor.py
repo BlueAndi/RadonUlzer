@@ -31,6 +31,20 @@ MAX_VEHICLE_SPEED = 4200  # mm/s
 platoon_data = [None] * NUMBER_OF_VEHICLES
 
 
+def print_constants() -> None:
+    """
+    Print platoon constants.
+    """
+
+    print(f"Vehicle length: {VEHICLE_LENGTH} mm")
+    print(f"Number of vehicles: {NUMBER_OF_VEHICLES}")
+    print(f"Minimum platoon length: {MIN_PLATOON_LENGTH} mm")
+    print(f"Maximum platoon length: {MAX_PLATOON_LENGTH} mm")
+    print(f"Minimum inter-vehicle space: {MIN_INTER_VEHICLE_SPACE:.0f} mm")
+    print(f"Maximum inter-vehicle space: {MAX_INTER_VEHICLE_SPACE} mm")
+    print(f"Maximum vehicle speed: {MAX_VEHICLE_SPEED} mm/s")
+
+
 def process_data() -> None:
     """
     Process data from subscribed topics.
@@ -124,6 +138,9 @@ def main_loop():
     status = 0
     supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_REAL_TIME)
 
+    print("Platoon Supervisor started")
+    print_constants()
+
     client = mqtt.Client()
     client.on_message = topic_callback
     client.connect("localhost")
@@ -156,7 +173,10 @@ def main_loop():
             if (status != -1) and ((contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1) or (contact_follower2 > initial_contact_follower2)):
                 print(AnsiCodes.RED_FOREGROUND +
                       "Collision detected" + AnsiCodes.RESET)
-                status = -1  # Collision detected. Show error message once.
+                leader_node.restartController()
+                follower1_node.restartController()
+                follower2_node.restartController()
+                break
 
     client.disconnect()
     client.loop_stop()
