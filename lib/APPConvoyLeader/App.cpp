@@ -74,6 +74,7 @@ static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payl
 void App::setup()
 {
     IDisplay& display = Board::getInstance().getDisplay();
+    ParameterSets::getInstance().choose(1U);
 
     Serial.begin(SERIAL_BAUDRATE);
 

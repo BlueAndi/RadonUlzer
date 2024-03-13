@@ -93,36 +93,47 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
 ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
-        "PID Slow", /* Name */
-        1920,       /* Top speed in steps/s */
-        3,          /* Kp Numerator */
-        2,          /* Kp Denominator */
-        1,          /* Ki Numerator */
-        60,         /* Ki Denominator */
-        4,          /* Kd Numerator */
-        1           /* Kd Denominator */
+        "PD VF", /* Name - VF: very fast */
+        4200,    /* Top speed in steps/s */
+        4,       /* Kp Numerator */
+        1,       /* Kp Denominator */
+        0,       /* Ki Numerator */
+        1,       /* Ki Denominator */
+        60,      /* Kd Numerator */
+        1        /* Kd Denominator */
     };
 
     m_parSets[1] = {
-        "PID Fast", /* Name */
-        2400,       /* Top speed in steps/s */
-        3,          /* Kp Numerator */
-        2,          /* Kp Denominator */
-        1,          /* Ki Numerator */
-        40,         /* Ki Denominator */
-        10,         /* Kd Numerator */
-        1           /* Kd Denominator */
+        "PD F", /* Name - F: fast */
+        3000,   /* Top speed in steps/s */
+        2,      /* Kp Numerator */
+        1,      /* Kp Denominator */
+        0,      /* Ki Numerator */
+        1,      /* Ki Denominator */
+        30,     /* Kd Numerator */
+        1       /* Kd Denominator */
     };
 
     m_parSets[2] = {
-        "PD Fast", /* Name */
-        2400,      /* Top speed in steps/s */
-        3,         /* Kp Numerator */
-        1,         /* Kp Denominator */
-        0,         /* Ki Numerator */
-        1,         /* Ki Denominator */
-        10,        /* Kd Numerator */
-        1          /* Kd Denominator */
+        "PD S", /* Name - S: slow */
+        2000,   /* Top speed in steps/s */
+        2,      /* Kp Numerator */
+        1,      /* Kp Denominator */
+        0,      /* Ki Numerator */
+        1,      /* Ki Denominator */
+        30,     /* Kd Numerator */
+        1       /* Kd Denominator */
+    };
+
+    m_parSets[3] = {
+        "PD VS", /* Name - VS: very slow */
+        1000,    /* Top speed in steps/s */
+        3,       /* Kp Numerator */
+        2,       /* Kp Denominator */
+        0,       /* Ki Numerator */
+        1,       /* Ki Denominator */
+        10,      /* Kd Numerator */
+        1        /* Kd Denominator */
     };
 }
 
