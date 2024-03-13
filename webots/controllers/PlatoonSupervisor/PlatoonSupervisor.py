@@ -6,6 +6,7 @@ import sys
 import paho.mqtt.client as mqtt
 import json
 from controller import Supervisor
+from controller import AnsiCodes
 
 # Create the Supervisor instance.
 supervisor = Supervisor()
@@ -16,6 +17,76 @@ children_field = root_node.getField('children')
 LEADER_NAME = "LEADER"
 FOLLOWER1_NAME = "FOLLOWER1"
 FOLLOWER2_NAME = "FOLLOWER2"
+
+# Platoon constants
+VEHICLE_LENGTH = 100  # mm
+NUMBER_OF_VEHICLES = 3  # Number of vehicles in the platoon
+MIN_PLATOON_LENGTH = (VEHICLE_LENGTH * NUMBER_OF_VEHICLES)  # mm
+MAX_PLATOON_LENGTH = MIN_PLATOON_LENGTH + 3 * VEHICLE_LENGTH  # mm
+MIN_INTER_VEHICLE_SPACE = VEHICLE_LENGTH/2  # mm
+MAX_INTER_VEHICLE_SPACE = VEHICLE_LENGTH * NUMBER_OF_VEHICLES  # mm
+MAX_VEHICLE_SPEED = 4200  # mm/s
+
+# Platoon data
+platoon_data = [None] * NUMBER_OF_VEHICLES
+
+
+def process_data() -> None:
+    """
+    Process data from subscribed topics.
+
+    """
+    platoon_positions = {"x": [platoon_data[0]["X"], platoon_data[1]["X"], platoon_data[2]["X"]],
+                         "y": [platoon_data[0]["Y"], platoon_data[1]["Y"], platoon_data[2]["Y"]]}
+
+    distance = [0, 0]
+    ivs = [0, 0]
+
+    distance[0] = ((platoon_positions["x"][0] - platoon_positions["x"][1])**2 +
+                   (platoon_positions["y"][0] - platoon_positions["y"][1])**2)**0.5
+    distance[1] = ((platoon_positions["x"][1] - platoon_positions["x"][2])**2 +
+                   (platoon_positions["y"][1] - platoon_positions["y"][2])**2)**0.5
+
+    ivs[0] = distance[0] - 100
+    ivs[1] = distance[1] - 100
+
+    platoon_length = distance[0] + distance[1] + 100
+
+    error_detected = False
+
+    if platoon_length > MAX_PLATOON_LENGTH:
+        print(AnsiCodes.RED_FOREGROUND +
+              f"Platoon length: {platoon_length:.0f} greater than the maximum value {MAX_PLATOON_LENGTH}!" + AnsiCodes.RESET)
+        error_detected = True
+    elif platoon_length < MIN_PLATOON_LENGTH:
+        print(AnsiCodes.RED_FOREGROUND +
+              f"Platoon length: {platoon_length:.0f} smaller than the minimum value {MIN_PLATOON_LENGTH}!" + AnsiCodes.RESET)
+        error_detected = True
+
+    for i in range(2):
+        if ivs[i] > MAX_INTER_VEHICLE_SPACE:
+            print(AnsiCodes.RED_FOREGROUND +
+                  f"IVS {i}: {ivs[i]:.0f} greater than the maximum value {MAX_INTER_VEHICLE_SPACE}!" + AnsiCodes.RESET)
+            error_detected = True
+        elif ivs[i] < MIN_INTER_VEHICLE_SPACE:
+            print(AnsiCodes.RED_FOREGROUND +
+                  f"IVS {i}: {ivs[i]:.0f} smaller than the minimum value {MIN_INTER_VEHICLE_SPACE}!" + AnsiCodes.RESET)
+            error_detected = True
+
+    if error_detected:
+        ...
+
+
+def local_topic_callback(client, userdata, message) -> None:
+    """
+    Callback function for subscribed topics.
+
+    """
+    json_payload = json.loads(message.payload)
+    array_id = int(json_payload["id"])
+    platoon_data[array_id] = json_payload["data"]
+    if (not platoon_data.__contains__(None)) and (2 == array_id) and (10000 < int(json_payload["timestamp"])):
+        process_data()
 
 
 def topic_callback(client, userdata, message) -> None:
@@ -28,17 +99,19 @@ def topic_callback(client, userdata, message) -> None:
         y = (jsonPayload["data"]["Y"] / 1000)
 
         if message.topic == "platoons/0/vehicles/1/inputWaypoint":
-            print(f"Leader: {x}:{y}")
+            # print(f"Leader: {x}:{y}")
             children_field.importMFNodeFromString(
-                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0.666667 0 0}')
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0.4 name "" color 0.666667 0 0}')
         elif message.topic == "platoons/0/vehicles/2/inputWaypoint":
-            print(f"Follower 1: {x}:{y}")
+            # print(f"Follower 1: {x}:{y}")
             children_field.importMFNodeFromString(
-                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0.666667 0}')
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0.4 name "" color 0 0.666667 0}')
         elif message.topic == "platoons/0/vehicles/3/inputWaypoint":
-            print(f"Follower 2: {x}:{y}")
+            # print(f"Follower 2: {x}:{y}")
             children_field.importMFNodeFromString(
-                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0 name "" color 0 0 0.666667}')
+                -1, 'Marker {translation ' + str(x) + ' ' + str(y) + ' 0.4 name "" color 0 0 0.666667}')
+        elif message.topic == "debug/waypoint":
+            local_topic_callback(client, userdata, message)
 
 
 def main_loop():
@@ -55,7 +128,7 @@ def main_loop():
     client.on_message = topic_callback
     client.connect("localhost")
     client.subscribe([("platoons/0/vehicles/1/inputWaypoint", 0),
-                     ("platoons/0/vehicles/2/inputWaypoint", 0), ("platoons/0/vehicles/3/inputWaypoint", 0), ("reset", 0)])
+                     ("platoons/0/vehicles/2/inputWaypoint", 0), ("platoons/0/vehicles/3/inputWaypoint", 0), ("reset", 0), ("debug/waypoint", 0)])
     client.loop_start()
 
     # Get the time step of the current world.
@@ -80,12 +153,13 @@ def main_loop():
             contact_follower1 = len(follower1_node.getContactPoints(True))
             contact_follower2 = len(follower2_node.getContactPoints(True))
 
-            if (contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1) or (contact_follower2 > initial_contact_follower2):
-                print("Collision detected")
-                supervisor.worldReload()
-                client.disconnect()
-                client.loop_stop()
-                break
+            if (status != -1) and ((contact_leader > initial_contact_leader) or (contact_follower1 > initial_contact_follower1) or (contact_follower2 > initial_contact_follower2)):
+                print(AnsiCodes.RED_FOREGROUND +
+                      "Collision detected" + AnsiCodes.RESET)
+                status = -1  # Collision detected. Show error message once.
+
+    client.disconnect()
+    client.loop_stop()
 
     return status
 
