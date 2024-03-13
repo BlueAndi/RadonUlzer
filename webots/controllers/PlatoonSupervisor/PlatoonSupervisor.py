@@ -23,9 +23,9 @@ VEHICLE_LENGTH = 100  # mm
 NUMBER_OF_VEHICLES = 3  # Number of vehicles in the platoon
 MIN_PLATOON_LENGTH = (VEHICLE_LENGTH * NUMBER_OF_VEHICLES)  # mm
 MAX_PLATOON_LENGTH = MIN_PLATOON_LENGTH + 3 * VEHICLE_LENGTH  # mm
-MIN_INTER_VEHICLE_SPACE = VEHICLE_LENGTH/2  # mm
+MIN_INTER_VEHICLE_SPACE = VEHICLE_LENGTH/5  # mm
 MAX_INTER_VEHICLE_SPACE = VEHICLE_LENGTH * NUMBER_OF_VEHICLES  # mm
-MAX_VEHICLE_SPEED = 4200  # mm/s
+MAX_VEHICLE_SPEED = 3000  # mm/s
 
 # Platoon data
 platoon_data = [None] * NUMBER_OF_VEHICLES
@@ -65,6 +65,8 @@ def process_data() -> None:
     ivs[1] = distance[1] - 100
 
     platoon_length = distance[0] + distance[1] + 100
+
+    print(f"Platoon length: {platoon_length:.0f} mm")
 
     error_detected = False
 
