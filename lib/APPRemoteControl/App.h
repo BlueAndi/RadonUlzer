@@ -47,6 +47,7 @@
 #include "SerialMuxChannels.h"
 #include <StateMachine.h>
 #include <SimpleTimer.h>
+#include <MovAvg.hpp>
 
 /******************************************************************************
  * Macros
@@ -128,6 +129,11 @@ private:
     /** Sending Data period in ms. */
     static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20U;
 
+    /**
+     * Number of measurements for proximity sensors moving average filter.
+     */
+    static const uint8_t MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS = 3U;
+
     /** SerialMuxProt Channel id for sending remote control command responses. */
     uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
 
@@ -160,6 +166,11 @@ private:
 
     /** SerialMuxProt Server Instance. */
     SMPServer m_smpServer;
+
+    /**
+     * Moving average filter for proximity sensors.
+     */
+    MovAvg<uint8_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
 
     /**
      * Report the current vehicle data.
