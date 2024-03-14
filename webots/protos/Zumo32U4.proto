@@ -7,6 +7,7 @@ PROTO Zumo32U4 [
   field SFRotation  rotation        0 0 1 0
   field SFString    name            "robot"
   field SFString    contactMaterial "default" # Contact material of the tracks
+  field SFColor     penColor        0 0 0     # White
 ]
 {
   Robot {
@@ -566,6 +567,10 @@ PROTO Zumo32U4 [
           Display {
             name "robot_display"
             height 32
+          }
+          Pen {
+            inkColor IS penColor
+            leadSize    0.008
           }
         ]
       }
