@@ -63,6 +63,9 @@
 #include <Keyboard.h>
 #include <SimTime.h>
 
+#include <webots/GPS.hpp>
+#include <webots/Compass.hpp>
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -232,6 +235,31 @@ public:
         m_buzzer.process();
     }
 
+    /**
+     * Get the Position from the GPS sensor
+     *
+     * @return Current Position
+     */
+    const double* getPositionGPS()
+    {
+        const double* position = m_gps->getValues();
+        return position;
+    }
+
+    /**
+     * Get the Angle calculated via the compass.
+     *
+     * @return Current Angle
+     */
+    const int32_t getAngle()
+    {
+        const double* values = m_compass->getValues();
+        /* First x-value, then y-value since axis are switched */
+        double  angle    = atan2(values[0], values[1]);
+        int32_t angleInt = static_cast<int32_t>(1000 * angle);
+        return angleInt;
+    }
+
 private:
     /** Name of the speaker in the robot simulation. */
     static const char* SPEAKER_NAME;
@@ -343,6 +371,12 @@ private:
 
     /** Settings */
     Settings m_settings;
+
+    /** GPS driver */
+    webots::GPS* m_gps;
+
+    /** Compass driver */
+    webots::Compass* m_compass;
 
     /**
      * Constructs the concrete board.

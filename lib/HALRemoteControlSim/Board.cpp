@@ -160,7 +160,9 @@ Board::Board() :
     m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
     m_proximitySensors(m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
                        m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
-    m_settings()
+    m_settings(),
+    m_gps(m_robot.getGPS("gps")),
+    m_compass(m_robot.getCompass("compass"))
 {
 }
 
@@ -178,6 +180,8 @@ void Board::enableSimulationDevices()
     m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)->enable(timeStep);
+    m_robot.getGPS("gps")->enable(timeStep);
+    m_robot.getCompass("compass")->enable(timeStep);
 }
 /******************************************************************************
  * External Functions

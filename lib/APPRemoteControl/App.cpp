@@ -253,14 +253,19 @@ void App::reportVehicleData()
     proximitySensors.read();
     averageCounts = (proximitySensors.countsFrontWithLeftLeds() + proximitySensors.countsFrontWithRightLeds()) / 2U;
 
-    odometry.getPosition(xPos, yPos);
-    payload.xPos        = xPos;
-    payload.yPos        = yPos;
-    payload.orientation = odometry.getOrientation();
-    payload.left        = speedometer.getLinearSpeedLeft();
-    payload.right       = speedometer.getLinearSpeedRight();
-    payload.center      = speedometer.getLinearSpeedCenter();
-    payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
+    const double* gpsPositions = Board::getInstance().getPositionGPS();
+    payload.xPos               = static_cast<int32_t>(gpsPositions[0] * 1000.0F);
+    payload.yPos               = static_cast<int32_t>(gpsPositions[1] * 1000.0F);
+    payload.orientation        = Board::getInstance().getAngle();
+
+    // odometry.getPosition(xPos, yPos);
+    // payload.xPos        = xPos;
+    // payload.yPos        = yPos;
+    // payload.orientation = odometry.getOrientation();
+    payload.left      = speedometer.getLinearSpeedLeft();
+    payload.right     = speedometer.getLinearSpeedRight();
+    payload.center    = speedometer.getLinearSpeedCenter();
+    payload.proximity = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));

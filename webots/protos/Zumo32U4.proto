@@ -571,6 +571,17 @@ PROTO Zumo32U4 [
           Pen {
             inkColor IS penColor
             leadSize    0.008
+            write       FALSE
+          }
+          GPS {
+            name "gps"
+          }
+          Compass {
+            name "compass"
+            xAxis TRUE
+            yAxis TRUE
+            zAxis TRUE
+            resolution  0.001
           }
         ]
       }
