@@ -2,21 +2,23 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+
 EXTERNPROTO "../protos/Zumo32U4.proto"
-EXTERNPROTO "../protos/LineFollowerTrack.proto"
-IMPORTABLE EXTERNPROTO "../protos/Marker.proto"
-IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+EXTERNPROTO "../protos/PlatoonTrack.proto"
 
 WorldInfo {
   info [
-    "LineFollower Track for platooning using ConvoyLeader and RemoteControl applications."
+    "Platoon Track for platooning using ConvoyLeader and RemoteControl applications."
   ]
-  title "Track"
+  title "Platoon Track"
   basicTimeStep 8
   contactProperties [
     ContactProperties {
       material1 "rubber"
       material2 "cardboard"
+      coulombFriction [
+        0.65
+      ]
     }
   ]
 }
@@ -28,7 +30,7 @@ TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-LineFollowerTrack {
+PlatoonTrack {
   contactMaterial "cardboard"
 }
 DEF LEADER Zumo32U4 {
@@ -51,9 +53,4 @@ DEF FOLLOWER2 Zumo32U4 {
   name "follower_2"
   contactMaterial "rubber"
   penColor 0 0 0.8
-}
-Supervisor {
-  name "PlatoonSupervisor"
-  controller "PlatoonSupervisor"
-  supervisor TRUE
 }

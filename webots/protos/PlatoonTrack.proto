@@ -1,0 +1,22 @@
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
+
+PROTO PlatoonTrack [
+  field SFString  contactMaterial "default" # Is `Solid.contactMaterial`.
+]
+{
+  RectangleArena {
+    contactMaterial IS contactMaterial
+    floorSize 10 10
+    floorTileSize 10 10
+    floorAppearance PBRAppearance {
+      baseColorMap ImageTexture {
+        url [
+          "./track_big.png"
+        ]
+      }
+      metalness 0
+    }
+  }
+}
