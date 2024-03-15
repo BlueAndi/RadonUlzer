@@ -7,34 +7,15 @@ PROTO LineFollowerTrack [
 ]
 {
   RectangleArena {
-    contactMaterial IS contactMaterial
-    floorSize 2 4
-    floorTileSize 4 4
-    floorAppearance PBRAppearance {
-      baseColorMap ImageTexture {
-        url [
-          "./track_long.png"
-        ]
-      }
-      roughness 1
-      roughnessMap ImageTexture {
-        url [
-          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_roughness.jpg"
-        ]
-      }
-      metalness 0
-      normalMap ImageTexture {
-        url [
-          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_normal.jpg"
-        ]
-      }
-      occlusionMap ImageTexture {
-        url [
-          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_occlusion.jpg"
-        ]
-      }
+  floorSize 10 10
+  floorTileSize 10 10
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "./track_big.png"
+      ]
     }
-    wallThickness 0.001
-    wallHeight 0.05
+    metalness 0
   }
+}
 }
