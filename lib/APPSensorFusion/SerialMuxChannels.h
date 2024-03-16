@@ -90,12 +90,6 @@ typedef struct _SensorData
     uint16_t timePeriod;
 } __attribute__((packed)) SensorData;
 
-/** Struct of the End Line Detection payload. */
-typedef struct _EndLineFlag
-{
-    /** Indicates if the End Line has been detected. */
-    bool isEndLineDetected;
-} __attribute__((packed)) EndLineFlag;
 
 /******************************************************************************
  * Functions
