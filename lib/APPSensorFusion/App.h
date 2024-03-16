@@ -71,8 +71,6 @@ public:
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendSensorDataInterval(),
-        m_measurementTimer(),
-        m_firstIteration(true),
         m_lastLineDetectionStatus(DrivingState::LINE_STATUS_FIND_START_LINE),
         m_smpServer(Serial)
     {
@@ -119,12 +117,6 @@ private:
 
     /** Timer used for sending data periodically. */
     SimpleTimer m_sendSensorDataInterval;
-
-    /** Timer used for measure the exact time since last sending data. */
-    SimpleTimer m_measurementTimer;
-
-    /** Flag if the current Iteration is the first one. */
-    bool m_firstIteration;
 
     /** End Line Status of the previous iteration */
     DrivingState::LineStatus m_lastLineDetectionStatus;
