@@ -95,6 +95,8 @@ public:
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.
+     *
+     *  Additionally, only the z-axis of the gyroscope and the x-axis of the accelerometer are enabled.
      */
     void configureForTurnSensing() final;
 
