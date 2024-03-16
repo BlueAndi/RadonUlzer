@@ -67,11 +67,9 @@ public:
      */
     App() :
         m_smpChannelIdSensorData(0U),
-        m_smpChannelIdEndLine(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendSensorDataInterval(),
-        m_lastLineDetectionStatus(DrivingState::LINE_STATUS_FIND_START_LINE),
         m_smpServer(Serial)
     {
     }
@@ -106,9 +104,6 @@ private:
     /** Channel id for sending sensor data used for sensor fusion. */
     uint8_t m_smpChannelIdSensorData;
 
-    /** Channel id for sending End Line Detection signal. */
-    uint8_t m_smpChannelIdEndLine;
-
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
@@ -117,9 +112,6 @@ private:
 
     /** Timer used for sending data periodically. */
     SimpleTimer m_sendSensorDataInterval;
-
-    /** End Line Status of the previous iteration */
-    DrivingState::LineStatus m_lastLineDetectionStatus;
 
     /**
      * SerialMuxProt Server Instance
@@ -132,12 +124,6 @@ private:
      * Send the Sensor data as a SensorData struct via SerialMuxProt.
      */
     void sendSensorData();
-
-    /**
-     * Send the End Line Detection Flag as a EndLineFlag struct via SerialMuxProt.
-     * The Signal will only be sent if the a new End Line has been detected.
-     */
-    void sendEndLineDetectionSignal();
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */

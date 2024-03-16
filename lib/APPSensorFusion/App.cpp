@@ -82,9 +82,6 @@ void App::setup()
 
     /* Providing Sensor data */
     m_smpChannelIdSensorData = m_smpServer.createChannel(SENSORDATA_CHANNEL_NAME, SENSORDATA_CHANNEL_DLC);
-
-    /* Sending End Line Detection signal */
-    m_smpChannelIdEndLine = m_smpServer.createChannel(ENDLINE_CHANNEL_NAME, ENDLINE_CHANNEL_DLC);
 }
 
 void App::loop()
@@ -121,11 +118,10 @@ void App::loop()
     {
         m_sendSensorDataInterval.restart();
 
-        /* Send End line detection signal if the application is currently in the Driving state. */
+        /* Send Sensor Data if the application is currently in the Driving state. */
         if (&DrivingState::getInstance() == m_systemStateMachine.getState())
         {
             sendSensorData();
-            sendEndLineDetectionSignal();
         }
     }
 
@@ -169,21 +165,6 @@ void App::sendSensorData()
 
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-}
-
-void App::sendEndLineDetectionSignal()
-{
-    DrivingState::LineStatus lineStatus = DrivingState::getInstance().getLineStatus();
-
-    /* Send only if a new End Line has been detected. */
-    if ((DrivingState::LINE_STATUS_FIND_END_LINE == m_lastLineDetectionStatus) &&
-        (DrivingState::LINE_STATUS_END_LINE_DETECTED == lineStatus))
-    {
-        EndLineFlag payload = {.isEndLineDetected = true};
-        (void)m_smpServer.sendData(m_smpChannelIdEndLine, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-    }
-
-    m_lastLineDetectionStatus = lineStatus;
 }
 
 /******************************************************************************
