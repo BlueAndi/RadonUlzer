@@ -69,7 +69,6 @@ public:
         m_gyroValues{0, 0, 0},
         m_magnetometerValues{0, 0, 0},
         m_rawAccelerometerOffsetX(0),
-        m_rawAccelerometerOffsetY(0),
         m_rawGyroOffsetZ(0)
     {
     }
@@ -178,7 +177,6 @@ private:
     Zumo32U4IMU m_imuDrv; /**< IMU driver from Zumo32U4 Library. */
 
     int16_t m_rawAccelerometerOffsetX; /**< Mean raw accelerometer offset in x-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetY; /**< Mean raw accelerometer offset in y-direction determined by calibration. */
     int16_t m_rawGyroOffsetZ;          /**< Mean raw gyro offset in z-direction determined by calibration. */
 };
 

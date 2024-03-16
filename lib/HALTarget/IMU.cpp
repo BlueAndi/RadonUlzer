@@ -108,7 +108,7 @@ void IMU::readAccelerometer()
 {
     m_imuDrv.readAcc();
     m_accelerometerValues.valueX = m_imuDrv.a.x - m_rawAccelerometerOffsetX;
-    m_accelerometerValues.valueY = m_imuDrv.a.y - m_rawAccelerometerOffsetY;
+    m_accelerometerValues.valueY = m_imuDrv.a.y;
     m_accelerometerValues.valueZ = m_imuDrv.a.z;
 }
 
@@ -184,7 +184,6 @@ void IMU::calibrate()
     /* Calibration takes place while the robot doesn't move. Therefore the Acceleration and turn values are near 0 and
      * int16_t values are enough. */
     int32_t sumOfRawAccelValuesX = 0;
-    int32_t sumOfRawAccelValuesY = 0;
 
     int32_t sumOfRawGyroValuesZ = 0;
 
@@ -197,7 +196,6 @@ void IMU::calibrate()
             m_imuDrv.readGyro();
             sumOfRawGyroValuesZ += m_imuDrv.g.z;
             sumOfRawAccelValuesX += m_imuDrv.a.x;
-            sumOfRawAccelValuesY += m_imuDrv.a.y;
             ++measurementIndex;
         }
         else
@@ -208,7 +206,6 @@ void IMU::calibrate()
     }
 
     m_rawAccelerometerOffsetX = static_cast<int16_t>(sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS); /* In digits */
-    m_rawAccelerometerOffsetY = static_cast<int16_t>(sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS); /* In digits */
 
     m_rawGyroOffsetZ = static_cast<int16_t>(sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS); /* In digits */
 }
