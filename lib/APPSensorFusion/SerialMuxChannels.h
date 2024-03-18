@@ -52,12 +52,6 @@
 /** DLC of Sensordata Channel */
 #define SENSORDATA_CHANNEL_DLC (sizeof(SensorData))
 
-/** Name of Channel to End Line Detected Signal. */
-#define ENDLINE_CHANNEL_NAME "END_LINE"
-
-/** DLC of End Line Channel */
-#define ENDLINE_CHANNEL_DLC (sizeof(EndLineFlag))
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -88,17 +82,8 @@ typedef struct _SensorData
 
     /** Time passed since the last sensor value in milliseconds. */
     uint16_t timePeriod;
-
-    /** Indicates whether the Robot is standing still (true) or is moving (false). Determined via Odometry. */
-    bool isStandStill;
 } __attribute__((packed)) SensorData;
 
-/** Struct of the End Line Detection payload. */
-typedef struct _EndLineFlag
-{
-    /** Indicates if the End Line has been detected. */
-    bool isEndLineDetected;
-} __attribute__((packed)) EndLineFlag;
 
 /******************************************************************************
  * Functions

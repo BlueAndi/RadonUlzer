@@ -73,17 +73,31 @@ void IMU::configureForTurnSensing()
 {
     m_imuDrv.configureForTurnSensing();
     /* Set a different Full Scale Factor. The Original Function uses +/- 2000 dps which is far too high for the our
-     * purposes. The values are defined in the Data Sheets of the gyros L3GD20H and LSM6DS33. */
+     * purposes. The values are defined in the Data Sheets of the gyros L3GD20H and LSM6DS33. 
+     *
+     * Disabling the non-used axes boosts the performance of the Pololu Zumo.  */
     switch (m_imuDrv.getType())
     {
     case Zumo32U4IMUType::LSM303D_L3GD20H:
         /* Set the Full Scale factor of the L3GD20H to +/- 500 dps (0x10 = 0b00010000) */
         m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL4, 0x10);
+
+        /* Enable only the x-axis of the LSM303D accelerometer. */
+        m_imuDrv.writeReg(LSM303D_ADDR, LSM303D_REG_CTRL1, 0x51);
+
+        /* Enable only the z-axis of the L3GD20H gyroscope. */
+        m_imuDrv.writeReg(L3GD20H_ADDR, L3GD20H_REG_CTRL1, 0xFC);
         break;
     case Zumo32U4IMUType::LSM6DS33_LIS3MDL:
         /* Set the Full Scale factor of the LSM6DS33  to +/- 500 dps (0x7C = 0b01110100). Also set the Output Data Rate 
          * to 833 Hz (high performance).  */
         m_imuDrv.writeReg(LSM6DS33_ADDR, LSM6DS33_REG_CTRL2_G, 0x74);
+
+        /* Enable only the x-axis of the LSM6DS33 accelerometer. 0x18 is the address of the CTRL9_XL Register. */
+        m_imuDrv.writeReg(LSM6DS33_ADDR, 0x18, 0x8);
+        
+        /* Enable only the z-axis of the LSM6DS33 gyroscope. 0x19 is the address of the CTRL10_C Register.  */
+        m_imuDrv.writeReg(LSM6DS33_ADDR, 0x19, 0x20);
         break;
     default:
         return;
@@ -94,15 +108,15 @@ void IMU::readAccelerometer()
 {
     m_imuDrv.readAcc();
     m_accelerometerValues.valueX = m_imuDrv.a.x - m_rawAccelerometerOffsetX;
-    m_accelerometerValues.valueY = m_imuDrv.a.y - m_rawAccelerometerOffsetY;
-    m_accelerometerValues.valueZ = m_imuDrv.a.z;
+    m_accelerometerValues.valueY = 0;
+    m_accelerometerValues.valueZ = 0;
 }
 
 void IMU::readGyro()
 {
     m_imuDrv.readGyro();
-    m_gyroValues.valueX = m_imuDrv.g.x;
-    m_gyroValues.valueY = m_imuDrv.g.y;
+    m_gyroValues.valueX = 0;
+    m_gyroValues.valueY = 0;
     m_gyroValues.valueZ = m_imuDrv.g.z - m_rawGyroOffsetZ;
 }
 
@@ -170,7 +184,6 @@ void IMU::calibrate()
     /* Calibration takes place while the robot doesn't move. Therefore the Acceleration and turn values are near 0 and
      * int16_t values are enough. */
     int32_t sumOfRawAccelValuesX = 0;
-    int32_t sumOfRawAccelValuesY = 0;
 
     int32_t sumOfRawGyroValuesZ = 0;
 
@@ -183,7 +196,6 @@ void IMU::calibrate()
             m_imuDrv.readGyro();
             sumOfRawGyroValuesZ += m_imuDrv.g.z;
             sumOfRawAccelValuesX += m_imuDrv.a.x;
-            sumOfRawAccelValuesY += m_imuDrv.a.y;
             ++measurementIndex;
         }
         else
@@ -194,7 +206,6 @@ void IMU::calibrate()
     }
 
     m_rawAccelerometerOffsetX = static_cast<int16_t>(sumOfRawAccelValuesX / NUMBER_OF_MEASUREMENTS); /* In digits */
-    m_rawAccelerometerOffsetY = static_cast<int16_t>(sumOfRawAccelValuesY / NUMBER_OF_MEASUREMENTS); /* In digits */
 
     m_rawGyroOffsetZ = static_cast<int16_t>(sumOfRawGyroValuesZ / NUMBER_OF_MEASUREMENTS); /* In digits */
 }

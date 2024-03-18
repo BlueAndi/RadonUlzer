@@ -142,10 +142,13 @@ int32_t Odometry::getOrientation() const
 
 void Odometry::clearPosition()
 {
-    m_posX           = 0;
-    m_posY           = 0;
-    m_countingXSteps = 0;
-    m_countingYSteps = 0;
+    m_relEncoders.clear();
+    m_lastAbsRelEncStepsLeft  = 0;
+    m_lastAbsRelEncStepsRight = 0;
+    m_posX                    = 0;
+    m_posY                    = 0;
+    m_countingXSteps          = 0;
+    m_countingYSteps          = 0;
 }
 
 void Odometry::clearMileage()

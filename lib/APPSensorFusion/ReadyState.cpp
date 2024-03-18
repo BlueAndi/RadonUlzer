@@ -33,6 +33,7 @@
  * Includes
  *****************************************************************************/
 #include "ReadyState.h"
+#include "Odometry.h"
 #include <Board.h>
 #include <StateMachine.h>
 #include "ReleaseTrackState.h"
@@ -70,6 +71,10 @@ LOG_TAG("RState");
 
 void ReadyState::entry()
 {
+
+    /* Clear the Odometry Position in favor of reproducibility. */
+    Odometry::getInstance().clearPosition();
+    Odometry::getInstance().setOrientation(1570);
     const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
 
     /* The line sensor value shall be output on console cyclic. */

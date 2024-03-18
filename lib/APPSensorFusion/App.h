@@ -67,13 +67,9 @@ public:
      */
     App() :
         m_smpChannelIdSensorData(0U),
-        m_smpChannelIdEndLine(0U),
         m_systemStateMachine(),
         m_controlInterval(),
         m_sendSensorDataInterval(),
-        m_measurementTimer(),
-        m_firstIteration(true),
-        m_lastLineDetectionStatus(DrivingState::LINE_STATUS_FIND_START_LINE),
         m_smpServer(Serial)
     {
     }
@@ -97,7 +93,7 @@ public:
 
 private:
     /** Sending Data period in ms. */
-    static const uint32_t SEND_SENSOR_DATA_PERIOD = 20U;
+    static const uint32_t SEND_SENSOR_DATA_PERIOD = 25U;
 
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
@@ -108,9 +104,6 @@ private:
     /** Channel id for sending sensor data used for sensor fusion. */
     uint8_t m_smpChannelIdSensorData;
 
-    /** Channel id for sending End Line Detection signal. */
-    uint8_t m_smpChannelIdEndLine;
-
     /** The system state machine. */
     StateMachine m_systemStateMachine;
 
@@ -119,15 +112,6 @@ private:
 
     /** Timer used for sending data periodically. */
     SimpleTimer m_sendSensorDataInterval;
-
-    /** Timer used for measure the exact time since last sending data. */
-    SimpleTimer m_measurementTimer;
-
-    /** Flag if the current Iteration is the first one. */
-    bool m_firstIteration;
-
-    /** End Line Status of the previous iteration */
-    DrivingState::LineStatus m_lastLineDetectionStatus;
 
     /**
      * SerialMuxProt Server Instance
@@ -140,12 +124,6 @@ private:
      * Send the Sensor data as a SensorData struct via SerialMuxProt.
      */
     void sendSensorData();
-
-    /**
-     * Send the End Line Detection Flag as a EndLineFlag struct via SerialMuxProt.
-     * The Signal will only be sent if the a new End Line has been detected.
-     */
-    void sendEndLineDetectionSignal();
 
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
