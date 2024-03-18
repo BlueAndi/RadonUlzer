@@ -109,7 +109,7 @@ public:
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
      *
-     * Only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled and set to f0.
+     * Only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled and set to 0.
      */
     void readGyro() final;
 
@@ -142,6 +142,10 @@ public:
     /**
      * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z in digits.
      *
+     * Note: Currently, only the Acceleration along the x-axis is read. The measurements along the other axes are
+     * disabled and set to 0. 
+     * If you need to access the other measurements, you need to modify the method readAccelerometer().
+     *
      * @param[in] accelerationValues  Pointer to IMUData struct where the raw acceleration values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
      * multiplication with a sensitivity factor in mm/s^2/digit.
@@ -150,6 +154,10 @@ public:
 
     /**
      * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
+     *
+     * Note: Currently, only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled
+     * and set to 0.
+     * If you need to access the other measurements, you need to modify the method readGyro().
      *
      * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
