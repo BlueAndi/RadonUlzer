@@ -108,15 +108,15 @@ void IMU::readAccelerometer()
 {
     m_imuDrv.readAcc();
     m_accelerometerValues.valueX = m_imuDrv.a.x - m_rawAccelerometerOffsetX;
-    m_accelerometerValues.valueY = m_imuDrv.a.y;
-    m_accelerometerValues.valueZ = m_imuDrv.a.z;
+    m_accelerometerValues.valueY = 0;
+    m_accelerometerValues.valueZ = 0;
 }
 
 void IMU::readGyro()
 {
     m_imuDrv.readGyro();
-    m_gyroValues.valueX = m_imuDrv.g.x;
-    m_gyroValues.valueY = m_imuDrv.g.y;
+    m_gyroValues.valueX = 0;
+    m_gyroValues.valueY = 0;
     m_gyroValues.valueZ = m_imuDrv.g.z - m_rawGyroOffsetZ;
 }
 

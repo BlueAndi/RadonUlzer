@@ -101,11 +101,15 @@ public:
 
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
+     *
+     * Only the Acceleration along the x-axis is read. The measurements along the other axes are disabled and set to 0.
      */
     void readAccelerometer() final;
 
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
+     *
+     * Only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled and set to f0.
      */
     void readGyro() final;
 
