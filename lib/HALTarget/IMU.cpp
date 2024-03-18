@@ -75,7 +75,7 @@ void IMU::configureForTurnSensing()
     /* Set a different Full Scale Factor. The Original Function uses +/- 2000 dps which is far too high for the our
      * purposes. The values are defined in the Data Sheets of the gyros L3GD20H and LSM6DS33. 
      *
-     * Disabeling the non-used axes boosts the performance of the Pololu Zumo.  */
+     * Disabling the non-used axes boosts the performance of the Pololu Zumo.  */
     switch (m_imuDrv.getType())
     {
     case Zumo32U4IMUType::LSM303D_L3GD20H:

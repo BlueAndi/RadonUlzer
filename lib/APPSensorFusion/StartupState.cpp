@@ -77,6 +77,7 @@ void StartupState::process(StateMachine& sm)
     if (0 == maxMotorSpeed)
     {
         /* If the max. Speed equals 0, the Motor Speed Calibration is missing. */
+        ErrorState::getInstance().setErrorMsg("MCAL=0");
         sm.setState(&ErrorState::getInstance());
     }
     else
