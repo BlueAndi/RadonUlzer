@@ -80,16 +80,8 @@ void App::setup()
     /* Periodically send Send Data via SerialMuxProt. */
     m_sendSensorDataInterval.start(SEND_SENSOR_DATA_PERIOD);
 
-    /* Measure the precise duration of each iteration.
-     * This is necessary because the time required for each iteration can vary.
-     */
-    m_measurementTimer.start(0U);
-
     /* Providing Sensor data */
     m_smpChannelIdSensorData = m_smpServer.createChannel(SENSORDATA_CHANNEL_NAME, SENSORDATA_CHANNEL_DLC);
-
-    /* Sending End Line Detection signal */
-    m_smpChannelIdEndLine = m_smpServer.createChannel(ENDLINE_CHANNEL_NAME, ENDLINE_CHANNEL_DLC);
 }
 
 void App::loop()
@@ -112,22 +104,27 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
+        /* Read the IMU so when the Measurement Timer runs out the Sensor Data can be accessed directly without having
+         * to wait for the reading. */
+        IIMU& imu = Board::getInstance().getIMU();
+        imu.readGyro();
+        imu.readAccelerometer();
+
         m_controlInterval.restart();
     }
 
     /* Send sensor data periodically if new data is available. */
     if (true == m_sendSensorDataInterval.isTimeout())
     {
-        sendSensorData();
         m_sendSensorDataInterval.restart();
 
-        /* Send End line detection signal if the application is currently in the Driving state. */
+        /* Send Sensor Data if the application is currently in the Driving state. */
         if (&DrivingState::getInstance() == m_systemStateMachine.getState())
         {
-            sendEndLineDetectionSignal();
+            sendSensorData();
         }
     }
-    
+
     m_systemStateMachine.process();
 }
 
@@ -150,14 +147,12 @@ void App::sendSensorData()
     /* Get the current values from the Odometry. */
     odometry.getPosition(positionOdometryX, positionOdometryY);
 
-    /* Read the accelerometer. */
+    /* Access the Accelerometer Data (the Accelerometer is read out during the Control Interval Timeout). */
     IMUData accelerationValues;
-    imu.readAccelerometer();
     imu.getAccelerationValues(&accelerationValues);
 
-    /* Read the gyro. */
+    /* Access the Gyro Data (the Gyro is read out during the Control Interval Timeout). */
     IMUData turnRates;
-    imu.readGyro();
     imu.getTurnRates(&turnRates);
 
     /* Write the sensor data in the SensorData Struct. */
@@ -166,46 +161,10 @@ void App::sendSensorData()
     payload.orientationOdometry = odometry.getOrientation();
     payload.accelerationX       = accelerationValues.valueX;
     payload.turnRate            = turnRates.valueZ;
-    payload.isStandStill        = odometry.isStandStill();
-
-    uint32_t duration = 0U;
-    if (true == m_firstIteration)
-    {
-        duration         = SEND_SENSOR_DATA_PERIOD;
-        m_firstIteration = false;
-    }
-    duration = m_measurementTimer.getCurrentDuration();
-
-    /* Casting is not problematic since the theoretical time step is much lower than the numerical limits of the used 16
-     * bit unsigned integer. However, if in one iteration the duration exceeds the numerical limits of uint16, the
-     * maximum value is being sent. */
-    if (UINT16_MAX > duration)
-    {
-        payload.timePeriod = static_cast<uint16_t>(duration);
-    }
-    else
-    {
-        payload.timePeriod = UINT16_MAX;
-    }
+    payload.timePeriod          = static_cast<uint16_t>(SEND_SENSOR_DATA_PERIOD);
 
     /* Send the sensor data via the SerialMuxProt. */
     (void)m_smpServer.sendData(m_smpChannelIdSensorData, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-    m_measurementTimer.restart();
-}
-
-void App::sendEndLineDetectionSignal()
-{
-    DrivingState::LineStatus lineStatus = DrivingState::getInstance().getLineStatus();
-
-    /* Send only if a new End Line has been detected. */
-    if ((DrivingState::LINE_STATUS_FIND_END_LINE == m_lastLineDetectionStatus) &&
-        (DrivingState::LINE_STATUS_END_LINE_DETECTED == lineStatus))
-    {
-        EndLineFlag payload = {.isEndLineDetected = true};
-        (void)m_smpServer.sendData(m_smpChannelIdEndLine, reinterpret_cast<uint8_t*>(&payload), sizeof(payload));
-    }
-
-    m_lastLineDetectionStatus = lineStatus;
 }
 
 /******************************************************************************
