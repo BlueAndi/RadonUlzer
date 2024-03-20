@@ -5,77 +5,94 @@
 import math
 import sys
 from controller import Supervisor
-
-# Create the Supervisor instance.
-supervisor = Supervisor()
+from robot_observer import RobotObserver
 
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
 
-def get_robot_translation_values(robot_node):
-    """Get robot translation field values.
+# The supervisor receiver name.
+SUPERVISOR_RX_NAME = "serialComRx"
+
+def serial_com_read(serial_com_rx_device):
+    """Read from serial communication device.
 
     Args:
-        robot_node (robot): The robot node.
+        serial_com_rx_device (obj): Serial COM device
 
     Returns:
-        list: List of translation field values for x, y and z.
+        Union[str, None]: Received data or None.
     """
-    robot_field_translation = robot_node.getField("translation")
-    return robot_field_translation.getSFVec3f()
+    rx_data = None
 
-def get_robot_rotation_values(robot_node):
-    """Get robot rotation field values.
+    if serial_com_rx_device.getQueueLength() > 0:
+        rx_data = serial_com_rx_device.getString()
+        serial_com_rx_device.nextPacket()
+
+    return rx_data
+
+def rad_to_deg(angle_rad):
+    """Convert angle in rad to degree.
 
     Args:
-        robot_node (robot): The robot node.
+        angle_rad (float): Angle in rad
 
     Returns:
-        list: List of rotation field values for x, y, z and angle.
+        float: Angle in degree
     """
-    robot_field_rotation = robot_node.getField("rotation")
-    return robot_field_rotation.getSFRotation()
+    return angle_rad * 180 / math.pi
 
-def get_robot_3d_rel_position(robot_node, prev_translation_values):
-    """Get robot 3d relative position (x, y).
+def has_position_changed(position, position_old):
+    """Returns whether the position changed.
 
     Args:
-        robot_node (robot): The robot node.
-        prev_translation_values (list): Absolute translation values to calculate the relative from.
+        position (list[float]): Position 1
+        position_old (list[float]): Position 2
 
     Returns:
-        list: List with position (x, y, z) in [mm]
+        bool: If changed, it will return True otherwise False.
     """
-    vector_idx_x = 0
-    vector_idx_y = 1
-    vector_idx_z = 2
-    factor_m_to_mm = 1000 # Conversion factor from [m] to [mm]
+    has_changed = False
 
-    robot_translation_values = get_robot_translation_values(robot_node)
+    for idx, value in enumerate(position):
+        if int(value) != int(position_old[idx]):
+            has_changed = True
+            break
 
-    rel_pos_x = ( robot_translation_values[vector_idx_x] - prev_translation_values[vector_idx_x] ) \
-                * factor_m_to_mm # [mm]
-    rel_pos_y = ( robot_translation_values[vector_idx_y] - prev_translation_values[vector_idx_y] ) \
-                * factor_m_to_mm # [mm]
-    rel_pos_z = ( robot_translation_values[vector_idx_z] - prev_translation_values[vector_idx_z] ) \
-                * factor_m_to_mm # [mm]
+    return has_changed
 
-    return rel_pos_x, rel_pos_y, rel_pos_z
-
-def get_robot_2d_orientation(robot_node):
-    """Get the robot 2d orientation angle [-PI, PI].
+def has_orientation_changed(orientation, orientation_old):
+    """Returns whether the orientation changed.
 
     Args:
-        robot_node (Robot): The robot node.
+        orientation (list[float]): Orientation 1
+        orientation_old (list[float]): Orientation 2
 
     Returns:
-        float: Orientation angle in [rad]
+        bool: If changed, it will return True otherwise False.
     """
-    vector_idx_angle = 3
+    has_changed = False
 
-    robot_rotation_values = get_robot_rotation_values(robot_node)
+    for idx, value in enumerate(orientation):
+        if int(rad_to_deg(value)) != int(rad_to_deg(orientation_old[idx])):
+            has_changed = True
+            break
 
-    return robot_rotation_values[vector_idx_angle]
+    return has_changed
+
+class OdometryData(): # pylint: disable=too-few-public-methods
+    """Odometry data container.
+    """
+    def __init__(self) -> None:
+        self.x = 0
+        self.y = 0
+        self.yaw_angle = 0
+
+    def reset(self):
+        """Reset odometry data.
+        """
+        self.x = 0
+        self.y = 0
+        self.yaw_angle = 0
 
 def main_loop():
     """Main loop:
@@ -86,8 +103,20 @@ def main_loop():
     """
     status = 0
 
+    # Create the Supervisor instance.
+    supervisor = Supervisor()
+
     # Get the time step of the current world.
     timestep = int(supervisor.getBasicTimeStep())
+
+    # Enable supervisor receiver to receive any message from the robot or other
+    # devices in the simulation.
+    supervisor_com_rx = supervisor.getDevice(SUPERVISOR_RX_NAME)
+
+    if supervisor_com_rx is None:
+        print(f"No supervisor communication possible, because {SUPERVISOR_RX_NAME} not found.")
+    else:
+        supervisor_com_rx.enable(timestep)
 
     # Get robot node which to observe.
     robot_node = supervisor.getFromDef(ROBOT_NAME)
@@ -98,31 +127,62 @@ def main_loop():
         status = -1
 
     else:
+        robot_observer = RobotObserver(robot_node)
 
-        # Get robot absolute start position
-        robot_start_translation_values = get_robot_translation_values(robot_node)
+        # Set current position and orientation in the map as reference.
+        robot_observer.set_current_position_as_reference()
+        robot_observer.set_current_orientation_as_reference()
 
-        prev_pos_x = -1
-        prev_pos_y = -1
-        prev_orientation_deg = -1
+        robot_position_old = robot_observer.get_rel_position()
+        robot_orientation_old = robot_observer.get_rel_orientation()
+        robot_odometry = OdometryData()
 
         while supervisor.step(timestep) != -1:
-            pos_x, pos_y, _ = get_robot_3d_rel_position(robot_node, robot_start_translation_values)
-            orientation = get_robot_2d_orientation(robot_node)
-            orientation_deg = math.degrees(orientation)
+            if supervisor_com_rx is not None:
+                rx_data = serial_com_read(supervisor_com_rx)
 
-            # Only interested in the floor part
-            pos_x = int(pos_x)
-            pos_y = int(pos_y)
-            orientation_deg = int(orientation_deg)
+                if rx_data is None:
+                    pass
 
-            # pylint: disable=line-too-long
-            if (prev_pos_x != pos_x) or (prev_pos_y != pos_y) or (prev_orientation_deg != orientation_deg):
-                print(f"{pos_x}, {pos_y}, {orientation_deg}\n")
+                else:
+                    command = rx_data.split(',')
 
-                prev_pos_x = pos_x
-                prev_pos_y = pos_y
-                prev_orientation_deg = orientation_deg
+                    # Reset robot position and orientation?
+                    if command[0] == "RST":
+                        print("RST")
+                        robot_observer.set_current_position_as_reference()
+                        robot_observer.set_current_orientation_as_reference()
+                        robot_odometry.reset()
+
+                    # Robot odometry data received?
+                    elif command[0] == "ODO":
+                        robot_odometry.x = int(rx_data[1]) # [mm]
+                        robot_odometry.y = int(rx_data[2]) # [mm]
+                        robot_odometry.yaw_angle = float(rx_data[3]) / 1000.0 # [rad]
+
+                    # Unknown command.
+                    else:
+                        print(f"Unknown command: {command[0]}")
+
+            robot_position = robot_observer.get_rel_position()
+            robot_orientation = robot_observer.get_rel_orientation()
+
+            any_change = has_position_changed(robot_position, robot_position_old)
+
+            if any_change is False:
+                any_change = has_orientation_changed(robot_orientation, robot_orientation_old)
+
+            if any_change is True:
+                print(f"{int(robot_position[0])}, ", end="")
+                print(f"{int(robot_position[1])}, ", end="")
+                print(f"{int(robot_position[2])}, ", end="")
+                print(f"{int(rad_to_deg(robot_orientation[2]))} / ", end="")
+                print(f"{robot_odometry.x}, ", end="")
+                print(f"{robot_odometry.y}, ", end="")
+                print(f"{int(rad_to_deg(robot_odometry.yaw_angle))}")
+
+                robot_position_old = robot_position
+                robot_orientation_old = robot_orientation
 
     return status
 
