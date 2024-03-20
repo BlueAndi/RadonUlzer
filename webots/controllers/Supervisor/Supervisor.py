@@ -41,6 +41,42 @@ def rad_to_deg(angle_rad):
     """
     return angle_rad * 180 / math.pi
 
+def convert_angle_to_2pi(angle):
+    """Convert angle from range [-PI; PI] in rad to [0; 2PI].
+
+    Args:
+        angle (float): Angle in rad, range [-PI; PI].
+
+    Returns:
+        float: Angle in rad, range [0; 2PI]
+    """
+    if angle < 0:
+        angle += 2 * math.pi
+
+    return angle
+
+def convert_webots_angle_to_ru_angle(webots_angle):
+    """Convert Webots angle to RadonUlzer angle.
+
+    Args:
+        webots_angle (float): Webots angle in rad, range [-PI; PI].
+
+    Returns:
+        float: Angle in rad, range [-2PI; 2PI]
+    """
+    # Radon Ulzer
+    #   Angle [-2PI; 2PI]
+    #   North are 90° (PI/2)
+    #
+    # Webots angle [-PI; PI]
+    webots_angle += math.pi / 2
+
+    webots_angle_2pi = convert_angle_to_2pi(webots_angle)
+
+    # TODO Handling the negative range.
+
+    return webots_angle_2pi
+
 def has_position_changed(position, position_old):
     """Returns whether the position changed.
 
@@ -156,9 +192,9 @@ def main_loop():
 
                     # Robot odometry data received?
                     elif command[0] == "ODO":
-                        robot_odometry.x = int(rx_data[1]) # [mm]
-                        robot_odometry.y = int(rx_data[2]) # [mm]
-                        robot_odometry.yaw_angle = float(rx_data[3]) / 1000.0 # [rad]
+                        robot_odometry.x = int(command[1]) # [mm]
+                        robot_odometry.y = int(command[2]) # [mm]
+                        robot_odometry.yaw_angle = float(command[3]) / 1000.0 # [rad]
 
                     # Unknown command.
                     else:
@@ -173,10 +209,13 @@ def main_loop():
                 any_change = has_orientation_changed(robot_orientation, robot_orientation_old)
 
             if any_change is True:
+
+                robot_yaw_angle = robot_orientation[2]
+                yaw_ru_angle = convert_webots_angle_to_ru_angle(robot_yaw_angle)
+
                 print(f"{int(robot_position[0])}, ", end="")
                 print(f"{int(robot_position[1])}, ", end="")
-                print(f"{int(robot_position[2])}, ", end="")
-                print(f"{int(rad_to_deg(robot_orientation[2]))} / ", end="")
+                print(f"{int(rad_to_deg(yaw_ru_angle))} / ", end="")
                 print(f"{robot_odometry.x}, ", end="")
                 print(f"{robot_odometry.y}, ", end="")
                 print(f"{int(rad_to_deg(robot_odometry.yaw_angle))}")
