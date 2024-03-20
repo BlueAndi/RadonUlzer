@@ -53,14 +53,14 @@ class RobotObserver():
 
         if orientation is not None:
             # Extract roll, pitch, and yaw angles from the rotation matrix
-            # R21, R22
-            roll_angle = math.atan2(orientation[5],
+            # R23, R23
+            roll_angle = math.atan2(orientation[7],
                                     orientation[8])
-            # -R20, sqrt(R21^2 + R22^2)
-            pitch_angle = math.atan2(-orientation[2],
-                                     math.sqrt(orientation[5]**2 + orientation[8]**2))
-            # R10, R00
-            yaw_angle = math.atan2(orientation[1],
+            # -R13, sqrt(R23^2 + R33^2)
+            pitch_angle = math.atan2(-orientation[6],
+                                     math.sqrt(orientation[7]**2 + orientation[8]**2))
+            # R02, R00
+            yaw_angle = math.atan2(orientation[3],
                                    orientation[0])
 
         return roll_angle, pitch_angle, yaw_angle
