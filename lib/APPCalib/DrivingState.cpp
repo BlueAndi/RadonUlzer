@@ -80,7 +80,7 @@ void DrivingState::entry()
     case DRIVING_CMD_TURN_LEFT:
         m_dstAngle = angle + TURN_ANGLE;
 
-        if (FP_2PI() <= angle)
+        if (FP_2PI() <= m_dstAngle)
         {
             m_dstAngle -= FP_2PI();
             m_wrapAroundCnt = 1;
@@ -92,7 +92,7 @@ void DrivingState::entry()
     case DRIVING_CMD_TURN_RIGHT:
         m_dstAngle = angle - TURN_ANGLE;
 
-        if (-FP_2PI() >= angle)
+        if (-FP_2PI() >= m_dstAngle)
         {
             m_dstAngle += FP_2PI();
             m_wrapAroundCnt = 1;
