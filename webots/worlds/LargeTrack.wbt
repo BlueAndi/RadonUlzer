@@ -43,6 +43,7 @@ RectangleArena {
         "LargeTrack.png"
       ]
     }
+    roughness 1
     metalness 0
   }
 }
