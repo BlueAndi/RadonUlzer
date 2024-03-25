@@ -62,8 +62,9 @@
  *****************************************************************************/
 
 /* Calculate the position set point to be generic. */
-const int16_t DrivingState::POSITION_SET_POINT = Board::getInstance().getLineSensors().getSensorValueMax() *
-                                                 Board::getInstance().getLineSensors().getNumLineSensors() / 2;
+const int16_t DrivingState::POSITION_SET_POINT = (Board::getInstance().getLineSensors().getSensorValueMax() *
+                                                  (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) /
+                                                 2;
 
 /* Initialize the required sensor IDs to be generic. */
 const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
