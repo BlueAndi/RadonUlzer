@@ -57,7 +57,7 @@
  *****************************************************************************/
 
 /* Initialize static constant data. */
-const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(10U * RobotConstants::ENCODER_STEPS_PER_MM);
+const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants::ENCODER_STEPS_PER_M / 100U);
 
 /******************************************************************************
  * Public Methods
@@ -85,24 +85,25 @@ void Odometry::process()
             int16_t dXSteps     = 0;                                  /* [steps] */
             int16_t dYSteps     = 0;                                  /* [steps] */
 
-            /* Mileage accuracy depends on STEPS_THRESHOLD. */
+            /* Calculate mileage in steps to avoid loosing precision by division. */
             m_mileage = calculateMileage(m_mileage, stepsCenter);
 
             m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight);
 
-            /* Calculate in steps to avoid loosing precision by divison. */
+            /* Calculate delta position in steps to avoid loosing precision by divison. */
             calculateDeltaPos(stepsCenter, m_orientation, dXSteps, dYSteps);
-            m_countingXSteps += dXSteps;
-            m_countingYSteps += dYSteps;
+            m_countingXSteps += dXSteps * 1000; /* Multiply with 1000 for higher precision. */
+            m_countingYSteps += dYSteps * 1000; /* Multiply with 1000 for higher precision. */
 
             /* For large areas, its important to have the position in mm and not in steps.
              * Therefore the position in mm is continously calculated from the counted steps
              * on each axis.
              */
-            m_posX += m_countingXSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-            m_posY += m_countingYSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-            m_countingXSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
-            m_countingYSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM);
+            m_posX += m_countingXSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+            m_countingXSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+
+            m_posY += m_countingYSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+            m_countingYSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
 
             /* Reset to be able to calculate the next delta. */
             absStepsLeft  = 0U; /* [steps] */
@@ -116,16 +117,16 @@ void Odometry::process()
 
 uint32_t Odometry::getMileageCenter() const
 {
-    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();      /* [steps] */
-    int16_t  relStepsRight = m_relEncoders.getCountsRight();     /* [steps] */
-    int16_t  stepsCenter   = (relStepsLeft + relStepsRight) / 2; /* [steps] */
-    uint32_t mileage       = calculateMileage(m_mileage, stepsCenter);
+    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();            /* [steps] */
+    int16_t  relStepsRight = m_relEncoders.getCountsRight();           /* [steps] */
+    int16_t  stepsCenter   = (relStepsLeft + relStepsRight) / 2;       /* [steps] */
+    uint32_t mileage       = calculateMileage(m_mileage, stepsCenter); /* [steps] */
 
     /* For higher accuracy use the current relative steps left and right.
      * The m_mileage will only be updated every STEPS_THRESHOLD, which
      * will reset the relative encoders to 0.
      */
-    return mileage / RobotConstants::ENCODER_STEPS_PER_MM;
+    return (mileage * 1000U) / RobotConstants::ENCODER_STEPS_PER_M;
 }
 
 int32_t Odometry::getOrientation() const
@@ -217,11 +218,10 @@ int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, i
     /* The alpha is approximated for performance reason. */
     int32_t stepsLeft32  = static_cast<int32_t>(stepsLeft);
     int32_t stepsRight32 = static_cast<int32_t>(stepsRight);
-    int32_t alpha        = (stepsRight32 - stepsLeft32) * 1000; /* 1000 * [steps] */
+    int32_t alpha        = (stepsRight32 - stepsLeft32) * 1000 * 1000; /* 1000 * 1000 * [steps] */
 
-    alpha /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_MM); /* 1000 * [mm] */
-    alpha /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);           /* [mrad] */
-    alpha %= FP_2PI();                                                   /* -2*PI < alpha < +2*PI */
+    alpha /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* 1000 * [mm] */
+    alpha /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);          /* [mrad] */
 
     /* Calculate orientation */
     orientation += alpha;
