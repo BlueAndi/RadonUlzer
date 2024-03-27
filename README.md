@@ -118,7 +118,7 @@ $ program.exe -?
 | - | - | - | - | - |
 | Calib | Application used for motor speed calibration. | Yes | No | ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
 | ConvoyLeader | A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role. | No | Yes | ./webots/worlds/GridWithMarkers.wbt  ./webots/worlds/HeadingCalculation.wbt |
-| LineFollower | Just a line follower, using a PID controller. | Yes | No | ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
+| LineFollower | Just a line follower, using a PID controller. | Yes | No | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
 | RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | Any |
 | SensorFusion | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No | Yes | ./webots/worlds/SensorFustion.wbt |
 | Test | Only for testing purposes on native environment. | Yes | No | N/A |
