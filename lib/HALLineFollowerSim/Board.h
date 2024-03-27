@@ -55,13 +55,16 @@
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
-#include <ProximitySensors.h>
 #include <Settings.h>
 
 #include <math.h>
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
 #include <SimTime.h>
+
+#ifdef DEBUG_ODOMETRY
+#include <Sender.h>
+#endif /* DEBUG_ODOMETRY */
 
 /******************************************************************************
  * Macros
@@ -205,16 +208,6 @@ public:
     }
 
     /**
-     * Get proximity sensors driver.
-     *
-     * @return Proximity sensors driver
-     */
-    IProximitySensors& getProximitySensors() final
-    {
-        return m_proximitySensors;
-    }
-
-    /**
      * Get the settings.
      *
      * @return Settings
@@ -223,6 +216,20 @@ public:
     {
         return m_settings;
     }
+
+#ifdef DEBUG_ODOMETRY
+
+    /**
+     * Get the sender driver, used to send data to the webots supervisor.
+     *
+     * @return Sender driver
+     */
+    ISender& getSender() final
+    {
+        return m_sender;
+    }
+
+#endif /* DEBUG_ODOMETRY */
 
     /**
      * Process actuators and sensors.
@@ -296,6 +303,11 @@ private:
     /** Name of the front right proximity sensor in the robot simulation. */
     static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
 
+#ifdef DEBUG_ODOMETRY
+    /** Name of the sender to the webots supervisor. */
+    static const char* SENDER_NAME;
+#endif /* DEBUG_ODOMETRY */
+
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -338,11 +350,15 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
-
     /** Settings */
     Settings m_settings;
+
+#ifdef DEBUG_ODOMETRY
+
+    /** Sender driver for supervisor communication. */
+    Sender m_sender;
+
+#endif /* DEBUG_ODOMETRY */
 
     /**
      * Constructs the concrete board.

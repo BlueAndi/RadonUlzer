@@ -63,7 +63,6 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
     m_settings.init();
 }
 
@@ -88,7 +87,6 @@ Board::Board() :
     m_ledRed(),
     m_ledYellow(),
     m_ledGreen(),
-    m_proximitySensors(),
     m_settings()
 {
 }

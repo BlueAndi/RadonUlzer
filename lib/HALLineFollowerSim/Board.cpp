@@ -111,11 +111,10 @@ const char* Board::LED_YELLOW_NAME = "led_yellow";
 /* Name of the green LED in the robot simulation. */
 const char* Board::LED_GREEN_NAME = "led_green";
 
-/* Name of the front left proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
-
-/* Name of the front right proximity sensor in the robot simulation. */
-const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
+#ifdef DEBUG_ODOMETRY
+/* Name of the sender to the webots supervisor. */
+const char* Board::SENDER_NAME = "serialComTx";
+#endif /* DEBUG_ODOMETRY */
 
 /******************************************************************************
  * Public Methods
@@ -126,7 +125,6 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
     m_settings.init();
 }
 
@@ -158,9 +156,11 @@ Board::Board() :
     m_ledRed(m_robot.getLED(LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
-    m_proximitySensors(m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                       m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
     m_settings()
+#ifdef DEBUG_ODOMETRY
+    ,
+    m_sender(m_robot.getEmitter(SENDER_NAME))
+#endif /* DEBUG_ODOMETRY */
 {
 }
 
@@ -176,8 +176,6 @@ void Board::enableSimulationDevices()
     m_robot.getDistanceSensor(LIGHT_SENSOR_2_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(LIGHT_SENSOR_3_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)->enable(timeStep);
 }
 
 /******************************************************************************
