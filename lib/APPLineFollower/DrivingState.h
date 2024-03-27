@@ -98,9 +98,9 @@ private:
      */
     enum LineStatus
     {
-        LINE_STATUS_NO_START_STOP_LINE_DETECTED = 0, /**< No start/stop line detected. */
-        LINE_STATUS_START_LINE_DETECTED,             /**< Start line detected. */
-        LINE_STATUS_STOP_LINE_DETECTED               /**< Stop line detected. */
+        LINE_STATUS_NO_START_LINE_DETECTED = 0, /**< No start line detected. */
+        LINE_STATUS_START_LINE_DETECTED,        /**< Start line detected. */
+        LINE_STATUS_STOP_LINE_DETECTED          /**< Stop line detected. */
     };
 
     /**
@@ -108,9 +108,15 @@ private:
      */
     enum TrackStatus
     {
-        TRACK_STATUS_ON_TRACK = 0, /**< Robot is on track */
-        TRACK_STATUS_LOST,         /**< Robot lost track */
-        TRACK_STATUS_FINISHED      /**< Robot found the end line or a error happened */
+        TRACK_STATUS_NORMAL = 0,              /**< Normal line conditions. */
+        TRACK_STATUS_START_STOP_LINE,         /**< Driving over start-/stop-line. */
+        TRACK_STATUS_SHARP_CURVE_LEFT,        /**< Sharp curve to the left detected. */
+        TRACK_STATUS_SHARP_CURVE_RIGHT,       /**< Sharp curve to the right detected. */
+        TRACK_STATUS_SHARP_CURVE_LEFT_TURN,   /**< Sharp curve to the left turns now. */
+        TRACK_STATUS_SHARP_CURVE_RIGHT_TURN,  /**< Sharp curve to the right turns now. */
+        TRACK_STATUS_TRACK_LOST_BY_GAP,       /**< Track lost by gap. */
+        TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE, /**< Track lost by driving manoeuvre. */
+        TRACK_STATUS_FINISHED                 /**< Robot found the end line or a error happened. */
     };
 
     /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
@@ -127,7 +133,7 @@ private:
      * The track is detected in case the received value is greater or equal than
      * the threshold.
      */
-    static const uint16_t LINE_SENSOR_ON_TRACK_VALUE = 200U;
+    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
 
     /**
      * Position set point which is the perfect on track position.
@@ -149,6 +155,32 @@ private:
      * ID of middle sensor.
      */
     static const uint8_t SENSOR_ID_MOST_RIGHT;
+
+    /**
+     * Minimum position in digits.
+     */
+    static const int16_t POSITION_MIN;
+
+    /**
+     * Maximum position in digits.
+     */
+    static const int16_t POSITION_MAX;
+
+    /**
+     * Lower border position in digits for driving will on the line.
+     */
+    static const int16_t POSITION_MIDDLE_MIN;
+
+    /**
+     * Higher border position in digits for driving will on the line.
+     */
+    static const int16_t POSITION_MIDDLE_MAX;
+
+    /**
+     * Threshold of the position difference in digits, used for sharp curve
+     * detection.
+     */
+    static const int16_t POS_DIFF_SHARP_CURVE_THRESHOLD;
 
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
@@ -178,6 +210,17 @@ private:
     DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 
     /**
+     * Calculate the position with the inner 3 line sensors.
+     *
+     * @param[out]  position            The position result.
+     * @param[in]   lineSensorValues    Array of line sensor values.
+     * @param[in]   length              Array length.
+     *
+     * @return If successful, it will return true otherwise false.
+     */
+    bool calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const;
+
+    /**
      * Is the start/stop line detected?
      *
      * @param[in] lineSensorValues  The line sensor values as array.
@@ -186,26 +229,6 @@ private:
      * @return If start/stop line detected, it will return true otherwise false.
      */
     bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length);
-
-    /**
-     * Is right angle curve to the left detected?
-     *
-     * @param[in] lineSensorValues  The line sensor values as array.
-     * @param[in] length            The number of line sensor values.
-     *
-     * @return If right angle curve to the left is detected, it will return true otherwise false.
-     */
-    bool isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length);
-
-    /**
-     * Is right angle curve to the right detected?
-     *
-     * @param[in] lineSensorValues  The line sensor values as array.
-     * @param[in] length            The number of line sensor values.
-     *
-     * @return If right angle curve to the right is detected, it will return true otherwise false.
-     */
-    bool isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length);
 
     /**
      * Is track gap detected?
@@ -232,6 +255,8 @@ private:
      * @return If abort is required, it will return true otherwise false.
      */
     bool isAbortRequired();
+
+    friend void logCsvDataTrackStatus(TrackStatus trackStatus);
 };
 
 /******************************************************************************
