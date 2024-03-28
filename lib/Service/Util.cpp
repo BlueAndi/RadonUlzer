@@ -150,6 +150,51 @@ void Util::intToStr(char* str, size_t size, int32_t value)
     }
 }
 
+uint32_t Util::divRoundUp(uint32_t numerator, uint32_t denominator)
+{
+    uint32_t result    = numerator / denominator;
+    uint32_t rest      = numerator % denominator;
+    uint32_t threshold = denominator / 2U;
+
+    if (threshold <= rest)
+    {
+        result += 1U;
+    }
+
+    return result;
+}
+
+int32_t Util::divRoundUp(int32_t numerator, int32_t denominator)
+{
+    int32_t result    = numerator / denominator;
+    int32_t rest      = numerator % denominator;
+    int32_t threshold = denominator / 2;
+
+    if (0 > rest)
+    {
+        rest *= -1;
+    }
+
+    if (0 > threshold)
+    {
+        threshold *= -1;
+    }
+
+    if (threshold <= rest)
+    {
+        if (0 > result)
+        {
+            result -= 1;
+        }
+        else
+        {
+            result += 1;
+        }
+    }
+
+    return result;
+}
+
 /******************************************************************************
  * Local Functions
  *****************************************************************************/

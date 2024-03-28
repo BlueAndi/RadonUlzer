@@ -82,7 +82,27 @@ namespace Util
      */
     void intToStr(char* str, size_t size, int32_t value);
 
-} // namespace Util
+    /**
+     * Divide and round.
+     * 
+     * @param[in] numerator     The numerator.
+     * @param[in] denominator   The denominator.
+     * 
+     * @return Result
+     */
+    uint32_t divRoundUp(uint32_t numerator, uint32_t denominator);
+
+    /**
+     * Divide and round.
+     * 
+     * @param[in] numerator     The numerator.
+     * @param[in] denominator   The denominator.
+     * 
+     * @return Result
+     */
+    int32_t divRoundUp(int32_t numerator, int32_t denominator);
+
+} /* namespace Util */
 
 #endif /* UTIL_H */
 /** @} */

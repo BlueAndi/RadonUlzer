@@ -35,6 +35,7 @@
 #include <Odometry.h>
 #include <Board.h>
 #include <RobotConstants.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -65,8 +66,8 @@ const uint16_t Odometry::STEPS_THRESHOLD = static_cast<uint16_t>(RobotConstants:
 
 void Odometry::process()
 {
-    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();  /* [steps] */
-    int16_t  relStepsRight = m_relEncoders.getCountsRight(); /* [steps] */
+    int32_t  relStepsLeft  = m_relEncoders.getCountsLeft();  /* [steps] */
+    int32_t  relStepsRight = m_relEncoders.getCountsRight(); /* [steps] */
     uint16_t absStepsLeft  = abs(relStepsLeft);              /* Positive amount of delta steps left */
     uint16_t absStepsRight = abs(relStepsRight);             /* Positive amount of delta steps right*/
     bool     isNoMovement  = detectStandStill(absStepsLeft, absStepsRight);
@@ -81,9 +82,11 @@ void Odometry::process()
          */
         if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
         {
-            int16_t stepsCenter = (relStepsLeft + relStepsRight) / 2; /* [steps] */
-            int16_t dXSteps     = 0;                                  /* [steps] */
-            int16_t dYSteps     = 0;                                  /* [steps] */
+            int16_t stepsCenter = static_cast<int16_t>((relStepsLeft + relStepsRight) / 2); /* [steps] */
+            int16_t dXSteps     = 0;                                                        /* [steps] */
+            int16_t dYSteps     = 0;                                                        /* [steps] */
+            int32_t deltaPosX   = 0;                                                        /* [mm] */
+            int32_t deltaPosY   = 0;                                                        /* [mm] */
 
             /* Calculate mileage in steps to avoid loosing precision by division. */
             m_mileage = calculateMileage(m_mileage, stepsCenter);
@@ -99,11 +102,14 @@ void Odometry::process()
              * Therefore the position in mm is continously calculated from the counted steps
              * on each axis.
              */
-            m_posX += m_countingXSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
-            m_countingXSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+            deltaPosX = Util::divRoundUp(m_countingXSteps, static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M));
+            deltaPosY = Util::divRoundUp(m_countingYSteps, static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M));
 
-            m_posY += m_countingYSteps / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
-            m_countingYSteps %= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+            m_posX += deltaPosX;
+            m_countingXSteps -= deltaPosX * static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+
+            m_posY += deltaPosY;
+            m_countingYSteps -= deltaPosY * static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
 
             /* Reset to be able to calculate the next delta. */
             absStepsLeft  = 0U; /* [steps] */
@@ -117,16 +123,13 @@ void Odometry::process()
 
 uint32_t Odometry::getMileageCenter() const
 {
-    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();            /* [steps] */
-    int16_t  relStepsRight = m_relEncoders.getCountsRight();           /* [steps] */
-    int16_t  stepsCenter   = (relStepsLeft + relStepsRight) / 2;       /* [steps] */
-    uint32_t mileage       = calculateMileage(m_mileage, stepsCenter); /* [steps] */
+    int16_t  relStepsLeft  = m_relEncoders.getCountsLeft();                                  /* [steps] */
+    int16_t  relStepsRight = m_relEncoders.getCountsRight();                                 /* [steps] */
+    int16_t  stepsCenter   = (relStepsLeft + relStepsRight) / 2;                             /* [steps] */
+    uint32_t mileage       = 1000U * calculateMileage(m_mileage, stepsCenter);               /* 1000 * [steps] */
+    uint32_t mileageMM     = Util::divRoundUp(mileage, RobotConstants::ENCODER_STEPS_PER_M); /* [mm] */
 
-    /* For higher accuracy use the current relative steps left and right.
-     * The m_mileage will only be updated every STEPS_THRESHOLD, which
-     * will reset the relative encoders to 0.
-     */
-    return (mileage * 1000U) / RobotConstants::ENCODER_STEPS_PER_M;
+    return mileageMM;
 }
 
 int32_t Odometry::getOrientation() const
@@ -218,10 +221,11 @@ int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, i
     /* The alpha is approximated for performance reason. */
     int32_t stepsLeft32  = static_cast<int32_t>(stepsLeft);
     int32_t stepsRight32 = static_cast<int32_t>(stepsRight);
-    int32_t alpha        = (stepsRight32 - stepsLeft32) * 1000 * 1000; /* 1000 * 1000 * [steps] */
+    int32_t alpha        = (stepsRight32 - stepsLeft32) * 1000; /* 1000 * [steps] */
 
-    alpha /= static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* 1000 * [mm] */
-    alpha /= static_cast<int32_t>(RobotConstants::WHEEL_BASE);          /* [mrad] */
+    alpha = Util::divRoundUp(alpha, static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M)); /* 1000 * [m] */
+    alpha *= 1000;                                                                              /* 1000 * [mm] */
+    alpha = Util::divRoundUp(alpha, static_cast<int32_t>(RobotConstants::WHEEL_BASE));          /* [mrad] */
 
     /* Calculate orientation */
     orientation += alpha;
@@ -237,6 +241,7 @@ void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16
     float fDeltaPosX   = fDistCenter * cosf(fOrientation);          /* [steps] */
     float fDeltaPosY   = fDistCenter * sinf(fOrientation);          /* [steps] */
 
+    /* Round because the cast will just cut the fractional part. */
     if (0.0F <= fDeltaPosX)
     {
         fDeltaPosX += 0.5F;
@@ -246,6 +251,7 @@ void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16
         fDeltaPosX -= 0.5F;
     }
 
+    /* Round because the cast will just cut the fractional part. */
     if (0.0F <= fDeltaPosY)
     {
         fDeltaPosY += 0.5F;
