@@ -61,7 +61,7 @@
 static void logCsvDataTitles(uint8_t length);
 static void logCsvDataTimestamp();
 static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t pos, int16_t pos3, bool isPos3Valid);
-static void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus);
+void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus);
 static void logCsvDataSpeed(int16_t leftSpeed, int16_t rightSpeed);
 #endif /* DEBUG_ALGORITHM */
 
@@ -660,7 +660,7 @@ static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t
  *
  * @param[in] trackStatus   The track status.
  */
-static void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus)
+void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus)
 {
     switch (trackStatus)
     {
