@@ -40,6 +40,7 @@
 #include <Odometry.h>
 #include "ReadyState.h"
 #include "ParameterSets.h"
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -61,7 +62,7 @@
 static void logCsvDataTitles(uint8_t length);
 static void logCsvDataTimestamp();
 static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t pos, int16_t pos3, bool isPos3Valid);
-void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus);
+void        logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus);
 static void logCsvDataSpeed(int16_t leftSpeed, int16_t rightSpeed);
 #endif /* DEBUG_ALGORITHM */
 
@@ -74,10 +75,11 @@ static int16_t gSpeedLeft  = 0;
 static int16_t gSpeedRight = 0;
 #endif /* DEBUG_ALGORITHM */
 
+const uint16_t DrivingState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
+
 /* Calculate the position set point to be generic. */
-const int16_t DrivingState::POSITION_SET_POINT = (Board::getInstance().getLineSensors().getSensorValueMax() *
-                                                  (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) /
-                                                 2;
+const int16_t DrivingState::POSITION_SET_POINT =
+    (SENSOR_VALUE_MAX * (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) / 2;
 
 /* Initialize the required sensor IDs to be generic. */
 const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
@@ -88,11 +90,8 @@ const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineS
 const int16_t DrivingState::POSITION_MIN = 0;
 const int16_t DrivingState::POSITION_MAX =
     static_cast<int16_t>(Board::getInstance().getLineSensors().getNumLineSensors() - 1U) * 1000;
-const int16_t DrivingState::POSITION_MIDDLE_MIN =
-    POSITION_SET_POINT - (Board::getInstance().getLineSensors().getSensorValueMax() / 2);
-const int16_t DrivingState::POSITION_MIDDLE_MAX =
-    POSITION_SET_POINT + (Board::getInstance().getLineSensors().getSensorValueMax() / 2);
-const int16_t DrivingState::POS_DIFF_SHARP_CURVE_THRESHOLD = 834;
+const int16_t DrivingState::POSITION_MIDDLE_MIN = POSITION_SET_POINT - (SENSOR_VALUE_MAX / 2);
+const int16_t DrivingState::POSITION_MIDDLE_MAX = POSITION_SET_POINT + (SENSOR_VALUE_MAX / 2);
 
 /******************************************************************************
  * Public Methods
@@ -143,12 +142,6 @@ void DrivingState::process(StateMachine& sm)
 
     int16_t position3        = 0;
     bool    isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
-    int16_t posDiff          = 0;
-
-    if (true == isPosition3Valid)
-    {
-        posDiff = position - position3;
-    }
 
 #ifdef DEBUG_ALGORITHM
     logCsvDataTimestamp();
@@ -261,26 +254,11 @@ void DrivingState::process(StateMachine& sm)
             position = POSITION_MAX; /* Enfore max. error in PID to turn sharp right at place. */
         }
     }
-    /* Sharp curve to left detected? */
-    else if ((-POS_DIFF_SHARP_CURVE_THRESHOLD >= posDiff) && (POSITION_MIDDLE_MIN <= position3) &&
-             (POSITION_MIDDLE_MAX >= position3))
-    {
-        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT;
-        position        = position3; /* Use only the inner sensors for position calculation. */
-    }
-    /* Sharp curve to right detected? */
-    else if ((POS_DIFF_SHARP_CURVE_THRESHOLD <= posDiff) && (POSITION_MIDDLE_MIN <= position3) &&
-             (POSITION_MIDDLE_MAX >= position3))
-    {
-        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT;
-        position        = position3; /* Use only the inner sensors for position calculation. */
-    }
     /* Is it a gap in the track? */
     else if (true == isGapDetected(lineSensorValues, numLineSensors))
     {
-        const int16_t SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
-        const int16_t POS_MIN          = POSITION_SET_POINT - SENSOR_VALUE_MAX;
-        const int16_t POS_MAX          = POSITION_SET_POINT + SENSOR_VALUE_MAX;
+        const int16_t POS_MIN = POSITION_SET_POINT - SENSOR_VALUE_MAX;
+        const int16_t POS_MAX = POSITION_SET_POINT + SENSOR_VALUE_MAX;
 
         /* If its a gap in the track, last position will be well. */
         if ((POS_MIN <= m_lastPosition) && (POS_MAX > m_lastPosition))
@@ -298,6 +276,18 @@ void DrivingState::process(StateMachine& sm)
              */
             nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE;
         }
+    }
+    /* Sharp curve to left detected? */
+    else if (true == isSharpLeftCurveDetected(lineSensorValues, numLineSensors, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT;
+        position        = position3; /* Use only the inner sensors for position calculation. */
+    }
+    /* Sharp curve to right detected? */
+    else if (true == isSharpRightCurveDetected(lineSensorValues, numLineSensors, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT;
+        position        = position3; /* Use only the inner sensors for position calculation. */
     }
     /* Nothing special. */
     else
@@ -437,7 +427,7 @@ DrivingState::DrivingState() :
 
 bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const
 {
-    const int32_t WEIGHT      = Board::getInstance().getLineSensors().getSensorValueMax();
+    const int32_t WEIGHT      = SENSOR_VALUE_MAX;
     bool          isValid     = true;
     int32_t       numerator   = 0U;
     int32_t       denominator = 0U;
@@ -466,11 +456,9 @@ bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorVa
 
 bool DrivingState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length)
 {
-    bool           isDetected = false;
-    const uint32_t LINE_MAX_30 =
-        (Board::getInstance().getLineSensors().getSensorValueMax() * 30U) / 100U; /* 30 % of max. value */
-    const uint32_t LINE_MAX_70 =
-        (Board::getInstance().getLineSensors().getSensorValueMax() * 70U) / 100U; /* 70 % of max. value */
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
 
     /*
      * ===     =     ===
@@ -506,6 +494,44 @@ bool DrivingState::isGapDetected(const uint16_t* lineSensorValues, uint8_t lengt
             isDetected = false;
             break;
         }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3)
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
+
+    /*
+     *   =     =
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) && (POSITION_MIDDLE_MIN <= position3) &&
+        (POSITION_MIDDLE_MAX >= position3))
+    {
+        isDetected = true;
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3)
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
+
+    /*
+     *         =     =
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]) && (POSITION_MIDDLE_MIN <= position3) &&
+        (POSITION_MIDDLE_MAX >= position3))
+    {
+        isDetected = true;
     }
 
     return isDetected;

@@ -136,6 +136,11 @@ private:
     static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
 
     /**
+     * The max. normalized value of a sensor in digits.
+     */
+    static const uint16_t SENSOR_VALUE_MAX;
+
+    /**
      * Position set point which is the perfect on track position.
      * This is the goal to achieve.
      */
@@ -175,12 +180,6 @@ private:
      * Higher border position in digits for driving will on the line.
      */
     static const int16_t POSITION_MIDDLE_MAX;
-
-    /**
-     * Threshold of the position difference in digits, used for sharp curve
-     * detection.
-     */
-    static const int16_t POS_DIFF_SHARP_CURVE_THRESHOLD;
 
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
@@ -239,6 +238,28 @@ private:
      * @return If track gap is detected, it will return true otherwise false.
      */
     bool isGapDetected(const uint16_t* lineSensorValues, uint8_t length);
+
+    /**
+     * Is a sharp left curve detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     * @param[in] position3         The position calculated with the inner line sensors in digits.
+     *
+     * @return If sharp left curve is detected, it will return true otherwise false.
+     */
+    bool isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3);
+
+    /**
+     * Is a sharp right curve detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     * @param[in] position3         The position calculated with the inner line sensors in digits.
+     *
+     * @return If sharp right curve is detected, it will return true otherwise false.
+     */
+    bool isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3);
 
     /**
      * Adapt driving by using a PID algorithm, depended on the position
