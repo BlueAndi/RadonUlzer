@@ -308,8 +308,6 @@ private:
      * @param[out]      allowNegativeMotorSpeed     Allow negative motor speed or not.
      * @param[in]       trackStatus                 The evaluated track status.
      * @param[in]       position3                   The position calculated with the inner sensors in digits.
-     *
-     * @return If sharp right curve is detected, it will return true otherwise false.
      */
     void processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3);
 
