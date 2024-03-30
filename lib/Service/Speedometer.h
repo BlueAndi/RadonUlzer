@@ -112,7 +112,7 @@ private:
      * The minimum number of counted encoder steps until the speed is measured.
      * It shall avoid a noisy speed.
      */
-    static const int16_t MIN_ENCODER_COUNT = RobotConstants::ENCODER_RESOLUTION / 2;
+    static const int32_t MIN_ENCODER_COUNT = static_cast<int32_t>(RobotConstants::ENCODER_RESOLUTION / 2U);
 
     /** Speedometer instance */
     static Speedometer m_instance;

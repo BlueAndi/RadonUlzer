@@ -51,8 +51,11 @@
 #include <ILineSensors.h>
 #include <IMotors.h>
 #include <ILed.h>
-#include <IProximitySensors.h>
 #include <ISettings.h>
+
+#ifdef DEBUG_ODOMETRY
+#include <ISender.h>
+#endif /* DEBUG_ODOMETRY */
 
 /******************************************************************************
  * Macros
@@ -159,18 +162,22 @@ public:
     virtual ILed& getGreenLed() = 0;
 
     /**
-     * Get proximity sensors driver.
-     * 
-     * @return Proximity sensors driver
-     */
-    virtual IProximitySensors& getProximitySensors() = 0;
-
-    /**
      * Get the settings.
      * 
      * @return Settings
      */
     virtual ISettings& getSettings() = 0;
+
+#ifdef DEBUG_ODOMETRY
+
+    /**
+     * Get the sender driver, used to send data to the webots supervisor.
+     *
+     * @return Sender driver
+     */
+    virtual ISender& getSender() = 0;
+
+#endif /* DEBUG_ODOMETRY */
 
     /**
      * Process actuators and sensors.

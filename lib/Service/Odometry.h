@@ -174,7 +174,7 @@ private:
      * Don't use values lower than 1 cm, because the accuracy of the orientation
      * will decrease massively.
      *
-     * Use a multiple of RobotConstants::ENCODER_STEPS_PER_MM for better
+     * Use a multiple of RobotConstants::ENCODER_STEPS_PER_M for better
      * accuracy.
      */
     static const uint16_t STEPS_THRESHOLD;
@@ -213,10 +213,10 @@ private:
     /** Absolute position on y-axis. Unit is mm. */
     int32_t m_posY;
 
-    /** Counting encoder steps on x-axis. Unit is in encoder steps. */
+    /** Counting encoder steps on x-axis. Unit is in encoder steps * 1000 (higher precision). */
     int32_t m_countingXSteps;
 
-    /** Counting encoder steps on y-axis. Unit is in encoder steps. */
+    /** Counting encoder steps on y-axis. Unit is in encoder steps * 1000 (higher precision). */
     int32_t m_countingYSteps;
 
     /** Timer used to detect standstill. */
@@ -264,12 +264,12 @@ private:
     bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**
-     * Calculate the mileage in mm.
+     * Calculate the mileage in encoder steps.
      *
-     * @param[in]   mileage     Mileage in mm
+     * @param[in]   mileage     Mileage in encoder steps
      * @param[in]   stepsCenter Number of steps center
      *
-     * @return Mileage in mm
+     * @return Mileage in encoder steps
      */
     int32_t calculateMileage(uint32_t mileage, int16_t stepsCenter) const;
 

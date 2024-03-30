@@ -27,7 +27,7 @@
 /**
  * @brief  Robot specific constants
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALInterfaces
  *
  * @{
@@ -62,35 +62,37 @@ namespace RobotConstants
     /**
      * Gear ratio multiplied with 1000.
      */
-    static const uint32_t   GEAR_RATIO              = 75810;
+    static const uint32_t GEAR_RATIO = 75810;
 
     /**
      * Encoder resolution in counts per revolution of the motor shaft.
      */
-    static const uint16_t   ENCODER_RESOLUTION      = 12;
+    static const uint32_t ENCODER_RESOLUTION = 12;
 
     /**
      * Calibrated wheel diameter in mm.
      * This means the real wheel diameter was adapted after calibration drive.
      */
-    static const uint32_t   WHEEL_DIAMETER          = 36;
+    static const uint32_t WHEEL_DIAMETER = 36;
 
     /**
      * Wheel circumference in um.
      */
-    static const uint32_t   WHEEL_CIRCUMFERENCE     = static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
+    static const uint32_t WHEEL_CIRCUMFERENCE =
+        static_cast<uint32_t>(static_cast<float>(WHEEL_DIAMETER) * PI * 1000.0f);
 
     /**
      * Wheel base in mm.
      * Distance between the left wheel center to the right wheel center.
      */
-    static const uint32_t   WHEEL_BASE              = 85;
+    static const uint32_t WHEEL_BASE = 85;
 
     /**
-     * Number of encoder steps per mm.
+     * Number of encoder steps per m.
      */
-    static const uint32_t   ENCODER_STEPS_PER_MM    = (ENCODER_RESOLUTION * GEAR_RATIO) / WHEEL_CIRCUMFERENCE;
-};
+    static const uint32_t ENCODER_STEPS_PER_M = (ENCODER_RESOLUTION * GEAR_RATIO * 1000U) / WHEEL_CIRCUMFERENCE;
+
+}; /* namespace RobotConstants */
 
 /******************************************************************************
  * Functions
