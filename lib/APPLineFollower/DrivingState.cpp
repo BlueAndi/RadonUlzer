@@ -108,6 +108,7 @@ void DrivingState::entry()
     m_pidProcessTime.start(0); /* Immediate */
     m_lineStatus              = LINE_STATUS_NO_START_LINE_DETECTED;
     m_trackStatus             = TRACK_STATUS_NORMAL; /* Assume that the robot is placed on track. */
+    m_isTrackLost             = false;               /* Assume that the robot is placed on track. */
     m_isStartStopLineDetected = false;
 
     /* Configure PID controller with selected parameter set. */
@@ -139,39 +140,48 @@ void DrivingState::process(StateMachine& sm)
     int16_t         position         = lineSensors.readLine();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         numLineSensors   = lineSensors.getNumLineSensors();
-
-    int16_t position3        = 0;
-    bool    isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
+    int16_t         position3        = 0;
+    bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
+    bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
 
 #ifdef DEBUG_ALGORITHM
     logCsvDataTimestamp();
     logCsvData(lineSensorValues, numLineSensors, position, position3, isPosition3Valid);
 #endif /* DEBUG_ALGORITHM */
 
+    /* If the position calculated with the inner sensors is not valid, the
+     * position will be taken.
+     */
+    if (true == isPosition3Valid)
+    {
+        position3 = position;
+    }
+
     /* ========================================================================
      * Evaluate the situation based on the sensor values.
      * ========================================================================
      */
+    nextTrackStatus = evaluateSituation(lineSensorValues, numLineSensors, position, position3, isTrackLost);
 
-    /* Driving over start-/stop-line? */
-    if (TRACK_STATUS_START_STOP_LINE == m_trackStatus)
+    /* ========================================================================
+     * Initiate measures depended on the situation.
+     * ========================================================================
+     */
+    processSituation(position, allowNegativeMotorSpeed, nextTrackStatus, position3);
+
+    /* If the tracks status changes, the PID integral and derivative part
+     * will be reset to provide a smooth reaction.
+     */
+    if (m_trackStatus != nextTrackStatus)
     {
-        /* Left the start-/stop-line?
-         * If the robot is not exact on the start-/stop-line, the calculated position
-         * may misslead. Therefore additional the most left and right sensor values
-         * are evaluated too.
-         */
-        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position) &&
-            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
-            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_RIGHT]))
-        {
-            nextTrackStatus = TRACK_STATUS_NORMAL;
-        }
-
-        allowNegativeMotorSpeed = false; /* Avoid that the robot turns in place. */
+        m_pidCtrl.clear();
     }
-    /* Is the start-/stop-line detected? */
-    else if (true == isStartStopLineDetected(lineSensorValues, numLineSensors))
+
+    /* ========================================================================
+     * Handle start-/stop-line actions.
+     * ========================================================================
+     */
+    if ((TRACK_STATUS_START_STOP_LINE != m_trackStatus) && (TRACK_STATUS_START_STOP_LINE == nextTrackStatus))
     {
         /* Start line detected? */
         if (LINE_STATUS_NO_START_LINE_DETECTED == m_lineStatus)
@@ -179,8 +189,7 @@ void DrivingState::process(StateMachine& sm)
             /* Measure the lap time and use as start point the detected start line. */
             m_lapTime.start(0);
 
-            m_lineStatus    = LINE_STATUS_START_LINE_DETECTED;
-            nextTrackStatus = TRACK_STATUS_START_STOP_LINE;
+            m_lineStatus = LINE_STATUS_START_LINE_DETECTED;
         }
         /* Stop line detected. */
         else
@@ -189,114 +198,14 @@ void DrivingState::process(StateMachine& sm)
             ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
 
             m_lineStatus    = LINE_STATUS_STOP_LINE_DETECTED;
+
+            /* Overwrite track status. */
             nextTrackStatus = TRACK_STATUS_FINISHED;
         }
 
+        /* Notify user about start-/stop-line detection. */
         Sound::playBeep();
-
-        allowNegativeMotorSpeed = false; /* Avoid that the robot turns in place. */
     }
-    /* Sharp curve to the left expected? */
-    else if (TRACK_STATUS_SHARP_CURVE_LEFT == m_trackStatus)
-    {
-        /* Turn just before the robot leaves the line. */
-        if (POSITION_MIDDLE_MAX < position3)
-        {
-            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT_TURN;
-            position        = POSITION_MIN; /* Enfore max. error in PID to turn sharp left at place. */
-        }
-        /* The calculated position can not be used anymore, because the left sensors
-         * may overlap the line.
-         */
-        else
-        {
-            position = position3;
-        }
-    }
-    /* Sharp curve to the right expected? */
-    else if (TRACK_STATUS_SHARP_CURVE_RIGHT == m_trackStatus)
-    {
-        /* Turn just before the robot leaves the line. */
-        if (POSITION_MIDDLE_MIN > position3)
-        {
-            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT_TURN;
-            position        = POSITION_MAX; /* Enfore max. error in PID to turn sharp right at place. */
-        }
-        /* The calculated position can not be used anymore, because the left sensors
-         * may overlap the line.
-         */
-        else
-        {
-            position = position3;
-        }
-    }
-    /* Sharp curve to the left turning now! */
-    else if (TRACK_STATUS_SHARP_CURVE_LEFT_TURN == m_trackStatus)
-    {
-        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
-        {
-            nextTrackStatus = TRACK_STATUS_NORMAL;
-        }
-        else
-        {
-            position = POSITION_MIN; /* Enfore max. error in PID to turn sharp left at place. */
-        }
-    }
-    /* Sharp curve to the right turning now! */
-    else if (TRACK_STATUS_SHARP_CURVE_RIGHT_TURN == m_trackStatus)
-    {
-        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
-        {
-            nextTrackStatus = TRACK_STATUS_NORMAL;
-        }
-        else
-        {
-            position = POSITION_MAX; /* Enfore max. error in PID to turn sharp right at place. */
-        }
-    }
-    /* Is it a gap in the track? */
-    else if (true == isGapDetected(lineSensorValues, numLineSensors))
-    {
-        const int16_t POS_MIN = POSITION_SET_POINT - SENSOR_VALUE_MAX;
-        const int16_t POS_MAX = POSITION_SET_POINT + SENSOR_VALUE_MAX;
-
-        /* If its a gap in the track, last position will be well. */
-        if ((POS_MIN <= m_lastPosition) && (POS_MAX > m_lastPosition))
-        {
-            /* Drive straight forward in hope to see the line again. */
-            position                = POSITION_SET_POINT;
-            allowNegativeMotorSpeed = false; /* Avoid that the robots turns. */
-            nextTrackStatus         = TRACK_STATUS_TRACK_LOST_BY_GAP;
-        }
-        else
-        {
-            /* In any other case, route the calculated position through and
-             * hope. It will be the position of the most left sensor or the
-             * most right sensor.
-             */
-            nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE;
-        }
-    }
-    /* Sharp curve to left detected? */
-    else if (true == isSharpLeftCurveDetected(lineSensorValues, numLineSensors, position3))
-    {
-        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT;
-        position        = position3; /* Use only the inner sensors for position calculation. */
-    }
-    /* Sharp curve to right detected? */
-    else if (true == isSharpRightCurveDetected(lineSensorValues, numLineSensors, position3))
-    {
-        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT;
-        position        = position3; /* Use only the inner sensors for position calculation. */
-    }
-    /* Nothing special. */
-    else
-    {
-        /* Just follow the line by calculated position. */
-        nextTrackStatus = TRACK_STATUS_NORMAL;
-    }
-
-    m_lastPosition = position;
 
     /* ========================================================================
      * Handle track lost or back on track actions.
@@ -304,9 +213,7 @@ void DrivingState::process(StateMachine& sm)
      */
 
     /* Track lost just in this process cycle? */
-    if ((TRACK_STATUS_TRACK_LOST_BY_GAP != m_trackStatus) && (TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE != m_trackStatus) &&
-        ((TRACK_STATUS_TRACK_LOST_BY_GAP == nextTrackStatus) ||
-         (TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE == nextTrackStatus)))
+    if ((false == m_isTrackLost) && (true == isTrackLost))
     {
         /* Notify user by yellow LED. */
         Board::getInstance().getYellowLed().enable(true);
@@ -317,10 +224,7 @@ void DrivingState::process(StateMachine& sm)
         Odometry::getInstance().clearMileage();
     }
     /* Track found again just in this process cycle? */
-    else if (((TRACK_STATUS_TRACK_LOST_BY_GAP == m_trackStatus) ||
-              (TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE == m_trackStatus)) &&
-             ((TRACK_STATUS_TRACK_LOST_BY_GAP != nextTrackStatus) &&
-              (TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE != nextTrackStatus)))
+    else if ((true == m_isTrackLost) && (false == isTrackLost))
     {
         Board::getInstance().getYellowLed().enable(false);
     }
@@ -328,13 +232,6 @@ void DrivingState::process(StateMachine& sm)
     {
         ;
     }
-
-    /* Take over next track status. */
-    m_trackStatus = nextTrackStatus;
-
-#ifdef DEBUG_ALGORITHM
-    logCsvDataTrackStatus(m_trackStatus);
-#endif /* DEBUG_ALGORITHM */
 
     /* ========================================================================
      * Handle the abort conditions which will cause a alarm stop.
@@ -354,7 +251,8 @@ void DrivingState::process(StateMachine& sm)
         /* Clear lap time. */
         ReadyState::getInstance().setLapTime(0);
 
-        m_trackStatus = TRACK_STATUS_FINISHED;
+        /* Overwrite track status. */
+        nextTrackStatus = TRACK_STATUS_FINISHED;
     }
 
     /* ========================================================================
@@ -365,7 +263,7 @@ void DrivingState::process(StateMachine& sm)
     /* Periodically adapt driving and check the abort conditions, except
      * the round is finished.
      */
-    if (TRACK_STATUS_FINISHED != m_trackStatus)
+    if (TRACK_STATUS_FINISHED != nextTrackStatus)
     {
         /* Process the line follower PID controller periodically to adapt driving. */
         if (true == m_pidProcessTime.isTimeout())
@@ -374,10 +272,6 @@ void DrivingState::process(StateMachine& sm)
 
             m_pidProcessTime.start(PID_PROCESS_PERIOD);
         }
-
-#ifdef DEBUG_ALGORITHM
-        logCsvDataSpeed(gSpeedLeft, gSpeedRight);
-#endif /* DEBUG_ALGORITHM */
     }
     /* Finished. */
     else
@@ -392,9 +286,15 @@ void DrivingState::process(StateMachine& sm)
     }
 
 #ifdef DEBUG_ALGORITHM
-    /* Next CSV data. */
+    logCsvDataTrackStatus(nextTrackStatus);
+    logCsvDataSpeed(gSpeedLeft, gSpeedRight);
     printf("\n");
 #endif /* DEBUG_ALGORITHM */
+
+    /* Take over values for next cycle. */
+    m_trackStatus  = nextTrackStatus;
+    m_isTrackLost  = isTrackLost;
+    m_lastPosition = position;
 }
 
 void DrivingState::exit()
@@ -421,7 +321,8 @@ DrivingState::DrivingState() :
     m_trackStatus(TRACK_STATUS_NORMAL),
     m_isStartStopLineDetected(false),
     m_lastSensorIdSawTrack(SENSOR_ID_MIDDLE),
-    m_lastPosition(0)
+    m_lastPosition(0),
+    m_isTrackLost(false)
 {
 }
 
@@ -454,7 +355,130 @@ bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorVa
     return isValid;
 }
 
-bool DrivingState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length)
+DrivingState::TrackStatus DrivingState::evaluateSituation(const uint16_t* lineSensorValues, uint8_t length,
+                                                          int16_t position, int16_t position3, bool isTrackLost) const
+{
+    TrackStatus nextTrackStatus = m_trackStatus;
+
+    /* Driving over start-/stop-line? */
+    if (TRACK_STATUS_START_STOP_LINE == m_trackStatus)
+    {
+        /* Left the start-/stop-line?
+         * If the robot is not exact on the start-/stop-line, the calculated position
+         * may misslead. Therefore additional the most left and right sensor values
+         * are evaluated too.
+         */
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position) &&
+            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
+            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_RIGHT]))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Is the start-/stop-line detected? */
+    else if (true == isStartStopLineDetected(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_START_STOP_LINE;
+    }
+    else if (TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    else if (TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Sharp curve to the left expected? */
+    else if (TRACK_STATUS_SHARP_CURVE_LEFT == m_trackStatus)
+    {
+        /* Turn just before the robot leaves the line. */
+        if (true == isTrackLost)
+        {
+            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT_TURN;
+        }
+    }
+    /* Sharp curve to the right expected? */
+    else if (TRACK_STATUS_SHARP_CURVE_RIGHT == m_trackStatus)
+    {
+        /* Turn just before the robot leaves the line. */
+        if (true == isTrackLost)
+        {
+            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT_TURN;
+        }
+    }
+    /* Sharp curve to the left turning now! */
+    else if (TRACK_STATUS_SHARP_CURVE_LEFT_TURN == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Sharp curve to the right turning now! */
+    else if (TRACK_STATUS_SHARP_CURVE_RIGHT_TURN == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Is the track lost or just a gap in the track? */
+    else if (true == isTrackLost)
+    {
+        const int16_t POS_MIN = POSITION_SET_POINT - SENSOR_VALUE_MAX;
+        const int16_t POS_MAX = POSITION_SET_POINT + SENSOR_VALUE_MAX;
+
+        /* If its a gap in the track, last position will be well. */
+        if ((POS_MIN <= m_lastPosition) && (POS_MAX > m_lastPosition))
+        {
+            nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_GAP;
+        }
+        else
+        {
+            /* In any other case, route the calculated position through and
+             * hope. It will be the position of the most left sensor or the
+             * most right sensor.
+             */
+            nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE;
+        }
+    }
+    /* Right angle curve to left detected? */
+    else if (true == isRightAngleCurveToLeft(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT;
+    }
+    /* Right angle curve to right detected? */
+    else if (true == isRightAngleCurveToRight(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT;
+    }
+    /* Sharp curve to left detected? */
+    else if (true == isSharpLeftCurveDetected(lineSensorValues, length, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT;
+    }
+    /* Sharp curve to right detected? */
+    else if (true == isSharpRightCurveDetected(lineSensorValues, length, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT;
+    }
+    /* Nothing special. */
+    else
+    {
+        /* Just follow the line by calculated position. */
+        nextTrackStatus = TRACK_STATUS_NORMAL;
+    }
+
+    return nextTrackStatus;
+}
+
+bool DrivingState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
 {
     bool           isDetected  = false;
     const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
@@ -477,7 +501,7 @@ bool DrivingState::isStartStopLineDetected(const uint16_t* lineSensorValues, uin
     return isDetected;
 }
 
-bool DrivingState::isGapDetected(const uint16_t* lineSensorValues, uint8_t length)
+bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
 {
     bool    isDetected = true;
     uint8_t idx        = SENSOR_ID_MOST_RIGHT;
@@ -499,17 +523,61 @@ bool DrivingState::isGapDetected(const uint16_t* lineSensorValues, uint8_t lengt
     return isDetected;
 }
 
-bool DrivingState::isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3)
+bool DrivingState::isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_LEFT;
+
+    /*
+     * =========
+     *   +   + + +   +
+     *   L     M     R
+     */
+    for (idx = SENSOR_ID_MOST_LEFT; idx <= SENSOR_ID_MIDDLE; ++idx)
+    {
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[idx])
+        {
+            isDetected = false;
+            break;
+        }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_RIGHT;
+
+    /*
+     *         =========
+     *   +   + + +   +
+     *   L     M     R
+     */
+    for (idx = SENSOR_ID_MIDDLE; idx <= SENSOR_ID_MOST_RIGHT; ++idx)
+    {
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[idx])
+        {
+            isDetected = false;
+            break;
+        }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const
 {
     bool           isDetected  = false;
-    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
 
     /*
      *   =     =
      *   +   + + +   +
      *   L     M     R
      */
-    if ((LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) && (POSITION_MIDDLE_MIN <= position3) &&
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) && (POSITION_MIDDLE_MIN <= position3) &&
         (POSITION_MIDDLE_MAX >= position3))
     {
         isDetected = true;
@@ -518,23 +586,105 @@ bool DrivingState::isSharpLeftCurveDetected(const uint16_t* lineSensorValues, ui
     return isDetected;
 }
 
-bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3)
+bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const
 {
     bool           isDetected  = false;
-    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
 
     /*
      *         =     =
      *   +   + + +   +
      *   L     M     R
      */
-    if ((LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]) && (POSITION_MIDDLE_MIN <= position3) &&
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]) && (POSITION_MIDDLE_MIN <= position3) &&
         (POSITION_MIDDLE_MAX >= position3))
     {
         isDetected = true;
     }
 
     return isDetected;
+}
+
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+{
+    switch (trackStatus)
+    {
+    case TRACK_STATUS_NORMAL:
+        /* The position is used by default to follow the line. */
+        break;
+
+    case TRACK_STATUS_START_STOP_LINE:
+        /* Use the inner sensors only for driving to avoid jerky movements, caused
+         * by the most left or right sensor.
+         */
+        position = position3;
+
+        /* Avoid that the robot turns in place. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT:
+        /* Enfore max. error in PID to turn sharp left at place. */
+        position = POSITION_MIN;
+        break;
+
+    case TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT:
+        /* Enfore max. error in PID to turn sharp right at place. */
+        position = POSITION_MAX;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_LEFT:
+        /* Stratey is to drive till the end of the curve with the inner sensors.
+         * Then a hard in place turn will appear, see TRACK_STATUS_SHARP_CURVE_LEFT_TURN.
+         */
+        position = position3;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_RIGHT:
+        /* Stratey is to drive till the end of the curve with the inner sensors.
+         * Then a hard in place turn will appear, see TRACK_STATUS_SHARP_CURVE_LEFT_TURN.
+         */
+        position = position3;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_LEFT_TURN:
+        /* Enfore max. error in PID to turn sharp left at place. */
+        position = POSITION_MIN;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_RIGHT_TURN:
+        /* Enfore max. error in PID to turn sharp right at place. */
+        position = POSITION_MAX;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_GAP:
+        /* Overwrite the positin to drive straight forward in hope to see the
+         * line again.
+         */
+        position = POSITION_SET_POINT;
+
+        /* Avoid that the robots turns. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE:
+        /* If the track is lost by a robot manoeuvre and not becase the track
+         * has a gap, the last position given by most left or right sensor
+         * will be automatically used to find the track again.
+         * 
+         * See ILineSensors::readLine() description regarding the behaviour in
+         * case the line is not detected anymore.
+         */
+        break;
+
+    case TRACK_STATUS_FINISHED:
+        /* Nothing to do. */
+        break;
+
+    default:
+        /* Should never happen. */
+        break;
+    }
 }
 
 void DrivingState::adaptDriving(int16_t position, bool allowNegativeMotorSpeed)
@@ -583,7 +733,7 @@ bool DrivingState::isAbortRequired()
     bool isAbort = false;
 
     /* If track is lost over a certain distance, abort driving. */
-    if ((TRACK_STATUS_TRACK_LOST_BY_GAP == m_trackStatus) || (TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE == m_trackStatus))
+    if (true == m_isTrackLost)
     {
         /* Max. distance driven, but track still not found? */
         if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
@@ -632,7 +782,7 @@ static void logCsvDataTitles(uint8_t length)
         ++idx;
     }
 
-    printf(";Position;Position3;PosDiff;Scenario;Speed Left; Speed Right\n");
+    printf(";Position;Position3;Scenario;Speed Left; Speed Right\n");
 }
 
 /**
@@ -644,8 +794,7 @@ static void logCsvDataTimestamp()
 }
 
 /**
- * Log the sensor values, the calculated positions and the position difference
- * as CSV data.
+ * Log the sensor values and the calculated positions as CSV data.
  *
  * @param[in] lineSensorValues  The array of line sensor values.
  * @param[in] length            The number of line sensors.
@@ -671,13 +820,9 @@ static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t
 
     printf(";%d;", pos);
 
-    if (false == isPos3Valid)
+    if (true == isPos3Valid)
     {
-        printf(";;");
-    }
-    else
-    {
-        printf("%d;%d", pos3, pos - pos3);
+        printf("%d", pos3);
     }
 }
 
@@ -696,6 +841,14 @@ void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus)
 
     case DrivingState::TRACK_STATUS_START_STOP_LINE:
         printf(";\"Start-/Stop-line\"");
+        break;
+
+    case DrivingState::TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT:
+        printf(";\"Right angle curve left\"");
+        break;
+
+    case DrivingState::TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT:
+        printf(";\"Right angle curve right\"");
         break;
 
     case DrivingState::TRACK_STATUS_SHARP_CURVE_LEFT:
