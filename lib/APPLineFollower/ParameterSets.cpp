@@ -94,7 +94,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
         "PD VF", /* Name - VF: very fast */
-        4200,    /* Top speed in steps/s */
+        4000,    /* Top speed in steps/s */
         4,       /* Kp Numerator */
         1,       /* Kp Denominator */
         0,       /* Ki Numerator */
