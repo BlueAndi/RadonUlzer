@@ -49,10 +49,12 @@ if OS_TYPE == OS_WIN:
     PROGRAM_NAME = "${PROGNAME}.exe"
 
 elif OS_TYPE == OS_LINUX:
+
     WEBOTS_CONTROLLER = "$WEBOTS_HOME/webots-controller"
     PROGRAM_NAME = "${PROGNAME}"
 
 elif OS_TYPE == OS_MACOS:
+
     WEBOTS_CONTROLLER = "$WEBOTS_HOME/Contents/MacOS/webots-controller"
     PROGRAM_NAME = "${PROGNAME}"
 
