@@ -1,4 +1,4 @@
-"""Webots library creation"""
+"""Webots launcher"""
 
 # MIT License
 #
@@ -25,27 +25,30 @@
 ################################################################################
 # Imports
 ################################################################################
-import shutil
-import errno
 import os
-import json
+
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
+OS_TYPE = env["PLATFORM"] # pylint: disable=undefined-variable
+FILE_EXTENSION = ".exe" if OS_TYPE == "win32" else ""
+WEBOTS_HOME = os.getenv('WEBOTS_HOME').replace('\\', '/')
+WEBOTS_CONTROLLER = '"' + WEBOTS_HOME + '/msys64/mingw64/bin/webots-controller"' + FILE_EXTENSION
+ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
+WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
+PROGRAM = "$BUILD_DIR/${PROGNAME}" + FILE_EXTENSION
+PROGRAM_OPTIONS_SOCKET = '-s'
 
-src_path_include_c      = os.getenv('WEBOTS_HOME') + '/include/controller/c'
-src_path_include_cpp    = os.getenv('WEBOTS_HOME') + '/include/controller/cpp'
-src_path_source         = os.getenv('WEBOTS_HOME') + '/src/controller/cpp'
-src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController.a'
+WEBOTS_LAUNCHER_ACTION = WEBOTS_CONTROLLER + ' '\
+                        + WEBOTS_CONTROLLER_OPTIONS + ' ' \
+                        + PROGRAM
 
-DST_PATH = './lib/Webots'
-
-library_json = {
-    "name": "Webots",
-    "version": "0.1.0",
-    "platforms": ["native"]
-}
+WEBOTS_LAUNCHER_SOCKET_ACTION = WEBOTS_CONTROLLER + ' ' \
+                                + WEBOTS_CONTROLLER_OPTIONS + ' ' \
+                                + PROGRAM + ' ' \
+                                + PROGRAM_OPTIONS_SOCKET
 
 ################################################################################
 # Classes
@@ -55,41 +58,28 @@ library_json = {
 # Functions
 ################################################################################
 
-def copy_path_recursive(src, dst):
-    """Copy all files from the source path to the destination path.
-
-    Args:
-        src (str): Source path
-        dst (str): Destination path
-    """
-    try:
-        shutil.copytree(src, dst)
-    except OSError as exc: # python >2.5
-        if exc.errno in (errno.ENOTDIR, errno.EINVAL):
-            shutil.copy(src, dst)
-        else: raise
-
-def copy_single_file(src, dst):
-    """Copy a single source file to the destination path.
-
-    Args:
-        src (str): Source file
-        dst (str): Destination path
-    """
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
-    shutil.copy(src, dst)
-
 ################################################################################
 # Main
 ################################################################################
 
-if os.path.exists(DST_PATH) is False:
-    print(f'Create WEBOTS library to {DST_PATH}.')
+# pylint: disable=undefined-variable
+env.AddCustomTarget(
+    name="webots_launcher",
+    dependencies=PROGRAM,
+    actions=[
+        WEBOTS_LAUNCHER_ACTION
+    ],
+    title="WebotsLauncher",
+    description="Launch application with Webots launcher."
+)
 
-    copy_path_recursive(src_path_include_c, DST_PATH + '/include/c/')
-    copy_path_recursive(src_path_include_cpp, DST_PATH + '/include/cpp/')
-    copy_path_recursive(src_path_source, DST_PATH + '/src/')
-    copy_single_file(src_path_lib, DST_PATH + '/lib/')
-
-    with open(DST_PATH + '/library.json', 'w', encoding="utf-8") as fd:
-        json.dump(library_json, fd, ensure_ascii=False, indent=4)
+# pylint: disable=undefined-variable
+env.AddCustomTarget(
+    name="webots_launcher_socket",
+    dependencies=PROGRAM,
+    actions=[
+        WEBOTS_LAUNCHER_SOCKET_ACTION
+    ],
+    title="WebotsLauncherSocket",
+    description="Launch application with Webots launcher and enable socket."
+)

@@ -22,6 +22,10 @@ Several kind of exclusive applications are available:
   * [The Webots library](#the-webots-library)
   * [Build](#build)
   * [Preparation](#preparation)
+  * [Run](#run)
+    * [Run without Webots launcher](#run-without-webots-launcher)
+    * [Run with Webots launcher](#run-with-webots-launcher)
+    * [Run via terminal](#run-via-terminal)
   * [Running the robot on track](#running-the-robot-on-track)
   * [Communicate with the DroidControlShip](#communicate-with-the-droidcontrolship)
 * [The target](#the-target)
@@ -71,7 +75,9 @@ The library creation is handled in the ```./scripts/create_webots_library.py``` 
 
 ## Build
 1. Start VSCode.
-2. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Build
+2. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Build\
+    Example for **LineFollowerSim** application:\
+  ![Example](./doc/images/pio_build.jpg)
 
 For the simulation use only the applications with "Sim" as postfix, e.g. LineFollowerSim.
 
@@ -81,9 +87,35 @@ The preparation is shown with the line follower application as example. It expec
 1. Start the Webots simulation.
 2. File --> Open World
 3. Select ```./webots/worlds/LineFollowerTrack.wbt```.
-4. The loaded world should now look like this: ![webots_world](./doc/webots_world.jpg)
-5. Open a command line (shell) and change to the folder with the built executable in ```.pio/build/LineFollowerSim```. This folder contains all necessary shared libraries as well.
-6. Start the executable and the simulated display should show the name of the team and etc.
+4. The loaded world should now look like this: ![webots_world](./doc/images/webots_world.jpg)
+5. The simulation waits now for the external controller, like the RadonUlzer.
+
+## Run
+There are 3 ways how to run now the application. Choose according to your needs.
+
+### Run without Webots launcher
+This can be choosen in case the simulation waits just for one robot.
+
+PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Upload
+
+Example for **LineFollowerSim** application:
+
+![Example](./doc/images/pio_upload.jpg)
+
+### Run with Webots launcher
+Choose this one in case the simulation waits for more than one robot. Adapt the robot name in the _platformio.ini_.
+
+See (Single Simulation and Multiple Local Extern Robot Controllers)[https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-os=windows#single-simulation-and-multiple-local-extern-robot-controllers] for details.
+
+PlatformIO project tasks --> &lt;APP-NAME&gt; --> Custom --> WebotsLauncher
+
+Example for **LineFollowerSim** application:
+
+![Example](./doc/images/pio_webots_launcher.jpg)
+
+### Run via terminal
+1. Open a command line (shell) and change to the folder with the built executable in ```.pio/build/LineFollowerSim```. This folder contains all necessary shared libraries as well.
+2. Start the executable.
 
 ## Running the robot on track
 
@@ -103,14 +135,22 @@ The port can be changed via command line parameters, please use -? to get more d
 $ program.exe -?
 ```
 
+For simplicity a Platformio project task was added, which start the socket server as well.
+
+![Example](./doc/images/pio_webots_launcher_socket.jpg)
+
 # The target
 
 ## Build and flash procedure
-1. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Build
+1. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Build
     * For the target use only the applications with "Target" as postfix, e.g. LineFollowerTarget.
 2. Start the bootloader by triggering twice the reset button. The yellow led will start blinking for 10s. Note, after 10s the target will leave the bootloader!
-3. PlatformIO project tasks --> &lt;APP-NAME&gt; --> Upload
+3. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Upload
 4. Ready.
+
+Example for the **LineFollowerTarget** application:
+
+![Example](./doc/images/pio_target_build_upload.jpg)
 
 # The Applications
 
