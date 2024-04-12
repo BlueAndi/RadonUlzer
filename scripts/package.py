@@ -25,27 +25,63 @@
 ################################################################################
 # Imports
 ################################################################################
-import os
+import platform
+import sys
 from zipfile import ZipFile
 
-Import("env")  # type: ignore
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
 
-PIO_ENV_NAME = env["PIOENV"]  # type: ignore
-WORKDIR_PATH = './.pio/build/' + PIO_ENV_NAME
-OUT_PATH = WORKDIR_PATH + "/" + PIO_ENV_NAME + ".zip"
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE_LINUX = "Linux"
+OS_PLATFORM_TYPE_MACOS = "Darwin"
+OS_PLATFORM_TYPE = platform.system()
 
-FILE_NAME_LIST = [
-    "/Controller.dll",
-    "/CppController.dll",
-    "/program.exe",
-    "/sounds/4KHz.wav",
-    "/sounds/10KHz.wav",
-    "/sounds/440Hz.wav",
-]
+PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
+BUILD_DIR = env["PROJECT_BUILD_DIR"] + "/" + PIO_ENV_NAME # pylint: disable=undefined-variable
+OUT_PATH = BUILD_DIR + "/" + PIO_ENV_NAME + ".zip"
+
+FILE_NAME_LIST = []
+
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
+
+    FILE_NAME_LIST = [
+        "/Controller.dll",
+        "/CppController.dll",
+        "/program.exe",
+        "/sounds/4KHz.wav",
+        "/sounds/10KHz.wav",
+        "/sounds/440Hz.wav",
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
+    FILE_NAME_LIST = [
+        "/Controller.dylib",
+        "/CppController.dylib",
+        "/program",
+        "/sounds/4KHz.wav",
+        "/sounds/10KHz.wav",
+        "/sounds/440Hz.wav",
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
+
+    FILE_NAME_LIST = [
+        "/Controller.so",
+        "/CppController.so",
+        "/program",
+        "/sounds/4KHz.wav",
+        "/sounds/10KHz.wav",
+        "/sounds/440Hz.wav",
+    ]
+
+else:
+    print(f"OS type {OS_PLATFORM_TYPE} not supported.")
+    sys.exit(1)
 
 ################################################################################
 # Classes
@@ -55,14 +91,19 @@ FILE_NAME_LIST = [
 # Functions
 ################################################################################
 
+def zip_executable(source, target, env): # pylint: disable=unused-argument
+    """Create a zip file with the executable and all required libraries.
 
-def zip_executable(source, target, env):
-    """Create a zip file with the executable and all required libraries."""
+    Args:
+        source (Any): Source (not used)
+        target (Any): Target (not used)
+        env (Any): Environment (not used)
+    """
 
     with ZipFile(OUT_PATH, 'w') as zip_object:
-        for fileName in FILE_NAME_LIST:
-            fullPath = WORKDIR_PATH + fileName
-            zip_object.write(fullPath, PIO_ENV_NAME + fileName)
+        for file_name in FILE_NAME_LIST:
+            full_path = BUILD_DIR + file_name
+            zip_object.write(full_path, PIO_ENV_NAME + file_name)
 
     print("Packed executable found in: " + OUT_PATH)
 
@@ -70,7 +111,5 @@ def zip_executable(source, target, env):
 # Main
 ################################################################################
 
-
 # Create packed executable as a Post action.
-env.AddPostAction(WORKDIR_PATH + "/program.exe",  # type: ignore
-                  zip_executable)
+env.AddPostAction(BUILD_DIR + "/program.exe", zip_executable) # pylint: disable=undefined-variable

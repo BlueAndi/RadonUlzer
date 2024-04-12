@@ -37,7 +37,7 @@ Import("env") # pylint: disable=undefined-variable
 OS_PLATFORM_TYPE_WIN = "Windows"
 OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
-OS_PLATFORM_TYPE = platform.system() # pylint: disable=undefined-variable
+OS_PLATFORM_TYPE = platform.system()
 PROGRAM_PATH = "$BUILD_DIR/"
 PROGRAM_OPTIONS_SOCKET = '-s'
 ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
@@ -61,7 +61,7 @@ elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
 
 else:
     print(f"OS type {OS_PLATFORM_TYPE} not supported.")
-    sys.exit(-1)
+    sys.exit(1)
 
 WEBOTS_LAUNCHER_ACTION = WEBOTS_CONTROLLER + ' '\
                         + WEBOTS_CONTROLLER_OPTIONS + ' ' \
