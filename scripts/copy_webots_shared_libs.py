@@ -30,7 +30,7 @@ import os
 import platform
 import sys
 
-Import("env") # type: ignore
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
@@ -40,33 +40,39 @@ Import("env") # type: ignore
 # Variables
 ################################################################################
 
-# 2024_02_27 eble: Make this script platform independant since
-# There are no *.dll on Linux or on Macs
-WINDOWS_PLATFORM_NAME = 'Windows'
-MACOS_PLATFORM_NAME = 'Darwin'
-LINUX_PLATFORM_NAME = 'Linux'
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE_LINUX = "Linux"
+OS_PLATFORM_TYPE_MACOS = "Darwin"
+OS_PLATFORM_TYPE = platform.system()
 
 SHARED_FILES_LIST = []
 
-if platform.system() == WINDOWS_PLATFORM_NAME:
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
+
     SHARED_FILES_LIST = [
-    '/lib/controller/Controller.dll',
-    '/lib/controller/CppController.dll']
-elif platform.system() == MACOS_PLATFORM_NAME:
-        SHARED_FILES_LIST = [
-    '/lib/controller/libController.dylib',
-    '/lib/controller/libCppController.dylib']
-elif platform.system() == LINUX_PLATFORM_NAME:
+        '/lib/controller/Controller.dll',
+        '/lib/controller/CppController.dll'
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
     SHARED_FILES_LIST = [
-    '/lib/controller/libController.so',
-    '/lib/controller/libCppController.so']
+        '/lib/controller/libController.dylib',
+        '/lib/controller/libCppController.dylib'
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
+
+    SHARED_FILES_LIST = [
+        '/lib/controller/libController.so',
+        '/lib/controller/libCppController.so'
+    ]
+
 else:
-    print("I don't know your platform, it's neither Windows nor Linux nor Mac. Exiting script.")
+    print(f"OS type {OS_PLATFORM_TYPE} not supported.")
     sys.exit(1)
 
-
-
-PIO_ENV_NAME = env["PIOENV"] # type: ignore
+PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
 
 ################################################################################
 # Classes

@@ -41,19 +41,26 @@ src_path_include_cpp    = os.getenv('WEBOTS_HOME') + '/include/controller/cpp'
 src_path_source         = os.getenv('WEBOTS_HOME') + '/src/controller/cpp'
 src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController'
 
-WINDOWS_PLATFORM_NAME = 'Windows'
-MACOS_PLATFORM_NAME = 'Darwin'
-LINUX_PLATFORM_NAME = 'Linux'
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE_LINUX = "Linux"
+OS_PLATFORM_TYPE_MACOS = "Darwin"
+OS_PLATFORM_TYPE = platform.system()
 
 #  Add correct file extension for the platform.
-if platform.system() == WINDOWS_PLATFORM_NAME:
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
+
     src_path_lib += '.a'
-elif platform.system() == MACOS_PLATFORM_NAME:
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
     src_path_lib += '.dylib'
-elif platform.system() == LINUX_PLATFORM_NAME:
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
+
     src_path_lib += '.so'
+
 else:
-    print("I don't know your platform, it's neither Windows nor Linux nor Mac. Exiting script.")
+    print(f"OS type {OS_PLATFORM_TYPE} not supported.")
     sys.exit(1)
 
 DST_PATH = './lib/Webots'

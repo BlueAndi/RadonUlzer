@@ -27,15 +27,16 @@
 ################################################################################
 # Imports
 ################################################################################
-
 import platform
+
 Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
 
-WINDOWS_PLATFORM_NAME = 'Windows'
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE = platform.system()
 WINDOWS_BUILD_FLAGS = ['-lws2_32']
 
 ################################################################################
@@ -50,5 +51,5 @@ WINDOWS_BUILD_FLAGS = ['-lws2_32']
 # Main
 ################################################################################
 
-if platform.system() is WINDOWS_PLATFORM_NAME:
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
     env.Append(BUILD_FLAGS=WINDOWS_BUILD_FLAGS) # pylint: disable=undefined-variable
