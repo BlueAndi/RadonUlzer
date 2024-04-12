@@ -37,7 +37,7 @@ Import("env") # pylint: disable=undefined-variable
 
 PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
 BUILD_DIR = env["PROJECT_BUILD_DIR"] + "/" + PIO_ENV_NAME # pylint: disable=undefined-variable
-DST_PATH = BUILD_DIR + "/" + PIO_ENV_NAME + "/sounds"
+DST_PATH = BUILD_DIR + "/sounds"
 SOUNDS_FOLDER = "./sounds"
 
 ################################################################################
