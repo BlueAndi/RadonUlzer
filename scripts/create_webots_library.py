@@ -25,10 +25,12 @@
 ################################################################################
 # Imports
 ################################################################################
+import sys
 import shutil
 import errno
 import os
 import json
+import platform
 
 ################################################################################
 # Variables
@@ -37,7 +39,22 @@ import json
 src_path_include_c      = os.getenv('WEBOTS_HOME') + '/include/controller/c'
 src_path_include_cpp    = os.getenv('WEBOTS_HOME') + '/include/controller/cpp'
 src_path_source         = os.getenv('WEBOTS_HOME') + '/src/controller/cpp'
-src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController.a'
+src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController'
+
+WINDOWS_PLATFORM_NAME = 'Windows'
+MACOS_PLATFORM_NAME = 'Darwin'
+LINUX_PLATFORM_NAME = 'Linux'
+
+#  Add correct file extension for the platform.
+if platform.system() == WINDOWS_PLATFORM_NAME:
+    src_path_lib += '.a'
+elif platform.system() == MACOS_PLATFORM_NAME:
+    src_path_lib += '.dylib'
+elif platform.system() == LINUX_PLATFORM_NAME:
+    src_path_lib += '.so'
+else:
+    print("I don't know your platform, it's neither Windows nor Linux nor Mac. Exiting script.")
+    sys.exit(1)
 
 DST_PATH = './lib/Webots'
 
