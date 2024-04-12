@@ -25,16 +25,14 @@
 ################################################################################
 # Imports
 ################################################################################
-import os
 from zipfile import ZipFile
 
-Import("env")  # type: ignore
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
-
-PIO_ENV_NAME = env["PIOENV"]  # type: ignore
+PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
 WORKDIR_PATH = './.pio/build/' + PIO_ENV_NAME
 OUT_PATH = WORKDIR_PATH + "/" + PIO_ENV_NAME + ".zip"
 
@@ -55,14 +53,19 @@ FILE_NAME_LIST = [
 # Functions
 ################################################################################
 
+def zip_executable(source, target, env): # pylint: disable=unused-argument
+    """Create a zip file with the executable and all required libraries.
 
-def zip_executable(source, target, env):
-    """Create a zip file with the executable and all required libraries."""
+    Args:
+        source (Any): Source (not used)
+        target (Any): Target (not used)
+        env (Any): Environment (not used)
+    """
 
     with ZipFile(OUT_PATH, 'w') as zip_object:
-        for fileName in FILE_NAME_LIST:
-            fullPath = WORKDIR_PATH + fileName
-            zip_object.write(fullPath, PIO_ENV_NAME + fileName)
+        for file_name in FILE_NAME_LIST:
+            full_path = WORKDIR_PATH + file_name
+            zip_object.write(full_path, PIO_ENV_NAME + file_name)
 
     print("Packed executable found in: " + OUT_PATH)
 
@@ -70,7 +73,5 @@ def zip_executable(source, target, env):
 # Main
 ################################################################################
 
-
 # Create packed executable as a Post action.
-env.AddPostAction(WORKDIR_PATH + "/program.exe",  # type: ignore
-                  zip_executable)
+env.AddPostAction(WORKDIR_PATH + "/program.exe", zip_executable) # pylint: disable=undefined-variable
