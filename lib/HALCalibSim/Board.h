@@ -63,6 +63,7 @@
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
 #include <SimTime.h>
+#include <WebotsSerialDrv.h>
 
 /******************************************************************************
  * Macros
