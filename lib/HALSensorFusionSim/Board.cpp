@@ -111,6 +111,12 @@ const char* Board::GYRO_NAME = "gyro";
 /* Name of the magnetometer in the robot simulation. */
 const char* Board::MAGNETOMETER_NAME = "magnetometer";
 
+/* Name of the serial emitter in the RadonUlzer simulation. */
+const char* Board::EMITTER_NAME_SERIAL = "serialComTx";
+
+/* Name of the serial receiver in the RadonUlzer simulation. */
+const char* Board::RECEIVER_NAME_SERIAL = "serialComRx";
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -152,6 +158,7 @@ Board::Board() :
     m_ledYellow(m_robot.getLED(LED_YELLOW_NAME)),
     m_imu(m_robot.getAccelerometer(ACCELEROMETER_NAME), m_robot.getGyro(GYRO_NAME),
           m_robot.getCompass(MAGNETOMETER_NAME)),
+    m_serialDrv(m_robot.getEmitter(EMITTER_NAME_SERIAL), m_robot.getReceiver(RECEIVER_NAME_SERIAL)),
     m_settings()
 {
 }
@@ -171,6 +178,7 @@ void Board::enableSimulationDevices()
     m_robot.getAccelerometer(ACCELEROMETER_NAME)->enable(timeStep);
     m_robot.getGyro(GYRO_NAME)->enable(timeStep);
     m_robot.getCompass(MAGNETOMETER_NAME)->enable(timeStep);
+    m_robot.getReceiver(RECEIVER_NAME_SERIAL)->enable(timeStep);
 }
 
 /******************************************************************************

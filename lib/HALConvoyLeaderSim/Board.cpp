@@ -117,6 +117,12 @@ const char* Board::PROXIMITY_SENSOR_FRONT_LEFT_NAME = "proxim_sensor_fl";
 /* Name of the front right proximity sensor in the robot simulation. */
 const char* Board::PROXIMITY_SENSOR_FRONT_RIGHT_NAME = "proxim_sensor_fr";
 
+/* Name of the serial emitter in the RadonUlzer simulation. */
+const char* Board::EMITTER_NAME_SERIAL = "serialComTx";
+
+/* Name of the serial receiver in the RadonUlzer simulation. */
+const char* Board::RECEIVER_NAME_SERIAL = "serialComRx";
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -160,6 +166,7 @@ Board::Board() :
     m_ledGreen(m_robot.getLED(LED_GREEN_NAME)),
     m_proximitySensors(m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME),
                        m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
+    m_serialDrv(m_robot.getEmitter(EMITTER_NAME_SERIAL), m_robot.getReceiver(RECEIVER_NAME_SERIAL)),
     m_settings()
 {
 }
@@ -178,6 +185,7 @@ void Board::enableSimulationDevices()
     m_robot.getDistanceSensor(LIGHT_SENSOR_4_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_LEFT_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(PROXIMITY_SENSOR_FRONT_RIGHT_NAME)->enable(timeStep);
+    m_robot.getReceiver(RECEIVER_NAME_SERIAL)->enable(timeStep);
 }
 
 /******************************************************************************

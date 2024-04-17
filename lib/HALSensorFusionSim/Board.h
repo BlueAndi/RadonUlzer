@@ -57,6 +57,7 @@
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
 #include <SimTime.h>
+#include <WebotsSerialDrv.h>
 
 /******************************************************************************
  * Macros
@@ -235,6 +236,12 @@ private:
     /** Name of the Magnetometer in the robot simulation. */
     static const char* MAGNETOMETER_NAME;
 
+    /** Name of the serial emitter in the RadonUlzer simulation. */
+    static const char* EMITTER_NAME_SERIAL;
+
+    /** Name of the serial receiver in the RadonUlzer simulation. */
+    static const char* RECEIVER_NAME_SERIAL;
+
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -264,6 +271,9 @@ private:
 
     /** IMU driver */
     IMU m_imu;
+
+    /** Simulation serial driver */
+    WebotsSerialDrv m_serialDrv;
 
     /** Settings */
     Settings m_settings;
@@ -298,6 +308,16 @@ private:
     Keyboard& getKeyboard()
     {
         return m_keyboard;
+    }
+
+    /**
+     * Get the simulation serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSerial()
+    {
+        return &m_serialDrv;
     }
 
     /**

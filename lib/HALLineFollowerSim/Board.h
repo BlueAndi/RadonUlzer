@@ -393,6 +393,17 @@ private:
     }
 
     /**
+     * Get the simulation serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSerial()
+    {
+        /* Not supported. */
+        return nullptr;
+    }
+
+    /**
      * Enable all simulation devices.
      * It is called by the main entry only.
      * Devices must be enabled before they can be used, and a simulation step must be performed before the application
