@@ -227,5 +227,5 @@ private:
     WebotsSerialDrv& operator=(const WebotsSerialDrv& srv); /**< Assignment of an instance. */
 };
 
-#endif /* SOCKET_SERVER_H_ */
+#endif /* WEBOTS_SERIAL_DRV_H */
 /** @} */
