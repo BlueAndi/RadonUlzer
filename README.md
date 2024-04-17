@@ -123,21 +123,16 @@ Example for **LineFollowerSim** application:
 2. Now the keyboard keys a, b and c can be used to control the robot according to the implemented application logic.
 
 ## Communicate with the DroidControlShip
-For the communication with the DroidControlShip a socket server needs to be enabled, which is disabled by default.
+The communication with the DroidControlShip goes via a Webots serial connection, which is disabled by default.
 
-Use the -s flag to enable it with default port 65432. Note, this will disable the standard logging, because the serial communication will automatically be routed over the socket. The SerialMuxProt protocol is used to exchange data in both directions.
+Use the -c flag to enable it with default channels (see _webots_robot_serial_rx_channel_ and _webots_robot_serial_tx_channel_ in [platformio.ini](./platformio.ini)). Note, this will disable the standard logging, because the serial communication uses the SerialMuxProt procotol for data interchange.
 ```bash
-$ program.exe -s
+$ program.exe -c
 ```
 
-The port can be changed via command line parameters, please use -? to get more details.
-```bash
-$ program.exe -?
-```
+For simplicity a Platformio project task was added, which enables the Webots serial connection as well.
 
-For simplicity a Platformio project task was added, which start the socket server as well.
-
-![Example](./doc/images/pio_webots_launcher_socket.jpg)
+![Example](./doc/images/pio_webots_launcher_zumo_com_system.jpg)
 
 # The target
 
@@ -159,7 +154,7 @@ Example for the **LineFollowerTarget** application:
 | Calib | Application used for motor speed calibration. | Yes | No | ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
 | ConvoyLeader | A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role. | No | Yes | ./webots/worlds/GridWithMarkers.wbt  ./webots/worlds/HeadingCalculation.wbt |
 | LineFollower | Just a line follower, using a PID controller. | Yes | No | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
-| RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | Any |
+| RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | ./webots/world/zumo_with_com_system/* |
 | SensorFusion | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No | Yes | ./webots/worlds/SensorFustion.wbt |
 | Test | Only for testing purposes on native environment. | Yes | No | N/A |
 
