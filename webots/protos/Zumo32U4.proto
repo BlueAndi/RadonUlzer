@@ -5,7 +5,7 @@ EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/project
 PROTO Zumo32U4 [
   field SFVec3f     translation     0 0 0
   field SFRotation  rotation        0 0 1 0
-  field SFString    name            "robot"
+  field SFString    name            "Zumo"
   field SFString    contactMaterial "default" # Contact material of the tracks
 ]
 {
@@ -13,11 +13,15 @@ PROTO Zumo32U4 [
     translation IS translation
     rotation IS rotation
     children [
-      Speaker {
+      Receiver {
+        name "serialComRx"
+        type "serial"
       }
       Emitter {
         name "serialComTx"
         type "serial"
+      }
+      Speaker {
       }
       DEF SHIELD Group {
         children [
