@@ -338,7 +338,7 @@ namespace Logging
         }
     }
 
-}; // namespace Logging
+}; /* namespace Logging */
 
 /******************************************************************************
  * Functions
