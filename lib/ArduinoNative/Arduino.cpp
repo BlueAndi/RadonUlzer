@@ -229,11 +229,8 @@ extern int main(int argc, char** argv)
             Logging::disable();
         }
 
-        if (0 == status)
-        {
-            /* Get simulation time handler. It will be used by millis() and delay(). */
-            gSimTime = &board.getSimTime();
-        }
+        /* Get simulation time handler. It will be used by millis() and delay(). */
+        gSimTime = &board.getSimTime();
     }
 
     if (0 != status)
