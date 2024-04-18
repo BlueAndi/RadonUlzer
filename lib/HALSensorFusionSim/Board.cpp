@@ -33,7 +33,7 @@
  * Includes
  *****************************************************************************/
 #include <Board.h>
-#include <RobotDevices.h>
+#include <RobotDeviceNames.h>
 
 /******************************************************************************
  * Compiler Switches
