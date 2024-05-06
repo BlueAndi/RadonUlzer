@@ -75,7 +75,8 @@ public:
         m_statusTimer(),
         m_statusTimeoutTimer(),
         m_sendLineSensorsDataInterval(),
-        m_smpServer(Serial, this)
+        m_smpServer(Serial, this),
+        m_movAvgProximitySensor()
     {
     }
 

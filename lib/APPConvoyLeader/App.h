@@ -74,7 +74,8 @@ public:
         m_reportTimer(),
         m_statusTimer(),
         m_statusTimeoutTimer(),
-        m_smpServer(Serial, this)
+        m_smpServer(Serial, this),
+        m_movAvgProximitySensor()
     {
     }
 
