@@ -1,4 +1,4 @@
-"""Pack the executable and its dependencies into a ZIP file."""
+"""Webots launcher"""
 
 # MIT License
 #
@@ -25,63 +25,52 @@
 ################################################################################
 # Imports
 ################################################################################
-import platform
+import os
 import sys
-from zipfile import ZipFile
+import platform
 
 Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
-
 OS_PLATFORM_TYPE_WIN = "Windows"
 OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
-
-PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
-BUILD_DIR = env["PROJECT_BUILD_DIR"] + "/" + PIO_ENV_NAME # pylint: disable=undefined-variable
-OUT_PATH = BUILD_DIR + "/" + PIO_ENV_NAME + ".zip"
-
-FILE_NAME_LIST = []
+PROGRAM_PATH = "$BUILD_DIR/"
+PROGRAM_OPTIONS_SOCKET = '-s'
+ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
+WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
-    FILE_NAME_LIST = [
-        "/Controller.dll",
-        "/CppController.dll",
-        "/program.exe",
-        "/sounds/4KHz.wav",
-        "/sounds/10KHz.wav",
-        "/sounds/440Hz.wav",
-    ]
-
-elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
-
-    FILE_NAME_LIST = [
-        "/Controller.dylib",
-        "/CppController.dylib",
-        "/program",
-        "/sounds/4KHz.wav",
-        "/sounds/10KHz.wav",
-        "/sounds/440Hz.wav",
-    ]
+    WEBOTS_HOME = os.getenv('WEBOTS_HOME').replace('\\', '/')
+    WEBOTS_CONTROLLER = '"' + WEBOTS_HOME + '/msys64/mingw64/bin/webots-controller.exe"'
+    PROGRAM_NAME = "${PROGNAME}.exe"
 
 elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
 
-    FILE_NAME_LIST = [
-        "/Controller.so",
-        "/CppController.so",
-        "/program",
-        "/sounds/4KHz.wav",
-        "/sounds/10KHz.wav",
-        "/sounds/440Hz.wav",
-    ]
+    WEBOTS_CONTROLLER = "$WEBOTS_HOME/webots-controller"
+    PROGRAM_NAME = "${PROGNAME}"
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
+    WEBOTS_CONTROLLER = "$WEBOTS_HOME/Contents/MacOS/webots-controller"
+    PROGRAM_NAME = "${PROGNAME}"
 
 else:
     print(f"OS type {OS_PLATFORM_TYPE} not supported.")
     sys.exit(1)
+
+WEBOTS_LAUNCHER_ACTION = WEBOTS_CONTROLLER + ' '\
+                        + WEBOTS_CONTROLLER_OPTIONS + ' ' \
+                        + PROGRAM_PATH + PROGRAM_NAME
+
+WEBOTS_LAUNCHER_SOCKET_ACTION = WEBOTS_CONTROLLER + ' ' \
+                                + WEBOTS_CONTROLLER_OPTIONS + ' ' \
+                                + PROGRAM_PATH + PROGRAM_NAME + ' ' \
+                                + PROGRAM_OPTIONS_SOCKET
 
 ################################################################################
 # Classes
@@ -91,25 +80,28 @@ else:
 # Functions
 ################################################################################
 
-def zip_executable(source, target, env): # pylint: disable=unused-argument
-    """Create a zip file with the executable and all required libraries.
-
-    Args:
-        source (Any): Source (not used)
-        target (Any): Target (not used)
-        env (Any): Environment (not used)
-    """
-
-    with ZipFile(OUT_PATH, 'w') as zip_object:
-        for file_name in FILE_NAME_LIST:
-            full_path = BUILD_DIR + file_name
-            zip_object.write(full_path, PIO_ENV_NAME + file_name)
-
-    print("Packed executable found in: " + OUT_PATH)
-
 ################################################################################
 # Main
 ################################################################################
 
-# Create packed executable as a Post action.
-env.AddPostAction(BUILD_DIR + "/program.exe", zip_executable) # pylint: disable=undefined-variable
+# pylint: disable=undefined-variable
+env.AddCustomTarget(
+    name="webots_launcher",
+    dependencies=PROGRAM_PATH + PROGRAM_NAME,
+    actions=[
+        WEBOTS_LAUNCHER_ACTION
+    ],
+    title="WebotsLauncher",
+    description="Launch application with Webots launcher."
+)
+
+# pylint: disable=undefined-variable
+env.AddCustomTarget(
+    name="webots_launcher_socket",
+    dependencies=PROGRAM_PATH + PROGRAM_NAME,
+    actions=[
+        WEBOTS_LAUNCHER_SOCKET_ACTION
+    ],
+    title="WebotsLauncherSocket",
+    description="Launch application with Webots launcher and enable socket."
+)

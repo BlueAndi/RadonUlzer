@@ -227,8 +227,11 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
     }
     else
     {
+        int32_t maxSpeed32 =
+            static_cast<int32_t>(maxSpeed) * 1000 / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+
         LOG_INFO_VAL("Calibrated max. speed (steps/s): ", maxSpeed);
-        LOG_INFO_VAL("Calibrated max. speed (mm/s): ", maxSpeed / RobotConstants::ENCODER_STEPS_PER_MM);
+        LOG_INFO_VAL("Calibrated max. speed (mm/s): ", maxSpeed32);
 
         sm.setState(&ReadyState::getInstance());
     }

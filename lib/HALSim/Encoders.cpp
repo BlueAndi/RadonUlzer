@@ -145,11 +145,9 @@ void Encoders::overflowProtection(double& lastPos, double pos)
     /* Position sensor provides NAN until the first simulation step was perfomed. */
     if (false == isnan(pos))
     {
-        const double CONV_FACTOR_M_TO_MM = 1000.0F;
-        const double OVERFLOW_DELTA_POS  = static_cast<double>(UINT16_MAX) /
-                                          static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM) /
-                                          static_cast<double>(CONV_FACTOR_M_TO_MM); /* [m] */
-        double deltaPosM = pos - lastPos;                                           /* [m] */
+        const double OVERFLOW_DELTA_POS =
+            static_cast<double>(UINT16_MAX) / static_cast<double>(RobotConstants::ENCODER_STEPS_PER_M); /* [m] */
+        double deltaPosM = pos - lastPos;                                                               /* [m] */
 
         /* Protect against delta position overflow (16-bit). */
         if (0.0F <= deltaPosM)
@@ -176,10 +174,8 @@ int16_t Encoders::calculateSteps(double lastPos, double pos) const
     /* Position sensor provides NAN until the first simulation step was perfomed. */
     if (false == isnan(pos))
     {
-        const double CONV_FACTOR_M_TO_MM = 1000.0F;
-        double       deltaPosM           = pos - lastPos;                                             /* [m] */
-        double       deltaPosMM          = deltaPosM * CONV_FACTOR_M_TO_MM;                           /* [mm] */
-        double encoderSteps = deltaPosMM * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_MM); /* [steps] */
+        double deltaPos     = pos - lastPos;                                                         /* [m] */
+        double encoderSteps = (deltaPos * static_cast<double>(RobotConstants::ENCODER_STEPS_PER_M)); /* [steps] */
 
         steps = static_cast<int16_t>(encoderSteps); /* [steps] */
     }

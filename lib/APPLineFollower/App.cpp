@@ -68,7 +68,7 @@
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
-    
+
     /* Initialize HAL */
     Board::getInstance().init();
 
@@ -77,6 +77,11 @@ void App::setup()
 
     /* Setup the periodically processing of robot control.  */
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+
+#ifdef DEBUG_ODOMETRY
+    /* Reset supervisor which set its observed position and orientation to 0. */
+    Board::getInstance().getSender().send("RST");
+#endif /* DEBUG_ODOMETRY */
 
     /* Surprise the audience. */
     Sound::playMelody(Sound::MELODY_WELCOME);
@@ -100,6 +105,23 @@ void App::loop()
          * the differential drive control.
          */
         Odometry::getInstance().process();
+
+#ifdef DEBUG_ODOMETRY
+        {
+            Odometry&    odo         = Odometry::getInstance();
+            int32_t      posX        = 0;
+            int32_t      posY        = 0;
+            int32_t      orientation = odo.getOrientation();
+            const size_t BUFFER_SIZE = 128U;
+            char         buffer[BUFFER_SIZE];
+
+            odo.getPosition(posX, posY);
+
+            snprintf(buffer, BUFFER_SIZE, "ODO,%d,%d,%d", posX, posY, orientation);
+
+            Board::getInstance().getSender().send(buffer);
+        }
+#endif /* DEBUG_ODOMETRY */
 
         m_controlInterval.restart();
     }

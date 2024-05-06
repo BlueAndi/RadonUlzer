@@ -98,9 +98,9 @@ private:
      */
     enum LineStatus
     {
-        LINE_STATUS_NO_START_STOP_LINE_DETECTED = 0, /**< No start/stop line detected. */
-        LINE_STATUS_START_LINE_DETECTED,             /**< Start line detected. */
-        LINE_STATUS_STOP_LINE_DETECTED               /**< Stop line detected. */
+        LINE_STATUS_NO_START_LINE_DETECTED = 0, /**< No start line detected. */
+        LINE_STATUS_START_LINE_DETECTED,        /**< Start line detected. */
+        LINE_STATUS_STOP_LINE_DETECTED          /**< Stop line detected. */
     };
 
     /**
@@ -108,9 +108,17 @@ private:
      */
     enum TrackStatus
     {
-        TRACK_STATUS_ON_TRACK = 0, /**< Robot is on track */
-        TRACK_STATUS_LOST,         /**< Robot lost track */
-        TRACK_STATUS_FINISHED      /**< Robot found the end line or a error happened */
+        TRACK_STATUS_NORMAL = 0,              /**< Normal line conditions. */
+        TRACK_STATUS_START_STOP_LINE,         /**< Driving over start-/stop-line. */
+        TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT,  /**< Right angle curve to the left detected. */
+        TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT, /**< Right angle curve to the right detected. */
+        TRACK_STATUS_SHARP_CURVE_LEFT,        /**< Sharp curve to the left detected. */
+        TRACK_STATUS_SHARP_CURVE_RIGHT,       /**< Sharp curve to the right detected. */
+        TRACK_STATUS_SHARP_CURVE_LEFT_TURN,   /**< Sharp curve to the left turns now. */
+        TRACK_STATUS_SHARP_CURVE_RIGHT_TURN,  /**< Sharp curve to the right turns now. */
+        TRACK_STATUS_TRACK_LOST_BY_GAP,       /**< Track lost by gap. */
+        TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE, /**< Track lost by driving manoeuvre. */
+        TRACK_STATUS_FINISHED                 /**< Robot found the end line or a error happened. */
     };
 
     /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
@@ -127,7 +135,12 @@ private:
      * The track is detected in case the received value is greater or equal than
      * the threshold.
      */
-    static const uint16_t LINE_SENSOR_ON_TRACK_VALUE = 200U;
+    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
+
+    /**
+     * The max. normalized value of a sensor in digits.
+     */
+    static const uint16_t SENSOR_VALUE_MAX;
 
     /**
      * Position set point which is the perfect on track position.
@@ -150,6 +163,26 @@ private:
      */
     static const uint8_t SENSOR_ID_MOST_RIGHT;
 
+    /**
+     * Minimum position in digits.
+     */
+    static const int16_t POSITION_MIN;
+
+    /**
+     * Maximum position in digits.
+     */
+    static const int16_t POSITION_MAX;
+
+    /**
+     * Lower border position in digits for driving will on the line.
+     */
+    static const int16_t POSITION_MIDDLE_MIN;
+
+    /**
+     * Higher border position in digits for driving will on the line.
+     */
+    static const int16_t POSITION_MIDDLE_MAX;
+
     SimpleTimer            m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
     SimpleTimer            m_lapTime;          /**< Timer used to calculate the lap time. */
     SimpleTimer            m_pidProcessTime;   /**< Timer used for periodically PID processing. */
@@ -160,6 +193,7 @@ private:
     bool                   m_isStartStopLineDetected; /**< Is the start/stop line detected? */
     uint8_t                m_lastSensorIdSawTrack;    /**< The sensor id of the sensor which saw the track as last. */
     int16_t                m_lastPosition; /**< Last position, used to decide strategy in case of a track gap. */
+    bool                   m_isTrackLost; /**< Is the track lost? Lost means the line sensors didn't detect it. */
 
     /**
      * Default constructor.
@@ -178,6 +212,32 @@ private:
     DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 
     /**
+     * Calculate the position with the inner 3 line sensors.
+     *
+     * @param[out]  position            The position result.
+     * @param[in]   lineSensorValues    Array of line sensor values.
+     * @param[in]   length              Array length.
+     *
+     * @return If successful, it will return true otherwise false.
+     */
+    bool calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const;
+
+    /**
+     * Evaluate the situation by line sensor values and position and determine
+     * the track status. The result influences the measures to keep track on
+     * the line.
+     * 
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     * @param[in] position          The position calculated with all sensors.
+     * @param[in] position3         The position calculated with the inner 3 sensors only.
+     * @param[in] isTrackLost       Information whether the track is lost or not.
+     * 
+     * @return The track status result.
+     */
+    TrackStatus evaluateSituation(const uint16_t* lineSensorValues, uint8_t length, int16_t position, int16_t position3, bool isTrackLost) const;
+
+    /**
      * Is the start/stop line detected?
      *
      * @param[in] lineSensorValues  The line sensor values as array.
@@ -185,7 +245,17 @@ private:
      *
      * @return If start/stop line detected, it will return true otherwise false.
      */
-    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length);
+    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
+
+    /**
+     * Is no line detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     *
+     * @return If no line is detected, it will return true otherwise false.
+     */
+    bool isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
 
     /**
      * Is right angle curve to the left detected?
@@ -195,7 +265,7 @@ private:
      *
      * @return If right angle curve to the left is detected, it will return true otherwise false.
      */
-    bool isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length);
+    bool isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length) const;
 
     /**
      * Is right angle curve to the right detected?
@@ -205,17 +275,41 @@ private:
      *
      * @return If right angle curve to the right is detected, it will return true otherwise false.
      */
-    bool isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length);
+    bool isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length) const;
 
     /**
-     * Is track gap detected?
+     * Is a sharp left curve detected?
      *
      * @param[in] lineSensorValues  The line sensor values as array.
      * @param[in] length            The number of line sensor values.
+     * @param[in] position3         The position calculated with the inner line sensors in digits.
      *
-     * @return If track gap is detected, it will return true otherwise false.
+     * @return If sharp left curve is detected, it will return true otherwise false.
      */
-    bool isGapDetected(const uint16_t* lineSensorValues, uint8_t length);
+    bool isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const;
+
+    /**
+     * Is a sharp right curve detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     * @param[in] position3         The position calculated with the inner line sensors in digits.
+     *
+     * @return If sharp right curve is detected, it will return true otherwise false.
+     */
+    bool isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const;
+
+    /**
+     * Process the situation and decide which measures to take.
+     * Measures will influence the position or whether its allowed to have
+     * a negative motor speed.
+     *
+     * @param[in, out]  position                    The position calculated with all sensors in digits.
+     * @param[out]      allowNegativeMotorSpeed     Allow negative motor speed or not.
+     * @param[in]       trackStatus                 The evaluated track status.
+     * @param[in]       position3                   The position calculated with the inner sensors in digits.
+     */
+    void processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3);
 
     /**
      * Adapt driving by using a PID algorithm, depended on the position
@@ -232,6 +326,16 @@ private:
      * @return If abort is required, it will return true otherwise false.
      */
     bool isAbortRequired();
+
+
+#ifdef DEBUG_ALGORITHM
+    /**
+     * Required for debugging purposes.
+     * 
+     * @param[in] trackStatus   The track status.
+     */
+    friend void logCsvDataTrackStatus(TrackStatus trackStatus);
+#endif /* DEBUG_ALGORITHM */
 };
 
 /******************************************************************************

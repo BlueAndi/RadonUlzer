@@ -67,6 +67,10 @@
 
 void DrivingState::entry()
 {
+    /* Clear the Odometry Position in favor of reproducibility. */
+    Odometry::getInstance().clearPosition();
+    Odometry::getInstance().setOrientation(FP_PI() / 2);
+
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
@@ -181,8 +185,16 @@ void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorVa
             /* End line detected */
             else if (LINE_STATUS_FIND_END_LINE == m_lineStatus)
             {
-                m_lineStatus = LINE_STATUS_END_LINE_DETECTED;
-                /* Don't switch to the Ready State and do nothing. */
+                DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+                /* Stop motors immediately. Don't move this to a later position,
+                 * as this would extend the driven length.
+                 */
+                diffDrive.setLinearSpeed(0, 0);
+
+                Sound::playBeep();
+                m_trackStatus = TRACK_STATUS_FINISHED;
+
             }
             else
             {

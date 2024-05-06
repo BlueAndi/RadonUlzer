@@ -69,7 +69,6 @@ public:
         m_gyroValues{0, 0, 0},
         m_magnetometerValues{0, 0, 0},
         m_rawAccelerometerOffsetX(0),
-        m_rawAccelerometerOffsetY(0),
         m_rawGyroOffsetZ(0)
     {
     }
@@ -95,16 +94,22 @@ public:
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.
+     *
+     *  Additionally, only the z-axis of the gyroscope and the x-axis of the accelerometer are enabled.
      */
     void configureForTurnSensing() final;
 
     /**
      * Takes a reading from the accelerometer and makes the measurements available in a.
+     *
+     * Only the Acceleration along the x-axis is read. The measurements along the other axes are disabled and set to 0.
      */
     void readAccelerometer() final;
 
     /**
      * Takes a reading from the gyro and makes the measurements available in g.
+     *
+     * Only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled and set to 0.
      */
     void readGyro() final;
 
@@ -137,6 +142,10 @@ public:
     /**
      * Get last raw Accelerometer values as an IMUData struct containing values in x, y and z in digits.
      *
+     * Note: Currently, only the Acceleration along the x-axis is read. The measurements along the other axes are
+     * disabled and set to 0. 
+     * If you need to access the other measurements, you need to modify the method readAccelerometer().
+     *
      * @param[in] accelerationValues  Pointer to IMUData struct where the raw acceleration values in digits in
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
      * multiplication with a sensitivity factor in mm/s^2/digit.
@@ -145,6 +154,10 @@ public:
 
     /**
      * Get last raw Gyro values as an IMUData struct containing values in x, y and z in digits.
+     *
+     * Note: Currently, only the Turn Rate around the z-axis is read. The measurements along the other axes are disabled
+     * and set to 0.
+     * If you need to access the other measurements, you need to modify the method readGyro().
      *
      * @param[in] turnRates  Pointer to IMUData struct where the raw turn Rates in digits in x, y and z
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
@@ -176,7 +189,6 @@ private:
     Zumo32U4IMU m_imuDrv; /**< IMU driver from Zumo32U4 Library. */
 
     int16_t m_rawAccelerometerOffsetX; /**< Mean raw accelerometer offset in x-direction determined by calibration. */
-    int16_t m_rawAccelerometerOffsetY; /**< Mean raw accelerometer offset in y-direction determined by calibration. */
     int16_t m_rawGyroOffsetZ;          /**< Mean raw gyro offset in z-direction determined by calibration. */
 };
 

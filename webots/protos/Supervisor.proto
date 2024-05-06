@@ -5,11 +5,18 @@ PROTO Supervisor [
   field SFString name "robot"
   field SFString controller "<generic>"
   field SFBool supervisor FALSE
+  field SFString serialReceiver "serialComRx"
 ]
 {
   Robot {
     name IS name
     controller IS controller
     supervisor IS supervisor
+    children [
+      Receiver {
+        name IS serialReceiver
+        type "serial"
+      }
+    ]
   }
 }

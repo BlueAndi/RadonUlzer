@@ -94,7 +94,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
         "PD VF", /* Name - VF: very fast */
-        4200,    /* Top speed in steps/s */
+        4000,    /* Top speed in steps/s */
         4,       /* Kp Numerator */
         1,       /* Kp Denominator */
         0,       /* Ki Numerator */
@@ -110,7 +110,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         1,      /* Kp Denominator */
         0,      /* Ki Numerator */
         1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
+        50,     /* Kd Numerator */
         1       /* Kd Denominator */
     };
 
@@ -121,7 +121,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         1,      /* Kp Denominator */
         0,      /* Ki Numerator */
         1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
+        40,     /* Kd Numerator */
         1       /* Kd Denominator */
     };
 
@@ -132,7 +132,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
         2,       /* Kp Denominator */
         0,       /* Ki Numerator */
         1,       /* Ki Denominator */
-        10,      /* Kd Numerator */
+        30,      /* Kd Numerator */
         1        /* Kd Denominator */
     };
 }

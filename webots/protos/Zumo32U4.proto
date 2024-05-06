@@ -108,6 +108,7 @@ PROTO Zumo32U4 [
           LinearMotor {
             name "motor_left"
             maxVelocity 0.525
+            maxForce 8.2
           }
           PositionSensor {
             name "position_sensor_left"
@@ -163,6 +164,7 @@ PROTO Zumo32U4 [
           LinearMotor {
             name "motor_right"
             maxVelocity 0.525
+            maxForce 8.2
           }
           PositionSensor {
             name "position_sensor_right"
@@ -475,9 +477,9 @@ PROTO Zumo32U4 [
             zAxis TRUE
             resolution  0.001
             lookupTable [
-              -12.647 -32768 0.001
-              0 0 0.001
-              12.647 32767 0.001
+              -9.32 -32768 0
+              0 0 0
+              9.32 32767 0
             ]
           }
           Compass {

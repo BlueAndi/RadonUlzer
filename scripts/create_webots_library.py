@@ -1,4 +1,4 @@
-"""Webots libraray creation"""
+"""Webots library creation"""
 
 # MIT License
 #
@@ -25,10 +25,12 @@
 ################################################################################
 # Imports
 ################################################################################
+import sys
 import shutil
 import errno
 import os
 import json
+import platform
 
 ################################################################################
 # Variables
@@ -37,7 +39,29 @@ import json
 src_path_include_c      = os.getenv('WEBOTS_HOME') + '/include/controller/c'
 src_path_include_cpp    = os.getenv('WEBOTS_HOME') + '/include/controller/cpp'
 src_path_source         = os.getenv('WEBOTS_HOME') + '/src/controller/cpp'
-src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController.a'
+src_path_lib            = os.getenv('WEBOTS_HOME') + '/lib/controller/libController'
+
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE_LINUX = "Linux"
+OS_PLATFORM_TYPE_MACOS = "Darwin"
+OS_PLATFORM_TYPE = platform.system()
+
+#  Add correct file extension for the platform.
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
+
+    src_path_lib += '.a'
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
+    src_path_lib += '.dylib'
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
+
+    src_path_lib += '.so'
+
+else:
+    print(f"OS type {OS_PLATFORM_TYPE} not supported.")
+    sys.exit(1)
 
 DST_PATH = './lib/Webots'
 

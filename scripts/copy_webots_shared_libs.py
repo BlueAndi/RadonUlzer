@@ -27,18 +27,52 @@
 ################################################################################
 import shutil
 import os
+import platform
+import sys
 
-Import("env") # type: ignore
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
 
-SHARED_FILES_LIST = [
-    '/lib/controller/Controller.dll',
-    '/lib/controller/CppController.dll']
+################################################################################
+# Variables
+################################################################################
 
-PIO_ENV_NAME = env["PIOENV"] # type: ignore
+OS_PLATFORM_TYPE_WIN = "Windows"
+OS_PLATFORM_TYPE_LINUX = "Linux"
+OS_PLATFORM_TYPE_MACOS = "Darwin"
+OS_PLATFORM_TYPE = platform.system()
+
+SHARED_FILES_LIST = []
+
+if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
+
+    SHARED_FILES_LIST = [
+        '/lib/controller/Controller.dll',
+        '/lib/controller/CppController.dll'
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
+
+    SHARED_FILES_LIST = [
+        '/lib/controller/libController.dylib',
+        '/lib/controller/libCppController.dylib'
+    ]
+
+elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
+
+    SHARED_FILES_LIST = [
+        '/lib/controller/libController.so',
+        '/lib/controller/libCppController.so'
+    ]
+
+else:
+    print(f"OS type {OS_PLATFORM_TYPE} not supported.")
+    sys.exit(1)
+
+PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
 
 ################################################################################
 # Classes

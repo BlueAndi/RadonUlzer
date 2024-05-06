@@ -29,14 +29,15 @@ import shutil
 import errno
 import os
 
-Import("env")  # type: ignore
+Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
 # Variables
 ################################################################################
 
-PIO_ENV_NAME = env["PIOENV"]  # type: ignore
-DST_PATH = './.pio/build/' + PIO_ENV_NAME + "/sounds"
+PIO_ENV_NAME = env["PIOENV"] # pylint: disable=undefined-variable
+BUILD_DIR = env["PROJECT_BUILD_DIR"] + "/" + PIO_ENV_NAME # pylint: disable=undefined-variable
+DST_PATH = BUILD_DIR + "/sounds"
 SOUNDS_FOLDER = "./sounds"
 
 ################################################################################
@@ -46,7 +47,6 @@ SOUNDS_FOLDER = "./sounds"
 ################################################################################
 # Functions
 ################################################################################
-
 
 def copy_path_recursive(src, dst):
     """Copy all files from the source path to the destination path.
@@ -66,7 +66,6 @@ def copy_path_recursive(src, dst):
 ################################################################################
 # Main
 ################################################################################
-
 
 if os.path.exists(DST_PATH) is False:
     copy_path_recursive(SOUNDS_FOLDER, DST_PATH)

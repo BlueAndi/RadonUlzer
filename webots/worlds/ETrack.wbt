@@ -1,0 +1,60 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "../protos/Zumo32U4.proto"
+IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+
+WorldInfo {
+  info [
+    "Line follower track along a 'E'."
+    "Andreas Merkle <web@blue-andi.de>"
+    "2024-03-23"
+    "Parameters: etrack -a Andreas Merkle -d Line follower track along a 'E'. -e web@blue-andi.de -mg cardboard -mr rubber -mp dry ETrack"
+  ]
+  title "my world"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "cardboard"
+      material2 "rubber"
+      coulombFriction [
+        0.5658597043160902
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.34761748037225965 0.3461592728510155 0.8713987865259499 1.712182153107181
+  position 0.029545963860120483 -5.298084688577991 5.468410739001658
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+RectangleArena {
+  contactMaterial "cardboard"
+  floorSize 2 2
+  floorTileSize 2 2
+  floorAppearance PBRAppearance {
+    baseColorMap ImageTexture {
+      url [
+        "ETrack.png"
+      ]
+    }
+    roughness 1
+    metalness 0
+  }
+}
+DEF ROBOT Zumo32U4 {
+  translation -0.322039 -0.72155 0.0139985
+  rotation 0 0 1 0.244514
+  name "Zumo"
+  contactMaterial "rubber"
+}
+Supervisor {
+  name "Supervisor"
+  controller "Supervisor"
+  supervisor TRUE
+}
