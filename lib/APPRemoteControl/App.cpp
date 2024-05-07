@@ -248,10 +248,18 @@ void App::reportVehicleData()
     VehicleData        payload;
     int32_t            xPos          = 0;
     int32_t            yPos          = 0;
+    uint8_t            maxCounts     = 0U;
     uint8_t            averageCounts = 0U;
+    uint8_t            leftCounts    = 0U;
+    uint8_t            rightCounts   = 0U;
 
     proximitySensors.read();
-    averageCounts = (proximitySensors.countsFrontWithLeftLeds() + proximitySensors.countsFrontWithRightLeds()) / 2U;
+    leftCounts  = proximitySensors.countsFrontWithLeftLeds();
+    rightCounts = proximitySensors.countsFrontWithRightLeds();
+
+    /* Use the sensor value with the maximum counts. */
+    maxCounts     = leftCounts > rightCounts ? leftCounts : rightCounts;
+    averageCounts = m_movAvgProximitySensor.write(maxCounts);
 
     odometry.getPosition(xPos, yPos);
     payload.xPos        = xPos;

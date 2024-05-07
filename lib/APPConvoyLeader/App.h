@@ -48,6 +48,7 @@
 #include <SerialMuxProtServer.hpp>
 #include "SerialMuxChannels.h"
 #include <Arduino.h>
+#include <MovAvg.hpp>
 
 /******************************************************************************
  * Macros
@@ -73,7 +74,8 @@ public:
         m_reportTimer(),
         m_statusTimer(),
         m_statusTimeoutTimer(),
-        m_smpServer(Serial, this)
+        m_smpServer(Serial, this),
+        m_movAvgProximitySensor()
     {
     }
 
@@ -129,6 +131,11 @@ private:
     /** Status timeout timer interval in ms. */
     static const uint32_t STATUS_TIMEOUT_TIMER_INTERVAL = 2U * SEND_STATUS_TIMER_INTERVAL;
 
+    /**
+     * Number of measurements for proximity sensors moving average filter.
+     */
+    static const uint8_t MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS = 3U;
+
     /** SerialMuxProt Channel id for sending remote control command responses. */
     uint8_t m_serialMuxProtChannelIdRemoteCtrlRsp;
 
@@ -161,6 +168,11 @@ private:
      * SerialMuxProt Server Instance
      */
     SMPServer m_smpServer;
+
+    /**
+     * Moving average filter for proximity sensors.
+     */
+    MovAvg<uint8_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
 
     /**
      * Report the current vehicle data.
