@@ -148,7 +148,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim", "SensorFusionSim"]
+        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyFollowerSim", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim", "SensorFusionSim"]
 
     steps:
     - name: Checkout repository
