@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2019 - 2024 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,14 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ParameterSets.h"
+#include <Board.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -58,28 +58,13 @@
  * Public Methods
  *****************************************************************************/
 
-void ParameterSets::choose(uint8_t setId)
+void Board::init()
 {
-    if (MAX_SETS > setId)
-    {
-        m_currentSetId = setId;
-    }
-}
-
-void ParameterSets::next()
-{
-    ++m_currentSetId;
-    m_currentSetId %= MAX_SETS;
-}
-
-uint8_t ParameterSets::getCurrentSetId() const
-{
-    return m_currentSetId;
-}
-
-const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
-{
-    return m_parSets[m_currentSetId];
+    m_encoders.init();
+    m_lineSensors.init();
+    m_motors.init();
+    m_proximitySensors.initFrontSensor();
+    m_settings.init();
 }
 
 /******************************************************************************
@@ -90,54 +75,21 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
  * Private Methods
  *****************************************************************************/
 
-ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
-{
-    m_parSets[0] = {
-        "PD VF", /* Name - VF: very fast */
-        4200,    /* Top speed in steps/s */
-        4,       /* Kp Numerator */
-        1,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        60,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-
-    m_parSets[1] = {
-        "PD F", /* Name - F: fast */
-        3000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[2] = {
-        "PD S", /* Name - S: slow */
-        2000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[3] = {
-        "PD VS", /* Name - VS: very slow */
-        1000,    /* Top speed in steps/s */
-        3,       /* Kp Numerator */
-        2,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        10,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-}
-
-ParameterSets::~ParameterSets()
+Board::Board() :
+    IBoard(),
+    m_buttonA(),
+    m_buttonB(),
+    m_buttonC(),
+    m_buzzer(),
+    m_display(),
+    m_encoders(),
+    m_lineSensors(),
+    m_motors(),
+    m_ledRed(),
+    m_ledYellow(),
+    m_ledGreen(),
+    m_proximitySensors(),
+    m_settings()
 {
 }
 

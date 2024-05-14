@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  RemoteControl application
+ * @brief  ConvoyFollower application
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -57,12 +57,12 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The remote control application. */
+/** The convoy follower application. */
 class App
 {
 public:
     /**
-     * Construct the remote control application.
+     * Construct the convoy follower application.
      */
     App() :
         m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
@@ -81,7 +81,7 @@ public:
     }
 
     /**
-     * Destroy the remote control application.
+     * Destroy the convoy follower application.
      */
     ~App()
     {

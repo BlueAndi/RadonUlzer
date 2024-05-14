@@ -1,0 +1,23 @@
+{
+    "name": "HALConvoyFollowerTarget",
+    "version": "0.1.0",
+    "description": "...",
+    "authors": [{
+        "name": "Andreas Merkle",
+        "email": "web@blue-andi.de",
+        "url": "https://github.com/BlueAndi",
+        "maintainer": true
+    }],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "HALInterfaces"
+    }, {
+        "name": "HALTarget"
+    }, {
+        "owner": "pololu",
+        "name": "Zumo32U4",
+        "version": "^2.0.1"
+    }],
+    "frameworks": "arduino",
+    "platforms": "*"
+}

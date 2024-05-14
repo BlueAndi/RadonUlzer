@@ -3,13 +3,15 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
 EXTERNPROTO "../protos/Zumo32U4.proto"
-EXTERNPROTO "../protos/LineFollowerTrack.proto"
+EXTERNPROTO "../protos/PlatoonTrack.proto"
+EXTERNPROTO "../protos/Supervisor.proto"
+EXTERNPROTO "../protos/Obstacle.proto"
 
 WorldInfo {
   info [
-    "LineFollower Track for platooning using ConvoyLeader and RemoteControl applications."
+    "Platoon Track for platooning using ConvoyLeader and RemoteControl applications."
   ]
-  title "Track"
+  title "Platoon Track"
   basicTimeStep 8
   contactProperties [
     ContactProperties {
@@ -22,25 +24,41 @@ WorldInfo {
   ]
 }
 Viewpoint {
-  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
-  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
+  orientation -0.7176343920698073 0.00028570577229950487 0.6964199865675955 3.1410420741084026
+  position -3.3187472129446247 -0.8391292754142821 2.997080235514728
+  follow "follower_1"
 }
 TexturedBackground {
 }
 TexturedBackgroundLight {
 }
-LineFollowerTrack {
+PlatoonTrack {
   contactMaterial "cardboard"
 }
-Zumo32U4 {
-  translation -0.25 -0.05 0.013994298332013683
+DEF LEADER Zumo32U4 {
+  translation -3.15 -1.05 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "leader"
   contactMaterial "rubber"
 }
-Zumo32U4 {
-  translation -0.25 -0.20 0.013994298332013683
+DEF FOLLOWER1 Zumo32U4 {
+  translation -3.15 -1.2 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "follower_1"
   contactMaterial "rubber"
+}
+DEF FOLLOWER2 Zumo32U4 {
+  translation -3.15 -1.35 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_2"
+  contactMaterial "rubber"
+}
+Supervisor {
+  name "PlatoonSupervisor"
+  controller "PlatoonSupervisor"
+  supervisor TRUE
+}
+DEF OBSTACLE Obstacle {
+  translation -3.28 2 0.4
+  name "Wall"
 }

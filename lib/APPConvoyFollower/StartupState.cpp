@@ -25,14 +25,19 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ParameterSets.h"
+#include "StartupState.h"
+#include "ErrorState.h"
+#include "DrivingState.h"
+#include <Board.h>
+#include <StateMachine.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -58,28 +63,48 @@
  * Public Methods
  *****************************************************************************/
 
-void ParameterSets::choose(uint8_t setId)
+void StartupState::entry()
 {
-    if (MAX_SETS > setId)
+    IDisplay& display = Board::getInstance().getDisplay();
+
+    /* Initialize HAL */
+    Board::getInstance().init();
+
+    display.clear();
+    display.print("Convoy");
+    display.gotoXY(0, 1);
+    display.print("Follower");
+    delay(APP_NAME_DURATION);
+}
+
+void StartupState::process(StateMachine& sm)
+{
+    IBoard&            board     = Board::getInstance();
+    ISettings&         settings  = board.getSettings();
+    int16_t            maxSpeed  = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Load the max. motor speed always from the settings, because
+     * it may happen that there was no calibration before.
+     */
+    diffDrive.setMaxMotorSpeed(maxSpeed);
+    diffDrive.enable();
+
+    if (0 == maxSpeed)
     {
-        m_currentSetId = setId;
+        /* Missing calibration data. Run AppCalib first. */
+        ErrorState::getInstance().setErrorMsg("MCAL=0");
+        sm.setState(&ErrorState::getInstance());
+    }
+    else if (true == m_initialDataSet)
+    {
+        sm.setState(&DrivingState::getInstance());
     }
 }
 
-void ParameterSets::next()
+void StartupState::exit()
 {
-    ++m_currentSetId;
-    m_currentSetId %= MAX_SETS;
-}
-
-uint8_t ParameterSets::getCurrentSetId() const
-{
-    return m_currentSetId;
-}
-
-const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
-{
-    return m_parSets[m_currentSetId];
+    /* Nothing to do */
 }
 
 /******************************************************************************
@@ -89,57 +114,6 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
-{
-    m_parSets[0] = {
-        "PD VF", /* Name - VF: very fast */
-        4200,    /* Top speed in steps/s */
-        4,       /* Kp Numerator */
-        1,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        60,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-
-    m_parSets[1] = {
-        "PD F", /* Name - F: fast */
-        3000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[2] = {
-        "PD S", /* Name - S: slow */
-        2000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[3] = {
-        "PD VS", /* Name - VS: very slow */
-        1000,    /* Top speed in steps/s */
-        3,       /* Kp Numerator */
-        2,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        10,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-}
-
-ParameterSets::~ParameterSets()
-{
-}
 
 /******************************************************************************
  * External Functions

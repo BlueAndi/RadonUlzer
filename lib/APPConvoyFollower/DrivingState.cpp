@@ -25,14 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Calibration state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ParameterSets.h"
+#include "DrivingState.h"
+#include <StateMachine.h>
+#include <DifferentialDrive.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -58,28 +60,36 @@
  * Public Methods
  *****************************************************************************/
 
-void ParameterSets::choose(uint8_t setId)
+void DrivingState::entry()
 {
-    if (MAX_SETS > setId)
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    m_isActive = true;
+    diffDrive.setLinearSpeed(0, 0);
+    diffDrive.enable();
+}
+
+void DrivingState::process(StateMachine& sm)
+{
+    /* Nothing to do. */
+    (void)sm;
+}
+
+void DrivingState::exit()
+{
+    m_isActive = false;
+
+    /* Stop motors. */
+    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+    DifferentialDrive::getInstance().disable();
+}
+
+void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+{
+    if (true == m_isActive)
     {
-        m_currentSetId = setId;
+        DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
     }
-}
-
-void ParameterSets::next()
-{
-    ++m_currentSetId;
-    m_currentSetId %= MAX_SETS;
-}
-
-uint8_t ParameterSets::getCurrentSetId() const
-{
-    return m_currentSetId;
-}
-
-const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
-{
-    return m_parSets[m_currentSetId];
 }
 
 /******************************************************************************
@@ -89,57 +99,6 @@ const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
-{
-    m_parSets[0] = {
-        "PD VF", /* Name - VF: very fast */
-        4200,    /* Top speed in steps/s */
-        4,       /* Kp Numerator */
-        1,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        60,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-
-    m_parSets[1] = {
-        "PD F", /* Name - F: fast */
-        3000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[2] = {
-        "PD S", /* Name - S: slow */
-        2000,   /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
-        0,      /* Ki Numerator */
-        1,      /* Ki Denominator */
-        30,     /* Kd Numerator */
-        1       /* Kd Denominator */
-    };
-
-    m_parSets[3] = {
-        "PD VS", /* Name - VS: very slow */
-        1000,    /* Top speed in steps/s */
-        3,       /* Kp Numerator */
-        2,       /* Kp Denominator */
-        0,       /* Ki Numerator */
-        1,       /* Ki Denominator */
-        10,      /* Kd Numerator */
-        1        /* Kd Denominator */
-    };
-}
-
-ParameterSets::~ParameterSets()
-{
-}
 
 /******************************************************************************
  * External Functions

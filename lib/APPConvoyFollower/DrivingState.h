@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Parameter state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef PARAMETER_SETS_H
-#define PARAMETER_SETS_H
+#ifndef DRIVING_STATE_H
+#define DRIVING_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -44,6 +44,8 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <IState.h>
+#include <SimpleTimer.h>
 
 /******************************************************************************
  * Macros
@@ -53,33 +55,18 @@
  * Types and Classes
  *****************************************************************************/
 
-/** Parameter set with different driving configurations. */
-class ParameterSets
+/** The system driving state. */
+class DrivingState : public IState
 {
 public:
     /**
-     * A single parameter set.
-     */
-    struct ParameterSet
-    {
-        const char* name;          /**< Name of the parameter set */
-        int16_t     topSpeed;      /**< Top speed in steps/s */
-        int16_t     kPNumerator;   /**< Kp numerator value */
-        int16_t     kPDenominator; /**< Kp denominator value */
-        int16_t     kINumerator;   /**< Ki numerator value */
-        int16_t     kIDenominator; /**< Ki denominator value */
-        int16_t     kDNumerator;   /**< Kd numerator value */
-        int16_t     kDDenominator; /**< Kd denominator value */
-    };
-
-    /**
-     * Get parameter set instance.
+     * Get state instance.
      *
-     * @return Parameter set instance.
+     * @return State instance.
      */
-    static ParameterSets& getInstance()
+    static DrivingState& getInstance()
     {
-        static ParameterSets instance;
+        static DrivingState instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -87,59 +74,57 @@ public:
     }
 
     /**
-     * Choose a specific parameter set.
-     * If a invalid set id is given, nothing changes.
-     *
-     * @param[in] setId Parameter set id
+     * If the state is entered, this method will called once.
      */
-    void choose(uint8_t setId);
+    void entry() final;
 
     /**
-     * Change to next parameter set.
-     * After the last set, the first will be choosen.
+     * Processing the state.
+     *
+     * @param[in] sm State machine, which is calling this state.
      */
-    void next();
+    void process(StateMachine& sm) final;
 
     /**
-     * Get current set id.
-     *
-     * @return Parameter set id.
+     * If the state is left, this method will be called once.
      */
-    uint8_t getCurrentSetId() const;
+    void exit() final;
 
     /**
-     * Get selected parameter set.
+     * Set target motor speeds.
      *
-     * @return Parameter set
+     * @param[in] leftMotor  Left motor speed. [steps/s]
+     * @param[in] rightMotor Right motor speed. [steps/s]
      */
-    const ParameterSet& getParameterSet() const;
-
-    /** Max. number of parameter sets. */
-    static const uint8_t MAX_SETS = 4U;
+    void setTargetSpeeds(int16_t leftMotor, int16_t rightMotor);
 
 protected:
 private:
-    uint8_t      m_currentSetId;      /**< Set id of current selected set. */
-    ParameterSet m_parSets[MAX_SETS]; /**< All parameter sets */
+    /** Flag: State is active. */
+    bool m_isActive;
 
     /**
      * Default constructor.
      */
-    ParameterSets();
+    DrivingState() : IState(), m_isActive(false)
+    {
+    }
 
     /**
      * Default destructor.
      */
-    ~ParameterSets();
+    ~DrivingState()
+    {
+    }
 
     /* Not allowed. */
-    ParameterSets(const ParameterSets& set);            /**< Copy construction of an instance. */
-    ParameterSets& operator=(const ParameterSets& set); /**< Assignment of an instance. */
+    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
+    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* PARAMETER_SET_H */
+#endif /* DRIVING_STATE_H */
 /** @} */
