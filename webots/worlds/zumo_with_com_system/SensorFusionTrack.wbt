@@ -2,9 +2,10 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "../protos/Zumo32U4.proto"
-EXTERNPROTO "../protos/SensorFusionTrack.proto"
-IMPORTABLE EXTERNPROTO "../protos/Supervisor.proto"
+EXTERNPROTO "../../protos/Zumo32U4.proto"
+EXTERNPROTO "../../protos/ZumoComSystem.proto"
+EXTERNPROTO "../../protos/SensorFusionTrack.proto"
+IMPORTABLE EXTERNPROTO "../../protos/Supervisor.proto"
 
 WorldInfo {
   info [
@@ -38,6 +39,11 @@ DEF ROBOT Zumo32U4 {
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "Zumo"
   contactMaterial "rubber"
+}
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystem"
 }
 Supervisor {
   name "Supervisor"
