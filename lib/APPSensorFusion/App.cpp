@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Util.h>
+#include <Logging.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -67,6 +68,7 @@
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
+    Logging::disable();
 
     /* Initialize HAL */
     Board::getInstance().init();
