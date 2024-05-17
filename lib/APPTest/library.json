@@ -12,10 +12,6 @@
     ],
     "license": "MIT",
     "dependencies": [{
-        "owner": "BlueAndi",
-        "name": "ZumoHALInterfaces",
-        "version": "~0.1.1"
-    }, {
         "name": "Service"
     }],
     "frameworks": "*",

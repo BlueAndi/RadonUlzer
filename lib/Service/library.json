@@ -9,11 +9,7 @@
         "maintainer": true
     }],
     "license": "MIT",
-    "dependencies": [{
-        "owner": "BlueAndi",
-        "name": "ZumoHALInterfaces",
-        "version": "~0.1.1"
-    }],
+    "dependencies": [],
     "frameworks": "*",
     "platforms": "*"
 }

@@ -13,14 +13,6 @@
     "license": "MIT",
     "dependencies": [{
         "name": "Service"
-    }, {
-        "owner": "BlueAndi",
-        "name": "ZumoHALInterfaces",
-        "version": "~0.1.1"
-    }, {
-        "owner": "gabryelreyes",
-        "name": "SerialMuxProt",
-        "version": "^2.0.0"
     }],
     "frameworks": "*",
     "platforms": "*"

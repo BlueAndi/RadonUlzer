@@ -10,10 +10,6 @@
     }],
     "license": "MIT",
     "dependencies": [{
-        "owner": "BlueAndi",
-        "name": "ZumoHALWebots",
-        "version": "~0.1.1"
-    }, {
         "name": "Webots"
     }],
     "frameworks": "*",
