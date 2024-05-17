@@ -912,8 +912,6 @@ INPUT                  = mainpage.dox \
                          ../../src \
                          ../../lib/APPLineFollower \
                          ../../lib/Service \
-                         ../../lib/HALSim \
-                         ../../lib/HALInterfaces \
                          ../../lib/HALLineFollowerSim
 
 # This tag can be used to specify the character encoding of the source files
