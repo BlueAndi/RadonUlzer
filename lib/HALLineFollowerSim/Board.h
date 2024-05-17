@@ -61,6 +61,7 @@
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
 #include <SimTime.h>
+#include <WebotsSerialDrv.h>
 
 #ifdef DEBUG_ODOMETRY
 #include <Sender.h>
@@ -240,73 +241,6 @@ public:
     }
 
 private:
-    /** Name of the speaker in the robot simulation. */
-    static const char* SPEAKER_NAME;
-
-    /** Name of the display in the robot simulation. */
-    static const char* DISPLAY_NAME;
-
-    /** Name of the left motor in the robot simulation. */
-    static const char* LEFT_MOTOR_NAME;
-
-    /** Name of the right motor in the robot simulation. */
-    static const char* RIGHT_MOTOR_NAME;
-
-    /** Name of the infrared emitter 0 in the robot simulation. */
-    static const char* EMITTER_0_NAME;
-
-    /** Name of the infrared emitter 1 in the robot simulation. */
-    static const char* EMITTER_1_NAME;
-
-    /** Name of the infrared emitter 2 in the robot simulation. */
-    static const char* EMITTER_2_NAME;
-
-    /** Name of the infrared emitter 3 in the robot simulation. */
-    static const char* EMITTER_3_NAME;
-
-    /** Name of the infrared emitter 4 in the robot simulation. */
-    static const char* EMITTER_4_NAME;
-
-    /** Name of the position sensor of the left motor in the robot simulation. */
-    static const char* POS_SENSOR_LEFT_NAME;
-
-    /** Name of the position sensor of the right motor in the robot simulation. */
-    static const char* POS_SENSOR_RIGHT_NAME;
-
-    /** Name of the light sensor 0 in the robot simulation. */
-    static const char* LIGHT_SENSOR_0_NAME;
-
-    /** Name of the light sensor 1 in the robot simulation. */
-    static const char* LIGHT_SENSOR_1_NAME;
-
-    /** Name of the light sensor 2 in the robot simulation. */
-    static const char* LIGHT_SENSOR_2_NAME;
-
-    /** Name of the light sensor 3 in the robot simulation. */
-    static const char* LIGHT_SENSOR_3_NAME;
-
-    /** Name of the light sensor 4 in the robot simulation. */
-    static const char* LIGHT_SENSOR_4_NAME;
-
-    /** Name of the red LED in the robot simulation. */
-    static const char* LED_RED_NAME;
-
-    /** Name of the yellow LED in the robot simulation. */
-    static const char* LED_YELLOW_NAME;
-
-    /** Name of the green LED in the robot simulation. */
-    static const char* LED_GREEN_NAME;
-
-    /** Name of the front proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_LEFT_NAME;
-
-    /** Name of the front right proximity sensor in the robot simulation. */
-    static const char* PROXIMITY_SENSOR_FRONT_RIGHT_NAME;
-
-#ifdef DEBUG_ODOMETRY
-    /** Name of the sender to the webots supervisor. */
-    static const char* SENDER_NAME;
-#endif /* DEBUG_ODOMETRY */
 
     /** Simulated roboter instance. */
     webots::Robot m_robot;
@@ -390,6 +324,17 @@ private:
     Keyboard& getKeyboard()
     {
         return m_keyboard;
+    }
+
+    /**
+     * Get the simulation serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSerial()
+    {
+        /* Not supported. */
+        return nullptr;
     }
 
     /**

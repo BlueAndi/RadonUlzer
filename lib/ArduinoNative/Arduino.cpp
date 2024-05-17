@@ -39,16 +39,15 @@
 
 #include <time.h>
 
-#else
+#else /* UNIT_TEST */
 
 #include <Board.h>
 #include <webots/Robot.hpp>
 #include <Keyboard.h>
-#include "SocketServer.h"
 #include <getopt.h>
 #include <Logging.h>
 
-#endif
+#endif /* UNIT_TEST */
 
 /******************************************************************************
  * Compiler Switches
@@ -67,14 +66,15 @@
 /** This type defines the possible program arguments. */
 typedef struct
 {
-    const char* socketServerPort;   /**< Socket server port */
-    const char* robotName;          /**< Robot name */
-    bool        isSerialOverSocket; /**< Is serial communication over socket? */
-    bool        verbose;            /**< Show verbose information */
+    const char* robotName;              /**< Robot name */
+    bool        isZumoComSystemEnabled; /**< Is the ZumoComSystem enabled? */
+    const char* serialRxChannel;        /**< Serial Rx channel */
+    const char* serialTxChannel;        /**< Serial Tx channel */
+    bool        verbose;                /**< Show verbose information */
 
 } PrgArguments;
 
-#endif
+#endif /* UNIT_TEST */
 
 /******************************************************************************
  * Prototypes
@@ -88,7 +88,7 @@ extern void loop();
 static int  handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv);
 static void showPrgArguments(const PrgArguments& prgArgs);
 
-#endif
+#endif /* UNIT_TEST */
 
 /******************************************************************************
  * Local Variables
@@ -113,22 +113,26 @@ static const int MAX_TIME_STEP = 10;
  */
 static SimTime* gSimTime = nullptr;
 
+/** Supported long program arguments. */
+static const struct option LONG_OPTIONS[] = {{"help", no_argument, nullptr, 0},
+                                             {"serialRxCh", required_argument, nullptr, 0},
+                                             {"serialTxCh", required_argument, nullptr, 0},
+                                             {nullptr, no_argument, nullptr, 0}}; /* Marks the end. */
+
 /** Program argument default value of the robot name. */
 static const char* PRG_ARG_ROBOT_NAME_DEFAULT = "";
 
-/** Default port used for socket communications. */
-static const char* PRG_ARG_SOCKET_SERVER_PORT_DEFAULT = "65432";
+/** Program argument default value of the flag whether the ZumoComSystem is enabled or not. */
+static bool PRG_ARG_IS_ZUMO_COM_SYSTEM_ENABLED_DEFAULT = false;
+
+/** Program argument default value of the serial rx channel. */
+static const char PRG_ARG_SERIAL_RX_CH_DEFAULT[] = "1";
+
+/** Program argument default value of the serial tx channel. */
+static const char PRG_ARG_SERIAL_TX_CH_DEFAULT[] = "2";
 
 /** Program argument default value of the verbose flag. */
 static bool PRG_ARG_VERBOSE_DEFAULT = false;
-
-/** Program argument default value of the serial over socket flag. */
-static bool PRG_ARG_IS_SERIAL_OVER_SOCKET_DEFAULT = false;
-
-/**
- * Maximum number of socket connections.
- */
-static const uint8_t SOCKET_SERVER_MAX_CONNECTIONS = 1U;
 
 #endif /* UNIT_TEST */
 
@@ -175,14 +179,15 @@ extern void delay(unsigned long ms)
     }
 }
 
-#else
+#else /* UNIT_TEST */
 
 extern int main(int argc, char** argv)
 {
-    int          status   = 0;
-    Keyboard&    keyboard = Board::getInstance().getKeyboard();
-    PrgArguments prgArguments;
-    SocketServer socketStream;
+    int              status    = 0;
+    Board&           board     = Board::getInstance();
+    Keyboard&        keyboard  = board.getKeyboard();
+    WebotsSerialDrv* simSerial = board.getSimSerial();
+    PrgArguments     prgArguments;
 
     printf("\n*** Radon Ulzer ***\n");
 
@@ -200,31 +205,32 @@ extern int main(int argc, char** argv)
             showPrgArguments(prgArguments);
         }
 
-        /* Enable socket server? */
-        if (true == prgArguments.isSerialOverSocket)
+        /* It might happen that the user enables the ZumoComSystem, but the
+         * choosen application doesn't support it.
+         */
+        if ((nullptr == simSerial) && (true == prgArguments.isZumoComSystemEnabled))
         {
-            if (false == socketStream.init(prgArguments.socketServerPort, SOCKET_SERVER_MAX_CONNECTIONS))
-            {
-                printf("Error initializing SocketServer.\n");
-                status = -1;
-            }
-            else
-            {
-                if (true == prgArguments.verbose)
-                {
-                    printf("SocketServer ready on port %s.\n", prgArguments.socketServerPort);
-                }
+            printf("Warning: The application doesn't support the ZumoComSystem.\n");
 
-                Serial.setStream(socketStream);
-                Logging::disable();
-            }
+            prgArguments.isZumoComSystemEnabled = false;
         }
 
-        if (0 == status)
+        /* Is ZumoComSystem enabled? */
+        if ((nullptr != simSerial) && (true == prgArguments.isZumoComSystemEnabled))
         {
-            /* Get simulation time handler. It will be used by millis() and delay(). */
-            gSimTime = &Board::getInstance().getSimTime();
+            /* Set serial rx/tx channels for communication with the ZumoComSystem. */
+            simSerial->setRxChannel(atoi(prgArguments.serialRxChannel));
+            simSerial->setTxChannel(atoi(prgArguments.serialTxChannel));
+
+            /* Use the serial interface for ZumoComSystem communication and not for
+             * logging.
+             */
+            Serial.setStream(*simSerial);
+            Logging::disable();
         }
+
+        /* Get simulation time handler. It will be used by millis() and delay(). */
+        gSimTime = &board.getSimTime();
     }
 
     if (0 != status)
@@ -249,12 +255,12 @@ extern int main(int argc, char** argv)
          */
 
         /* Enable all simulation devices. Must be done before any other access to the devices. */
-        Board::getInstance().enableSimulationDevices();
+        board.enableSimulationDevices();
 
         /* Do one single simulation step to force that all sensors will deliver already data.
          * Otherwise e.g. the position sensor will provide NaN.
          * This must be done before setup() is called!
-         * 
+         *
          * Prerequisite: The sensors must be enabled!
          */
         if (false == gSimTime->step())
@@ -271,7 +277,6 @@ extern int main(int argc, char** argv)
             {
                 keyboard.getPressedButtons();
                 loop();
-                socketStream.process();
             }
         }
     }
@@ -314,30 +319,48 @@ extern void delay(unsigned long ms)
 static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char** argv)
 {
     int         status           = 0;
-    const char* availableOptions = "p:n:hs";
+    const char* availableOptions = "n:cnvh";
     const char* programName      = argv[0];
-    int         option           = getopt(argc, argv, availableOptions);
+    int         optionIndex      = 0;
+    int         option           = getopt_long(argc, argv, availableOptions, LONG_OPTIONS, &optionIndex);
 
     /* Set default values */
-    prgArguments.socketServerPort   = PRG_ARG_SOCKET_SERVER_PORT_DEFAULT;
-    prgArguments.robotName          = PRG_ARG_ROBOT_NAME_DEFAULT;
-    prgArguments.verbose            = PRG_ARG_VERBOSE_DEFAULT;
-    prgArguments.isSerialOverSocket = PRG_ARG_IS_SERIAL_OVER_SOCKET_DEFAULT;
+    prgArguments.robotName              = PRG_ARG_ROBOT_NAME_DEFAULT;
+    prgArguments.isZumoComSystemEnabled = PRG_ARG_IS_ZUMO_COM_SYSTEM_ENABLED_DEFAULT;
+    prgArguments.serialRxChannel        = PRG_ARG_SERIAL_RX_CH_DEFAULT;
+    prgArguments.serialTxChannel        = PRG_ARG_SERIAL_TX_CH_DEFAULT;
+    prgArguments.verbose                = PRG_ARG_VERBOSE_DEFAULT;
 
     while ((-1 != option) && (0 == status))
     {
         switch (option)
         {
+        case 0: /* Long option */
+
+            if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "help"))
+            {
+                status = -1;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "serialRxCh"))
+            {
+                prgArguments.serialRxChannel = optarg;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "serialTxCh"))
+            {
+                prgArguments.serialTxChannel = optarg;
+            }
+            else
+            {
+                status = -1;
+            }
+            break;
+
+        case 'c': /* Is ZumoComSystem enabled? */
+            prgArguments.isZumoComSystemEnabled = true;
+            break;
+
         case 'n': /* Name */
             prgArguments.robotName = optarg;
-            break;
-
-        case 'p': /* SocketServer Port */
-            prgArguments.socketServerPort = optarg;
-            break;
-
-        case 's': /* Is serial over socket? */
-            prgArguments.isSerialOverSocket = true;
             break;
 
         case 'v': /* Verbose */
@@ -355,19 +378,21 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             break;
         }
 
-        option = getopt(argc, argv, availableOptions);
+        option = getopt_long(argc, argv, availableOptions, LONG_OPTIONS, &optionIndex);
     }
 
     /* Does the user need help? */
     if (0 > status)
     {
         printf("Usage: %s <option(s)>\nOptions:\n", programName);
-        printf("\t-h\t\t\tShow this help message.\n");                /* Help */
-        printf("\t-n <NAME>\t\tSet robot name.\n");                   /* Robot Name */
-        printf("\t-p <PORT NUMBER>\tSet SocketServer port.");         /* SocketServer Port */
-        printf(" Default: %s\n", PRG_ARG_SOCKET_SERVER_PORT_DEFAULT); /* SocketServer port default value */
-        printf("\t-s\t\t\tEnable serial over socket.\n");             /* Flag */
-        printf("\t-v\t\t\tVerbose mode.\n");                          /* Flag */
+        printf("\t-h\t\t\tShow this help message.\n");                                /* Help */
+        printf("\t-n <NAME>\t\tSet robot name.\n");                                   /* Robot Name */
+        printf("\t-c\t\t\tEnable ZumoComSystem. Default: Disabled\n");                /* Flag */
+        printf("\t--serialRxCh <CHANNEL>\t\tSet serial rx channel (ZumoComSystem)."); /* Serial rx channel */
+        printf(" Default: %s\n", PRG_ARG_SERIAL_RX_CH_DEFAULT); /* Serial rx channel default value */
+        printf("\t--serialTxCh <CHANNEL>\t\tSet serial tx channel (ZumoComSystem)."); /* Serial txchannel */
+        printf(" Default: %s\n", PRG_ARG_SERIAL_TX_CH_DEFAULT); /* Serial tx channel default value */
+        printf("\t-v\t\t\tVerbose mode. Default: Disabled\n");  /* Flag */
     }
 
     return status;
@@ -380,10 +405,11 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
  */
 static void showPrgArguments(const PrgArguments& prgArgs)
 {
-    printf("Robot name        : %s\n", prgArgs.robotName);
-    printf("SocketServer Port : %s\n", prgArgs.socketServerPort);
-    printf("Serial over socket: %s\n", (false == prgArgs.isSerialOverSocket) ? "disabled" : "enabled");
+    printf("Robot name       : %s\n", prgArgs.robotName);
+    printf("ZumoComSystem    : %s\n", (false == prgArgs.isZumoComSystemEnabled) ? "disabled" : "enabled");
+    printf("Serial rx channel: %s\n", prgArgs.serialRxChannel);
+    printf("Serial tx channel: %s\n", prgArgs.serialTxChannel);
     /* Skip verbose flag. */
 }
 
-#endif
+#endif /* UNIT_TEST */

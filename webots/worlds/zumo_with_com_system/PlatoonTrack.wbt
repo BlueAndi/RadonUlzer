@@ -2,10 +2,11 @@
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
-EXTERNPROTO "../protos/Zumo32U4.proto"
-EXTERNPROTO "../protos/PlatoonTrack.proto"
-EXTERNPROTO "../protos/Supervisor.proto"
-EXTERNPROTO "../protos/Obstacle.proto"
+EXTERNPROTO "../../protos/Zumo32U4.proto"
+EXTERNPROTO "../../protos/ZumoComSystem.proto"
+EXTERNPROTO "../../protos/PlatoonTrack.proto"
+EXTERNPROTO "../../protos/Supervisor.proto"
+EXTERNPROTO "../../protos/Obstacle.proto"
 
 WorldInfo {
   info [
@@ -41,17 +42,32 @@ DEF LEADER Zumo32U4 {
   name "leader"
   contactMaterial "rubber"
 }
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemLeader"
+}
 DEF FOLLOWER1 Zumo32U4 {
   translation -3.15 -1.2 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "follower_1"
   contactMaterial "rubber"
 }
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemFollower1"
+}
 DEF FOLLOWER2 Zumo32U4 {
   translation -3.15 -1.35 0.013994298332013683
   rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
   name "follower_2"
   contactMaterial "rubber"
+}
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemFollower2"
 }
 Supervisor {
   name "PlatoonSupervisor"
