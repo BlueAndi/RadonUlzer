@@ -10,9 +10,9 @@
     }],
     "license": "MIT",
     "dependencies": [{
-        "name": "HALInterfaces"
-    }, {
-        "name": "HALSim"
+        "owner": "BlueAndi",
+        "name": "ZumoHALWebots",
+        "version": "~0.1.1"
     }, {
         "name": "Webots"
     }],

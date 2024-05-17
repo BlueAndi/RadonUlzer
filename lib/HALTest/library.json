@@ -10,7 +10,9 @@
     }],
     "license": "MIT",
     "dependencies": [{
-        "name": "HALInterfaces"
+        "owner": "BlueAndi",
+        "name": "ZumoHALInterfaces",
+        "version": "~0.1.1"
     }, {
         "name": "HALInterfacesTest"
     }],
