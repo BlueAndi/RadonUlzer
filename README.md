@@ -166,10 +166,12 @@ Example for the **LineFollowerTarget** application:
 
 # Used Libraries
 
-| Library                                                                 | Description                               | License |
-| ----------------------------------------------------------------------- | ----------------------------------------- | ------- |
-| [Zumo32U4 library](https://github.com/pololu/zumo-32u4-arduino-library) | Provides access to the Zumo32U4 hardware. | MIT     |
-| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)          | Multiplexing Communication Protocol       | MIT     |
+| Library                                                            | Description                                          | License |
+| ------------------------------------------------------------------ | ---------------------------------------------------- | ------- |
+| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)     | Multiplexing Communication Protocol                  | MIT     |
+| [ZumoHALATmega32u4](https://github.com/BlueAndi/ZumoHALATmega32u4) | C++ HAL for ATmega32u4 on the Pololu Zumo32u4        | MIT     |
+| [ZumoHALInterfaces](https://github.com/BlueAndi/ZumoHALInterfaces) | Abstract C++ HAL interfaces                          | MIT     |
+| [ZumoHALWebots](https://github.com/BlueAndi/ZumoHALWebots)         | C++ HAL for Webots simulation of the Pololu Zumo32u4 | MIT     |
 
 # Issues, Ideas And Bugs
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
