@@ -12,14 +12,14 @@ Application ...> HAL: <<access>>
 Service ..> HAL: <<access>>
 
 package "HAL" as halDetail {
-    package HALInterfaces
-    package HALTarget
-    package HALSim
+    package ZumoHALInterfaces
+    package ZumoHALATmega32u4
+    package ZumoHALWebots
     package HALTest
 
-    HALInterfaces <|.. HALTarget: <<realize>>
-    HALInterfaces <|.. HALSim: <<realize>>
-    HALInterfaces <|.. HALTest: <<realize>>
+    ZumoHALInterfaces <|.. ZumoHALATmega32u4: <<realize>>
+    ZumoHALInterfaces <|.. ZumoHALWebots: <<realize>>
+    ZumoHALInterfaces <|.. HALTest: <<realize>>
 }
 
 HAL -[hidden]-- halDetail
