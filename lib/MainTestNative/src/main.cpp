@@ -25,100 +25,83 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Arduino native
+ * @brief  Main entry point
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <stdio.h>
 #include <Arduino.h>
-#include "Terminal.h"
-
-/******************************************************************************
- * Compiler Switches
- *****************************************************************************/
+#include <time.h>
 
 /******************************************************************************
  * Macros
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
 
-extern void setup();
-extern void loop();
+static unsigned long getSystemTick();
+static void          systemDelay(unsigned long ms);
 
 /******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/** Terminal/Console stream. */
-static Terminal gTerminalStream;
-
-/** Serial driver, used by Arduino applications. */
-Serial_ Serial(gTerminalStream);
-
-/** Function pointer to get the system tick in ms. */
-static GetSystemTick gGetSystemTickFunc = nullptr;
-
-/** Function pointer to delay for some time in ms. */
-static SystemDelay gSystemDelayFunc = nullptr;
-
-/******************************************************************************
- * Public Methods
+ * Variables
  *****************************************************************************/
 
 /******************************************************************************
- * Protected Methods
+ * External functions
  *****************************************************************************/
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-void Arduino::setup(GetSystemTick getSystemTickFunc, SystemDelay systemDelayFunc)
+/**
+ * Main program entry point.
+ *
+ * @param[in] argc  Number of arguments
+ * @param[in] argv  Array of arguments
+ *
+ * @return Status
+ */
+extern int main(int argc, char** argv)
 {
-    gGetSystemTickFunc = getSystemTickFunc;
-    gSystemDelayFunc   = systemDelayFunc;
+    Arduino::setup(getSystemTick, systemDelay);
+    Arduino::loop();
 
-    ::setup();
+    return 0;
 }
 
-void Arduino::loop()
+/******************************************************************************
+ * Local functions
+ *****************************************************************************/
+
+/**
+ * Get the system tick in ms.
+ *
+ * @return Timestamp (system tick) in ms
+ */
+static unsigned long getSystemTick()
 {
-    ::loop();
+    clock_t now = clock();
+
+    return (now * 1000UL) / CLOCKS_PER_SEC;
 }
 
-extern unsigned long millis()
+/**
+ * Delay for a specific time in ms.
+ *
+ * @param[in] ms    Time in ms.
+ */
+static void systemDelay(unsigned long ms)
 {
-    unsigned long timestamp = 0U;
+    unsigned long timestamp = millis();
 
-    if (nullptr != gGetSystemTickFunc)
+    while ((millis() - timestamp) < ms)
     {
-        timestamp = gGetSystemTickFunc();
-    }
-
-    return timestamp;
-}
-
-extern void delay(unsigned long ms)
-{
-    if (nullptr != gSystemDelayFunc)
-    {
-        gSystemDelayFunc(ms);
+        ;
     }
 }
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/

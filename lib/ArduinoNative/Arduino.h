@@ -69,9 +69,34 @@
  * Types and Classes
  *****************************************************************************/
 
+/**
+ * This type defines the prototype to get the system tick counter in ms.
+ */
+typedef unsigned long (*GetSystemTick)();
+
+/**
+ * This type defines the prototype to delay for a specific time in ms.
+ */
+typedef void (*SystemDelay)(unsigned long ms);
+
 /******************************************************************************
  * Functions
  *****************************************************************************/
+
+/** Arduino internal specific functionality.*/
+namespace Arduino
+{
+    /**
+     * Setup the Arduino library and call the application setup() function.
+     */
+    void setup(GetSystemTick getSystemTickFunc, SystemDelay systemDelayFunc);
+
+    /**
+     * Loop shall be called periodically and handles Arduino library
+     * functionality and call the application loop() function.
+     */
+    void loop();
+}
 
 /**
  * Returns the number of milliseconds passed since the system start.
