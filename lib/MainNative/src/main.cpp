@@ -269,6 +269,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             }
             break;
 
+        case 'c': /* Is ZumoComSystem enabled? */
+            prgArguments.isZumoComSystemEnabled = true;
+            break;
+
         case 'n': /* Name */
             prgArguments.robotName = optarg;
             break;
