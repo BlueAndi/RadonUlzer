@@ -148,7 +148,7 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mm/s^2 via the
      * multiplication with a sensitivity factor in mm/s^2/digit.
      */
-    const void getAccelerationValues(IMUData* accelerationValues) final
+    void getAccelerationValues(IMUData* accelerationValues) const final
     {
     }
 
@@ -159,7 +159,7 @@ public:
      * direction will be written into. The values can be converted into physical values in mrad/s via the multiplication
      * with a sensitivity factor in mrad/s/digit.
      */
-    const void getTurnRates(IMUData* turnRates) final
+    void getTurnRates(IMUData* turnRates) const final
     {
     }
 
@@ -170,7 +170,7 @@ public:
      * x, y and z direction will be written into. The values can be converted into physical values in mgauss via the
      * multiplication with a sensitivity factor in mgauss/digit.
      */
-    const void getMagnetometerValues(IMUData* magnetometerValues) final
+    void getMagnetometerValues(IMUData* magnetometerValues) const final
     {
     }
 
