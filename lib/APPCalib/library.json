@@ -11,8 +11,6 @@
     "license": "MIT",
     "dependencies": [{
         "name": "Service"
-    }, {
-        "name": "HALInterfaces"
     }],
     "frameworks": "*",
     "platforms": "*"

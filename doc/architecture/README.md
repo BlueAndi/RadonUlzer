@@ -93,9 +93,10 @@ Improvement for better accuracy:
 ![speedometer](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/Speedometer.plantuml)
 
 ### HAL
-The hardware abstraction layer (HAL) for the target is shown. For the simulation and the test only the realization part is different and may base on other 3rd party components.
-
-![hal](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/HAL.plantuml)
+The hardware abstraction layer (HAL) depends on the target.
+* **ATmega32u4 on the Zumo32u4**: [ZumoHALATmega32u4](https://github.com/BlueAndi/ZumoHALATmega32u4)
+* **Zumo in Webots**: [ZumoHALWebots](https://github.com/BlueAndi/ZumoHALWebots)
+* **Zumo Test**: [HALTest](/lib/HALTest/)
 
 ## Process View
 

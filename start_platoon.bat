@@ -6,6 +6,8 @@ cd /d %~dp0
 
 set WEBOTS_CONTROLLER="%WEBOTS_HOME%\msys64\mingw64\bin\webots-controller.exe"
 set PROGRAM_NAME=program.exe
+set CONVOY_LEADER_RX_CHANNEL=1
+set CONVOY_LEADER_TX_CHANNEL=2
 
 set CONVOY_LEADER_PIO_ENV_NAME=ConvoyLeaderSim
 set CONVOY_LEADER_PIO_PATH=.pio\build\%CONVOY_LEADER_PIO_ENV_NAME%

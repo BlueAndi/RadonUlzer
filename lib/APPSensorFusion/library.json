@@ -11,19 +11,9 @@
         }
     ],
     "license": "MIT",
-    "dependencies": [
-        {
-            "name": "Service"
-        },
-        {
-            "name": "HALInterfaces"
-        },
-        {
-            "owner": "gabryelreyes",
-            "name": "SerialMuxProt",
-            "version": "^2.0.0"
-        }
-    ],
+    "dependencies": [{
+        "name": "Service"
+    }],
     "frameworks": "*",
     "platforms": "*"
 }

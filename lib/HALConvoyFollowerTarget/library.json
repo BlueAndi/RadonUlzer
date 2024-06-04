@@ -9,15 +9,7 @@
         "maintainer": true
     }],
     "license": "MIT",
-    "dependencies": [{
-        "name": "HALInterfaces"
-    }, {
-        "name": "HALTarget"
-    }, {
-        "owner": "pololu",
-        "name": "Zumo32U4",
-        "version": "^2.0.1"
-    }],
+    "dependencies": [],
     "frameworks": "arduino",
     "platforms": "*"
 }
