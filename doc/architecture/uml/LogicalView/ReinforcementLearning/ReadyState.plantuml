@@ -1,0 +1,65 @@
+@startuml
+
+title Ready State
+
+package "Application" as appLayer {
+
+    class ReadyState <<control>> {
+        + {static} getInstance() : ReadyState
+        + entry() : void
+        + process(sm : StateMachine&) : void
+        + exit() : void
+        + setLapTIme(lapTime : uint32_t)  void
+    }
+
+    class TrainingState <<control>>
+    class RacingState <<control>>
+    ReadyState .r.> RacingState: <<use>>
+    ReadyState .l.> TrainingState: <<use>>
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+        interface IDisplay {
+            + {abstract} clear() : void
+            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
+            + {abstract} print(str : const String&) : size_t
+            + {abstract} print(str : const char[]) : size_t
+            + {abstract} print(value : uint8_t) : size_t
+            + {abstract} print(value : uint16_t) : size_t
+            + {abstract} print(value : uint32_t) : size_t
+            + {abstract} print(value : int8_t) : size_t
+            + {abstract} print(value : int16_t) : size_t
+            + {abstract} print(value : int32_t) : size_t
+        }
+
+        interface IButton {
+            + {abstract} isPressed() : bool
+            + {abstract} waitForRelease() : void
+        }
+
+        interface ILineSensors {
+            + {abstract} init() : void
+            + {abstract} calibrate() : void
+            + {abstract} readLine() : int16_t
+            + {abstract} getSensorValues() : const uint16_t*
+            + {abstract} getNumLineSensors() const : uint8_t
+            + {abstract} getSensorValueMax() const : uint16_t
+        }
+    }
+
+    class Board << namespace >> {
+        + getDisplay() : IDisplay&
+        + getButtonA() : IButton&
+        + getButtonB() : IButton&
+        + getLineSensors() : ILineSensors&
+    }
+}
+
+ReadyState ..> IDisplay: <<use>>
+ReadyState ..> IButton: <<use>>
+ReadyState ..> ILineSensors: <<use>>
+ReadyState ..> Board:: <<use>>
+
+@enduml

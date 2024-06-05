@@ -1,0 +1,103 @@
+@startuml
+
+title Application
+
+package "Application" as appLayer {
+
+    class App <<main>> {
+        + setup() : void
+        + loop() : void
+    }
+
+    note left of App
+        The program entry point.
+    end note
+
+    class StateMachine <<control>> {
+        + setState(state : IState*) : void
+        + getState() : IState*
+        + process() : void
+    }
+
+    note left of StateMachine
+        The state machine executes always one
+        state exclusive. It is responsible to
+        enter/leave/process a state.
+    end note
+
+    interface IState {
+        + {abstract} entry() : void
+        + {abstract} process(sm : StateMachine&) : void
+        + {abstract} exit() : void
+    }
+
+    note left of IState
+        Defines the abstract state interface,
+        which forces every inherited class
+        to realize it.
+    end note
+
+    class StartupState <<control>>
+    class MotorSpeedCalibrationState <<control>>
+    class LineSensorsCalibrationState <<control>>
+    class ErrorState <<control>>
+    class DringState <<control>>
+    class ReadyState <<control>>
+    class TrainingState <<control>>
+
+    note bottom of StartupState
+        The system starts up and shows
+        the Applikation name on the display.
+    end note
+
+    note bottom of MotorSpeedCalibrationState
+        The robot drives with full speed forward
+        and with full speed backwar to determine
+        the max speed in steps/s. The slowest
+        motor is considered!
+    end note
+
+    note bottom of LineSensorsCalibrationState
+        The robot turns several times the
+        line sensors over the track for
+        calibration.
+    end note
+
+    note bottom of ErrorState
+        Error information is shown on display.
+        Confirmation from operator is requested.
+    end note
+
+    note bottom of DringState
+        The robot follows the line.
+    end note
+
+    note bottom of ReadyState
+        The robot is stopped and waits for
+        operator input.
+    end note
+
+    note bottom of TrainingState
+       the robot trains to follow the line.
+    end note
+}
+
+note top of  appLayer
+    Hint: See the application state behaviour
+    in the corresponding state diagram.
+end note
+
+App *--> StateMachine
+
+StateMachine o--> "0..1" IState
+
+IState <|.. StartupState: <<realize>>
+IState <|.... MotorSpeedCalibrationState: <<realize>>
+IState <|.. LineSensorsCalibrationState: <<realize>>
+IState <|.... ErrorState: <<realize>>
+IState <|.. ReadyState: <<realize>>
+IState <|.... TrainingState: <<realize>>
+IState <|.... DringState: <<realize>>
+
+
+@enduml
