@@ -168,6 +168,7 @@ Example for the **LineFollowerTarget** application:
 
 | Library                                                            | Description                                          | License |
 | ------------------------------------------------------------------ | ---------------------------------------------------- | ------- |
+| [ArduinoNative](https://github.com/BlueAndi/ArduinoNative)         | The Arduino for native environment.                  | MIT     |
 | [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)     | Multiplexing Communication Protocol                  | MIT     |
 | [ZumoHALATmega32u4](https://github.com/BlueAndi/ZumoHALATmega32u4) | C++ HAL for ATmega32u4 on the Pololu Zumo32u4        | MIT     |
 | [ZumoHALInterfaces](https://github.com/BlueAndi/ZumoHALInterfaces) | Abstract C++ HAL interfaces                          | MIT     |
