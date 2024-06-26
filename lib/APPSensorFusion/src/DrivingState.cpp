@@ -58,22 +58,9 @@
  * Prototypes
  *****************************************************************************/
 
-#ifdef DEBUG_ALGORITHM
-static void logCsvDataTitles(uint8_t length);
-static void logCsvDataTimestamp();
-static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t pos, int16_t pos3, bool isPos3Valid);
-void        logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus);
-static void logCsvDataSpeed(int16_t leftSpeed, int16_t rightSpeed);
-#endif /* DEBUG_ALGORITHM */
-
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-#ifdef DEBUG_ALGORITHM
-static int16_t gSpeedLeft  = 0;
-static int16_t gSpeedRight = 0;
-#endif /* DEBUG_ALGORITHM */
 
 const uint16_t DrivingState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
 
@@ -119,10 +106,6 @@ void DrivingState::entry()
     m_pidCtrl.setSampleTime(PID_PROCESS_PERIOD);
     m_pidCtrl.setLimits(-maxSpeed, maxSpeed);
     m_pidCtrl.setDerivativeOnMeasurement(false);
-
-#ifdef DEBUG_ALGORITHM
-    logCsvDataTitles(Board::getInstance().getLineSensors().getNumLineSensors());
-#endif /* DEBUG_ALGORITHM */
 }
 
 void DrivingState::process(StateMachine& sm)
@@ -139,11 +122,6 @@ void DrivingState::process(StateMachine& sm)
     int16_t         position3        = 0;
     bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
     bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
-
-#ifdef DEBUG_ALGORITHM
-    logCsvDataTimestamp();
-    logCsvData(lineSensorValues, numLineSensors, position, position3, isPosition3Valid);
-#endif /* DEBUG_ALGORITHM */
 
     /* If the position calculated with the inner sensors is not valid, the
      * position will be taken.
@@ -280,12 +258,6 @@ void DrivingState::process(StateMachine& sm)
         /* Change to ready state. */
         sm.setState(&ReadyState::getInstance());
     }
-
-#ifdef DEBUG_ALGORITHM
-    logCsvDataTrackStatus(nextTrackStatus);
-    logCsvDataSpeed(gSpeedLeft, gSpeedRight);
-    printf("\n");
-#endif /* DEBUG_ALGORITHM */
 
     /* Take over values for next cycle. */
     m_trackStatus  = nextTrackStatus;
@@ -716,11 +688,6 @@ void DrivingState::adaptDriving(int16_t position, bool allowNegativeMotorSpeed)
     leftSpeed  = constrain(leftSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
     rightSpeed = constrain(rightSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
 
-#ifdef DEBUG_ALGORITHM
-    gSpeedLeft  = leftSpeed;
-    gSpeedRight = rightSpeed;
-#endif /* DEBUG_ALGORITHM */
-
     diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
 
@@ -757,139 +724,3 @@ bool DrivingState::isAbortRequired()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
-
-#ifdef DEBUG_ALGORITHM
-
-/**
- * Log the titles of each column as CSV data.
- *
- * @param[in] length Number of line sensors.
- */
-static void logCsvDataTitles(uint8_t length)
-{
-    uint8_t idx = 0;
-
-    printf("Timestamp");
-
-    while (length > idx)
-    {
-        printf(";Sensor %u", idx);
-
-        ++idx;
-    }
-
-    printf(";Position;Position3;Scenario;Speed Left; Speed Right\n");
-}
-
-/**
- * Log the timestamp as CSV data.
- */
-static void logCsvDataTimestamp()
-{
-    printf("%u;", millis());
-}
-
-/**
- * Log the sensor values and the calculated positions as CSV data.
- *
- * @param[in] lineSensorValues  The array of line sensor values.
- * @param[in] length            The number of line sensors.
- * @param[in] pos               The calculated position by all line sensors.
- * @param[in] pos3              The calculated position by the inner line sensors.
- * @param[in] isPos3Valid       Flag to see whether the inner line sensors position is valid or not.
- */
-static void logCsvData(const uint16_t* lineSensorValues, uint8_t length, int16_t pos, int16_t pos3, bool isPos3Valid)
-{
-    uint8_t idx = 0;
-
-    while (length > idx)
-    {
-        if (0 < idx)
-        {
-            printf(";");
-        }
-
-        printf("%u", lineSensorValues[idx]);
-
-        ++idx;
-    }
-
-    printf(";%d;", pos);
-
-    if (true == isPos3Valid)
-    {
-        printf("%d", pos3);
-    }
-}
-
-/**
- * Log the track status as CSV data.
- *
- * @param[in] trackStatus   The track status.
- */
-void logCsvDataTrackStatus(DrivingState::TrackStatus trackStatus)
-{
-    switch (trackStatus)
-    {
-    case DrivingState::TRACK_STATUS_NORMAL:
-        printf(";\"Normal\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_START_STOP_LINE:
-        printf(";\"Start-/Stop-line\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT:
-        printf(";\"Right angle curve left\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT:
-        printf(";\"Right angle curve right\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_SHARP_CURVE_LEFT:
-        printf(";\"Sharp curve left\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_SHARP_CURVE_RIGHT:
-        printf(";\"Sharp curve right\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_SHARP_CURVE_LEFT_TURN:
-        printf(";\"Sharp curve left turn\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_SHARP_CURVE_RIGHT_TURN:
-        printf(";\"Sharp curve right turn\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_TRACK_LOST_BY_GAP:
-        printf(";\"Track lost by gap\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE:
-        printf(";\"Track lost by manoeuvre\"");
-        break;
-
-    case DrivingState::TRACK_STATUS_FINISHED:
-        printf(";\"Track finished\"");
-        break;
-
-    default:
-        printf(";\"?\"");
-        break;
-    }
-}
-
-/**
- * Log the motor speed set points as CSV data.
- *
- * @param[in] leftSpeed     Right motor speed set point in steps/s.
- * @param[in] rightSpeed    Left motor speed set point in step/s.
- */
-static void logCsvDataSpeed(int16_t leftSpeed, int16_t rightSpeed)
-{
-    printf(";%d;%d", leftSpeed, rightSpeed);
-}
-
-#endif /* DEBUG_ALGORITHM */

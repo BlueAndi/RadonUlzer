@@ -326,16 +326,6 @@ private:
      * @return If abort is required, it will return true otherwise false.
      */
     bool isAbortRequired();
-
-
-#ifdef DEBUG_ALGORITHM
-    /**
-     * Required for debugging purposes.
-     * 
-     * @param[in] trackStatus   The track status.
-     */
-    friend void logCsvDataTrackStatus(TrackStatus trackStatus);
-#endif /* DEBUG_ALGORITHM */
 };
 
 /******************************************************************************
