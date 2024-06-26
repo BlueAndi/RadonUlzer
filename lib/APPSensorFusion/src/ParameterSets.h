@@ -115,7 +115,7 @@ public:
     const ParameterSet& getParameterSet() const;
 
     /** Max. number of parameter sets. */
-    static const uint8_t MAX_SETS = 3U;
+    static const uint8_t MAX_SETS = 4U;
 
 protected:
 private:
