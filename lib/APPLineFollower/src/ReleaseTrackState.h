@@ -111,9 +111,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    ReleaseTrackState(const ReleaseTrackState& state);            /**< Copy construction of an instance. */
-    ReleaseTrackState& operator=(const ReleaseTrackState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    ReleaseTrackState(const ReleaseTrackState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to ReleaseTrackState.
+     */
+    ReleaseTrackState& operator=(const ReleaseTrackState& state);
 
     /**
      * Show choosen parameter set on LCD.

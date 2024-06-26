@@ -159,9 +159,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    Speedometer(const Speedometer& value);            /**< Copy construction of an instance. */
-    Speedometer& operator=(const Speedometer& value); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] value Source instance.
+     */
+    Speedometer(const Speedometer& value);
+
+    /**
+     * Assignment operation.
+     * Not allowed.
+     *
+     * @param[in] value Right hand side instance.
+     *
+     * @returns Reference to Speedometerinstance.
+     */
+    Speedometer& operator=(const Speedometer& value);
 
     /**
      * Get the direction of movement left.

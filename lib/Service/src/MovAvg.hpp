@@ -151,9 +151,23 @@ private:
     uint8_t m_written;        /**< The number of written values to the list of values, till length is reached. */
     T       m_sum;            /**< Sum of all values */
 
-    /* Not allowed. */
-    MovAvg(const MovAvg& avg);            /**< Copy construction of an instance. */
-    MovAvg& operator=(const MovAvg& avg); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] avg source instance
+     */
+    MovAvg(const MovAvg& avg);
+
+    /**
+     * Assignment operation.
+     * Not allowed.
+     *
+     * @param[in] avg Right hand side instance.
+     *
+     * @return Reference to MovAvg instance
+     */
+    MovAvg& operator=(const MovAvg& avg);
 };
 
 /******************************************************************************
