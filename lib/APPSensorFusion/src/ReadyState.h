@@ -116,9 +116,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    ReadyState(const ReadyState& state);            /**< Copy construction of an instance. */
-    ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    ReadyState(const ReadyState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to ErrorState instance.
+     */
+    ReadyState& operator=(const ReadyState& state);
 };
 
 /******************************************************************************

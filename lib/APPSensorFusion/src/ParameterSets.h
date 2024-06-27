@@ -132,9 +132,23 @@ private:
      */
     ~ParameterSets();
 
-    /* Not allowed. */
-    ParameterSets(const ParameterSets& set);            /**< Copy construction of an instance. */
-    ParameterSets& operator=(const ParameterSets& set); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] set Source instance.
+     */
+    ParameterSets(const ParameterSets& set);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] set Source instance.
+     *
+     * @returns Reference to ParameterSets.
+     */
+    ParameterSets& operator=(const ParameterSets& set);
 };
 
 /******************************************************************************

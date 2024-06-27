@@ -125,9 +125,23 @@ private:
      */
     void sendSensorData();
 
-    /* Not allowed. */
-    App(const App& app);            /**< Copy construction of an instance. */
-    App& operator=(const App& app); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] app Source instance.
+     */
+    App(const App& app);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] app Source instance.
+     *
+     * @returns Reference to App instance.
+     */
+    App& operator=(const App& app);
 };
 
 /******************************************************************************

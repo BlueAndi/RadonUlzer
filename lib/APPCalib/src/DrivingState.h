@@ -137,9 +137,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
-    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    DrivingState(const DrivingState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to DrivingState instance.
+     */
+    DrivingState& operator=(const DrivingState& state);
 };
 
 /******************************************************************************

@@ -250,17 +250,32 @@ private:
     {
     }
 
-    /* Not allowed. */
-    Odometry(const Odometry& value);            /**< Copy construction of an instance. */
-    Odometry& operator=(const Odometry& value); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] value source instance
+     */
+    Odometry(const Odometry& value);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] value Source instance.
+     *
+     * @return Reference to Odometry instance
+     */
+    Odometry& operator=(const Odometry& value);
 
     /**
      * Is the robot standstill?
      *
      * @param[in] absStepsLeft      Absolute steps left
      * @param[in] absStepsRight     Absolute steps right
+     *
+     * @return If standstill, it will return true otherwise false.
      */
-
     bool detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight);
 
     /**

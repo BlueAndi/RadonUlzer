@@ -6,4 +6,6 @@
 .vscode/extensions.json
 lib/Webots
 *.wbproj
+webots/worlds/*.jpg
+doc/doxygen/*/*
 __pycache__

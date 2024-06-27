@@ -123,9 +123,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    StartupState(const StartupState& state);            /**< Copy construction of an instance. */
-    StartupState& operator=(const StartupState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    StartupState(const StartupState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to StartupState instance.
+     */
+    StartupState& operator=(const StartupState& state);
 };
 
 /******************************************************************************

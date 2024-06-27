@@ -193,7 +193,7 @@ private:
     bool                   m_isStartStopLineDetected; /**< Is the start/stop line detected? */
     uint8_t                m_lastSensorIdSawTrack;    /**< The sensor id of the sensor which saw the track as last. */
     int16_t                m_lastPosition; /**< Last position, used to decide strategy in case of a track gap. */
-    bool                   m_isTrackLost; /**< Is the track lost? Lost means the line sensors didn't detect it. */
+    bool                   m_isTrackLost;  /**< Is the track lost? Lost means the line sensors didn't detect it. */
 
     /**
      * Default constructor.
@@ -207,9 +207,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
-    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    DrivingState(const DrivingState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to DrivingState.
+     */
+    DrivingState& operator=(const DrivingState& state);
 
     /**
      * Calculate the position with the inner 3 line sensors.
@@ -226,16 +240,17 @@ private:
      * Evaluate the situation by line sensor values and position and determine
      * the track status. The result influences the measures to keep track on
      * the line.
-     * 
+     *
      * @param[in] lineSensorValues  The line sensor values as array.
      * @param[in] length            The number of line sensor values.
      * @param[in] position          The position calculated with all sensors.
      * @param[in] position3         The position calculated with the inner 3 sensors only.
      * @param[in] isTrackLost       Information whether the track is lost or not.
-     * 
+     *
      * @return The track status result.
      */
-    TrackStatus evaluateSituation(const uint16_t* lineSensorValues, uint8_t length, int16_t position, int16_t position3, bool isTrackLost) const;
+    TrackStatus evaluateSituation(const uint16_t* lineSensorValues, uint8_t length, int16_t position, int16_t position3,
+                                  bool isTrackLost) const;
 
     /**
      * Is the start/stop line detected?

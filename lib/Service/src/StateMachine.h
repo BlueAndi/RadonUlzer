@@ -101,9 +101,23 @@ private:
     IState* m_currentState; /**< Current active state */
     IState* m_nextState;    /**< Next state */
 
-    /* Not allowed. */
-    StateMachine(const StateMachine& sm);            /**< Copy construction of an instance. */
-    StateMachine& operator=(const StateMachine& sm); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] sm Source instance.
+     */
+    StateMachine(const StateMachine& sm);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] sm Source instance.
+     *
+     * @returns Reference to StateMachine instance.
+     */
+    StateMachine& operator=(const StateMachine& sm);
 };
 
 /******************************************************************************

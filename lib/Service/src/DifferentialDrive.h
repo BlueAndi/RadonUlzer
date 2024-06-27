@@ -238,9 +238,23 @@ private:
         /* Never called. */
     }
 
-    /* Not allowed. */
-    DifferentialDrive(const DifferentialDrive& diffDrive);            /**< Copy construction of an instance. */
-    DifferentialDrive& operator=(const DifferentialDrive& diffDrive); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] diffDrive Source instance.
+     */
+    DifferentialDrive(const DifferentialDrive& diffDrive);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] diffDrive Source instance.
+     *
+     * @return Reference to DifferentialDrive instance.
+     */
+    DifferentialDrive& operator=(const DifferentialDrive& diffDrive);
 
     /**
      * Calculate the linear speed left and right from the linear speed center and
