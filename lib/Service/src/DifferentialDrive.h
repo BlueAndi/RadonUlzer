@@ -238,7 +238,7 @@ private:
         /* Never called. */
     }
 
-        /**
+    /**
      * Copy construction of an instance.
      * Not allowed.
      *

@@ -160,10 +160,10 @@ private:
     MovAvg(const MovAvg& avg);
 
     /**
-     * Assignment operation.
+     * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] avg Right hand side instance.
+     * @param[in] avg Source instance.
      *
      * @return Reference to MovAvg instance
      */

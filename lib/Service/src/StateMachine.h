@@ -110,10 +110,10 @@ private:
     StateMachine(const StateMachine& sm);
 
     /**
-     * Assignment operation.
+     * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] sm Right hand side instance.
+     * @param[in] sm Source instance.
      *
      * @returns Reference to StateMachine instance.
      */

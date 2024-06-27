@@ -146,7 +146,7 @@ private:
      * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] relEncoder Relative encoders instance, which shall be assigned.
+     * @param[in] relEncoder Source instance.
      *
      * @return Reference to relative encoders instance
      */

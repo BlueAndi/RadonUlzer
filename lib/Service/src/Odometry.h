@@ -259,10 +259,10 @@ private:
     Odometry(const Odometry& value);
 
     /**
-     * Assignment operation.
+     * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] value Right hand side instance.
+     * @param[in] value Source instance.
      *
      * @return Reference to Odometry instance
      */
