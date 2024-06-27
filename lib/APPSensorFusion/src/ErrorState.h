@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <stddef.h>
 #include <IState.h>
+#include "StartupState.h"
 
 /******************************************************************************
  * Macros
@@ -121,9 +122,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    ErrorState(const ErrorState& state);            /**< Copy construction of an instance. */
-    ErrorState& operator=(const ErrorState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    ErrorState(const ErrorState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to ErrorState instance.
+     */
+    ErrorState& operator=(const ErrorState& state);
 };
 
 /******************************************************************************

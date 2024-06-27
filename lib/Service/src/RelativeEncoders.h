@@ -128,10 +128,29 @@ private:
      */
     int16_t m_referencePointRight;
 
-    /* Not allowed. */
-    RelativeEncoders();                                              /**< Default constructor. */
-    RelativeEncoders(const RelativeEncoders& relEncoder);            /**< Copy construction of an instance. */
-    RelativeEncoders& operator=(const RelativeEncoders& relEncoder); /**< Assignment of an instance. */
+    /**
+     * Default constructor.
+     * Not allowed.
+     */
+    RelativeEncoders();
+
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] relEncoder Relative encoders instance, which shall be copied.
+     */
+    RelativeEncoders(const RelativeEncoders& relEncoder);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] relEncoder Source instance.
+     *
+     * @return Reference to relative encoders instance
+     */
+    RelativeEncoders& operator=(const RelativeEncoders& relEncoder);
 };
 
 /******************************************************************************

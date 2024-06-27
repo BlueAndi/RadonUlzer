@@ -131,9 +131,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    LineSensorsCalibrationState(const LineSensorsCalibrationState& state); /**< Copy construction of an instance. */
-    LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    LineSensorsCalibrationState(const LineSensorsCalibrationState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to LineSensorsCalibrationState.
+     */
+    LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state);
 
     /**
      * Turn and calibrate the line sensors.

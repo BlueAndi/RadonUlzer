@@ -40,6 +40,7 @@
 #include <Odometry.h>
 #include "ReadyState.h"
 #include "ParameterSets.h"
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -61,24 +62,40 @@
  * Local Variables
  *****************************************************************************/
 
+const uint16_t DrivingState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
+
+/* Calculate the position set point to be generic. */
+const int16_t DrivingState::POSITION_SET_POINT =
+    (SENSOR_VALUE_MAX * (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) / 2;
+
+/* Initialize the required sensor IDs to be generic. */
+const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
+const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
+
+/* Initialize the position values used by the algorithmic. */
+const int16_t DrivingState::POSITION_MIN = 0;
+const int16_t DrivingState::POSITION_MAX =
+    static_cast<int16_t>(Board::getInstance().getLineSensors().getNumLineSensors() - 1U) * 1000;
+const int16_t DrivingState::POSITION_MIDDLE_MIN = POSITION_SET_POINT - (SENSOR_VALUE_MAX / 2);
+const int16_t DrivingState::POSITION_MIDDLE_MAX = POSITION_SET_POINT + (SENSOR_VALUE_MAX / 2);
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
 void DrivingState::entry()
 {
-    /* Clear the Odometry Position in favor of reproducibility. */
-    Odometry::getInstance().clearPosition();
-    Odometry::getInstance().setOrientation(FP_PI() / 2);
-
     const ParameterSets::ParameterSet& parSet    = ParameterSets::getInstance().getParameterSet();
     DifferentialDrive&                 diffDrive = DifferentialDrive::getInstance();
     const int16_t                      maxSpeed  = diffDrive.getMaxMotorSpeed(); /* [steps/s] */
 
     m_observationTimer.start(OBSERVATION_DURATION);
     m_pidProcessTime.start(0); /* Immediate */
-    m_lineStatus  = LINE_STATUS_FIND_START_LINE;
-    m_trackStatus = TRACK_STATUS_ON_TRACK; /* Assume that the robot is placed on track. */
+    m_lineStatus              = LINE_STATUS_NO_START_LINE_DETECTED;
+    m_trackStatus             = TRACK_STATUS_NORMAL; /* Assume that the robot is placed on track. */
+    m_isTrackLost             = false;               /* Assume that the robot is placed on track. */
+    m_isStartStopLineDetected = false;
 
     /* Configure PID controller with selected parameter set. */
     m_topSpeed = parSet.topSpeed;
@@ -88,234 +105,363 @@ void DrivingState::entry()
     m_pidCtrl.setDFactor(parSet.kDNumerator, parSet.kDDenominator);
     m_pidCtrl.setSampleTime(PID_PROCESS_PERIOD);
     m_pidCtrl.setLimits(-maxSpeed, maxSpeed);
-    m_pidCtrl.setDerivativeOnMeasurement(true);
+    m_pidCtrl.setDerivativeOnMeasurement(false);
 }
 
 void DrivingState::process(StateMachine& sm)
 {
-    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
-    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
-    int16_t            position    = 0;
+    ILineSensors&      lineSensors             = Board::getInstance().getLineSensors();
+    DifferentialDrive& diffDrive               = DifferentialDrive::getInstance();
+    TrackStatus        nextTrackStatus         = m_trackStatus;
+    bool               allowNegativeMotorSpeed = true;
 
-    /* Get the position of the line. */
-    position = lineSensors.readLine();
+    /* Get the position of the line and each sensor value. */
+    int16_t         position         = lineSensors.readLine();
+    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+    uint8_t         numLineSensors   = lineSensors.getNumLineSensors();
+    int16_t         position3        = 0;
+    bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
+    bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
 
-    switch (m_trackStatus)
+    /* If the position calculated with the inner sensors is not valid, the
+     * position will be taken.
+     */
+    if (true == isPosition3Valid)
     {
-    case TRACK_STATUS_ON_TRACK:
-        processOnTrack(position, lineSensors.getSensorValues());
-        break;
-
-    case TRACK_STATUS_LOST:
-        processTrackLost(position, lineSensors.getSensorValues());
-        break;
-
-    case TRACK_STATUS_FINISHED:
-        /* Change to ready state. */
-        sm.setState(&ReadyState::getInstance());
-        break;
-
-    default:
-        /* Fatal error */
-        diffDrive.setLinearSpeed(0, 0);
-        Sound::playAlarm();
-        sm.setState(&ReadyState::getInstance());
-        break;
+        position3 = position;
     }
 
-    /* Max. time for finishing the track over? */
-    if ((TRACK_STATUS_FINISHED != m_trackStatus) && (true == m_observationTimer.isTimeout()))
+    /* ========================================================================
+     * Evaluate the situation based on the sensor values.
+     * ========================================================================
+     */
+    nextTrackStatus = evaluateSituation(lineSensorValues, numLineSensors, position, position3, isTrackLost);
+
+    /* ========================================================================
+     * Initiate measures depended on the situation.
+     * ========================================================================
+     */
+    processSituation(position, allowNegativeMotorSpeed, nextTrackStatus, position3);
+
+    /* If the tracks status changes, the PID integral and derivative part
+     * will be reset to provide a smooth reaction.
+     */
+    if (m_trackStatus != nextTrackStatus)
     {
-        m_trackStatus = TRACK_STATUS_FINISHED;
-
-        /* Stop motors immediately. Don't move this to a later position,
-         * as this would extend the driven length.
-         */
-        diffDrive.setLinearSpeed(0, 0);
-
-        Sound::playAlarm();
-    }
-}
-
-void DrivingState::exit()
-{
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-    diffDrive.disable();
-    m_observationTimer.stop();
-    Board::getInstance().getYellowLed().enable(false);
-}
-
-/* PROTECTED METHODES *****************************************************************************/
-
-/* PRIVATE METHODES *******************************************************************************/
-
-void DrivingState::processOnTrack(int16_t position, const uint16_t* lineSensorValues)
-{
-    if (nullptr == lineSensorValues)
-    {
-        return;
+        m_pidCtrl.clear();
     }
 
-    /* Track lost just in this moment? */
-    if (true == isTrackGapDetected(position))
+    /* ========================================================================
+     * Handle start-/stop-line actions.
+     * ========================================================================
+     */
+    if ((TRACK_STATUS_START_STOP_LINE != m_trackStatus) && (TRACK_STATUS_START_STOP_LINE == nextTrackStatus))
     {
-        m_trackStatus = TRACK_STATUS_LOST;
+        /* Start line detected? */
+        if (LINE_STATUS_NO_START_LINE_DETECTED == m_lineStatus)
+        {
+            /* Measure the lap time and use as start point the detected start line. */
+            m_lapTime.start(0);
+
+            m_lineStatus = LINE_STATUS_START_LINE_DETECTED;
+        }
+        /* Stop line detected. */
+        else
+        {
+            /* Calculate lap time and show it. */
+            ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
+
+            m_lineStatus    = LINE_STATUS_STOP_LINE_DETECTED;
+
+            /* Overwrite track status. */
+            nextTrackStatus = TRACK_STATUS_FINISHED;
+        }
+
+        /* Notify user about start-/stop-line detection. */
+        Sound::playBeep();
+    }
+
+    /* ========================================================================
+     * Handle track lost or back on track actions.
+     * ========================================================================
+     */
+
+    /* Track lost just in this process cycle? */
+    if ((false == m_isTrackLost) && (true == isTrackLost))
+    {
+        /* Notify user by yellow LED. */
+        Board::getInstance().getYellowLed().enable(true);
 
         /* Set mileage to 0, to be able to measure the max. distance, till
          * the track must be found again.
          */
         Odometry::getInstance().clearMileage();
-
-        /* Show the operator that the track is lost visual. */
-        Board::getInstance().getYellowLed().enable(true);
+    }
+    /* Track found again just in this process cycle? */
+    else if ((true == m_isTrackLost) && (false == isTrackLost))
+    {
+        Board::getInstance().getYellowLed().enable(false);
     }
     else
     {
-        /* Detect start-/endline */
-        if (true == isStartEndLineDetected(lineSensorValues))
-        {
-            /* Start line detected? */
-            if (LINE_STATUS_FIND_START_LINE == m_lineStatus)
-            {
-                m_lineStatus = LINE_STATUS_START_LINE_DETECTED;
-
-                Sound::playBeep();
-            }
-            /* End line detected */
-            else if (LINE_STATUS_FIND_END_LINE == m_lineStatus)
-            {
-                DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-                /* Stop motors immediately. Don't move this to a later position,
-                 * as this would extend the driven length.
-                 */
-                diffDrive.setLinearSpeed(0, 0);
-
-                Sound::playBeep();
-                m_trackStatus = TRACK_STATUS_FINISHED;
-
-            }
-            else
-            {
-                ;
-            }
-        }
-        else if (LINE_STATUS_START_LINE_DETECTED == m_lineStatus)
-        {
-            m_lineStatus = LINE_STATUS_FIND_END_LINE;
-        }
-        else
-        {
-            /* Be able to switch back to LINE_STATUS_FIND_END_LINE */
-            m_lineStatus = LINE_STATUS_FIND_END_LINE;
-        }
-
-        if (TRACK_STATUS_FINISHED != m_trackStatus)
-        {
-            if (true == m_pidProcessTime.isTimeout())
-            {
-                adaptDriving(position);
-
-                m_pidProcessTime.start(PID_PROCESS_PERIOD);
-            }
-        }
-    }
-}
-
-void DrivingState::processTrackLost(int16_t position, const uint16_t* lineSensorValues)
-{
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-    if (nullptr == lineSensorValues)
-    {
-        return;
+        ;
     }
 
-    /* Back on track? */
-    if (false == isTrackGapDetected(position))
-    {
-        m_trackStatus = TRACK_STATUS_ON_TRACK;
-        m_pidCtrl.resync();
+    /* ========================================================================
+     * Handle the abort conditions which will cause a alarm stop.
+     * ========================================================================
+     */
 
-        Board::getInstance().getYellowLed().enable(false);
-    }
-    /* Max. distance driven, but track still not found? */
-    else if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
+    /* Check whether the abort conditions are true. */
+    if (true == isAbortRequired())
     {
         /* Stop motors immediately. Don't move this to a later position,
          * as this would extend the driven length.
          */
         diffDrive.setLinearSpeed(0, 0);
 
-        Sound::playAlarm();
-        m_trackStatus = TRACK_STATUS_FINISHED;
+        Sound::playAlarm(); /* Blocking! */
+
+        /* Clear lap time. */
+        ReadyState::getInstance().setLapTime(0);
+
+        /* Overwrite track status. */
+        nextTrackStatus = TRACK_STATUS_FINISHED;
+    }
+
+    /* ========================================================================
+     * Handle driving based on position or normal stop condition.
+     * ========================================================================
+     */
+
+    /* Periodically adapt driving and check the abort conditions, except
+     * the round is finished.
+     */
+    if (TRACK_STATUS_FINISHED != nextTrackStatus)
+    {
+        /* Process the line follower PID controller periodically to adapt driving. */
+        if (true == m_pidProcessTime.isTimeout())
+        {
+            adaptDriving(position, allowNegativeMotorSpeed);
+
+            m_pidProcessTime.start(PID_PROCESS_PERIOD);
+        }
+    }
+    /* Finished. */
+    else
+    {
+        /* Stop motors immediately. Don't move this to a later position,
+         * as this would extend the driven length.
+         */
+        diffDrive.setLinearSpeed(0, 0);
+
+        /* Change to ready state. */
+        sm.setState(&ReadyState::getInstance());
+    }
+
+    /* Take over values for next cycle. */
+    m_trackStatus  = nextTrackStatus;
+    m_isTrackLost  = isTrackLost;
+    m_lastPosition = position;
+}
+
+void DrivingState::exit()
+{
+    m_observationTimer.stop();
+    Board::getInstance().getYellowLed().enable(false);
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+DrivingState::DrivingState() :
+    m_observationTimer(),
+    m_lapTime(),
+    m_pidProcessTime(),
+    m_pidCtrl(),
+    m_topSpeed(0),
+    m_lineStatus(LINE_STATUS_NO_START_LINE_DETECTED),
+    m_trackStatus(TRACK_STATUS_NORMAL),
+    m_isStartStopLineDetected(false),
+    m_lastSensorIdSawTrack(SENSOR_ID_MIDDLE),
+    m_lastPosition(0),
+    m_isTrackLost(false)
+{
+}
+
+bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const
+{
+    const int32_t WEIGHT      = SENSOR_VALUE_MAX;
+    bool          isValid     = true;
+    int32_t       numerator   = 0U;
+    int32_t       denominator = 0U;
+    int32_t       idxBegin    = 1;
+    int32_t       idxEnd      = length - 1;
+
+    for (int32_t idx = idxBegin; idx < idxEnd; ++idx)
+    {
+        int32_t sensorValue = static_cast<int32_t>(lineSensorValues[idx]);
+
+        numerator += idx * WEIGHT * sensorValue;
+        denominator += sensorValue;
+    }
+
+    if (0 == denominator)
+    {
+        isValid = false;
     }
     else
     {
-        /* Drive straight on. */
-        diffDrive.setLinearSpeed(m_topSpeed, m_topSpeed);
+        position = numerator / denominator;
     }
+
+    return isValid;
 }
 
-bool DrivingState::isStartEndLineDetected(const uint16_t* lineSensorValues)
+DrivingState::TrackStatus DrivingState::evaluateSituation(const uint16_t* lineSensorValues, uint8_t length,
+                                                          int16_t position, int16_t position3, bool isTrackLost) const
 {
-    bool           isDetected                  = false;
-    uint16_t       leftSensor                  = lineSensorValues[0];
-    uint16_t       middleSensor                = (lineSensorValues[1] + lineSensorValues[2] + lineSensorValues[3]) / 3;
-    uint16_t       rightSensor                 = lineSensorValues[4];
-    const uint8_t  DEBOUNCE_CNT                = 3;
-    const uint16_t LINE_SENSOR_OFF_TRACK_VALUE = 200;
+    TrackStatus nextTrackStatus = m_trackStatus;
 
-    /* Note, the start-/end line detection must be debounced. Otherwise
-     * especially in low speed use cases, the line may be in one cycle
-     * detected, in the next not and then detected again. This would lead
-     * to a start line detection and afterwards to a end line detection,
-     * which would be wrong.
-     *
-     * Note the three sensors in the middle are handled as one sensor to
-     * avoid detection problems with different kind of line widths.
-     */
-    if ((LINE_SENSOR_OFF_TRACK_VALUE <= leftSensor) && (LINE_SENSOR_OFF_TRACK_VALUE <= middleSensor) &&
-        (LINE_SENSOR_OFF_TRACK_VALUE <= rightSensor))
+    /* Driving over start-/stop-line? */
+    if (TRACK_STATUS_START_STOP_LINE == m_trackStatus)
     {
-        if (DEBOUNCE_CNT > m_startEndLineDebounce)
+        /* Left the start-/stop-line?
+         * If the robot is not exact on the start-/stop-line, the calculated position
+         * may misslead. Therefore additional the most left and right sensor values
+         * are evaluated too.
+         */
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position) &&
+            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
+            (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[SENSOR_ID_MOST_RIGHT]))
         {
-            ++m_startEndLineDebounce;
-        }
-
-        if (DEBOUNCE_CNT <= m_startEndLineDebounce)
-        {
-            isDetected = true;
+            nextTrackStatus = TRACK_STATUS_NORMAL;
         }
     }
+    /* Is the start-/stop-line detected? */
+    else if (true == isStartStopLineDetected(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_START_STOP_LINE;
+    }
+    else if (TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    else if (TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position) && (POSITION_MIDDLE_MAX >= position))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Sharp curve to the left expected? */
+    else if (TRACK_STATUS_SHARP_CURVE_LEFT == m_trackStatus)
+    {
+        /* Turn just before the robot leaves the line. */
+        if (true == isTrackLost)
+        {
+            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT_TURN;
+        }
+    }
+    /* Sharp curve to the right expected? */
+    else if (TRACK_STATUS_SHARP_CURVE_RIGHT == m_trackStatus)
+    {
+        /* Turn just before the robot leaves the line. */
+        if (true == isTrackLost)
+        {
+            nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT_TURN;
+        }
+    }
+    /* Sharp curve to the left turning now! */
+    else if (TRACK_STATUS_SHARP_CURVE_LEFT_TURN == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Sharp curve to the right turning now! */
+    else if (TRACK_STATUS_SHARP_CURVE_RIGHT_TURN == m_trackStatus)
+    {
+        if ((POSITION_MIDDLE_MIN <= position3) && (POSITION_MIDDLE_MAX >= position3))
+        {
+            nextTrackStatus = TRACK_STATUS_NORMAL;
+        }
+    }
+    /* Is the track lost or just a gap in the track? */
+    else if (true == isTrackLost)
+    {
+        const int16_t POS_MIN = POSITION_SET_POINT - SENSOR_VALUE_MAX;
+        const int16_t POS_MAX = POSITION_SET_POINT + SENSOR_VALUE_MAX;
+
+        /* If its a gap in the track, last position will be well. */
+        if ((POS_MIN <= m_lastPosition) && (POS_MAX > m_lastPosition))
+        {
+            nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_GAP;
+        }
+        else
+        {
+            /* In any other case, route the calculated position through and
+             * hope. It will be the position of the most left sensor or the
+             * most right sensor.
+             */
+            nextTrackStatus = TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE;
+        }
+    }
+    /* Right angle curve to left detected? */
+    else if (true == isRightAngleCurveToLeft(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT;
+    }
+    /* Right angle curve to right detected? */
+    else if (true == isRightAngleCurveToRight(lineSensorValues, length))
+    {
+        nextTrackStatus = TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT;
+    }
+    /* Sharp curve to left detected? */
+    else if (true == isSharpLeftCurveDetected(lineSensorValues, length, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_LEFT;
+    }
+    /* Sharp curve to right detected? */
+    else if (true == isSharpRightCurveDetected(lineSensorValues, length, position3))
+    {
+        nextTrackStatus = TRACK_STATUS_SHARP_CURVE_RIGHT;
+    }
+    /* Nothing special. */
     else
     {
-        m_startEndLineDebounce = 0;
+        /* Just follow the line by calculated position. */
+        nextTrackStatus = TRACK_STATUS_NORMAL;
     }
 
-    return isDetected;
+    return nextTrackStatus;
 }
 
-bool DrivingState::isTrackGapDetected(int16_t position) const
+bool DrivingState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
 {
-    bool                isDetected  = false;
-    const ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
 
-    /* Position value after loosing the track and sensor 0 saw it as last.
-     * It depends on the Zumo32U4LineSensors::readLine() implementation.
+    /*
+     * ===     =     ===
+     *   +   + + +   +
+     *   L     M     R
      */
-    const int16_t POS_MIN = 0;
-
-    /* Position value after loosing the track and sensor N saw it as last.
-     * It depends on the Zumo32U4LineSensors::readLine() implementation.
-     */
-    const int16_t POS_MAX = (lineSensors.getNumLineSensors() - 1) * 1000;
-
-    /* Note, no debouncing is done here. If necessary, it shall be done
-     * outside this method.
-     */
-    if ((POS_MIN >= position) || (POS_MAX <= position))
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE - 1U]) &&
+        (LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MIDDLE]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE + 1U]) &&
+        (LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]))
     {
         isDetected = true;
     }
@@ -323,14 +469,200 @@ bool DrivingState::isTrackGapDetected(int16_t position) const
     return isDetected;
 }
 
-void DrivingState::adaptDriving(int16_t position)
+bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
 {
-    DifferentialDrive&  diffDrive       = DifferentialDrive::getInstance();
-    const ILineSensors& lineSensors     = Board::getInstance().getLineSensors();
-    const int16_t       MAX_MOTOR_SPEED = diffDrive.getMaxMotorSpeed();
-    int16_t             speedDifference = 0; /* [steps/s] */
-    int16_t             leftSpeed       = 0; /* [steps/s] */
-    int16_t             rightSpeed      = 0; /* [steps/s] */
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_RIGHT;
+
+    /*
+     *
+     *   +   + + +   +
+     *   L     M     R
+     */
+    for (idx = SENSOR_ID_MOST_LEFT; idx <= SENSOR_ID_MOST_RIGHT; ++idx)
+    {
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE <= lineSensorValues[idx])
+        {
+            isDetected = false;
+            break;
+        }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isRightAngleCurveToLeft(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_LEFT;
+
+    /*
+     * =========
+     *   +   + + +   +
+     *   L     M     R
+     */
+    for (idx = SENSOR_ID_MOST_LEFT; idx <= SENSOR_ID_MIDDLE; ++idx)
+    {
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[idx])
+        {
+            isDetected = false;
+            break;
+        }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isRightAngleCurveToRight(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_RIGHT;
+
+    /*
+     *         =========
+     *   +   + + +   +
+     *   L     M     R
+     */
+    for (idx = SENSOR_ID_MIDDLE; idx <= SENSOR_ID_MOST_RIGHT; ++idx)
+    {
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE > lineSensorValues[idx])
+        {
+            isDetected = false;
+            break;
+        }
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isSharpLeftCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+
+    /*
+     *   =     =
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) && (POSITION_MIDDLE_MIN <= position3) &&
+        (POSITION_MIDDLE_MAX >= position3))
+    {
+        isDetected = true;
+    }
+
+    return isDetected;
+}
+
+bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, uint8_t length, int16_t position3) const
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+
+    /*
+     *         =     =
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]) && (POSITION_MIDDLE_MIN <= position3) &&
+        (POSITION_MIDDLE_MAX >= position3))
+    {
+        isDetected = true;
+    }
+
+    return isDetected;
+}
+
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+{
+    switch (trackStatus)
+    {
+    case TRACK_STATUS_NORMAL:
+        /* The position is used by default to follow the line. */
+        break;
+
+    case TRACK_STATUS_START_STOP_LINE:
+        /* Use the inner sensors only for driving to avoid jerky movements, caused
+         * by the most left or right sensor.
+         */
+        position = position3;
+
+        /* Avoid that the robot turns in place. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_RIGHT_ANGLE_CURVE_LEFT:
+        /* Enfore max. error in PID to turn sharp left at place. */
+        position = POSITION_MIN;
+        break;
+
+    case TRACK_STATUS_RIGHT_ANGLE_CURVE_RIGHT:
+        /* Enfore max. error in PID to turn sharp right at place. */
+        position = POSITION_MAX;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_LEFT:
+        /* Stratey is to drive till the end of the curve with the inner sensors.
+         * Then a hard in place turn will appear, see TRACK_STATUS_SHARP_CURVE_LEFT_TURN.
+         */
+        position = position3;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_RIGHT:
+        /* Stratey is to drive till the end of the curve with the inner sensors.
+         * Then a hard in place turn will appear, see TRACK_STATUS_SHARP_CURVE_LEFT_TURN.
+         */
+        position = position3;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_LEFT_TURN:
+        /* Enfore max. error in PID to turn sharp left at place. */
+        position = POSITION_MIN;
+        break;
+
+    case TRACK_STATUS_SHARP_CURVE_RIGHT_TURN:
+        /* Enfore max. error in PID to turn sharp right at place. */
+        position = POSITION_MAX;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_GAP:
+        /* Overwrite the positin to drive straight forward in hope to see the
+         * line again.
+         */
+        position = POSITION_SET_POINT;
+
+        /* Avoid that the robots turns. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE:
+        /* If the track is lost by a robot manoeuvre and not becase the track
+         * has a gap, the last position given by most left or right sensor
+         * will be automatically used to find the track again.
+         * 
+         * See ILineSensors::readLine() description regarding the behaviour in
+         * case the line is not detected anymore.
+         */
+        break;
+
+    case TRACK_STATUS_FINISHED:
+        /* Nothing to do. */
+        break;
+
+    default:
+        /* Should never happen. */
+        break;
+    }
+}
+
+void DrivingState::adaptDriving(int16_t position, bool allowNegativeMotorSpeed)
+{
+    DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
+    const int16_t      MAX_MOTOR_SPEED = diffDrive.getMaxMotorSpeed();
+    const int16_t      MIN_MOTOR_SPEED = (false == allowNegativeMotorSpeed) ? 0 : (-MAX_MOTOR_SPEED);
+    int16_t            speedDifference = 0; /* [steps/s] */
+    int16_t            leftSpeed       = 0; /* [steps/s] */
+    int16_t            rightSpeed      = 0; /* [steps/s] */
 
     /* Our "error" is how far we are away from the center of the
      * line, which corresponds to position (max. line sensor value multiplied
@@ -338,7 +670,7 @@ void DrivingState::adaptDriving(int16_t position)
      *
      * Get motor speed difference using PID terms.
      */
-    speedDifference = m_pidCtrl.calculate(lineSensors.getSensorValueMax() * 2, position);
+    speedDifference = m_pidCtrl.calculate(POSITION_SET_POINT, position);
 
     /* Get individual motor speeds.  The sign of speedDifference
      * determines if the robot turns left or right.
@@ -353,19 +685,37 @@ void DrivingState::adaptDriving(int16_t position)
      * might want to allow the motor speed to go negative so that
      * it can spin in reverse.
      */
-    leftSpeed  = constrain(leftSpeed, 0, MAX_MOTOR_SPEED);
-    rightSpeed = constrain(rightSpeed, 0, MAX_MOTOR_SPEED);
+    leftSpeed  = constrain(leftSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
+    rightSpeed = constrain(rightSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
 
     diffDrive.setLinearSpeed(leftSpeed, rightSpeed);
 }
 
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
+bool DrivingState::isAbortRequired()
+{
+    bool isAbort = false;
 
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
+    /* If track is lost over a certain distance, abort driving. */
+    if (true == m_isTrackLost)
+    {
+        /* Max. distance driven, but track still not found? */
+        if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
+        {
+            isAbort = true;
+        }
+    }
+
+    /* If track is not finished over a certain time, abort driving. */
+    if (TRACK_STATUS_FINISHED != m_trackStatus)
+    {
+        if (true == m_observationTimer.isTimeout())
+        {
+            isAbort = true;
+        }
+    }
+
+    return isAbort;
+}
 
 /******************************************************************************
  * External Functions

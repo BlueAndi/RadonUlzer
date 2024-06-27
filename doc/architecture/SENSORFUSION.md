@@ -3,11 +3,8 @@
 * [General](#general)
   * [SerialMuxProt Channels](#serialmuxprot-channels)
     * [Tx channel "SENSOR\_DATA"](#tx-channel-sensor_data)
-    * [Tx channel "END\_LINE"](#tx-channel-end_line)
 * [SW Architecture](#sw-architecture)
   * [Logical View](#logical-view)
-    * [Application](#application)
-    * [HAL](#hal)
   * [Process View](#process-view)
 * [Abbreviations](#abbreviations)
 * [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
@@ -30,40 +27,22 @@ This channel is used to send raw sensor data used for Sensor Fusion on the ZumoC
 
 * The datatypes can be found in SerialMuxChannel.h.
 * Order:
-  * Acceleration in X (raw sensor value in digits)
-  * Acceleration in Y (raw sensor value in digits)
-  * Turnrate around Z (raw sensor value in digits)
-  * Magnetometer value in X (raw sensor value in digits)
-  * Magnetometer value in Y (raw sensor value in digits)
-  * Angle calculated by Odometry (in mrad)
   * Position in X calculated by Odometry (in mm)
   * Position in Y calculated by Odometry (in mm)
+  * Orientation calculated by Odometry (in mrad)
+  * Acceleration in X (raw sensor value in digits)
+  * Turnrate around Z (raw sensor value in digits)
   * Time passed since the last sensor value (in ms)
 * Endianess: Big endian
-
-### Tx channel "END_LINE"
-This channel is used to send a flag to signal that a new End Line has been detected. This is used for testing purposes. 
-The only content that is sent is a boolean variable with the value true. 
 
 # SW Architecture
 The following part contains the specific details of the SensorFusion application.
 
 ## Logical View
 
-### Application
-The application uses the same [States](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md) as the Line Follower Application.
-
-### HAL
-Some changes have been made to the HAL compared to the HAL of the other Applications.
-ButtonB, ButtonC, LedYellow, LedRed, the Display and the ProximitySensors have been removed in the App specific HAL. 
-The Buzzer Component can not be removed since it is used inside the Service Layer. Instead, the Buzzer is replaced with a Dummy Buzzer without any Functionality.
-![HALSensorFusion](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_SensorFusion.puml)
-
-An IMU has been added:
-![HALIMU](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/SensorFusion/HAL_IMU.puml)
+The States are similar to the [Linefollower Application](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md)
 
 ## Process View
-Compared to the System States of the [Linefollower Application](https://github.com/BlueAndi/RadonUlzer/blob/main/doc/architecture/LINEFOLLOWER.md), the only change that has been made is that the detection of an end line does not trigger a change of state from DrivingState to ReadyState. This is done for testing purposes.  
 ![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/ProcessView/SensorFusion/SystemStates.puml)
 
 # Abbreviations

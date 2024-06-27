@@ -27,7 +27,7 @@
 /**
  * @brief  Simple timer
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Service
  *
  * @{
@@ -81,6 +81,8 @@ public:
      * Default assignment operator.
      *
      * @param[in] timer The timer to be assigned.
+     *
+     * @return Reference of this timer.
      */
     SimpleTimer& operator=(const SimpleTimer& timer)
     {
@@ -138,6 +140,8 @@ public:
     /**
      * Get current duration in ms, till the timer was started.
      * It is independed of whether the timer is stopped or timeout.
+     *
+     * @return Current duration in ms
      */
     uint32_t getCurrentDuration() const;
 

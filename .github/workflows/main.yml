@@ -182,7 +182,7 @@ jobs:
       uses: ts-graphviz/setup-graphviz@v2
 
     - name: Set up doxygen and generate documentation for ${{ matrix.environment }}
-      uses: mattnotmitt/doxygen-action@v1.9.5
+      uses: mattnotmitt/doxygen-action@v1.9.8
       with:
         working-directory: './doc/doxygen'
         doxyfile-path: './${{ matrix.environment }}Doxyfile'
