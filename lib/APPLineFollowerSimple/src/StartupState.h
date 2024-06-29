@@ -98,9 +98,9 @@ private:
      */
     enum UserInfo
     {
-        USER_INFO_TEAM_NAME = 0,   /**< Show the team name. */
-        USER_INFO_UI,              /**< Show the user interface. */
-        USER_INFO_COUNT            /**< Number of user infos. */
+        USER_INFO_TEAM_NAME = 0, /**< Show the team name. */
+        USER_INFO_UI,            /**< Show the user interface. */
+        USER_INFO_COUNT          /**< Number of user infos. */
     };
 
     /**
@@ -112,11 +112,16 @@ private:
     bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
     SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
     UserInfo    m_userInfoState; /**< Current user info state. */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    StartupState() : m_isMaxMotorSpeedCalibAvailable(false), m_timer(), m_userInfoState(USER_INFO_TEAM_NAME)
+    StartupState() :
+        m_isMaxMotorSpeedCalibAvailable(false),
+        m_timer(),
+        m_userInfoState(USER_INFO_TEAM_NAME),
+        m_isButtonAPressed(false)
     {
     }
 

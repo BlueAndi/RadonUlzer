@@ -36,8 +36,8 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include "LineSensorsCalibrationState.h"
-#include "Sound.h"
-#include <DifferentialDrive.h>
+#include <Sound.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -74,9 +74,8 @@ void StartupState::process(StateMachine& sm)
     IButton& buttonA = board.getButtonA();
 
     /* Start line sensor calibration? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
         sm.setState(&LineSensorsCalibrationState::getInstance());
     }
 

@@ -105,11 +105,12 @@ private:
     static const size_t ERROR_MSG_SIZE = 20;
 
     char m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
+    bool m_isButtonAPressed;         /**< Is the button A pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ErrorState() : m_errorMsg()
+    ErrorState() : m_errorMsg(), m_isButtonAPressed(false)
     {
         m_errorMsg[0] = '\0';
     }

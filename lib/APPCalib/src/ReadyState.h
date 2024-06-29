@@ -115,11 +115,20 @@ private:
     SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
     UserInfo    m_userInfoState; /**< Current user info state. */
     SimpleTimer m_releaseTimer;  /**< Release timer */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
+    bool        m_isButtonCPressed; /**< Is the button C pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ReadyState() : m_timer(), m_userInfoState(USER_INFO_DRIVE_FORWARD), m_releaseTimer()
+    ReadyState() :
+        m_timer(),
+        m_userInfoState(USER_INFO_DRIVE_FORWARD),
+        m_releaseTimer(),
+        m_isButtonAPressed(false),
+        m_isButtonBPressed(false),
+        m_isButtonCPressed(false)
     {
     }
 

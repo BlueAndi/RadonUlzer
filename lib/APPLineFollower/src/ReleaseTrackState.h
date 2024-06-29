@@ -95,12 +95,13 @@ private:
     /** Track release timer duration in ms. */
     static const uint32_t TRACK_RELEASE_DURATION = 5000;
 
-    SimpleTimer m_releaseTimer; /**< Track release timer */
+    SimpleTimer m_releaseTimer;     /**< Track release timer */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ReleaseTrackState()
+    ReleaseTrackState() : m_releaseTimer(), m_isButtonAPressed(false)
     {
     }
 
