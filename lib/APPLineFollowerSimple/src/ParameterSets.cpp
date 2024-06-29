@@ -94,45 +94,45 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
         "PD VF", /* Name - VF: very fast */
-        400,     /* Top speed in steps/s */
-        4,       /* Kp Numerator */
-        1,       /* Kp Denominator */
+        400,     /* Top speed in digits */
+        1,       /* Kp Numerator */
+        3,       /* Kp Denominator */
         0,       /* Ki Numerator */
         1,       /* Ki Denominator */
-        60,      /* Kd Numerator */
+        10,      /* Kd Numerator */
         1        /* Kd Denominator */
     };
 
     m_parSets[1] = {
         "PD F", /* Name - F: fast */
-        300,    /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
+        300,    /* Top speed in digits */
+        1,      /* Kp Numerator */
+        3,      /* Kp Denominator */
         0,      /* Ki Numerator */
         1,      /* Ki Denominator */
-        50,     /* Kd Numerator */
+        10,     /* Kd Numerator */
         1       /* Kd Denominator */
     };
 
     m_parSets[2] = {
         "PD S", /* Name - S: slow */
-        200,    /* Top speed in steps/s */
-        2,      /* Kp Numerator */
-        1,      /* Kp Denominator */
+        200,    /* Top speed in digits */
+        1,      /* Kp Numerator */
+        3,      /* Kp Denominator */
         0,      /* Ki Numerator */
         1,      /* Ki Denominator */
-        40,     /* Kd Numerator */
-        1       /* Kd Denominator */
+        1,      /* Kd Numerator */
+        10      /* Kd Denominator */
     };
 
     m_parSets[3] = {
         "PD VS", /* Name - VS: very slow */
-        100,     /* Top speed in steps/s */
-        3,       /* Kp Numerator */
-        2,       /* Kp Denominator */
+        100,     /* Top speed in digits */
+        1,       /* Kp Numerator */
+        4,       /* Kp Denominator */
         0,       /* Ki Numerator */
         1,       /* Ki Denominator */
-        30,      /* Kd Numerator */
+        0,       /* Kd Numerator */
         1        /* Kd Denominator */
     };
 }
