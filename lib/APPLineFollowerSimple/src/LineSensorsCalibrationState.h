@@ -46,6 +46,8 @@
 #include <IState.h>
 #include <SimpleTimer.h>
 #include <FPMath.h>
+#include <RelativeEncoders.h>
+#include <RobotConstants.h>
 
 /******************************************************************************
  * Macros
@@ -108,19 +110,24 @@ private:
     static const uint32_t WAIT_TIME = 1000;
 
     /**
-     * Calibration turn angle in mrad (corresponds to 72°).
+     * Calibration turn angle in encoder steps (corresponds to 72°).
      */
-    static const int32_t CALIB_ANGLE = (FP_2PI() / 5);
+    static const int32_t CALIB_ANGLE =
+        (((72 * 3 * RobotConstants::WHEEL_BASE) / 360) * RobotConstants::ENCODER_STEPS_PER_M) / 1000;
 
-    SimpleTimer m_timer;            /**< Timer used to wait, until the calibration drive starts. */
-    Phase       m_phase;            /**< Current calibration phase */
-    int16_t     m_calibrationSpeed; /**< Speed in steps/s for the calibration drive. */
-    int32_t     m_orientation;      /**< Orientation at the begin of the calibration in [mrad]. */
+    SimpleTimer      m_timer;            /**< Timer used to wait, until the calibration drive starts. */
+    Phase            m_phase;            /**< Current calibration phase */
+    int16_t          m_calibrationSpeed; /**< Speed in digits for the calibration drive. */
+    RelativeEncoders m_relEncoders;      /**< Relative encoders to measure turn angle. */
 
     /**
      * Default constructor.
      */
-    LineSensorsCalibrationState() : m_timer(), m_phase(PHASE_1_WAIT), m_calibrationSpeed(0), m_orientation(0)
+    LineSensorsCalibrationState() :
+        m_timer(),
+        m_phase(PHASE_1_WAIT),
+        m_calibrationSpeed(0),
+        m_relEncoders(Board::getInstance().getEncoders())
     {
     }
 

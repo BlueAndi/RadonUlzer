@@ -207,6 +207,18 @@ private:
     DrivingState& operator=(const DrivingState& state);
 
     /**
+     * Calculate the position with the inner 3 line sensors.
+     *
+     * @param[out]  position            The position result.
+     * @param[in]   lineSensorValues    Array of line sensor values.
+     * @param[in]   length              Array length.
+     *
+     * @return If successful, it will return true otherwise false.
+     */
+    bool calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const;
+
+
+    /**
      * Evaluate the situation by line sensor values and position and determine
      * the track status. The result influences the measures to keep track on
      * the line.
@@ -240,6 +252,19 @@ private:
      * @return If no line is detected, it will return true otherwise false.
      */
     bool isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
+
+    /**
+     * Process the situation and decide which measures to take.
+     * Measures will influence the position or whether its allowed to have
+     * a negative motor speed.
+     *
+     * @param[in, out]  position                    The position calculated with all sensors in digits.
+     * @param[out]      allowNegativeMotorSpeed     Allow negative motor speed or not.
+     * @param[in]       trackStatus                 The evaluated track status.
+     * @param[in]       position3                   The position calculated with the inner sensors in digits.
+     */
+    void processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3);
+
 
     /**
      * Adapt driving by using a PID algorithm, depended on the position

@@ -94,7 +94,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 {
     m_parSets[0] = {
         "PD VF", /* Name - VF: very fast */
-        4000,    /* Top speed in steps/s */
+        400,     /* Top speed in steps/s */
         4,       /* Kp Numerator */
         1,       /* Kp Denominator */
         0,       /* Ki Numerator */
@@ -105,7 +105,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 
     m_parSets[1] = {
         "PD F", /* Name - F: fast */
-        3000,   /* Top speed in steps/s */
+        300,    /* Top speed in steps/s */
         2,      /* Kp Numerator */
         1,      /* Kp Denominator */
         0,      /* Ki Numerator */
@@ -116,7 +116,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 
     m_parSets[2] = {
         "PD S", /* Name - S: slow */
-        2000,   /* Top speed in steps/s */
+        200,    /* Top speed in steps/s */
         2,      /* Kp Numerator */
         1,      /* Kp Denominator */
         0,      /* Ki Numerator */
@@ -127,7 +127,7 @@ ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
 
     m_parSets[3] = {
         "PD VS", /* Name - VS: very slow */
-        1000,    /* Top speed in steps/s */
+        100,     /* Top speed in steps/s */
         3,       /* Kp Numerator */
         2,       /* Kp Denominator */
         0,       /* Ki Numerator */

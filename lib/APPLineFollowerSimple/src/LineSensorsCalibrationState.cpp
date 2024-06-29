@@ -34,8 +34,6 @@
  *****************************************************************************/
 #include "LineSensorsCalibrationState.h"
 #include <Board.h>
-#include <DifferentialDrive.h>
-#include <Odometry.h>
 #include <StateMachine.h>
 #include <Util.h>
 #include "ReadyState.h"
@@ -67,10 +65,10 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&          display     = Board::getInstance().getDisplay();
-    DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
-    Odometry&          odometry    = Odometry::getInstance();
-    ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
+    IBoard&       board       = Board::getInstance();
+    IMotors&      motors      = board.getMotors();
+    IDisplay&     display     = board.getDisplay();
+    ILineSensors& lineSensors = board.getLineSensors();
 
     display.clear();
     display.print("Run");
@@ -78,11 +76,11 @@ void LineSensorsCalibrationState::entry()
     display.print("LCAL");
 
     /* Prepare calibration drive. */
-    m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 4;
-    m_orientation      = odometry.getOrientation();
+    m_calibrationSpeed = motors.getMaxSpeed() / 4;
 
     /* Mandatory for each new calibration. */
     lineSensors.resetCalibration();
+    m_relEncoders.clear();
 
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
@@ -91,7 +89,8 @@ void LineSensorsCalibrationState::entry()
 
 void LineSensorsCalibrationState::process(StateMachine& sm)
 {
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    IBoard&  board  = Board::getInstance();
+    IMotors& motors = board.getMotors();
 
     switch (m_phase)
     {
@@ -99,7 +98,7 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
         if (true == m_timer.isTimeout())
         {
             m_phase = PHASE_2_TURN_LEFT;
-            diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
+            motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
         }
         break;
 
@@ -107,7 +106,7 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
         if (true == turnAndCalibrate(CALIB_ANGLE, true))
         {
             m_phase = PHASE_3_TURN_RIGHT;
-            diffDrive.setLinearSpeed(m_calibrationSpeed, -m_calibrationSpeed);
+            motors.setSpeeds(m_calibrationSpeed, -m_calibrationSpeed);
         }
         break;
 
@@ -115,7 +114,7 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
         if (true == turnAndCalibrate(-CALIB_ANGLE, false))
         {
             m_phase = PHASE_4_TURN_ORIG;
-            diffDrive.setLinearSpeed(-m_calibrationSpeed, m_calibrationSpeed);
+            motors.setSpeeds(-m_calibrationSpeed, m_calibrationSpeed);
         }
         break;
 
@@ -123,7 +122,7 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
         if (true == turnAndCalibrate(0, true))
         {
             m_phase = PHASE_5_FINISHED;
-            diffDrive.setLinearSpeed(0, 0);
+            motors.setSpeeds(0, 0);
             finishCalibration(sm);
         }
         break;
@@ -150,9 +149,9 @@ void LineSensorsCalibrationState::exit()
 
 bool LineSensorsCalibrationState::turnAndCalibrate(int32_t calibAlpha, bool isGreaterEqual)
 {
-    ILineSensors& lineSensors = Board::getInstance().getLineSensors();
-    Odometry&     odometry    = Odometry::getInstance();
-    int32_t       alpha       = odometry.getOrientation() - m_orientation; /* [mrad] */
+    IBoard&       board       = Board::getInstance();
+    IMotors&      motors      = board.getMotors();
+    ILineSensors& lineSensors = board.getLineSensors();
     bool          isSuccesful = false;
 
     /* Continously calibrate the line sensors. */
@@ -162,7 +161,7 @@ bool LineSensorsCalibrationState::turnAndCalibrate(int32_t calibAlpha, bool isGr
     if (false == isGreaterEqual)
     {
         /* Is alpha lower or equal than the destination calibration angle? */
-        if (calibAlpha >= alpha)
+        if (calibAlpha >= m_relEncoders.getCountsRight())
         {
             isSuccesful = true;
         }
@@ -170,7 +169,7 @@ bool LineSensorsCalibrationState::turnAndCalibrate(int32_t calibAlpha, bool isGr
     else
     {
         /* Is alpha greater or equal than the destination calibration angle? */
-        if (calibAlpha <= alpha)
+        if (calibAlpha <= m_relEncoders.getCountsRight())
         {
             isSuccesful = true;
         }

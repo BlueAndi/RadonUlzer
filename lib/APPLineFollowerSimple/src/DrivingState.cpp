@@ -120,6 +120,8 @@ void DrivingState::process(StateMachine& sm)
     int16_t         position         = lineSensors.readLine();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         numLineSensors   = lineSensors.getNumLineSensors();
+    int16_t         position3        = 0;
+    bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
     bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
 
     /* ========================================================================
@@ -127,6 +129,12 @@ void DrivingState::process(StateMachine& sm)
      * ========================================================================
      */
     nextTrackStatus = evaluateSituation(lineSensorValues, numLineSensors, position, isTrackLost);
+
+    /* ========================================================================
+     * Initiate measures depended on the situation.
+     * ========================================================================
+     */
+    processSituation(position, allowNegativeMotorSpeed, nextTrackStatus, position3);
 
     /* If the tracks status changes, the PID integral and derivative part
      * will be reset to provide a smooth reaction.
@@ -274,6 +282,35 @@ DrivingState::DrivingState() :
 {
 }
 
+bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const
+{
+    const int32_t WEIGHT      = SENSOR_VALUE_MAX;
+    bool          isValid     = true;
+    int32_t       numerator   = 0U;
+    int32_t       denominator = 0U;
+    int32_t       idxBegin    = 1;
+    int32_t       idxEnd      = length - 1;
+
+    for (int32_t idx = idxBegin; idx < idxEnd; ++idx)
+    {
+        int32_t sensorValue = static_cast<int32_t>(lineSensorValues[idx]);
+
+        numerator += idx * WEIGHT * sensorValue;
+        denominator += sensorValue;
+    }
+
+    if (0 == denominator)
+    {
+        isValid = false;
+    }
+    else
+    {
+        position = numerator / denominator;
+    }
+
+    return isValid;
+}
+
 DrivingState::TrackStatus DrivingState::evaluateSituation(const uint16_t* lineSensorValues, uint8_t length,
                                                           int16_t position, bool isTrackLost) const
 {
@@ -372,6 +409,54 @@ bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t le
     }
 
     return isDetected;
+}
+
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+{
+    switch (trackStatus)
+    {
+    case TRACK_STATUS_NORMAL:
+        /* The position is used by default to follow the line. */
+        break;
+
+    case TRACK_STATUS_START_STOP_LINE:
+        /* Use the inner sensors only for driving to avoid jerky movements, caused
+         * by the most left or right sensor.
+         */
+        position = position3;
+
+        /* Avoid that the robot turns in place. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_GAP:
+        /* Overwrite the positin to drive straight forward in hope to see the
+         * line again.
+         */
+        position = POSITION_SET_POINT;
+
+        /* Avoid that the robots turns. */
+        allowNegativeMotorSpeed = false;
+        break;
+
+    case TRACK_STATUS_TRACK_LOST_BY_MANOEUVRE:
+        /* If the track is lost by a robot manoeuvre and not becase the track
+         * has a gap, the last position given by most left or right sensor
+         * will be automatically used to find the track again.
+         *
+         * See ILineSensors::readLine() description regarding the behaviour in
+         * case the line is not detected anymore.
+         */
+        break;
+
+    case TRACK_STATUS_FINISHED:
+        /* Nothing to do. */
+        break;
+
+    default:
+        /* Should never happen. */
+        break;
+    }
 }
 
 void DrivingState::adaptDriving(int16_t position, bool allowNegativeMotorSpeed)
