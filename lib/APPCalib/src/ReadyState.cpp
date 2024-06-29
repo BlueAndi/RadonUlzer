@@ -93,7 +93,7 @@ void ReadyState::process(StateMachine& sm)
     }
 
     /* Turn left? */
-    if (true == Util::isButtonTriggered(buttonA, m_isButtonBPressed))
+    if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
     {
         DrivingState::getInstance().setCmd(DrivingState::DRIVING_CMD_TURN_LEFT);
 
