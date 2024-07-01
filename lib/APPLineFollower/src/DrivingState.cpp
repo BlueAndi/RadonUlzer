@@ -83,7 +83,7 @@ const int16_t DrivingState::POSITION_SET_POINT =
 
 /* Initialize the required sensor IDs to be generic. */
 const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t DrivingState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE     = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
 const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /* Initialize the position values used by the algorithmic. */
