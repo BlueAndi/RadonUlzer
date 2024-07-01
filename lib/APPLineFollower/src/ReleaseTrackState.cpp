@@ -37,6 +37,7 @@
 #include <StateMachine.h>
 #include "DrivingState.h"
 #include "ParameterSets.h"
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -77,13 +78,12 @@ void ReleaseTrackState::process(StateMachine& sm)
     IButton& buttonA = Board::getInstance().getButtonA();
 
     /* Change parameter set? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        /* Choose next parameter set (round-robin) */
+        /* Choose next parameter set (round-robin). */
         ParameterSets::getInstance().next();
         showParSet();
 
-        buttonA.waitForRelease();
         m_releaseTimer.restart();
     }
 

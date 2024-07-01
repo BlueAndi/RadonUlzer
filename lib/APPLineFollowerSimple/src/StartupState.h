@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Startup state
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef READY_STATE_H
-#define READY_STATE_H
+#ifndef STARTUP_STATE_H
+#define STARTUP_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,6 +43,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <stdint.h>
 #include <IState.h>
 #include <SimpleTimer.h>
 
@@ -54,8 +55,8 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system ready state. */
-class ReadyState : public IState
+/** The system startup state. */
+class StartupState : public IState
 {
 public:
     /**
@@ -63,9 +64,9 @@ public:
      *
      * @return State instance.
      */
-    static ReadyState& getInstance()
+    static StartupState& getInstance()
     {
-        static ReadyState instance;
+        static StartupState instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -97,14 +98,10 @@ private:
      */
     enum UserInfo
     {
-        USER_INFO_DRIVE_FORWARD = 0, /**< Show button to use to drive forward. */
-        USER_INFO_TURN_LEFT,         /**< Show button to use to turn left 90°. */
-        USER_INFO_TURN_RIGHT,        /**< Show button to use to turn right 90°. */
-        USER_INFO_COUNT              /**< Number of user infos. */
+        USER_INFO_TEAM_NAME = 0, /**< Show the team name. */
+        USER_INFO_UI,            /**< Show the user interface. */
+        USER_INFO_COUNT          /**< Number of user infos. */
     };
-
-    /** Release timer duration in ms. */
-    static const uint32_t RELEASE_DURATION = 2000;
 
     /**
      * Duration in ms how long a info on the display shall be shown, until
@@ -112,30 +109,26 @@ private:
      */
     static const uint32_t INFO_DURATION = 2000;
 
+    bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
     SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
     UserInfo    m_userInfoState; /**< Current user info state. */
-    SimpleTimer m_releaseTimer;  /**< Release timer */
     bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
-    bool        m_isButtonCPressed; /**< Is the button C pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ReadyState() :
+    StartupState() :
+        m_isMaxMotorSpeedCalibAvailable(false),
         m_timer(),
-        m_userInfoState(USER_INFO_DRIVE_FORWARD),
-        m_releaseTimer(),
-        m_isButtonAPressed(false),
-        m_isButtonBPressed(false),
-        m_isButtonCPressed(false)
+        m_userInfoState(USER_INFO_TEAM_NAME),
+        m_isButtonAPressed(false)
     {
     }
 
     /**
      * Default destructor.
      */
-    ~ReadyState()
+    ~StartupState()
     {
     }
 
@@ -145,7 +138,7 @@ private:
      *
      * @param[in] state Source instance.
      */
-    ReadyState(const ReadyState& state);
+    StartupState(const StartupState& state);
 
     /**
      * Assignment of an instance.
@@ -153,9 +146,9 @@ private:
      *
      * @param[in] state Source instance.
      *
-     * @returns Reference to ReadyState instance.
+     * @returns Reference to StartupState instance.
      */
-    ReadyState& operator=(const ReadyState& state);
+    StartupState& operator=(const StartupState& state);
 
     /**
      * Show next user info.
@@ -169,5 +162,5 @@ private:
  * Functions
  *****************************************************************************/
 
-#endif /* READY_STATE_H */
+#endif /* STARTUP_STATE_H */
 /** @} */

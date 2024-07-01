@@ -25,18 +25,18 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Release track state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
+#include "ReleaseTrackState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "ReleaseTrackState.h"
-#include <Logging.h>
+#include "DrivingState.h"
+#include "ParameterSets.h"
 #include <Util.h>
 
 /******************************************************************************
@@ -59,96 +59,45 @@
  * Local Variables
  *****************************************************************************/
 
-/**
- * Logging source.
- */
-LOG_TAG("RState");
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void ReadyState::entry()
+void ReleaseTrackState::entry()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
+    /* Start challenge after specific time. */
+    m_releaseTimer.start(TRACK_RELEASE_DURATION);
 
-    display.clear();
-    display.print("A: Go");
-
-    if (true == m_isLapTimeAvailable)
-    {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-        display.print("ms");
-
-        LOG_INFO_VAL("Lap time: ", m_lapTime);
-    }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
+    /* Choose parameter set 0 by default. */
+    ParameterSets::getInstance().choose(0);
+    showParSet();
 }
 
-void ReadyState::process(StateMachine& sm)
+void ReleaseTrackState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
 
-    /* Shall track be released? */
+
+    /* Change parameter set? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        sm.setState(&ReleaseTrackState::getInstance());
+        /* Choose next parameter set (round-robin). */
+        ParameterSets::getInstance().next();
+        showParSet();
+
+        m_releaseTimer.restart();
     }
 
-    /* Shall the line sensor values be printed out on console? */
-    if (true == m_timer.isTimeout())
+    /* Release track after specific time. */
+    if (true == m_releaseTimer.isTimeout())
     {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            valueStr[10];
-
-        LOG_DEBUG_HEAD();
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
-    }
-    else
-    {
-        /* Nothing to do. */
-        ;
+        sm.setState(&DrivingState::getInstance());
     }
 }
 
-void ReadyState::exit()
+void ReleaseTrackState::exit()
 {
-    m_timer.stop();
-    m_isLapTimeAvailable = false;
-}
-
-void ReadyState::setLapTime(uint32_t lapTime)
-{
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
+    m_releaseTimer.stop();
 }
 
 /******************************************************************************
@@ -158,6 +107,19 @@ void ReadyState::setLapTime(uint32_t lapTime)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void ReleaseTrackState::showParSet() const
+{
+    IDisplay&   display    = Board::getInstance().getDisplay();
+    uint8_t     parSetId   = ParameterSets::getInstance().getCurrentSetId();
+    const char* parSetName = ParameterSets::getInstance().getParameterSet().name;
+
+    display.clear();
+    display.print("A: CHG SET");
+    display.gotoXY(0, 1);
+    display.print(parSetName);
+    display.print(parSetId);
+}
 
 /******************************************************************************
  * External Functions

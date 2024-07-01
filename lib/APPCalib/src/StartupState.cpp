@@ -38,6 +38,7 @@
 #include "MotorSpeedCalibrationState.h"
 #include "ReadyState.h"
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -97,9 +98,8 @@ void StartupState::process(StateMachine& sm)
     IButton& buttonB = board.getButtonB();
 
     /* Start max. motor speed calibration? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
         sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 
@@ -109,10 +109,9 @@ void StartupState::process(StateMachine& sm)
     if (true == m_isMaxMotorSpeedCalibAvailable)
     {
         /* Ready to drive? */
-        if (true == buttonB.isPressed())
+        if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
         {
-            buttonB.waitForRelease();
-            sm.setState(&ReadyState::getInstance());
+            sm.setState(&MotorSpeedCalibrationState::getInstance());
         }
     }
 

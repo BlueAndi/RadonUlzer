@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <stdlib.h>
+#include <IButton.h>
 
 /**
  * Utilities
@@ -101,6 +102,17 @@ namespace Util
      * @return Result
      */
     int32_t divRoundUp(int32_t numerator, int32_t denominator);
+
+    /**
+     * Is button triggered?
+     * Triggered means a pressed/released change.
+     * 
+     * @param[in]       button      The button.
+     * @param[inout]    lastState   The last button state.
+     * 
+     * @return If button is triggered, it will return true otherwise false.
+     */
+    bool isButtonTriggered(IButton& button, bool& lastState);
 
 } /* namespace Util */
 

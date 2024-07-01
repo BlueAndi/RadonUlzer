@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Parameter state
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef READY_STATE_H
-#define READY_STATE_H
+#ifndef PARAMETER_SETS_H
+#define PARAMETER_SETS_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,8 +43,7 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <IState.h>
-#include <SimpleTimer.h>
+#include <stdint.h>
 
 /******************************************************************************
  * Macros
@@ -54,18 +53,33 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system ready state. */
-class ReadyState : public IState
+/** Parameter set with different driving configurations. */
+class ParameterSets
 {
 public:
     /**
-     * Get state instance.
-     *
-     * @return State instance.
+     * A single parameter set.
      */
-    static ReadyState& getInstance()
+    struct ParameterSet
     {
-        static ReadyState instance;
+        const char* name;          /**< Name of the parameter set */
+        int16_t     topSpeed;      /**< Top speed in steps/s */
+        int16_t     kPNumerator;   /**< Kp numerator value */
+        int16_t     kPDenominator; /**< Kp denominator value */
+        int16_t     kINumerator;   /**< Ki numerator value */
+        int16_t     kIDenominator; /**< Ki denominator value */
+        int16_t     kDNumerator;   /**< Kd numerator value */
+        int16_t     kDDenominator; /**< Kd denominator value */
+    };
+
+    /**
+     * Get parameter set instance.
+     *
+     * @return Parameter set instance.
+     */
+    static ParameterSets& getInstance()
+    {
+        static ParameterSets instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -73,101 +87,73 @@ public:
     }
 
     /**
-     * If the state is entered, this method will called once.
-     */
-    void entry() final;
-
-    /**
-     * Processing the state.
+     * Choose a specific parameter set.
+     * If a invalid set id is given, nothing changes.
      *
-     * @param[in] sm State machine, which is calling this state.
+     * @param[in] setId Parameter set id
      */
-    void process(StateMachine& sm) final;
+    void choose(uint8_t setId);
 
     /**
-     * If the state is left, this method will be called once.
+     * Change to next parameter set.
+     * After the last set, the first will be choosen.
      */
-    void exit() final;
+    void next();
+
+    /**
+     * Get current set id.
+     *
+     * @return Parameter set id.
+     */
+    uint8_t getCurrentSetId() const;
+
+    /**
+     * Get selected parameter set.
+     *
+     * @return Parameter set
+     */
+    const ParameterSet& getParameterSet() const;
+
+    /** Max. number of parameter sets. */
+    static const uint8_t MAX_SETS = 4U;
 
 protected:
 private:
-    /**
-     * This type defines different kind of information, which will be shown
-     * to the user in the same order as defined.
-     */
-    enum UserInfo
-    {
-        USER_INFO_DRIVE_FORWARD = 0, /**< Show button to use to drive forward. */
-        USER_INFO_TURN_LEFT,         /**< Show button to use to turn left 90°. */
-        USER_INFO_TURN_RIGHT,        /**< Show button to use to turn right 90°. */
-        USER_INFO_COUNT              /**< Number of user infos. */
-    };
-
-    /** Release timer duration in ms. */
-    static const uint32_t RELEASE_DURATION = 2000;
-
-    /**
-     * Duration in ms how long a info on the display shall be shown, until
-     * the next info appears.
-     */
-    static const uint32_t INFO_DURATION = 2000;
-
-    SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
-    UserInfo    m_userInfoState; /**< Current user info state. */
-    SimpleTimer m_releaseTimer;  /**< Release timer */
-    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
-    bool        m_isButtonCPressed; /**< Is the button C pressed (last time)? */
+    uint8_t      m_currentSetId;      /**< Set id of current selected set. */
+    ParameterSet m_parSets[MAX_SETS]; /**< All parameter sets */
 
     /**
      * Default constructor.
      */
-    ReadyState() :
-        m_timer(),
-        m_userInfoState(USER_INFO_DRIVE_FORWARD),
-        m_releaseTimer(),
-        m_isButtonAPressed(false),
-        m_isButtonBPressed(false),
-        m_isButtonCPressed(false)
-    {
-    }
+    ParameterSets();
 
     /**
      * Default destructor.
      */
-    ~ReadyState()
-    {
-    }
+    ~ParameterSets();
 
     /**
      * Copy construction of an instance.
      * Not allowed.
      *
-     * @param[in] state Source instance.
+     * @param[in] set Source instance.
      */
-    ReadyState(const ReadyState& state);
+    ParameterSets(const ParameterSets& set);
 
     /**
      * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] state Source instance.
+     * @param[in] set Source instance.
      *
-     * @returns Reference to ReadyState instance.
+     * @returns Reference to ParameterSets.
      */
-    ReadyState& operator=(const ReadyState& state);
-
-    /**
-     * Show next user info.
-     *
-     * @param[in] next  Next user info which to show.
-     */
-    void showUserInfo(UserInfo next);
+    ParameterSets& operator=(const ParameterSets& set);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* READY_STATE_H */
+#endif /* PARAMETER_SET_H */
 /** @} */

@@ -113,11 +113,18 @@ private:
     bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
     SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
     UserInfo    m_userInfoState; /**< Current user info state. */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    StartupState() : m_isMaxMotorSpeedCalibAvailable(false), m_timer(), m_userInfoState(USER_INFO_TEAM_NAME)
+    StartupState() :
+        m_isMaxMotorSpeedCalibAvailable(false),
+        m_timer(),
+        m_userInfoState(USER_INFO_TEAM_NAME),
+        m_isButtonAPressed(false),
+        m_isButtonBPressed(false)
     {
     }
 

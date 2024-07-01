@@ -101,11 +101,12 @@ private:
     SimpleTimer m_timer;              /**< Timer used for cyclic debug output. */
     bool        m_isLapTimeAvailable; /**< Is set (true), if a lap time is available. */
     uint32_t    m_lapTime;            /**< Lap time in ms of the last successful driven round. */
+    bool        m_isButtonAPressed;   /**< Is the button A pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ReadyState() : m_timer(), m_isLapTimeAvailable(false), m_lapTime(0)
+    ReadyState() : m_timer(), m_isLapTimeAvailable(false), m_lapTime(0), m_isButtonAPressed(false)
     {
     }
 

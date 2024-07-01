@@ -39,6 +39,7 @@
 #include <DifferentialDrive.h>
 #include <Logging.h>
 #include "DrivingState.h"
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -82,30 +83,30 @@ void ReadyState::process(StateMachine& sm)
     IButton& buttonC = board.getButtonC();
 
     /* Drive forward? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
         DrivingState::getInstance().setCmd(DrivingState::DRIVING_CMD_FORWARD);
-        buttonA.waitForRelease();
+
         m_releaseTimer.start(RELEASE_DURATION);
 
         LOG_INFO("Drive forward 10 cm.");
     }
 
     /* Turn left? */
-    if (true == buttonB.isPressed())
+    if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
     {
         DrivingState::getInstance().setCmd(DrivingState::DRIVING_CMD_TURN_LEFT);
-        buttonB.waitForRelease();
+
         m_releaseTimer.start(RELEASE_DURATION);
 
         LOG_INFO("Turn left 90°.");
     }
 
     /* Turn right? */
-    if (true == buttonC.isPressed())
+    if (true == Util::isButtonTriggered(buttonC, m_isButtonCPressed))
     {
         DrivingState::getInstance().setCmd(DrivingState::DRIVING_CMD_TURN_RIGHT);
-        buttonC.waitForRelease();
+
         m_releaseTimer.start(RELEASE_DURATION);
 
         LOG_INFO("Turn right 90°.");

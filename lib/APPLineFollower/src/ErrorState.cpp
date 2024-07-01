@@ -38,6 +38,7 @@
 #include "StartupState.h"
 #include <DifferentialDrive.h>
 #include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -70,8 +71,10 @@ LOG_TAG("EState");
 
 void ErrorState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-    
+    IBoard&   board   = Board::getInstance();
+    IDisplay& display = board.getDisplay();
+
+    /* Stop the motors in any case! */
     DifferentialDrive::getInstance().disable();
 
     display.clear();
@@ -95,9 +98,8 @@ void ErrorState::process(StateMachine& sm)
     IButton& buttonA = Board::getInstance().getButtonA();
 
     /* Restart calibration? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
         sm.setState(&StartupState::getInstance());
     }
 }

@@ -25,17 +25,17 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Error state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
+#include "ErrorState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "ReleaseTrackState.h"
+#include "StartupState.h"
 #include <Logging.h>
 #include <Util.h>
 
@@ -60,95 +60,66 @@
  *****************************************************************************/
 
 /**
- * Logging source.
+ * Error logging tag.
  */
-LOG_TAG("RState");
+LOG_TAG("EState");
 
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void ReadyState::entry()
+void ErrorState::entry()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
+    IBoard&   board   = Board::getInstance();
+    IMotors&  motors  = board.getMotors();
+    IDisplay& display = board.getDisplay();
+
+    /* Stop the motors in any case! */
+    motors.setSpeeds(0, 0);
 
     display.clear();
-    display.print("A: Go");
+    display.print("A: CONT");
+    display.gotoXY(0, 1);
 
-    if (true == m_isLapTimeAvailable)
+    if ('\0' == m_errorMsg[0])
     {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-        display.print("ms");
-
-        LOG_INFO_VAL("Lap time: ", m_lapTime);
-    }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
-}
-
-void ReadyState::process(StateMachine& sm)
-{
-    IButton& buttonA = Board::getInstance().getButtonA();
-
-    /* Shall track be released? */
-    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
-    {
-        sm.setState(&ReleaseTrackState::getInstance());
-    }
-
-    /* Shall the line sensor values be printed out on console? */
-    if (true == m_timer.isTimeout())
-    {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            valueStr[10];
-
-        LOG_DEBUG_HEAD();
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
+        display.print("ERR");
     }
     else
     {
-        /* Nothing to do. */
-        ;
+        display.print(m_errorMsg);
+    }
+
+    LOG_ERROR_VAL("Error: ", m_errorMsg);
+}
+
+void ErrorState::process(StateMachine& sm)
+{
+    IButton& buttonA = Board::getInstance().getButtonA();
+
+    /* Restart calibration? */
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
+    {
+        sm.setState(&StartupState::getInstance());
     }
 }
 
-void ReadyState::exit()
+void ErrorState::exit()
 {
-    m_timer.stop();
-    m_isLapTimeAvailable = false;
+    /* Nothing to do. */
 }
 
-void ReadyState::setLapTime(uint32_t lapTime)
+void ErrorState::setErrorMsg(const char* msg)
 {
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
+    if (nullptr == msg)
+    {
+        m_errorMsg[0] = '\0';
+    }
+    else
+    {
+        strncpy(m_errorMsg, msg, ERROR_MSG_SIZE - 1);
+        m_errorMsg[ERROR_MSG_SIZE - 1] = '\0';
+    }
 }
 
 /******************************************************************************

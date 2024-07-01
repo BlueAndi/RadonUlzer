@@ -35,6 +35,7 @@
 #include "ErrorState.h"
 #include <Board.h>
 #include <StateMachine.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -70,9 +71,8 @@ void ErrorState::process(StateMachine& sm)
     IButton& buttonA = Board::getInstance().getButtonA();
 
     /* Restart calibration? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
         sm.setState(&StartupState::getInstance());
     }
 }

@@ -39,6 +39,7 @@
 #include "LineSensorsCalibrationState.h"
 #include "Sound.h"
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -96,11 +97,10 @@ void StartupState::process(StateMachine& sm)
     Board&   board   = Board::getInstance();
     IButton& buttonA = board.getButtonA();
 
-    /* Start max. motor speed calibration? */
-    if (true == buttonA.isPressed())
+    /* Start line sensor calibration? */
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
+        sm.setState(&LineSensorsCalibrationState::getInstance());
     }
 
     /* If the max. motor speed calibration is done, it will be possible to
@@ -111,9 +111,8 @@ void StartupState::process(StateMachine& sm)
         IButton& buttonB = board.getButtonB();
 
         /* Start line sensor calibration? */
-        if (true == buttonB.isPressed())
+        if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
         {
-            buttonB.waitForRelease();
             sm.setState(&LineSensorsCalibrationState::getInstance());
         }
     }

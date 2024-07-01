@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Error state
+ * @brief  Simple LineFollower application
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef ERROR_STATE_H
-#define ERROR_STATE_H
+#ifndef APP_H
+#define APP_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stddef.h>
-#include <IState.h>
-#include "StartupState.h"
+#include <StateMachine.h>
+#include <Arduino.h>
 
 /******************************************************************************
  * Macros
@@ -55,96 +54,63 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system error state. */
-class ErrorState : public IState
+/** The line follower application. */
+class App
 {
 public:
     /**
-     * Get state instance.
-     *
-     * @return State instance.
+     * Construct the line follower application.
      */
-    static ErrorState& getInstance()
+    App() : m_systemStateMachine()
     {
-        static ErrorState instance;
-
-        /* Singleton idiom to force initialization during first usage. */
-
-        return instance;
     }
 
     /**
-     * If the state is entered, this method will called once.
+     * Destroy the line follower application.
      */
-    void entry() final;
+    ~App()
+    {
+    }
 
     /**
-     * Processing the state.
-     *
-     * @param[in] sm State machine, which is calling this state.
+     * Setup the application.
      */
-    void process(StateMachine& sm) final;
+    void setup();
 
     /**
-     * If the state is left, this method will be called once.
+     * Process the application periodically.
      */
-    void exit() final;
+    void loop();
 
-    /**
-     * Set error message, which to show on the display.
-     *
-     * @param[in] msg   Error message
-     */
-    void setErrorMsg(const char* msg);
-
-protected:
 private:
-    /**
-     * The error message string size in bytes, which
-     * includes the terminating character.
-     */
-    static const size_t ERROR_MSG_SIZE = 20;
+    /** Baudrate for Serial Communication */
+    static const uint32_t SERIAL_BAUDRATE = 115200U;
 
-    char m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
-    bool m_isButtonAPressed;         /**< Is the button A pressed (last time)? */
-
-    /**
-     * Default constructor.
-     */
-    ErrorState() : m_errorMsg(), m_isButtonAPressed(false)
-    {
-        m_errorMsg[0] = '\0';
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~ErrorState()
-    {
-    }
+    /** The system state machine. */
+    StateMachine m_systemStateMachine;
 
     /**
      * Copy construction of an instance.
      * Not allowed.
      *
-     * @param[in] state Source instance.
+     * @param[in] app Source instance.
      */
-    ErrorState(const ErrorState& state);
+    App(const App& app);
 
     /**
      * Assignment of an instance.
      * Not allowed.
      *
-     * @param[in] state Source instance.
+     * @param[in] app Source instance.
      *
-     * @returns Reference to ErrorState instance.
+     * @returns Reference to App instance.
      */
-    ErrorState& operator=(const ErrorState& state);
+    App& operator=(const App& app);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* ERROR_STATE_H */
+#endif /* APP_H */
 /** @} */

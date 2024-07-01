@@ -25,19 +25,14 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Calibration state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
-#include <Board.h>
-#include <StateMachine.h>
-#include "ReleaseTrackState.h"
-#include <Logging.h>
-#include <Util.h>
+#include "ParameterSets.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -59,96 +54,32 @@
  * Local Variables
  *****************************************************************************/
 
-/**
- * Logging source.
- */
-LOG_TAG("RState");
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void ReadyState::entry()
+void ParameterSets::choose(uint8_t setId)
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
-
-    display.clear();
-    display.print("A: Go");
-
-    if (true == m_isLapTimeAvailable)
+    if (MAX_SETS > setId)
     {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-        display.print("ms");
-
-        LOG_INFO_VAL("Lap time: ", m_lapTime);
-    }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
-}
-
-void ReadyState::process(StateMachine& sm)
-{
-    IButton& buttonA = Board::getInstance().getButtonA();
-
-    /* Shall track be released? */
-    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
-    {
-        sm.setState(&ReleaseTrackState::getInstance());
-    }
-
-    /* Shall the line sensor values be printed out on console? */
-    if (true == m_timer.isTimeout())
-    {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            valueStr[10];
-
-        LOG_DEBUG_HEAD();
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
-    }
-    else
-    {
-        /* Nothing to do. */
-        ;
+        m_currentSetId = setId;
     }
 }
 
-void ReadyState::exit()
+void ParameterSets::next()
 {
-    m_timer.stop();
-    m_isLapTimeAvailable = false;
+    ++m_currentSetId;
+    m_currentSetId %= MAX_SETS;
 }
 
-void ReadyState::setLapTime(uint32_t lapTime)
+uint8_t ParameterSets::getCurrentSetId() const
 {
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
+    return m_currentSetId;
+}
+
+const ParameterSets::ParameterSet& ParameterSets::getParameterSet() const
+{
+    return m_parSets[m_currentSetId];
 }
 
 /******************************************************************************
@@ -158,6 +89,57 @@ void ReadyState::setLapTime(uint32_t lapTime)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+ParameterSets::ParameterSets() : m_currentSetId(0), m_parSets()
+{
+    m_parSets[0] = {
+        "PD VF", /* Name - VF: very fast */
+        400,     /* Top speed in digits */
+        1,       /* Kp Numerator */
+        3,       /* Kp Denominator */
+        0,       /* Ki Numerator */
+        1,       /* Ki Denominator */
+        10,      /* Kd Numerator */
+        1        /* Kd Denominator */
+    };
+
+    m_parSets[1] = {
+        "PD F", /* Name - F: fast */
+        300,    /* Top speed in digits */
+        1,      /* Kp Numerator */
+        3,      /* Kp Denominator */
+        0,      /* Ki Numerator */
+        1,      /* Ki Denominator */
+        10,     /* Kd Numerator */
+        1       /* Kd Denominator */
+    };
+
+    m_parSets[2] = {
+        "PD S", /* Name - S: slow */
+        200,    /* Top speed in digits */
+        1,      /* Kp Numerator */
+        3,      /* Kp Denominator */
+        0,      /* Ki Numerator */
+        1,      /* Ki Denominator */
+        1,      /* Kd Numerator */
+        10      /* Kd Denominator */
+    };
+
+    m_parSets[3] = {
+        "PD VS", /* Name - VS: very slow */
+        100,     /* Top speed in digits */
+        1,       /* Kp Numerator */
+        4,       /* Kp Denominator */
+        0,       /* Ki Numerator */
+        1,       /* Ki Denominator */
+        0,       /* Kd Numerator */
+        1        /* Kd Denominator */
+    };
+}
+
+ParameterSets::~ParameterSets()
+{
+}
 
 /******************************************************************************
  * External Functions

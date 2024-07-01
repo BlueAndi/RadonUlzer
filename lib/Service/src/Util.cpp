@@ -195,6 +195,21 @@ int32_t Util::divRoundUp(int32_t numerator, int32_t denominator)
     return result;
 }
 
+bool Util::isButtonTriggered(IButton& button, bool& lastState)
+{
+    bool isTriggered = false;
+    bool isPressed   = button.isPressed();
+
+    if ((false == isPressed) && (true == lastState))
+    {
+        isTriggered = true;
+    }
+
+    lastState = isPressed;
+
+    return isTriggered;
+}
+
 /******************************************************************************
  * Local Functions
  *****************************************************************************/

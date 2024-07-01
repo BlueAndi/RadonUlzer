@@ -86,9 +86,8 @@ void ReadyState::process(StateMachine& sm)
     IButton& buttonA = Board::getInstance().getButtonA();
 
     /* Shall track be released? */
-    if (true == buttonA.isPressed())
+    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        buttonA.waitForRelease();
         sm.setState(&ReleaseTrackState::getInstance());
     }
     /* Shall the line sensor values be printed out on console? */

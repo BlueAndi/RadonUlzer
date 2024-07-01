@@ -25,16 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Error state
+ * @brief  Board interface, which abstracts the physical board
  * @author Andreas Merkle <web@blue-andi.de>
- *
- * @addtogroup Application
+ * 
+ * @addtogroup HALInterfaces
  *
  * @{
  */
 
-#ifndef ERROR_STATE_H
-#define ERROR_STATE_H
+#ifndef IBOARD_H
+#define IBOARD_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,19 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stddef.h>
-#include <IState.h>
-#include "StartupState.h"
+#include <stdint.h>
+#include <IButton.h>
+#include <IBuzzer.h>
+#include <IDisplay.h>
+#include <IEncoders.h>
+#include <ILineSensors.h>
+#include <IMotors.h>
+#include <ILed.h>
+#include <ISettings.h>
+
+#ifdef DEBUG_ODOMETRY
+#include <ISender.h>
+#endif /* DEBUG_ODOMETRY */
 
 /******************************************************************************
  * Macros
@@ -55,96 +65,141 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system error state. */
-class ErrorState : public IState
+/**
+ * Abstracts the physical board interface.
+ */
+class IBoard
 {
 public:
+
     /**
-     * Get state instance.
-     *
-     * @return State instance.
+     * Destroys the board interface.
      */
-    static ErrorState& getInstance()
+    virtual ~IBoard()
     {
-        static ErrorState instance;
-
-        /* Singleton idiom to force initialization during first usage. */
-
-        return instance;
     }
 
     /**
-     * If the state is entered, this method will called once.
+     * Initialize the hardware.
      */
-    void entry() final;
+    virtual void init() = 0;
 
     /**
-     * Processing the state.
+     * Get button A driver.
      *
-     * @param[in] sm State machine, which is calling this state.
+     * @return Button A driver.
      */
-    void process(StateMachine& sm) final;
+    virtual IButton& getButtonA() = 0;
 
     /**
-     * If the state is left, this method will be called once.
-     */
-    void exit() final;
-
-    /**
-     * Set error message, which to show on the display.
+     * Get button B driver.
      *
-     * @param[in] msg   Error message
+     * @return Button B driver.
      */
-    void setErrorMsg(const char* msg);
+    virtual IButton& getButtonB() = 0;
 
+    /**
+     * Get button C driver.
+     *
+     * @return Button C driver.
+     */
+    virtual IButton& getButtonC() = 0;
+
+    /**
+     * Get buzzer driver.
+     *
+     * @return Buzzer driver.
+     */
+    virtual IBuzzer& getBuzzer() = 0;
+
+    /**
+     * Get LCD driver.
+     *
+     * @return LCD driver.
+     */
+    virtual IDisplay& getDisplay() = 0;
+
+    /**
+     * Get encoders driver.
+     * 
+     * @return Encoders driver.
+     */
+    virtual IEncoders& getEncoders() = 0;
+
+    /**
+     * Get line sensors driver.
+     *
+     * @return Line sensor driver.
+     */
+    virtual ILineSensors& getLineSensors() = 0;
+
+    /**
+     * Get motor driver.
+     *
+     * @return Motor driver.
+     */
+    virtual IMotors& getMotors() = 0;
+
+    /**
+     * Get red LED driver.
+     *
+     * @return Red LED driver.
+     */
+    virtual ILed& getRedLed() = 0;
+
+    /**
+     * Get yellow LED driver.
+     *
+     * @return Yellow LED driver.
+     */
+    virtual ILed& getYellowLed() = 0;
+
+    /**
+     * Get green LED driver.
+     *
+     * @return Green LED driver.
+     */
+    virtual ILed& getGreenLed() = 0;
+
+    /**
+     * Get the settings.
+     * 
+     * @return Settings
+     */
+    virtual ISettings& getSettings() = 0;
+
+#ifdef DEBUG_ODOMETRY
+
+    /**
+     * Get the sender driver, used to send data to the webots supervisor.
+     *
+     * @return Sender driver
+     */
+    virtual ISender& getSender() = 0;
+
+#endif /* DEBUG_ODOMETRY */
+
+    /**
+     * Process actuators and sensors.
+     */
+    virtual void process() = 0;
+    
 protected:
+
+    /**
+     * Constructs the board interface.
+     */
+    IBoard()
+    {
+    }
+
 private:
-    /**
-     * The error message string size in bytes, which
-     * includes the terminating character.
-     */
-    static const size_t ERROR_MSG_SIZE = 20;
 
-    char m_errorMsg[ERROR_MSG_SIZE]; /**< Error message, which to show. */
-    bool m_isButtonAPressed;         /**< Is the button A pressed (last time)? */
-
-    /**
-     * Default constructor.
-     */
-    ErrorState() : m_errorMsg(), m_isButtonAPressed(false)
-    {
-        m_errorMsg[0] = '\0';
-    }
-
-    /**
-     * Default destructor.
-     */
-    ~ErrorState()
-    {
-    }
-
-    /**
-     * Copy construction of an instance.
-     * Not allowed.
-     *
-     * @param[in] state Source instance.
-     */
-    ErrorState(const ErrorState& state);
-
-    /**
-     * Assignment of an instance.
-     * Not allowed.
-     *
-     * @param[in] state Source instance.
-     *
-     * @returns Reference to ErrorState instance.
-     */
-    ErrorState& operator=(const ErrorState& state);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* ERROR_STATE_H */
+#endif /* IBOARD_H */
 /** @} */

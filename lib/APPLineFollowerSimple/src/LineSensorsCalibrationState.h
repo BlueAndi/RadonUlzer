@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Line sensors calibration state
  * @author Andreas Merkle <web@blue-andi.de>
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef READY_STATE_H
-#define READY_STATE_H
+#ifndef LINE_SENSORS_CALIBRATION_STATE_H
+#define LINE_SENSORS_CALIBRATION_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -45,6 +45,9 @@
  *****************************************************************************/
 #include <IState.h>
 #include <SimpleTimer.h>
+#include <FPMath.h>
+#include <RelativeEncoders.h>
+#include <RobotConstants.h>
 
 /******************************************************************************
  * Macros
@@ -54,8 +57,8 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system ready state. */
-class ReadyState : public IState
+/** The line sensors calibration state. */
+class LineSensorsCalibrationState : public IState
 {
 public:
     /**
@@ -63,9 +66,9 @@ public:
      *
      * @return State instance.
      */
-    static ReadyState& getInstance()
+    static LineSensorsCalibrationState& getInstance()
     {
-        static ReadyState instance;
+        static LineSensorsCalibrationState instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -91,51 +94,47 @@ public:
 
 protected:
 private:
-    /**
-     * This type defines different kind of information, which will be shown
-     * to the user in the same order as defined.
-     */
-    enum UserInfo
+    /** Calibration phases */
+    enum Phase
     {
-        USER_INFO_DRIVE_FORWARD = 0, /**< Show button to use to drive forward. */
-        USER_INFO_TURN_LEFT,         /**< Show button to use to turn left 90°. */
-        USER_INFO_TURN_RIGHT,        /**< Show button to use to turn right 90°. */
-        USER_INFO_COUNT              /**< Number of user infos. */
+        PHASE_1_WAIT = 0,   /**< Wait a short time before starting the calibration. */
+        PHASE_2_TURN_LEFT,  /**< Turn line sensors left over the line. */
+        PHASE_3_TURN_RIGHT, /**< Turn line sensor right over the line. */
+        PHASE_4_TURN_ORIG,  /**< Turn back to origin. */
+        PHASE_5_FINISHED    /**< Calibration is finished. */
     };
 
-    /** Release timer duration in ms. */
-    static const uint32_t RELEASE_DURATION = 2000;
+    /**
+     * Duration in ms about to wait, until the calibration drive starts.
+     */
+    static const uint32_t WAIT_TIME = 1000;
 
     /**
-     * Duration in ms how long a info on the display shall be shown, until
-     * the next info appears.
+     * Calibration turn angle in encoder steps (corresponds to 72°).
      */
-    static const uint32_t INFO_DURATION = 2000;
+    static const int32_t CALIB_ANGLE =
+        (((72 * 3 * RobotConstants::WHEEL_BASE) / 360) * RobotConstants::ENCODER_STEPS_PER_M) / 1000;
 
-    SimpleTimer m_timer;         /**< Used to show information for a certain time before changing to the next info. */
-    UserInfo    m_userInfoState; /**< Current user info state. */
-    SimpleTimer m_releaseTimer;  /**< Release timer */
-    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
-    bool        m_isButtonCPressed; /**< Is the button C pressed (last time)? */
+    SimpleTimer      m_timer;            /**< Timer used to wait, until the calibration drive starts. */
+    Phase            m_phase;            /**< Current calibration phase */
+    int16_t          m_calibrationSpeed; /**< Speed in digits for the calibration drive. */
+    RelativeEncoders m_relEncoders;      /**< Relative encoders to measure turn angle. */
 
     /**
      * Default constructor.
      */
-    ReadyState() :
+    LineSensorsCalibrationState() :
         m_timer(),
-        m_userInfoState(USER_INFO_DRIVE_FORWARD),
-        m_releaseTimer(),
-        m_isButtonAPressed(false),
-        m_isButtonBPressed(false),
-        m_isButtonCPressed(false)
+        m_phase(PHASE_1_WAIT),
+        m_calibrationSpeed(0),
+        m_relEncoders(Board::getInstance().getEncoders())
     {
     }
 
     /**
      * Default destructor.
      */
-    ~ReadyState()
+    ~LineSensorsCalibrationState()
     {
     }
 
@@ -145,7 +144,7 @@ private:
      *
      * @param[in] state Source instance.
      */
-    ReadyState(const ReadyState& state);
+    LineSensorsCalibrationState(const LineSensorsCalibrationState& state);
 
     /**
      * Assignment of an instance.
@@ -153,21 +152,31 @@ private:
      *
      * @param[in] state Source instance.
      *
-     * @returns Reference to ReadyState instance.
+     * @returns Reference to LineSensorsCalibrationState.
      */
-    ReadyState& operator=(const ReadyState& state);
+    LineSensorsCalibrationState& operator=(const LineSensorsCalibrationState& state);
 
     /**
-     * Show next user info.
+     * Turn and calibrate the line sensors.
      *
-     * @param[in] next  Next user info which to show.
+     * @param[in]   calibAlpha      Destination calibration angle in [mrad]
+     * @param[in]   isGreaterEqual  Configure true if angle shall be greater or equal than the destination.
+     *
+     * @return If destination angle reached, it will return true otherwise false.
      */
-    void showUserInfo(UserInfo next);
+    bool turnAndCalibrate(int32_t calibAlpha, bool isGreaterEqual);
+
+    /**
+     * Finish the calibration and determine next state.
+     *
+     * @param[in] sm    State machine
+     */
+    void finishCalibration(StateMachine& sm);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* READY_STATE_H */
+#endif /* LINE_SENSORS_CALIBRATION_STATE_H */
 /** @} */

@@ -25,19 +25,21 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Simple LineFollower application
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
+#include "App.h"
+#include "StartupState.h"
 #include <Board.h>
-#include <StateMachine.h>
-#include "ReleaseTrackState.h"
-#include <Logging.h>
+#include <Speedometer.h>
+#include <DifferentialDrive.h>
+#include <Odometry.h>
 #include <Util.h>
+#include <Sound.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -59,96 +61,30 @@
  * Local Variables
  *****************************************************************************/
 
-/**
- * Logging source.
- */
-LOG_TAG("RState");
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void ReadyState::entry()
+void App::setup()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
+    Serial.begin(SERIAL_BAUDRATE);
 
-    display.clear();
-    display.print("A: Go");
+    /* Initialize HAL */
+    Board::getInstance().init();
 
-    if (true == m_isLapTimeAvailable)
-    {
-        display.gotoXY(0, 1);
-        display.print(m_lapTime);
-        display.print("ms");
+    /* Setup the state machine with the first state. */
+    m_systemStateMachine.setState(&StartupState::getInstance());
 
-        LOG_INFO_VAL("Lap time: ", m_lapTime);
-    }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
+    /* Surprise the audience. */
+    Sound::playMelody(Sound::MELODY_WELCOME);
 }
 
-void ReadyState::process(StateMachine& sm)
+void App::loop()
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
+    Board::getInstance().process();
+    Speedometer::getInstance().process();
 
-    /* Shall track be released? */
-    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
-    {
-        sm.setState(&ReleaseTrackState::getInstance());
-    }
-
-    /* Shall the line sensor values be printed out on console? */
-    if (true == m_timer.isTimeout())
-    {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            valueStr[10];
-
-        LOG_DEBUG_HEAD();
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
-    }
-    else
-    {
-        /* Nothing to do. */
-        ;
-    }
-}
-
-void ReadyState::exit()
-{
-    m_timer.stop();
-    m_isLapTimeAvailable = false;
-}
-
-void ReadyState::setLapTime(uint32_t lapTime)
-{
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
+    m_systemStateMachine.process();
 }
 
 /******************************************************************************
