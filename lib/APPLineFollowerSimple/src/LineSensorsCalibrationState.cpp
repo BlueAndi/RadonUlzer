@@ -150,7 +150,6 @@ void LineSensorsCalibrationState::exit()
 bool LineSensorsCalibrationState::turnAndCalibrate(int32_t calibAlpha, bool isGreaterEqual)
 {
     IBoard&       board       = Board::getInstance();
-    IMotors&      motors      = board.getMotors();
     ILineSensors& lineSensors = board.getLineSensors();
     bool          isSuccesful = false;
 
