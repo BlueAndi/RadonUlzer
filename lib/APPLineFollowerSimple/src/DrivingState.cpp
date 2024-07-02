@@ -67,8 +67,8 @@ const int16_t DrivingState::POSITION_SET_POINT =
     (SENSOR_VALUE_MAX * (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) / 2;
 
 /* Initialize the required sensor IDs to be generic. */
-const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t DrivingState::SENSOR_ID_MIDDLE     = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
+const uint8_t DrivingState::SENSOR_ID_MOST_LEFT = 0U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE    = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
 const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /* Initialize the position values used by the algorithmic. */
@@ -121,7 +121,6 @@ void DrivingState::process(StateMachine& sm)
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         numLineSensors   = lineSensors.getNumLineSensors();
     int16_t         position3        = 0;
-    bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
     bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
 
     /* ========================================================================
@@ -282,35 +281,6 @@ DrivingState::DrivingState() :
 {
 }
 
-bool DrivingState::calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const
-{
-    const int32_t WEIGHT      = SENSOR_VALUE_MAX;
-    bool          isValid     = true;
-    int32_t       numerator   = 0U;
-    int32_t       denominator = 0U;
-    int32_t       idxBegin    = 1;
-    int32_t       idxEnd      = length - 1;
-
-    for (int32_t idx = idxBegin; idx < idxEnd; ++idx)
-    {
-        int32_t sensorValue = static_cast<int32_t>(lineSensorValues[idx]);
-
-        numerator += idx * WEIGHT * sensorValue;
-        denominator += sensorValue;
-    }
-
-    if (0 == denominator)
-    {
-        isValid = false;
-    }
-    else
-    {
-        position = numerator / denominator;
-    }
-
-    return isValid;
-}
-
 DrivingState::TrackStatus DrivingState::evaluateSituation(const uint16_t* lineSensorValues, uint8_t length,
                                                           int16_t position, bool isTrackLost) const
 {
@@ -411,7 +381,8 @@ bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t le
     return isDetected;
 }
 
-void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus,
+                                    int16_t position3)
 {
     switch (trackStatus)
     {
