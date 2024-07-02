@@ -67,8 +67,8 @@ const int16_t DrivingState::POSITION_SET_POINT =
     (SENSOR_VALUE_MAX * (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) / 2;
 
 /* Initialize the required sensor IDs to be generic. */
-const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t DrivingState::SENSOR_ID_MIDDLE     = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
+const uint8_t DrivingState::SENSOR_ID_MOST_LEFT = 0U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE    = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
 const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /* Initialize the position values used by the algorithmic. */
@@ -123,6 +123,14 @@ void DrivingState::process(StateMachine& sm)
     int16_t         position3        = 0;
     bool            isPosition3Valid = calcPosition3(position3, lineSensorValues, numLineSensors);
     bool            isTrackLost      = isNoLineDetected(lineSensorValues, numLineSensors);
+
+    /* If the position calculated with the inner sensors is not valid, the
+     * position will be taken.
+     */
+    if (true == isPosition3Valid)
+    {
+        position3 = position;
+    }
 
     /* ========================================================================
      * Evaluate the situation based on the sensor values.
@@ -411,7 +419,8 @@ bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t le
     return isDetected;
 }
 
-void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus,
+                                    int16_t position3)
 {
     switch (trackStatus)
     {
