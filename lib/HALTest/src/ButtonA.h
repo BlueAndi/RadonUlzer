@@ -27,7 +27,7 @@
 /**
  * @brief  Button A realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -81,15 +81,7 @@ public:
         return false;
     }
 
-    /**
-     * Wait until button is released.
-     */
-    void waitForRelease() final
-    {
-    }
-
 private:
-
 };
 
 /******************************************************************************
