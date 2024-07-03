@@ -30,6 +30,7 @@ Several kind of exclusive applications are available:
   * [Communicate with the DroidControlShip](#communicate-with-the-droidcontrolship)
 * [The target](#the-target)
   * [Build and flash procedure](#build-and-flash-procedure)
+  * [OLED Display Support](#oled-display-support)
 * [The Applications](#the-applications)
 * [Documentation](#documentation)
 * [Used Libraries](#used-libraries)
@@ -146,6 +147,10 @@ For simplicity a Platformio project task was added, which enables the Webots ser
 Example for the **LineFollowerTarget** application:
 
 ![Example](./doc/images/pio_target_build_upload.jpg)
+
+## OLED Display Support
+
+For instructions on how to enable the OLED display, please visit the [ZumoHALATmega32U4 Repository](https://github.com/BlueAndi/ZumoHALATmega32u4?tab=readme-ov-file#oled-display-support).
 
 # The Applications
 
