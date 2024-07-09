@@ -13,7 +13,7 @@ from controller import device
 
 class SerialWebots:
     """
-    Class for Serial Webots Communication
+    Serial Webots Communication Class
     """
 
     def __init__(self, Emitter: device, Receiver: device)-> None:
@@ -29,9 +29,9 @@ class SerialWebots:
         """
         self.m_Emitter = Emitter
         self.m_Receiver = Receiver
+        self.buffer  = bytearray()
 
         
-
     def write(self, payload : bytearray ) -> int:
         """ Sends Data to the Server.
 
@@ -44,9 +44,6 @@ class SerialWebots:
         ----------
         Number of bytes sent
         """
-        
-        bytes_sent = 0
-
         self.m_Emitter.send(bytes(payload))
         bytes_sent= len(payload)
         
@@ -57,11 +54,16 @@ class SerialWebots:
 
         Returns
         ----------
-        Number of bytes available for reading.
+        Number of bytes that are available for reading.
+        
         """
-        return self.m_Receiver.getQueueLength()
+        if len(self.buffer) > 0:
+            return len(self.buffer)
+        elif self.m_Receiver.getQueueLength() > 0:
+            return self.m_Receiver.getDataSize()
+        return 0 
 
-    def read_bytes(self) -> tuple[int, bytearray]:
+    def read_bytes(self, length: int) -> tuple[int, bytearray]:
         """ Read a given number of Bytes from Serial.
 
         Returns
@@ -70,10 +72,28 @@ class SerialWebots:
         - int: Number of bytes received.
         - bytearray: Received data.
         """
-        rcvd_data = b''
-        rcvd_data = self.m_Receiver.getBytes() 
-           
-        return len(rcvd_data), rcvd_data
+
+        read = 0
+        data = bytearray()
+
+        if len(self.buffer) > 0:
+            read = min(len(self.buffer), length)
+            data = self.buffer[:read]
+            self.buffer = self.buffer[read:]
+        elif self.m_Receiver.getQueueLength() > 0:
+            receivedData = self.m_Receiver.getBytes()
+            receivedData_size = self.m_Receiver.getDataSize()
+            self.m_Receiver.nextPacket()
+
+            if receivedData_size > length:
+                data = receivedData[:length]
+                self.buffer = receivedData[length:]
+                read = length
+            else:
+                data = receivedData
+                read = receivedData_size
+
+        return read, data
 
 
     
