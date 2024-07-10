@@ -42,7 +42,7 @@ if exist %TEMP_PLATOON_LEADER_PATH%\ (
 )
 Call :UnZipFile "%~dp0%TEMP_PLATOON_PATH%\" "%~dp0%CONVOY_LEADER_PIO_PATH%\%CONVOY_LEADER_PIO_ENV_NAME%.zip"
 
-rem Unzip leader to temporary folder
+rem Unzip follower to temporary folder
 if exist %TEMP_PLATOON_FOLLOWER_PATH%\ (
     rmdir /s /q %TEMP_PLATOON_FOLLOWER_PATH%\
 )
@@ -50,15 +50,12 @@ Call :UnZipFile "%~dp0%TEMP_PLATOON_PATH%\" "%~dp0%CONVOY_FOLLOWER_PIO_PATH%\%CO
 
 rem Copy leader folder according to a new folder with the robot's name.
 rem The copy ensures that a existing settings.json will be kept.
-copy /y %TEMP_PLATOON_LEADER_PATH% %TEMP_PLATOON_LEADER_NEW_PATH%
+xcopy /s /y %TEMP_PLATOON_LEADER_PATH%\ %TEMP_PLATOON_LEADER_NEW_PATH%\
 
 rem Copy follower folder according to a new folder with the robot's name.
 rem The copy ensures that a existing settings.json will be kept.
 for /L %%i in (1, 1, 2) do (
-    if exist %TEMP_PLATOON_FOLLOWER_PATH%\ (
-        rmdir /s /q %TEMP_PLATOON_FOLLOWER_PATH%\
-    )
-    copy /y %TEMP_PLATOON_FOLLOWER_PATH% %TEMP_PLATOON_FOLLOWER_NEW_PATH%%%i
+    xcopy /s /y %TEMP_PLATOON_FOLLOWER_PATH%\ %TEMP_PLATOON_FOLLOWER_NEW_PATH%%%i\
 )
 
 rem Delete extraced files from .zip
