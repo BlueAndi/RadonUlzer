@@ -6,6 +6,7 @@ PROTO Supervisor [
   field SFString controller "<generic>"
   field SFBool supervisor FALSE
   field SFString serialReceiver "serialComRx"
+  field SFString serialEmitter "serialComTx"
 ]
 {
   Robot {
@@ -15,6 +16,10 @@ PROTO Supervisor [
     children [
       Receiver {
         name IS serialReceiver
+        type "serial"
+      }
+      Emitter {
+        name IS serialEmitter
         type "serial"
       }
     ]
