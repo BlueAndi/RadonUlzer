@@ -27,6 +27,9 @@ PROTO ZumoComSystem [
         name "serialComTx"
         type "serial"
       }
+      GPS {
+        name "gps"
+      }
     ]
     name IS name
     description "DroidControlShip"
