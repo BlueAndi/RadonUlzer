@@ -4,14 +4,15 @@
 
 import math
 import sys
-from controller import Supervisor
-from robot_observer import RobotObserver
+from controller import Supervisor  # pylint: disable=import-error
+from robot_observer import RobotObserver, has_position_changed, has_orientation_changed
 
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
 
 # The supervisor receiver name.
 SUPERVISOR_RX_NAME = "serialComRx"
+
 
 def serial_com_read(serial_com_rx_device):
     """Read from serial communication device.
@@ -30,6 +31,7 @@ def serial_com_read(serial_com_rx_device):
 
     return rx_data
 
+
 def rad_to_deg(angle_rad):
     """Convert angle in rad to degree.
 
@@ -40,6 +42,7 @@ def rad_to_deg(angle_rad):
         float: Angle in degree
     """
     return angle_rad * 180 / math.pi
+
 
 def convert_angle_to_2pi(angle):
     """Convert angle from range [-PI; PI] in rad to [0; 2PI].
@@ -54,6 +57,7 @@ def convert_angle_to_2pi(angle):
         angle += 2 * math.pi
 
     return angle
+
 
 def convert_webots_angle_to_ru_angle(webots_angle):
     """Convert Webots angle to RadonUlzer angle.
@@ -73,51 +77,15 @@ def convert_webots_angle_to_ru_angle(webots_angle):
 
     webots_angle_2pi = convert_angle_to_2pi(webots_angle)
 
-    # TODO Handling the negative range.
+    # TO DO Handling the negative range.
 
     return webots_angle_2pi
 
-def has_position_changed(position, position_old):
-    """Returns whether the position changed.
 
-    Args:
-        position (list[float]): Position 1
-        position_old (list[float]): Position 2
-
-    Returns:
-        bool: If changed, it will return True otherwise False.
-    """
-    has_changed = False
-
-    for idx, value in enumerate(position):
-        if int(value) != int(position_old[idx]):
-            has_changed = True
-            break
-
-    return has_changed
-
-def has_orientation_changed(orientation, orientation_old):
-    """Returns whether the orientation changed.
-
-    Args:
-        orientation (list[float]): Orientation 1
-        orientation_old (list[float]): Orientation 2
-
-    Returns:
-        bool: If changed, it will return True otherwise False.
-    """
-    has_changed = False
-
-    for idx, value in enumerate(orientation):
-        if int(rad_to_deg(value)) != int(rad_to_deg(orientation_old[idx])):
-            has_changed = True
-            break
-
-    return has_changed
-
-class OdometryData(): # pylint: disable=too-few-public-methods
+class OdometryData():  # pylint: disable=too-few-public-methods
     """Odometry data container.
     """
+
     def __init__(self) -> None:
         self.x = 0
         self.y = 0
@@ -130,6 +98,10 @@ class OdometryData(): # pylint: disable=too-few-public-methods
         self.y = 0
         self.yaw_angle = 0
 
+
+# pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-locals
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller-
@@ -150,7 +122,8 @@ def main_loop():
     supervisor_com_rx = supervisor.getDevice(SUPERVISOR_RX_NAME)
 
     if supervisor_com_rx is None:
-        print(f"No supervisor communication possible, because {SUPERVISOR_RX_NAME} not found.")
+        print(
+            f"No supervisor communication possible, because {SUPERVISOR_RX_NAME} not found.")
     else:
         supervisor_com_rx.enable(timestep)
 
@@ -192,9 +165,10 @@ def main_loop():
 
                     # Robot odometry data received?
                     elif command[0] == "ODO":
-                        robot_odometry.x = int(command[1]) # [mm]
-                        robot_odometry.y = int(command[2]) # [mm]
-                        robot_odometry.yaw_angle = float(command[3]) / 1000.0 # [rad]
+                        robot_odometry.x = int(command[1])  # [mm]
+                        robot_odometry.y = int(command[2])  # [mm]
+                        robot_odometry.yaw_angle = float(
+                            command[3]) / 1000.0  # [rad]
 
                     # Unknown command.
                     else:
@@ -203,15 +177,18 @@ def main_loop():
             robot_position = robot_observer.get_rel_position()
             robot_orientation = robot_observer.get_rel_orientation()
 
-            any_change = has_position_changed(robot_position, robot_position_old)
+            any_change = has_position_changed(
+                robot_position, robot_position_old)
 
             if any_change is False:
-                any_change = has_orientation_changed(robot_orientation, robot_orientation_old)
+                any_change = has_orientation_changed(
+                    robot_orientation, robot_orientation_old)
 
             if any_change is True:
 
                 robot_yaw_angle = robot_orientation[2]
-                yaw_ru_angle = convert_webots_angle_to_ru_angle(robot_yaw_angle)
+                yaw_ru_angle = convert_webots_angle_to_ru_angle(
+                    robot_yaw_angle)
 
                 print(f"{int(robot_position[0])}, ", end="")
                 print(f"{int(robot_position[1])}, ", end="")
@@ -224,5 +201,6 @@ def main_loop():
                 robot_orientation_old = robot_orientation
 
     return status
+
 
 sys.exit(main_loop())

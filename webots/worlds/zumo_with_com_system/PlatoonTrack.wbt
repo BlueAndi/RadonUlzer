@@ -65,7 +65,7 @@ DEF FOLLOWER2 Zumo32U4 {
 }
 Supervisor {
   name "PlatoonSupervisor"
-  controller "PlatoonSupervisor"
+  controller "platoon_supervisor"
   supervisor TRUE
 }
 DEF OBSTACLE Obstacle {
