@@ -25,20 +25,18 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Startup state
+ * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "StartupState.h"
-#include <Board.h>
+#include "DrivingState.h"
 #include <StateMachine.h>
-#include "MotorSpeedCalibrationState.h"
-#include "LineSensorsCalibrationState.h"
-#include "Sound.h"
 #include <DifferentialDrive.h>
+#include <Board.h>
+#include <Odometry.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -60,83 +58,82 @@
  * Local Variables
  *****************************************************************************/
 
+/* Initialize the required sensor IDs to be generic. */
+const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
+const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
 
-void StartupState::entry()
+void DrivingState::entry()
 {
-    Board&     board         = Board::getInstance();
-    ISettings& settings      = board.getSettings();
-    int16_t    maxMotorSpeed = settings.getMaxSpeed();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
-    /* If max. motor speed calibration value is available, the differential
-     * drive will be enabled.
-     */
-    if (0 < maxMotorSpeed)
-    {
-        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-        /* With setting the max. motor speed in [steps/s] the differential drive control
-         * can now be used.
-         */
-        diffDrive.setMaxMotorSpeed(maxMotorSpeed);
-
-        /* Differential drive can now be used. */
-        diffDrive.enable();
-
-        m_isMaxMotorSpeedCalibAvailable = true;
-    }
-    showUserInfo(m_userInfoState);
+    diffDrive.setLinearSpeed(0, 0);
+    diffDrive.enable();
 }
 
-void StartupState::process(StateMachine& sm)
+void DrivingState::process(StateMachine& sm)
 {
-    Board&   board   = Board::getInstance();
-    IButton& buttonA = board.getButtonA();
+    /* Nothing to do. */
+    (void)sm;
+}
 
-    /* Start max. motor speed calibration? */
-    if (true == buttonA.isPressed())
-    {
-        buttonA.waitForRelease();
-        sm.setState(&MotorSpeedCalibrationState::getInstance());
-    }
+void DrivingState::exit()
+{
 
-    /* If the max. motor speed calibration is done, it will be possible to
-     * start the line sensor calibration immediately.
+    /* Stop motors. */
+    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
+    DifferentialDrive::getInstance().disable();
+}
+
+void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+{
+    DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+}
+
+
+bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool    isDetected = true;
+    uint8_t idx        = SENSOR_ID_MOST_RIGHT;
+
+    /*
+     *
+     *   +   + + +   +
+     *   L     M     R
      */
-    if (true == m_isMaxMotorSpeedCalibAvailable)
+    for (idx = SENSOR_ID_MOST_LEFT; idx <= SENSOR_ID_MOST_RIGHT; ++idx)
     {
-        IButton& buttonB = board.getButtonB();
-
-        /* Start line sensor calibration? */
-        if (true == buttonB.isPressed())
+        if (LINE_SENSOR_ON_TRACK_MIN_VALUE <= lineSensorValues[idx])
         {
-            buttonB.waitForRelease();
-            sm.setState(&LineSensorsCalibrationState::getInstance());
+            isDetected = false;
+            break;
         }
     }
 
-    /* Periodically change the user info on the display. */
-    if (true == m_timer.isTimeout())
-    {
-        int8_t next = m_userInfoState + 1;
-
-        if (USER_INFO_COUNT <= next)
-        {
-            next = 0;
-        }
-
-        showUserInfo(static_cast<UserInfo>(next));
-        m_timer.restart();
-    }
+    return isDetected; 
 }
 
-void StartupState::exit()
+bool DrivingState::isAbortRequired(bool m_isTrackLost)
 {
-    /* Next time start again from begin with the info. */
-    m_userInfoState = USER_INFO_TEAM_NAME;
+    bool isAbort = false;
+
+    /* If track is lost over a certain distance, abort driving. */
+    if (true == m_isTrackLost)
+    {
+        /* Max. distance driven, but track still not found? */
+        if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
+        {
+            isAbort = true;
+        }
+    }
+    return isAbort;
 }
+
+
+
 
 /******************************************************************************
  * Protected Methods
@@ -145,50 +142,6 @@ void StartupState::exit()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-void StartupState::showUserInfo(UserInfo next)
-{
-    Board&     board    = Board::getInstance();
-    IDisplay&  display  = board.getDisplay();
-    ISettings& settings = board.getSettings();
-
-    display.clear();
-
-    switch (next)
-    {
-    case USER_INFO_TEAM_NAME:
-        display.print(TEAM_NAME_LINE_1);
-        display.gotoXY(0, 1);
-        display.print(TEAM_NAME_LINE_2);
-        break;
-
-    case USER_INFO_MAX_MOTOR_SPEED:
-        display.print("maxSpeed");
-        display.gotoXY(0, 1);
-        display.print(settings.getMaxSpeed());
-        break;
-
-    case USER_INFO_UI:
-        display.print("A: MCAL");
-        if (true == m_isMaxMotorSpeedCalibAvailable)
-        {
-            display.gotoXY(0, 1);
-            display.print("B: LCAL");
-        }
-        break;
-
-    case USER_INFO_COUNT:
-        /* fallthrough */
-    default:
-        display.print("?");
-        next = USER_INFO_TEAM_NAME;
-        break;
-    }
-
-    m_userInfoState = next;
-
-    m_timer.start(INFO_DURATION);
-}
 
 /******************************************************************************
  * External Functions

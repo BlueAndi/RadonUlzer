@@ -80,7 +80,7 @@
 #define MODE_CHANNEL_NAME "MODE"
 
 /** DLC of Mode Channel */
-#define MODE_CHANNEL_DLC (sizeof(MODE))
+#define MODE_CHANNEL_DLC (sizeof(Mode))
 
 
 
@@ -98,8 +98,8 @@ namespace SMPChannelPayload
     typedef enum : uint8_t
     {
         CMD_ID_IDLE = 0,                /**< Nothing to do. */
-        CMD_ID_REINIT_BOARD,            /**< Re-initialize the board. Required for webots simulation. */
-        CMD_ID_GET_MAX_SPEED,           /**< Get maximum speed. */
+        CMD_ID_SET_INIT_POS,             /**< Set initial position. */
+        CMD_ID_GET_MAX_SPEED           /**< Get maximum speed. */
 
     } CmdId; /**< Command ID */
 
