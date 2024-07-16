@@ -7,10 +7,6 @@ from SerialMuxProt import SerialMuxProt
 from controller import Supervisor
 import struct
 
-
-
-
-
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
 
