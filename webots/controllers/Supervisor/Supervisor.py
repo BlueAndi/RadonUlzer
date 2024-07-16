@@ -5,6 +5,10 @@ import sys
 from Serial_webots import SerialWebots
 from SerialMuxProt import SerialMuxProt
 from controller import Supervisor
+from SerialMuxChannels import *
+
+
+
 
 
 # The PROTO DEF name must be given!
@@ -40,15 +44,40 @@ robot_node = supervisor.getFromDef(ROBOT_NAME)
 
 # SerialMuxProt Server Instance.
 S_client = SerialWebots(supervisor_com_Tx, supervisor_com_rx)
-smp_server = SerialMuxProt(10, S_client)
+smp_server = SerialMuxProt(10, S_client) 
 
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
 
-def callback_Status(payload: bytearray) -> None:
-    """ Callback Status Channel """
-    print(payload)
+m_serialMuxProtChannelIdSPEED_SET = smp_server.create_channel("SPEED_SET", 4)
 
+def callback_Status(payload: bytearray) -> int:
+    """ Callback Status Channel """
+    if payload[0] == 1:
+       print("End-Start-Line Detected")
+       smp_server.send_data("SPEED_SET", struct.pack('2H', 0, 0))  # Stop motors
+
+
+def callback_LineSensors(payload: bytearray)-> None:
+    """ Callback LINE_SENS Channel"""
+    sensor_data = struct.unpack('5H', payload)
+    for idx in range (5):
+        print(f"Sensor[{idx}] = {sensor_data[idx]}")
+    smp_server.send_data("SPEED_SET", struct.pack('2H', 1000, 1000))  # Stop motors
+
+def callback_Mode(payload: bytearray)-> None:
+    """ Callback MODE Channel"""
+    print("Akram")
+    train_mode = payload[0]
+    if train_mode:
+        print("Train Mode Selected")
+    else:
+        print("Driving Mode Selected")    
+
+smp_server.subscribe_to_channel("STATUS", callback_Status)
+smp_server.subscribe_to_channel("LINE_SENS",callback_LineSensors)
+smp_server.subscribe_to_channel("MODE",callback_Mode)
+    
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller-
@@ -58,19 +87,19 @@ def main_loop():
     """
     status = 0
     m_elapsedTimeSinceReset = 0
-    # Subscribe To Status Channel
-    smp_server.subscribe_to_channel("STATUS", callback_Status)
-     
-    # Get robot node which to observe.
-    robot_node = supervisor.getFromDef(ROBOT_NAME)
-    if robot_node is None:
-        print(f"Robot DEF {ROBOT_NAME} not found.")
-        status = -1         
+
+    if m_serialMuxProtChannelIdSPEED_SET == 0:
+        print(f"Channel SPEED_SET not created.")
     else:
-        while supervisor.step(timestep) != -1:
-            m_elapsedTimeSinceReset += timestep
-            smp_server.process(m_elapsedTimeSinceReset)
-                          
+        # Get robot node which to observe.
+        robot_node = supervisor.getFromDef(ROBOT_NAME)
+        if robot_node is None:
+            print(f"Robot DEF {ROBOT_NAME} not found.")
+            status = -1         
+        else:
+             while supervisor.step(timestep) != -1:
+                   m_elapsedTimeSinceReset += timestep
+                   smp_server.process(m_elapsedTimeSinceReset)
     return status
 
 sys.exit(main_loop())
