@@ -1,0 +1,14 @@
+{
+    "name": "APPReinforcementLearning",
+    "version": "0.1.0",
+    "description": "LineFollower application with Reinforcement Learning",
+    "authors": [{
+        "name": "Akram Bziouech"
+    }],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "Service"
+    }],
+    "frameworks": "*",
+    "platforms": "*"
+}
