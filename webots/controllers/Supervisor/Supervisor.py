@@ -5,7 +5,7 @@ import sys
 from Serial_webots import SerialWebots
 from SerialMuxProt import SerialMuxProt
 from controller import Supervisor
-from SerialMuxChannels import *
+import struct
 
 
 
@@ -67,7 +67,6 @@ def callback_LineSensors(payload: bytearray)-> None:
 
 def callback_Mode(payload: bytearray)-> None:
     """ Callback MODE Channel"""
-    print("Akram")
     train_mode = payload[0]
     if train_mode:
         print("Train Mode Selected")
