@@ -46,9 +46,6 @@ robot_node = supervisor.getFromDef(ROBOT_NAME)
 S_client = SerialWebots(supervisor_com_Tx, supervisor_com_rx)
 smp_server = SerialMuxProt(10, S_client) 
 
-# The PROTO DEF name must be given!
-ROBOT_NAME = "ROBOT"
-
 #DLC of SPEED_SET Channel
 SPEED_SET_DLC = 4
 
