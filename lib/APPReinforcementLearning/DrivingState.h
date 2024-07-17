@@ -99,54 +99,27 @@ public:
     void setTargetSpeeds(int16_t leftMotor, int16_t rightMotor);
 
     /**
-     * Is no line detected?
-     *
-     * @param[in] lineSensorValues  The line sensor values as array.
-     * @param[in] length            The number of line sensor values.
-     *
-     * @return If no line is detected, it will return true otherwise false.
-     */
-
-    bool isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
-    /**
      * Check the abort conditions while driving the challenge.
      *
      * @return If abort is required, it will return true otherwise false.
     */
-    bool isAbortRequired(bool m_isTrackLost);
+    bool isAbortRequired();
 
 protected:
 private:
-            /**
-     * The line sensor threshold (normalized) used to detect the track.
-     * The track is detected in case the received value is greater or equal than
-     * the threshold.
-     */
-    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
 
-    /** Max. distance in mm after a lost track must be found again. */
-    static const uint32_t MAX_DISTANCE = 200;
-    /**
-     * ID of most left sensor.
-     */
-    static const uint8_t SENSOR_ID_MOST_LEFT;
 
-    /**
-     * ID of most right sensor.
-     */
-    static const uint8_t SENSOR_ID_MIDDLE;
+    /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
+    static const uint32_t OBSERVATION_DURATION = 3000000;
 
-    /**
-     * ID of middle sensor.
-     */
-    static const uint8_t SENSOR_ID_MOST_RIGHT;
+    /**< Observation timer to observe the max. time per challenge. */
+
+    SimpleTimer m_observationTimer; 
 
     /**
      * Default constructor.
      */
-    DrivingState() : IState()
-    {
-    }
+    DrivingState();
 
     /**
      * Default destructor.

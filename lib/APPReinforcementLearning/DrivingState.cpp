@@ -58,10 +58,6 @@
  * Local Variables
  *****************************************************************************/
 
-/* Initialize the required sensor IDs to be generic. */
-const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t DrivingState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
-const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -69,9 +65,9 @@ const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineS
 void DrivingState::entry()
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
     diffDrive.setLinearSpeed(0, 0);
     diffDrive.enable();
+    m_observationTimer.start(OBSERVATION_DURATION);
 }
 
 void DrivingState::process(StateMachine& sm)
@@ -82,10 +78,10 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
-
     /* Stop motors. */
     DifferentialDrive::getInstance().setLinearSpeed(0, 0);
     DifferentialDrive::getInstance().disable();
+    m_observationTimer.stop();
 }
 
 void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
@@ -93,41 +89,13 @@ void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
     DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
 }
 
-
-bool DrivingState::isNoLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
-{
-    bool    isDetected = true;
-    uint8_t idx        = SENSOR_ID_MOST_RIGHT;
-
-    /*
-     *
-     *   +   + + +   +
-     *   L     M     R
-     */
-    for (idx = SENSOR_ID_MOST_LEFT; idx <= SENSOR_ID_MOST_RIGHT; ++idx)
-    {
-        if (LINE_SENSOR_ON_TRACK_MIN_VALUE <= lineSensorValues[idx])
-        {
-            isDetected = false;
-            break;
-        }
-    }
-
-    return isDetected; 
-}
-
-bool DrivingState::isAbortRequired(bool m_isTrackLost)
+bool DrivingState::isAbortRequired()
 {
     bool isAbort = false;
 
-    /* If track is lost over a certain distance, abort driving. */
-    if (true == m_isTrackLost)
+    if (true == m_observationTimer.isTimeout())
     {
-        /* Max. distance driven, but track still not found? */
-        if (MAX_DISTANCE < Odometry::getInstance().getMileageCenter())
-        {
             isAbort = true;
-        }
     }
     return isAbort;
 }
@@ -142,7 +110,10 @@ bool DrivingState::isAbortRequired(bool m_isTrackLost)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
+DrivingState::DrivingState() :
+    m_observationTimer()
+{
+}
 /******************************************************************************
  * External Functions
  *****************************************************************************/
