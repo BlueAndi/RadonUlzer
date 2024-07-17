@@ -28,6 +28,10 @@ supervisor_com_rx = supervisor.getDevice(SUPERVISOR_RX_NAME)
 # Get the Supervisor Emitter device 
 supervisor_com_Tx = supervisor.getDevice(SUPERVISOR_TX_NAME)
 
+# Set serial rx/tx channels for communication with the Roboter.
+supervisor_com_rx.setChannel(2)
+supervisor_com_Tx.setChannel(1)
+
 # Enable supervisor receiver to receive any message from the robot or other
 # devices in the simulation.
 if supervisor_com_rx is None:
