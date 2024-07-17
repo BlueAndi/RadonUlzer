@@ -45,29 +45,47 @@ smp_server = SerialMuxProt(10, S_client)
 # The PROTO DEF name must be given!
 ROBOT_NAME = "ROBOT"
 
-m_serialMuxProtChannelIdSPEED_SET = smp_server.create_channel("SPEED_SET", 4)
+#DLC of SPEED_SET Channel
+SPEED_SET_DLC = 4
+
+m_serialMuxProtChannelIdSPEED_SET = smp_server.create_channel("SPEED_SET", SPEED_SET_DLC)
+
+# Counter for the number of times no line has been detected
+noLineDetectionCount = 0
+
+# The line sensor threshold
+LINE_SENSOR_ON_TRACK_MIN_VALUE = 200
 
 def callback_Status(payload: bytearray) -> int:
     """ Callback Status Channel """
     if payload[0] == 1:
-       print("End-Start-Line Detected")
+       print("the max. time within the robot must be finished its drive is  Done")
        smp_server.send_data("SPEED_SET", struct.pack('2H', 0, 0))  # Stop motors
 
 
 def callback_LineSensors(payload: bytearray)-> None:
     """ Callback LINE_SENS Channel"""
+    global noLineDetectionCount,LINE_SENSOR_ON_TRACK_MIN_VALUE
     sensor_data = struct.unpack('5H', payload)
     for idx in range (5):
-        print(f"Sensor[{idx}] = {sensor_data[idx]}")
-    smp_server.send_data("SPEED_SET", struct.pack('2H', 1000, 1000))  # Stop motors
-
+         print(f"Sensor[{idx}] = {sensor_data[idx]}")
+    if all(value == 0 for value in sensor_data):
+        noLineDetectionCount += 1
+    else:
+        noLineDetectionCount = 0
+    
+    if noLineDetectionCount >= 20 or all(value >= LINE_SENSOR_ON_TRACK_MIN_VALUE for value in sensor_data):
+        smp_server.send_data("SPEED_SET", struct.pack('2H', 0, 0))  # Stop motors, maximum NO Line Detection Counter reached   
+    else:
+        smp_server.send_data("SPEED_SET", struct.pack('2H', 1000, 1000)) 
+    
 def callback_Mode(payload: bytearray)-> None:
     """ Callback MODE Channel"""
-    train_mode = payload[0]
-    if train_mode:
-        print("Train Mode Selected")
+    driving_mode = payload[0]
+    if driving_mode:
+        print("Driving Mode Selected")
     else:
-        print("Driving Mode Selected")    
+        print("Train Mode Selected")    
 
 smp_server.subscribe_to_channel("STATUS", callback_Status)
 smp_server.subscribe_to_channel("LINE_SENS",callback_LineSensors)
@@ -84,7 +102,7 @@ def main_loop():
     m_elapsedTimeSinceReset = 0
 
     if m_serialMuxProtChannelIdSPEED_SET == 0:
-        print(f"Channel SPEED_SET not created.")
+        print("Channel SPEED_SET not created.")
     else:
         # Get robot node which to observe.
         robot_node = supervisor.getFromDef(ROBOT_NAME)
@@ -98,3 +116,4 @@ def main_loop():
     return status
 
 sys.exit(main_loop())
+

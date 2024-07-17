@@ -119,18 +119,14 @@ void App::loop()
 
         m_controlInterval.restart();
     }
-
+    
     if ((true == m_statusTimer.isTimeout()) && (true == m_smpServer.isSynced())&& (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
         Status payload = {SMPChannelPayload::Status::NOT_DONE};
-        ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
-        uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-        const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-        bool m_isTrackLost = DrivingState::getInstance().isNoLineDetected(lineSensorValues, maxLineSensors);
-        if (DrivingState::getInstance().isAbortRequired(m_isTrackLost) == true)
+
+        if (DrivingState::getInstance().isAbortRequired() == true)
         {
             payload = {SMPChannelPayload::Status::DONE};
-            m_systemStateMachine.setState(&ReadyState::getInstance());
         }
         (void)m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
         m_statusTimer.restart();
@@ -142,11 +138,12 @@ void App::loop()
 
         m_sendLineSensorsDataInterval.restart();
     }
+    /* Send Mode selected to The Supervisor. */
+    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (ReadyState::getInstance().setSelectedMode() != 0))
+    {    
+        Mode payload = {SMPChannelPayload::Mode::TRAINING_MODE};
 
-    if (&ReadyState::getInstance() == m_systemStateMachine.getState())
-    {   
-        Mode payload = {SMPChannelPayload::Mode::TRAINING_MODE};   
-        if(ReadyState::getInstance().selectedMode() == 0)
+        if(ReadyState::getInstance().setSelectedMode() <= 1)
         {
             payload = {SMPChannelPayload::Mode::DRIVING_MODE};
         }
@@ -228,8 +225,8 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
         DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
         if((motorSpeedData->left == 0) && (motorSpeedData->right == 0))
         {
-            m_systemStateMachine.setState(&StartupState::getInstance());
-            printf("StartupState");
+            ErrorState::getInstance().setErrorMsg("LNF");
+            m_systemStateMachine.setState(&ErrorState::getInstance());
         }
     }
 }

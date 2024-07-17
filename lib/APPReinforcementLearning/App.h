@@ -93,10 +93,10 @@ private:
     SimpleTimer m_sendLineSensorsDataInterval;
 
     /** Send status timer interval in ms. */
-    static const uint32_t SEND_STATUS_TIMER_INTERVAL = 24U;
+    static const uint32_t SEND_STATUS_TIMER_INTERVAL = 1000U;
 
     /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 24U;
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
 
     /** SerialMuxProt Channel id for sending system status. */
     uint8_t m_serialMuxProtChannelIdStatus;
