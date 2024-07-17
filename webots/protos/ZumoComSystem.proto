@@ -1,43 +1,43 @@
 #VRML_SIM R2023a utf8
 
 PROTO ZumoComSystem [
-  field SFVec3f     translation 0 0 0
-  field SFRotation  rotation    0 0 1 0
-  field SFString    name        "ZumoComSystem"
+  field SFString name "ZumoComSystem"
 ]
 {
-  Robot {
-    translation IS translation
-    rotation IS rotation
-    children [
-      DEF BODY Group {
-        children [
-          Shape {
-            geometry Box {
-              size 0.06 0.05 0.01
+  Slot {
+    type "ZumoComSystem"
+    endPoint Robot {
+      translation 0 0 0.1
+      children [
+        DEF BODY Group {
+          children [
+            Shape {
+              geometry Box {
+                size 0.06 0.05 0.01
+              }
             }
-          }
-        ]
+          ]
+        }
+        Receiver {
+          name "serialComRx"
+          type "serial"
+        }
+        Emitter {
+          name "serialComTx"
+          type "serial"
+        }
+        GPS {
+          name "gps"
+        }
+      ]
+      name IS name
+      description "DroidControlShip"
+      boundingObject USE BODY
+      physics Physics {
+        density -1
+        mass 0.1
       }
-      Receiver {
-        name "serialComRx"
-        type "serial"
-      }
-      Emitter {
-        name "serialComTx"
-        type "serial"
-      }
-      GPS {
-        name "gps"
-      }
-    ]
-    name IS name
-    description "DroidControlShip"
-    boundingObject USE BODY
-    physics Physics {
-      density -1
-      mass 0.1
+      controller "<extern>"
     }
-    controller "<extern>"
   }
 }

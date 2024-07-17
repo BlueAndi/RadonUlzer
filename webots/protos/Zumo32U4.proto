@@ -3,10 +3,11 @@
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
 
 PROTO Zumo32U4 [
-  field SFVec3f     translation     0 0 0
-  field SFRotation  rotation        0 0 1 0
-  field SFString    name            "Zumo"
-  field SFString    contactMaterial "default" # Contact material of the tracks
+  field SFVec3f     translation       0 0 0
+  field SFRotation  rotation          0 0 1 0
+  field SFString    name              "Zumo"
+  field SFString    contactMaterial   "default" # Contact material of the tracks
+  field SFNode      zumoComSystemSlot NULL      # Slot for the ZumoComSystem
 ]
 {
   Robot {
@@ -22,6 +23,10 @@ PROTO Zumo32U4 [
         type "serial"
       }
       Speaker {
+      }
+      Slot {
+        type "ZumoComSystem"
+        endPoint IS zumoComSystemSlot
       }
       DEF SHIELD Group {
         children [
@@ -42,7 +47,6 @@ PROTO Zumo32U4 [
         ]
       }
       DEF TRACK_LEFT Track {
-        contactMaterial IS contactMaterial
         translation 0 0.0375 0
         rotation 0 1 0 0
         children [
@@ -77,6 +81,7 @@ PROTO Zumo32U4 [
           }
         ]
         name "left_track"
+        contactMaterial IS contactMaterial
         boundingObject DEF TRACK_BO Group {
           children [
             Transform {
@@ -128,7 +133,6 @@ PROTO Zumo32U4 [
         geometriesCount 70
       }
       DEF TRACK_RIGHT Track {
-        contactMaterial IS contactMaterial
         translation 0 -0.0375 0
         children [
           DEF WHEEL_FR TrackWheel {
@@ -162,6 +166,7 @@ PROTO Zumo32U4 [
           }
         ]
         name "track_right"
+        contactMaterial IS contactMaterial
         boundingObject USE TRACK_BO
         physics USE TRACK_PH
         device [
@@ -435,8 +440,8 @@ PROTO Zumo32U4 [
               0.301 0 0
             ]
             type "infra-red"
-            aperture 0.4
             numberOfRays 5
+            aperture 0.4
             gaussianWidth 1000
           }
           DistanceSensor {
@@ -460,47 +465,36 @@ PROTO Zumo32U4 [
           }
         ]
       }
-    DEF IMU Group {
+      DEF IMU Group {
         children [
           Accelerometer {
-            name "accelerometer"
-            xAxis TRUE
-            yAxis TRUE
-            zAxis TRUE
-            resolution  0.001
             lookupTable [
               -19.62 -32768 0.001
-              0 0  0.001
+              0 0 0.001
               19.62 32767 0.001
             ]
+            resolution 0.001
           }
           Gyro {
             name "gyro"
-            xAxis TRUE
-            yAxis TRUE
-            zAxis TRUE
-            resolution  0.001
             lookupTable [
               -9.32 -32768 0
               0 0 0
               9.32 32767 0
             ]
+            resolution 0.001
           }
           Compass {
             name "magnetometer"
-            xAxis TRUE
-            yAxis TRUE
-            zAxis TRUE
-            resolution  0.001
             lookupTable [
               -1 -32000 0
               0 0 0
               1 32000 0
             ]
+            resolution 0.001
           }
         ]
       }
-
       DEF LEDS Group {
         children [
           LED {
@@ -576,12 +570,12 @@ PROTO Zumo32U4 [
         ]
       }
     ]
+    name IS name
     boundingObject USE BODY
     physics Physics {
-      mass 0.2
       density -1
+      mass 0.2
     }
-    name IS name
     controller "<extern>"
   }
 }
