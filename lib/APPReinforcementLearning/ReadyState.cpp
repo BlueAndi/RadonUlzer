@@ -61,7 +61,11 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
+const uint16_t ReadyState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
+/* Initialize the required sensor IDs to be generic. */
+const uint8_t ReadyState::SENSOR_ID_MOST_LEFT  = 0U;
+const uint8_t ReadyState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
+const uint8_t ReadyState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /******************************************************************************
  * Public Methods
@@ -70,8 +74,6 @@
 void ReadyState::entry()
 {
     IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
-    const int32_t Mode_Selected_period    = 1000; /* ms*/
     display.clear();
     display.print("A: TMD");
     display.gotoXY(0, 1);
@@ -83,49 +85,53 @@ void ReadyState::entry()
         display.print(m_lapTime);
         display.print("ms");
     }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
-
-    m_ModeTimeoutTimer.start(Mode_Selected_period);
+    m_ModeTimeoutTimer.start(mode_selected_period);
 }
 
 void ReadyState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
     IButton& buttonB = Board::getInstance().getButtonB();
-    uint8_t selectedMode = 0;    
+    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
+    const uint16_t* lineSensorValues = lineSensors.getSensorValues(); 
     /* Shall the driving mode be released? */
     if (true == buttonA.isPressed())
     {
         buttonA.waitForRelease();
-        myMode = DRIVING_MODE;    
-        sm.setState(&DrivingState::getInstance());
+        m_mode = DRIVING_MODE; 
     }
      /* Shall the Training mode be released? */
     else if ((true == buttonB.isPressed()) )
     {   
         buttonB.waitForRelease();
-        myMode = TRAINING_MODE;
-        sm.setState(&DrivingState::getInstance());
+        m_mode = TRAINING_MODE;  
     }
-    else if (true == m_ModeTimeoutTimer.isTimeout())
+    else if (true == m_ModeTimeoutTimer.isTimeout() && (m_mode == IDLE))
     {
-        myMode = TRAINING_MODE;
-        sm.setState(&DrivingState::getInstance());
-        
+        m_mode = TRAINING_MODE;  
     }
     else
     {
         /* Nothing to do. */
         ;
+    }
+
+    DriveUntilStartLinecross();
+
+    if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (LastStatus == true))
+    {
+        sm.setState(&DrivingState::getInstance());
+    }
+    else 
+    {
+        LastStatus = isStartStopLineDetected(lineSensorValues, maxLineSensors);
     }   
 
 }
 
 void ReadyState::exit()
 {
-    m_timer.stop();
     m_isLapTimeAvailable = false;
 }
 
@@ -135,29 +141,39 @@ void ReadyState::setLapTime(uint32_t lapTime)
     m_lapTime            = lapTime;
 }
 
-uint8_t ReadyState::selectedMode()
+uint8_t ReadyState::setSelectedMode()
 {
-    return static_cast<uint8_t>(myMode);
+    return (m_mode);
 }
 
+void ReadyState :: DriveUntilStartLinecross()
+{
+    DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
+    int16_t         top_speed          = 2000;
+    int16_t         leftMotor          = top_speed / 2U;
+    int16_t         rightMotor         = top_speed / 2U;
+    diffDrive.setLinearSpeed(leftMotor, rightMotor);
+}
 
+bool ReadyState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
 
+    /*
+     * ===     =     ===
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE - 1U]) &&
+        (LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MIDDLE]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE + 1U]) &&
+        (LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]))
+    {
+        isDetected = true;
+    }
 
-
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
-    /*if (true == m_smpServer.isSynced())
-    {*/
+    return isDetected;
+}

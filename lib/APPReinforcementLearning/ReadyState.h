@@ -99,25 +99,50 @@ public:
     void setLapTime(uint32_t lapTime);
 
     /**
-     *  Returns the mode selection
+     *  Set the selected mode.
      *
-     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected or 0 if nothing is selected and there is no timeout..
+     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
      */
 
-    uint8_t selectedMode( );
-    /* Re-initialize the board. This is required for the webots simulation in
-     * case the world is reset by a supervisor without restarting the RadonUlzer
-     * controller executable.
-    */
-    void reinit_Board();
+    uint8_t setSelectedMode( );
 
 protected:
 private:
+
+    /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
+    static const uint32_t  mode_selected_period = 500U;
+
     /**
-    * the mode that can be selected.
+     * The line sensor threshold (normalized) used to detect the track.
+     * The track is detected in case the received value is greater or equal than
+     * the threshold.
+     */
+    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
+
+    /**
+     * ID of most left sensor.
+     */
+    static const uint8_t SENSOR_ID_MOST_LEFT;
+
+    /**
+     * ID of middle sensor.
     */
-    /**< Timer used for cyclic debug output. */
-    SimpleTimer m_timer; 
+    static const uint8_t SENSOR_ID_MIDDLE;
+
+    /**
+     * ID of most right sensor.
+    */
+    static const uint8_t SENSOR_ID_MOST_RIGHT;
+
+    /**
+     * The max. normalized value of a sensor in digits.
+    */
+    static const uint16_t SENSOR_VALUE_MAX;
+
+    /**
+     * last Line Status 
+    */
+    bool  LastStatus ;
 
     /** Timeout timer for the selected mode. */
     SimpleTimer m_ModeTimeoutTimer; 
@@ -129,22 +154,25 @@ private:
     bool        m_isLapTimeAvailable; 
 
     /**< Lap time in ms of the last successful driven round. */
-    uint32_t    m_lapTime;       
-    
-    enum Mode_: uint8_t
+    uint32_t    m_lapTime; 
+
+    /**
+     * The mode that can be selected.
+    */        
+    enum mode: uint8_t
     {
-        DRIVING_MODE = 0, /**< Driving Mode Selected. */
-        TRAINING_MODE     /**< Training Mode Selected. */
+        IDLE = 0,        /**< No mode has been selected*/
+        DRIVING_MODE,    /**< Driving Mode Selected. */
+        TRAINING_MODE    /**< Training Mode Selected. */
     };
-    
-    Mode_ myMode;
-    
+
+    mode m_mode;
 
     ReadyState() : 
-               m_timer(), 
                m_isLapTimeAvailable(false), 
                m_lapTime(0),
-               myMode(TRAINING_MODE)   
+               LastStatus(false),
+               m_mode(IDLE)   
     {
     }
 
@@ -158,6 +186,22 @@ private:
     /* Not allowed. */
     ReadyState(const ReadyState& state);            /**< Copy construction of an instance. */
     ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
+
+    /* 
+     * The robot moves from its current position 
+     * until it crosses and leaves the start line.
+    */
+    void DriveUntilStartLinecross();
+
+        /**
+     * Is the start/stop line detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     *
+     * @return If start/stop line detected, it will return true otherwise false.
+     */
+    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
 };
 
 /******************************************************************************
