@@ -46,18 +46,6 @@
 /** Maximum number of SerialMuxProt Channels. */
 #define MAX_CHANNELS (10U)
 
-/** Name of Channel to send Commands to. */
-#define COMMAND_CHANNEL_NAME "CMD"
-
-/** DLC of Command Channel. */
-#define COMMAND_CHANNEL_DLC (sizeof(Command))
-
-/** Name of Channel to receive Command Responses from. */
-#define COMMAND_RESPONSE_CHANNEL_NAME "CMD_RSP"
-
-/** DLC of Command Response Channel. */
-#define COMMAND_RESPONSE_CHANNEL_DLC (sizeof(CommandResponse))
-
 /** Name of Channel to send system status to. */
 #define STATUS_CHANNEL_NAME "STATUS"
 
@@ -94,23 +82,7 @@ typedef SerialMuxProtServer<MAX_CHANNELS> SMPServer;
 /** Channel payload constants. */
 namespace SMPChannelPayload
 {
-    /** Remote control commands. */
-    typedef enum : uint8_t
-    {
-        CMD_ID_IDLE = 0,                /**< Nothing to do. */
-        CMD_ID_SET_INIT_POS,             /**< Set initial position. */
-        CMD_ID_GET_MAX_SPEED           /**< Get maximum speed. */
 
-    } CmdId; /**< Command ID */
-
-    /** Remote control command responses. */
-    typedef enum : uint8_t
-    {
-        RSP_ID_OK = 0,  /**< Command successful executed. */
-        RSP_ID_PENDING, /**< Command is pending. */
-        RSP_ID_ERROR    /**< Command failed. */
-
-    } RspId; /**< Response ID */
     /** Status flags. */
     typedef enum : uint8_t
     {
@@ -120,31 +92,14 @@ namespace SMPChannelPayload
     } Status; /**< Status flag */
 
     typedef enum : uint8_t
-    {
-        DRIVING_MODE = 0, /**< Driving Mode Selected. */
-        TRAINING_MODE     /**< Training Mode Selected. */
+    {   
+        TRAINING_MODE = 0, /**< Driving Mode Selected. */
+        DRIVING_MODE     /**< Training Mode Selected. */
 
     } Mode; /**< Status flag */
 
 }
-/** Struct of the "Command" channel payload. */
-typedef struct _Command
-{
-    SMPChannelPayload::CmdId commandId; /**< Command ID */
 
-} __attribute__((packed)) Command;
-
-/** Struct of the "Command Response" channel payload. */
-typedef struct _CommandResponse
-{
-    SMPChannelPayload::RspId responseId; /**< Response to the command */
-
-    /** Response Payload. */
-    union
-    {
-        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
-    };
-} __attribute__((packed)) CommandResponse;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData

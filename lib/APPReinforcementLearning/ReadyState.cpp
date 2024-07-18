@@ -73,11 +73,15 @@ const uint8_t ReadyState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSen
 
 void ReadyState::entry()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
+    IDisplay&  display   = Board::getInstance().getDisplay();
     display.clear();
     display.print("A: TMD");
     display.gotoXY(0, 1);
     display.print("B: DMD");
+
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    diffDrive.setLinearSpeed(0, 0);
+    LastStatus = false;
 
     if (true == m_isLapTimeAvailable)
     {   
@@ -85,7 +89,7 @@ void ReadyState::entry()
         display.print(m_lapTime);
         display.print("ms");
     }
-    m_ModeTimeoutTimer.start(mode_selected_period);
+    m_modeTimeoutTimer.start(mode_selected_period);
 }
 
 void ReadyState::process(StateMachine& sm)
@@ -94,7 +98,8 @@ void ReadyState::process(StateMachine& sm)
     IButton& buttonB = Board::getInstance().getButtonB();
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-    const uint16_t* lineSensorValues = lineSensors.getSensorValues(); 
+    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+    m_mode = IDLE;
     /* Shall the driving mode be released? */
     if (true == buttonA.isPressed())
     {
@@ -107,26 +112,27 @@ void ReadyState::process(StateMachine& sm)
         buttonB.waitForRelease();
         m_mode = TRAINING_MODE;  
     }
-    else if (true == m_ModeTimeoutTimer.isTimeout() && (m_mode == IDLE))
+    else if (true == m_modeTimeoutTimer.isTimeout() && (m_mode == IDLE))
     {
-        m_mode = TRAINING_MODE;  
+        m_mode = TRAINING_MODE;
+        m_modeTimeoutTimer.restart();
     }
     else
     {
         /* Nothing to do. */
         ;
     }
-
-    DriveUntilStartLinecross();
-
+    /**Drive forward until START LINE is crossed */
+    DriveUntilStartLinecross();  
     if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (LastStatus == true))
     {
         sm.setState(&DrivingState::getInstance());
     }
-    else 
+    else
     {
         LastStatus = isStartStopLineDetected(lineSensorValues, maxLineSensors);
-    }   
+    }
+   
 
 }
 
@@ -146,6 +152,7 @@ uint8_t ReadyState::setSelectedMode()
     return (m_mode);
 }
 
+/**Drive forward until START LINE is crossed */
 void ReadyState :: DriveUntilStartLinecross()
 {
     DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();

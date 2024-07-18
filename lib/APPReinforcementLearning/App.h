@@ -50,8 +50,10 @@ public:
         m_serialMuxProtChannelIdMode(0U),
         m_statusTimer(),
         m_sendLineSensorsDataInterval(),
+        m_sentmode(false),
         m_smpServer(Serial, nullptr)
     {
+        appInstance = this;
     }
 
     /**
@@ -70,13 +72,21 @@ public:
      * Process the application periodically.
      */
     void loop();
-
+    /**
+     * System Status callback.
+     *
+     * @param[in] status    System status
+     */
+    void systemStatusCallback(SMPChannelPayload::Status status);
 private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
 
     /** Baudrate for Serial Communication */
     static const uint32_t SERIAL_BAUDRATE = 115200U;
+
+    /** Saving the APP instance */
+    static App* appInstance;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;
@@ -96,7 +106,7 @@ private:
     static const uint32_t SEND_STATUS_TIMER_INTERVAL = 1000U;
 
     /** Sending Data period in ms. */
-    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20;
+    static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20U;
 
     /** SerialMuxProt Channel id for sending system status. */
     uint8_t m_serialMuxProtChannelIdStatus;
@@ -110,7 +120,9 @@ private:
     /** SerialMuxProt Server Instance. */
     SMPServer m_smpServer;
 
-    
+    /* Ensue that the mode is only sent once*/
+    bool m_sentmode;
+   
     /**
      * Setup the SerialMuxProt channels.
      *
@@ -123,7 +135,7 @@ private:
     */
     void sendLineSensorsData() const;
 
-
+    static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
     /* Not allowed. */
     App(const App& app);            /**< Copy construction of an instance. */
     App& operator=(const App& app); /**< Assignment of an instance. */

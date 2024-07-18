@@ -42,6 +42,9 @@
  *****************************************************************************/
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
+/* Initialization of the static variable*/
+App* App::appInstance = nullptr;
+
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
@@ -139,15 +142,15 @@ void App::loop()
         m_sendLineSensorsDataInterval.restart();
     }
     /* Send Mode selected to The Supervisor. */
-    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (ReadyState::getInstance().setSelectedMode() != 0))
+    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (!m_sentmode))
     {    
-        Mode payload = {SMPChannelPayload::Mode::TRAINING_MODE};
-
-        if(ReadyState::getInstance().setSelectedMode() <= 1)
+        int modeSelection = ReadyState::getInstance().setSelectedMode();
+        if(modeSelection > 0)
         {
-            payload = {SMPChannelPayload::Mode::DRIVING_MODE};
+             SMPChannelPayload::Mode payload = (modeSelection == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+            (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+            m_sentmode = true;
         }
-        (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
     }
 
     
@@ -169,11 +172,12 @@ bool App::setupSerialMuxProt()
 {
     bool isSuccessful = false;
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME,App_statusChannelCallback);
     /* Channel creation. */
     m_serialMuxProtChannelIdStatus = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
     m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
     m_serialMuxProtChannelIdMode = m_smpServer.createChannel(MODE_CHANNEL_NAME, MODE_CHANNEL_DLC);
-    
+
 
     /* Channels succesfully created? */
     if ((0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) && (0U != m_serialMuxProtChannelIdMode))
@@ -205,6 +209,25 @@ void App::sendLineSensorsData() const
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
 }
 
+void App::systemStatusCallback(SMPChannelPayload::Status status)
+{
+    switch (status)
+    {
+    case SMPChannelPayload::NOT_DONE:
+        /* Nothing to do. All good. */
+        break;
+    case SMPChannelPayload::DONE:
+        Odometry::getInstance().clearPosition();
+        Odometry::getInstance().clearMileage();
+        m_systemStateMachine.setState(&ReadyState::getInstance());
+        m_sentmode = false;
+        
+        break;
+
+    default:
+        break;
+    }
+}
 
 /******************************************************************************
  * External Functions
@@ -213,20 +236,30 @@ void App::sendLineSensorsData() const
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+/**
+ * Receives current status of the DCS over SerialMuxProt channel.
+ *
+ * @param[in] payload       Status of the DCS.
+ * @param[in] payloadSize   Size of the Status Flag
+ * @param[in] userData      Instance of App class.
+ */
+void App::App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+
+    if ((nullptr != payload) && (STATUS_CHANNEL_DLC == payloadSize) && (nullptr != App::appInstance))
+    {
+        const Status* currentStatus = reinterpret_cast<const Status*>(payload);
+        App::appInstance->systemStatusCallback(currentStatus->status);
+    }
+}
 
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-
-    (void)userData;
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
-    {
-        StateMachine m_systemStateMachine;
+    { 
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
+        //printf("Payload %d", motorSpeedData->left);
         DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
-        if((motorSpeedData->left == 0) && (motorSpeedData->right == 0))
-        {
-            ErrorState::getInstance().setErrorMsg("LNF");
-            m_systemStateMachine.setState(&ErrorState::getInstance());
-        }
+
     }
 }

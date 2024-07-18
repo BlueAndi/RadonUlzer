@@ -145,7 +145,7 @@ private:
     bool  LastStatus ;
 
     /** Timeout timer for the selected mode. */
-    SimpleTimer m_ModeTimeoutTimer; 
+    SimpleTimer m_modeTimeoutTimer; 
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;  
@@ -165,11 +165,11 @@ private:
         DRIVING_MODE,    /**< Driving Mode Selected. */
         TRAINING_MODE    /**< Training Mode Selected. */
     };
-
     mode m_mode;
 
     ReadyState() : 
                m_isLapTimeAvailable(false), 
+               m_modeTimeoutTimer(),
                m_lapTime(0),
                LastStatus(false),
                m_mode(IDLE)   

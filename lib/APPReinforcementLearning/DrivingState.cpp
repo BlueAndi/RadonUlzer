@@ -66,7 +66,6 @@ void DrivingState::entry()
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
     diffDrive.setLinearSpeed(0, 0);
-    diffDrive.enable();
     m_observationTimer.start(OBSERVATION_DURATION);
 }
 
@@ -78,9 +77,6 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
-    /* Stop motors. */
-    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
-    DifferentialDrive::getInstance().disable();
     m_observationTimer.stop();
 }
 
