@@ -1,43 +1,37 @@
-@startuml
+@startuml SensorFusionSystemStates
 
 title System States
 
 state StartupState: /entry Initialize HAL.
-state StartupState: /entry Show operator info on LCD.
-state StartupState: /do Wait for pushbutton A is triggered.
+state StartupState: /entry Try to load Max. Motor Speed from Settings.
 
-state MotorSpeedCalibrationState: /entry Show operator info on LCD.
-state MotorSpeedCalibrationState: /do Perform calibration.
-
-state LineSensorsCalibrationState: /entry Show operator info on LCD.
 state LineSensorsCalibrationState: /do Perform calibration.
 
-state ErrorState: /entry Show error info on LCD.
-state ErrorState: /do Wait for pushbutton A is triggered.
+state ErrorState: /do Wait for pushbutton A to be triggered.
 
-state ReadyState: /entry Show operator info on LCD.
-state ReadyState: /do Wait for pushbutton A is triggered.
+state ReadyState: /do Wait for pushbutton A to be triggered.
 
-state ReleaseTrackState: /entry Choose parameter set 1
-state ReleaseTrackState: /entry Show parameter set on LCD.
+state ReleaseTrackState: /entry Choose parameter set 0
 state ReleaseTrackState: /entry Start release timer.
-state ReleaseTrackState: /do If pushbutton A is triggered, choose next parameter set and update LCD.
-state ReleaseTrackState: /do If pushbutton A is triggered, restart release timer.
+state ReleaseTrackState: /do If pushbutton A to be triggered, choose next parameter set.
+state ReleaseTrackState: /do If pushbutton A to be triggered, restart release timer.
 state ReleaseTrackState: /exit Stop release timer.
 
 state DrivingState: /entry Start observation timer.
 state DrivingState: /do Perform driving.
+state DrivingState: /do Read out Odometry unit and IMU.
+state DrivingState: /do Send Odometry values and IMU values via SerialMuxProt.
 state DrivingState: /exit Stop observation timer.
 
 [*] --> StartupState: Power up
-StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
-MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
+StartupState --> LineSensorsCalibrationState: [Max. Motor Speed is defined]
+StartupState --> ErrorState: [Max. Motor Speed is not defined]
 LineSensorsCalibrationState --> ReadyState: [Calibration finished]
 LineSensorsCalibrationState --> ErrorState: [Calibration failed]
 ReadyState --> ReleaseTrackState: [Pushbutton A triggered]
 ReleaseTrackState --> DrivingState: [Release timer timeout]
 ReleaseTrackState --> ReleaseTrackState: [Pushbutton A triggered]
 DrivingState --> ReadyState: [Track lost] or\n[Observation timer timeout]
-ErrorState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+ErrorState --> StartupState: [Pushbutton A triggered]
 
 @enduml

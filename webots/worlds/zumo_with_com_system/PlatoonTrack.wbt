@@ -1,0 +1,80 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../../protos/Zumo32U4.proto"
+EXTERNPROTO "../../protos/ZumoComSystem.proto"
+EXTERNPROTO "../../protos/PlatoonTrack.proto"
+EXTERNPROTO "../../protos/Supervisor.proto"
+EXTERNPROTO "../../protos/Obstacle.proto"
+
+WorldInfo {
+  info [
+    "Platoon Track for platooning using ConvoyLeader and RemoteControl applications."
+  ]
+  title "Platoon Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "rubber"
+      material2 "cardboard"
+      coulombFriction [
+        0.65
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.7176343920698073 0.00028570577229950487 0.6964199865675955 3.1410420741084026
+  position -3.3187472129446247 -0.8391292754142821 2.997080235514728
+  follow "follower_1"
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+PlatoonTrack {
+  contactMaterial "cardboard"
+}
+DEF LEADER Zumo32U4 {
+  translation -3.15 -1.05 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "leader"
+  contactMaterial "rubber"
+}
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemLeader"
+}
+DEF FOLLOWER1 Zumo32U4 {
+  translation -3.15 -1.2 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_1"
+  contactMaterial "rubber"
+}
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemFollower1"
+}
+DEF FOLLOWER2 Zumo32U4 {
+  translation -3.15 -1.35 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "follower_2"
+  contactMaterial "rubber"
+}
+ZumoComSystem {
+  translation 0 0 0
+  rotation 0 0 1 0
+  name "ZumoComSystemFollower2"
+}
+Supervisor {
+  name "PlatoonSupervisor"
+  controller "PlatoonSupervisor"
+  supervisor TRUE
+}
+DEF OBSTACLE Obstacle {
+  translation -3.28 2 0.4
+  name "Wall"
+}

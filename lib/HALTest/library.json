@@ -10,8 +10,6 @@
     }],
     "license": "MIT",
     "dependencies": [{
-        "name": "HALInterfaces"
-    }, {
         "name": "HALInterfacesTest"
     }],
     "frameworks": "*",

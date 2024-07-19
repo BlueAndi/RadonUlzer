@@ -5,5 +5,7 @@
 .vscode/ipch
 .vscode/extensions.json
 lib/Webots
-webots/worlds/*.wbproj
+*.wbproj
 webots/worlds/*.jpg
+doc/doxygen/*/*
+__pycache__

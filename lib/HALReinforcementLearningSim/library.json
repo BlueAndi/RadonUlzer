@@ -1,0 +1,14 @@
+{
+    "name": "HALReinforcementLearningSim",
+    "version": "0.1.0",
+    "description": "...",
+    "authors": [{
+        "name": "Akram Bziouech"
+    }],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "Webots"
+    }],
+    "frameworks": "*",
+    "platforms": "*"
+}

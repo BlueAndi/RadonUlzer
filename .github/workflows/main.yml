@@ -30,15 +30,15 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget"]
+        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "LineFollowerSimpleTarget", "RemoteControlTarget", "SensorFusionTarget"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job.
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -46,13 +46,13 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Cache PlatformIO
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.platformio
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
@@ -71,14 +71,14 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "TestSim"]
+        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "LineFollowerSimpleTarget", "RemoteControlTarget", "SensorFusionTarget", "TestSim"]
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -86,13 +86,13 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Cache PlatformIO
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.platformio
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
@@ -112,10 +112,10 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -123,13 +123,13 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Cache PlatformIO
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.platformio
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
     
@@ -148,14 +148,14 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["CalibTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyLeaderSim", "LineFollowerSim", "RemoteControlSim", "SensorFusionSim"]
+        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "LineFollowerSimpleTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyFollowerSim", "ConvoyLeaderSim", "LineFollowerSim", "LineFollowerSimpleSim", "RemoteControlSim", "SensorFusionSim"]
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cache pip
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -163,13 +163,13 @@ jobs:
           ${{ runner.os }}-pip-
 
     - name: Cache PlatformIO
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.platformio
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
   
@@ -179,10 +179,10 @@ jobs:
         pip install --upgrade platformio
 
     - name: Set up graphviz
-      uses: ts-graphviz/setup-graphviz@v1.2.0
+      uses: ts-graphviz/setup-graphviz@v2
 
     - name: Set up doxygen and generate documentation for ${{ matrix.environment }}
-      uses: mattnotmitt/doxygen-action@v1.9.5
+      uses: mattnotmitt/doxygen-action@v1.9.8
       with:
         working-directory: './doc/doxygen'
         doxyfile-path: './${{ matrix.environment }}Doxyfile'

@@ -3,6 +3,7 @@
 PROTO Marker [
   field SFVec3f    translation  0 0 0
   field SFString   name         "marker"
+  field SFColor    color        0.666667 0 0
 ]
 {
   Solid {
@@ -11,7 +12,7 @@ PROTO Marker [
     children [
       Shape {
         appearance PBRAppearance {
-          baseColor 0.666667 0 0
+          baseColor IS color
           metalness 0
           IBLStrength 0
           emissiveIntensity 0

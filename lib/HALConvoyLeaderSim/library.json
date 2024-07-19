@@ -10,10 +10,6 @@
     }],
     "license": "MIT",
     "dependencies": [{
-        "name": "HALInterfaces"
-    }, {
-        "name": "HALSim"
-    }, {
         "name": "Webots"
     }],
     "frameworks": "*",

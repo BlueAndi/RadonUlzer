@@ -13,7 +13,7 @@ PROTO SensorFusionTrack [
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
-          "./SensorFusionTrack.png"
+          "./track.png"
         ]
       }
       roughness 1

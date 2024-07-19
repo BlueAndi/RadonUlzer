@@ -1,0 +1,19 @@
+{
+    "name": "APPConvoyFollower",
+    "version": "0.1.0",
+    "description": "Convoy follower application",
+    "authors": [
+        {
+            "name": "Gabryel Reyes",
+            "email": "gabryelrdiaz@gmail.com",
+            "url": "https://github.com/gabryelreyes",
+            "maintainer": true
+        }
+    ],
+    "license": "MIT",
+    "dependencies": [{
+        "name": "Service"
+    }],
+    "frameworks": "*",
+    "platforms": "*"
+}
