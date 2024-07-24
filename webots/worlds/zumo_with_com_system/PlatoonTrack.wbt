@@ -43,7 +43,9 @@ DEF LEADER Zumo32U4 {
   contactMaterial "rubber"
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystemLeader"
+    performanceMode TRUE
   }
+  performanceMode TRUE
 }
 DEF FOLLOWER1 Zumo32U4 {
   translation -3.15 -1.2 0.013994298332013683
@@ -52,7 +54,9 @@ DEF FOLLOWER1 Zumo32U4 {
   contactMaterial "rubber"
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystemFollower1"
+    performanceMode TRUE
   }
+  performanceMode TRUE
 }
 DEF FOLLOWER2 Zumo32U4 {
   translation -3.15 -1.35 0.013994298332013683
@@ -61,7 +65,9 @@ DEF FOLLOWER2 Zumo32U4 {
   contactMaterial "rubber"
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystemFollower2"
+    performanceMode TRUE
   }
+  performanceMode TRUE
 }
 Supervisor {
   name "PlatoonSupervisor"
