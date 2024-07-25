@@ -1,21 +1,38 @@
 #VRML_SIM R2023a utf8
+# template language: javascript
 
 PROTO ZumoComSystem [
-  field SFString name "ZumoComSystem"
+  field SFString name             "ZumoComSystem"
+  field SFBool   performanceMode  FALSE           # Use basic blocks for the robot instead of meshes. Increases performance.
 ]
 {
   Slot {
     type "ZumoComSystem"
     endPoint Robot {
-      translation 0 0 0.1
+      translation -0.005 0 0.018
       children [
         DEF BODY Group {
           children [
+             %< if (false == fields.performanceMode.value) { >%
+            Transform {
+              translation -0.05 0.033 0
+              rotation 8.8992e-07 1.07489e-06 1 -1.5535153071795866
+              scale 0.01 0.01 0.01
+              children [
+                CadShape {
+                  url [
+                    "./mesh_ZumoComSystem/ZumoComSystem.obj"
+                  ]
+                }
+              ]
+            }
+            %< } else { >%
             Shape {
               geometry Box {
                 size 0.06 0.05 0.01
               }
             }
+            %<}>%
           ]
         }
         Receiver {
@@ -32,11 +49,6 @@ PROTO ZumoComSystem [
       ]
       name IS name
       description "DroidControlShip"
-      boundingObject USE BODY
-      physics Physics {
-        density -1
-        mass 0.1
-      }
       controller "<extern>"
     }
   }

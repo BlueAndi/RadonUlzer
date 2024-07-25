@@ -1,4 +1,5 @@
 #VRML_SIM R2023a utf8
+# template language: javascript
 
 EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
 
@@ -8,6 +9,7 @@ PROTO Zumo32U4 [
   field SFString    name              "Zumo"
   field SFString    contactMaterial   "default" # Contact material of the tracks
   field SFNode      zumoComSystemSlot NULL      # Slot for the ZumoComSystem
+  field SFBool      performanceMode   FALSE     # Use basic blocks for the robot instead of meshes. Increases performance.
 ]
 {
   Robot {
@@ -30,9 +32,10 @@ PROTO Zumo32U4 [
       }
       DEF SHIELD Group {
         children [
+          %< if (true == fields.performanceMode.value) { >%
           Transform {
-            translation 0.047 0 0.007
-            rotation 0 1 0 -0.42
+            translation 0.046 0 0.006
+            rotation 0 1 0 -0.26
             children [
               Shape {
                 appearance PBRAppearance {
@@ -44,6 +47,7 @@ PROTO Zumo32U4 [
               }
             ]
           }
+          %<}>%
         ]
       }
       DEF TRACK_LEFT Track {
@@ -184,38 +188,20 @@ PROTO Zumo32U4 [
       }
       DEF BODY Group {
         children [
-          Shape {
+           Shape {
             appearance DEF BODY_COLOR PBRAppearance {
-              emissiveColor 0.2 0.2 0.2
+              baseColor 0.2 0.2 0.2
+              metalness 0
             }
             geometry DEF BODY_GEOMETRY Box {
-              size 0.06 0.065 0.02
+              size 0.085 0.065 0.023
             }
-          }
-          Transform {
-            translation 0.0325 0 0.0025
-            children [
-              Shape {
-                appearance USE BODY_COLOR
-                geometry Box {
-                  size 0.025 0.065 0.015
-                }
-              }
-            ]
-          }
-          Transform {
-            translation -0.01 0 0
-            children [
-              Shape {
-                appearance USE BODY_COLOR
-                geometry USE BODY_GEOMETRY
-              }
-            ]
           }
         ]
       }
       DEF LINE_SENSOR_ARRAY Group {
         children [
+          %< if (true == fields.performanceMode.value) { >%
           Transform {
             translation 0.0425 0 -0.0075
             children [
@@ -228,7 +214,7 @@ PROTO Zumo32U4 [
             ]
           }
           Transform {
-            translation 0.049 0 -0.009
+            translation 0.044 0 -0.009
             children [
               Shape {
                 appearance USE BODY_COLOR
@@ -238,14 +224,18 @@ PROTO Zumo32U4 [
               }
             ]
           }
+          %<}>%
           DistanceSensor {
-            translation 0.05 0.001 -0.01
+            translation 0.045 0.001 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
                 appearance DEF LSAPPEARANCE PBRAppearance {
                   baseColor 0 0 0
                   metalness 0
+                  %< if (false == fields.performanceMode.value) { >%
+                  transparency 1
+                  %<}>%
                 }
                 geometry DEF LIGHTSENSOR Box {
                   size 0.00025 0.002 0.004
@@ -265,13 +255,16 @@ PROTO Zumo32U4 [
             aperture 0.4
           }
           Emitter {
-            translation 0.05 -0.001 -0.01
+            translation 0.045 -0.001 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
                 appearance DEF EMAPPEARANCE PBRAppearance {
                   baseColor 1 0 0
                   metalness 0
+                  %< if (false == fields.performanceMode.value) { >%
+                  transparency 1
+                  %<}>%
                 }
                 geometry DEF EMITTER Box {
                   size 0.00025 0.002 0.004
@@ -286,7 +279,7 @@ PROTO Zumo32U4 [
             aperture 0.35
           }
           DistanceSensor {
-            translation 0.05 0.011 -0.01
+            translation 0.045 0.011 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -306,7 +299,7 @@ PROTO Zumo32U4 [
             aperture 0.4
           }
           Emitter {
-            translation 0.05 0.009 -0.01
+            translation 0.045 0.009 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -321,7 +314,7 @@ PROTO Zumo32U4 [
             aperture 0.35
           }
           DistanceSensor {
-            translation 0.05 -0.009 -0.01
+            translation 0.045 -0.009 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -341,7 +334,7 @@ PROTO Zumo32U4 [
             aperture 0.4
           }
           Emitter {
-            translation 0.05 -0.011 -0.01
+            translation 0.045 -0.011 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -356,7 +349,7 @@ PROTO Zumo32U4 [
             aperture 0.35
           }
           DistanceSensor {
-            translation 0.05 0.046 -0.01
+            translation 0.045 0.046 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -376,7 +369,7 @@ PROTO Zumo32U4 [
             aperture 0.4
           }
           Emitter {
-            translation 0.05 0.044 -0.01
+            translation 0.045 0.044 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -391,7 +384,7 @@ PROTO Zumo32U4 [
             aperture 0.35
           }
           DistanceSensor {
-            translation 0.05 -0.044 -0.01
+            translation 0.045 -0.044 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -411,7 +404,7 @@ PROTO Zumo32U4 [
             aperture 0.4
           }
           Emitter {
-            translation 0.05 -0.046 -0.01
+            translation 0.045 -0.046 -0.01
             rotation 0 1 0 1.5708
             children [
               Shape {
@@ -569,6 +562,94 @@ PROTO Zumo32U4 [
           }
         ]
       }
+      %< if (false == fields.performanceMode.value) { >%
+      DEF MESH Transform {
+        translation 0 0 -0.01
+        scale 0.001 0.001 0.001
+        children [
+          %< if (undefined == fields.zumoComSystemSlot.value) { >%
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.1 0.4 0.1
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/lcd_1.stl"
+              ]
+              name "LCD"
+            }
+            castShadows FALSE
+          }
+          %<}>%
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.74902 0.737255 0.694118
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/blade_default_1.stl"
+              ]
+              name "Blade"
+            }
+            castShadows FALSE
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.180392 0.172549 0.160784
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/ir-emitter-led-holder_default_1.stl"
+              ]
+              name "Emitter_holder"
+            }
+            castShadows FALSE
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.858824 0.843137 0.8
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/ir-led_left_1.stl"
+              ]
+              name "IR_Left"
+            }
+            castShadows FALSE
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.858824 0.839216 0.796078
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/ir-led_right_1.stl"
+              ]
+              name "IR_Right"
+            }
+            castShadows FALSE
+          }
+          Shape {
+            appearance PBRAppearance {
+              baseColor 0.0941176 0.0941176 0.0862745
+              metalness 0
+            }
+            geometry Mesh {
+              url [
+                "./mesh_Zumo32U4/irs08a_default_1.stl"
+              ]
+              name "IRS"
+            }
+            castShadows FALSE
+          }
+        ]
+      }
+      %<}>%
     ]
     name IS name
     boundingObject USE BODY
