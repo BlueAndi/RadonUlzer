@@ -13,7 +13,7 @@ PROTO RL_LineFollowerTrack [
     floorAppearance PBRAppearance {
       baseColorMap ImageTexture {
         url [
-          "./NTrack.png"
+          "./GaplessTrack.png"
         ]
       }
       roughness 1
