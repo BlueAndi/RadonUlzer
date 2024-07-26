@@ -4,6 +4,7 @@
 
 import math
 import sys
+from dataclasses import dataclass
 from controller import Supervisor  # pylint: disable=import-error
 from robot_observer import RobotObserver, has_position_changed, has_orientation_changed
 
@@ -82,14 +83,13 @@ def convert_webots_angle_to_ru_angle(webots_angle):
     return webots_angle_2pi
 
 
-class OdometryData():  # pylint: disable=too-few-public-methods
+@dataclass
+class OdometryData():
     """Odometry data container.
     """
-
-    def __init__(self) -> None:
-        self.x = 0
-        self.y = 0
-        self.yaw_angle = 0
+    x: int = 0
+    y: int = 0
+    yaw_angle: float = 0
 
     def reset(self):
         """Reset odometry data.
