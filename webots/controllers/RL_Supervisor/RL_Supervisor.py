@@ -3,7 +3,7 @@
 """
 import sys
 from Serial_webots import SerialWebots
-from SerialMuxProt import SerialMuxProt
+from SerialMuxProt import Server
 from controller import Supervisor
 import struct
 
@@ -44,12 +44,13 @@ robot_node = supervisor.getFromDef(ROBOT_NAME)
 
 # SerialMuxProt Server Instance.
 S_client = SerialWebots(supervisor_com_Tx, supervisor_com_rx)
-smp_server = SerialMuxProt(10, S_client) 
+smp_server = Server(10, S_client) 
 
 #DLC of SPEED_SET Channel
 SPEED_SET_DLC = 4
+
 #DLC of STATUS Channel
-STATUS_DLC = 1
+CMD_DLC = 1
 
 # Counter for the number of times no line has been detected
 noLineDetectionCount = 0
@@ -76,7 +77,7 @@ def callback_Status(payload: bytearray) -> int:
     if payload[0] == 1:
        print("the max. time within the robot must be finished its drive is  Done")
        smp_server.send_data("SPEED_SET", struct.pack('2H', 0, 0))  # Stop motors
-       smp_server.send_data("STATUS",struct.pack('B', 1))
+       smp_server.send_data("CMD",struct.pack('B', 1))
        reinitialize()
 
 
@@ -97,10 +98,11 @@ def callback_LineSensors(payload: bytearray)-> None:
     
     if noLineDetectionCount >= 20 or all(value >= Line_Sensor_On_Track_Min_Value for value in sensor_data):
         smp_server.send_data("SPEED_SET", struct.pack('2H', 0, 0))  # Stop motors, maximum NO Line Detection Counter reached
-        smp_server.send_data("STATUS",struct.pack('B', 1))          # SEND STATUS DONE
+        smp_server.send_data("CMD",struct.pack('B', 1))             # SENDING A COMMAND ID SET READY STATUS
         Reset_Count += 1 
     else:
         smp_server.send_data("SPEED_SET", struct.pack('2H', 1000, 1000)) 
+        
     
 def callback_Mode(payload: bytearray)-> None:
     """ Callback MODE Channel"""
@@ -111,8 +113,11 @@ def callback_Mode(payload: bytearray)-> None:
         print("Train Mode Selected")
 
 
+# Channel creation. 
 m_serialMuxProtChannelIdSPEED_SET = smp_server.create_channel("SPEED_SET", SPEED_SET_DLC)
-m_serialMuxProtChannelIdSTATUS = smp_server.create_channel("STATUS", STATUS_DLC)
+m_serialMuxProtChannelIdCMD = smp_server.create_channel("CMD", CMD_DLC)
+
+# Channel subscription.
 smp_server.subscribe_to_channel("STATUS", callback_Status)
 smp_server.subscribe_to_channel("LINE_SENS",callback_LineSensors)
 smp_server.subscribe_to_channel("MODE",callback_Mode)
@@ -127,7 +132,7 @@ def main_loop():
     status = 0
     m_elapsedTimeSinceReset = 0
 
-    if m_serialMuxProtChannelIdSPEED_SET == 0 or  m_serialMuxProtChannelIdSTATUS == 0 :
+    if m_serialMuxProtChannelIdSPEED_SET == 0 or  m_serialMuxProtChannelIdCMD == 0 :
         print("Channel SPEED_SET not created.")
     else:
         if robot_node is None:
