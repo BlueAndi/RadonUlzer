@@ -1,7 +1,7 @@
 """ Controller for Obstacle proto."""
 
 import sys
-from controller import Robot
+from controller import Robot  # pylint: disable=import-error
 
 # Debounce time of collision in seconds.
 DEBOUNCE_TIME = 1
