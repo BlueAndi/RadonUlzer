@@ -218,6 +218,7 @@ public:
         return m_settings;
     }
 
+
 #ifdef DEBUG_ODOMETRY
 
     /**
@@ -239,7 +240,7 @@ public:
     {
         m_buzzer.process();
     }
-
+ 
 private:
 
     /** Simulated roboter instance. */
@@ -287,6 +288,11 @@ private:
     /** Settings */
     Settings m_settings;
 
+    /** Simulation serial driver */
+    WebotsSerialDrv m_serialDrv;
+    
+    
+
 #ifdef DEBUG_ODOMETRY
 
     /** Sender driver for supervisor communication. */
@@ -299,13 +305,12 @@ private:
      */
     Board();
 
-    /**
+       /**
      * Destroys the concrete board.
      */
-    ~Board()
+   ~Board()
     {
     }
-
     /**
      * Get the simulation time handler.
      *
@@ -333,9 +338,9 @@ private:
      */
     WebotsSerialDrv* getSimSerial()
     {
-        /* Not supported. */
-        return nullptr;
+        return &m_serialDrv;
     }
+
 
     /**
      * Enable all simulation devices.

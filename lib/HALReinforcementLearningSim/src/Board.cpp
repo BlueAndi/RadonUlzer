@@ -100,6 +100,8 @@ Board::Board() :
     m_ledRed(m_robot.getLED(RobotDeviceNames::LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(RobotDeviceNames::LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(RobotDeviceNames::LED_GREEN_NAME)),
+    m_serialDrv(m_robot.getEmitter(RobotDeviceNames::EMITTER_NAME_SERIAL),
+                m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)),
     m_settings()
 #ifdef DEBUG_ODOMETRY
     ,
@@ -120,6 +122,7 @@ void Board::enableSimulationDevices()
     m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME)->enable(timeStep);
     m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME)->enable(timeStep);
+    m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)->enable(timeStep);
 }
 
 /******************************************************************************
