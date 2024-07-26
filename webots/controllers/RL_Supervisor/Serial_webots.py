@@ -2,38 +2,35 @@
 # Imports
 ################################################################################
 from controller import device
-################################################################################
-# Variables
-################################################################################
+from SerialMuxProt import Stream
 
 ################################################################################
 # Classes
 ################################################################################
 
-
-class SerialWebots:
+class SerialWebots(Stream):
     """
     Serial Webots Communication Class
     """
 
-    def __init__(self, Emitter: device, Receiver: device)-> None:
-        """ SerialWebots Constructor.
-
-         Parameters
-        ----------
-        Emitter : device
-            Name of Emitter Device
-        Receiver : device
-            Name of Receiver Device
-
+    def __init__(self, emitter: device, receiver: device) -> None:
         """
-        self.m_Emitter = Emitter
-        self.m_Receiver = Receiver
-        self.buffer  = bytearray()
+        SerialWebots Constructor.
 
-        
-    def write(self, payload : bytearray ) -> int:
-        """ Sends Data to the Server.
+        Parameters
+        ----------
+        emitter : device
+            Name of Emitter Device
+        receiver : device
+            Name of Receiver Device
+        """
+        self.__emitter = emitter
+        self.__receiver = receiver
+        self.__buffer = bytearray()
+
+    def write(self, payload: bytearray) -> int:
+        """
+        Sends Data to the Server.
 
         Parameters
         ----------
@@ -42,68 +39,59 @@ class SerialWebots:
 
         Returns
         ----------
-        Number of bytes sent
+        int
+            Number of bytes sent
         """
-        self.m_Emitter.send(bytes(payload))
-        bytes_sent= len(payload)
-        
+        self.__emitter.send(bytes(payload))
+        bytes_sent = len(payload)
         return bytes_sent
 
     def available(self) -> int:
-        """ Check if there is anything available for reading
+        """
+        Check if there is anything available for reading.
 
         Returns
         ----------
-        Number of bytes that are available for reading.
-        
+        int
+            Number of bytes that are available for reading.
         """
-        if len(self.buffer) > 0:
-            return len(self.buffer)
-        elif self.m_Receiver.getQueueLength() > 0:
-            return self.m_Receiver.getDataSize()
-        return 0 
+        if len(self.__buffer) > 0:
+            return len(self.__buffer)
+        elif self.__receiver.getQueueLength() > 0:
+            return self.__receiver.getDataSize()
+        return 0
 
     def read_bytes(self, length: int) -> tuple[int, bytearray]:
-        """ Read a given number of Bytes from Serial.
+        """
+        Read a given number of Bytes from Serial.
 
         Returns
         ----------
-        Tuple:
-        - int: Number of bytes received.
-        - bytearray: Received data.
+        tuple[int, bytearray]
+            - int: Number of bytes received.
+            - bytearray: Received data.
         """
-
         read = 0
         data = bytearray()
 
-        if len(self.buffer) > 0:
-            read = min(len(self.buffer), length)
-            data = self.buffer[:read]
-            self.buffer = self.buffer[read:]
-        elif self.m_Receiver.getQueueLength() > 0:
-            receivedData = self.m_Receiver.getBytes()
-            receivedData_size = self.m_Receiver.getDataSize()
-            self.m_Receiver.nextPacket()
+        if len(self.__buffer) > 0:
+            read = min(len(self.__buffer), length)
+            data = self.__buffer[:read]
+            self.__buffer = self.__buffer[read:]
+        elif self.__receiver.getQueueLength() > 0:
+            received_data = self.__receiver.getBytes()
+            received_data_size = self.__receiver.getDataSize()
+            self.__receiver.nextPacket()
 
-            if receivedData_size > length:
-                data = receivedData[:length]
-                self.buffer = receivedData[length:]
+            if received_data_size > length:
+                data = received_data[:length]
+                self.__buffer = received_data[length:]
                 read = length
             else:
-                data = receivedData
-                read = receivedData_size
+                data = received_data
+                read = received_data_size
 
         return read, data
-
-
-    
-
-
-
-
-
-
-
 
 ################################################################################
 # Functions
