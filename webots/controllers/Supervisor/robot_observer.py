@@ -4,14 +4,16 @@
 
 import math
 
+
 class RobotObserver():
     """The robot observer provides position and orientation information
         about a robot by using a supervisor.
     """
+
     def __init__(self, robot_node):
         self._robot_node = robot_node
-        self._ref_position = [0, 0, 0] # x, y, z
-        self._ref_orientation_euler = [0, 0, 0, 0] # roll, pitch and yaw angle
+        self._ref_position = [0, 0, 0]  # x, y, z
+        self._ref_orientation_euler = [0, 0, 0, 0]  # roll, pitch and yaw angle
         self._factor_m_to_mm = 1000
 
     def _get_position(self):
@@ -133,6 +135,7 @@ def rad_to_deg(angle_rad):
     """
     return angle_rad * 180 / math.pi
 
+
 def has_position_changed(position, position_old):
     """Returns whether the position changed.
 
@@ -151,6 +154,7 @@ def has_position_changed(position, position_old):
             break
 
     return has_changed
+
 
 def has_orientation_changed(orientation, orientation_old):
     """Returns whether the orientation changed.
