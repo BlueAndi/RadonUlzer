@@ -41,18 +41,17 @@ package "Application" as appLayer {
     class MotorSpeedCalibrationState <<control>>
     class LineSensorsCalibrationState <<control>>
     class ErrorState <<control>>
-    class DringState <<control>>
+    class DrivingState <<control>>
     class ReadyState <<control>>
-    class TrainingState <<control>>
 
     note bottom of StartupState
         The system starts up and shows
-        the Applikation name on the display.
+        the Application name on the display.
     end note
 
     note bottom of MotorSpeedCalibrationState
         The robot drives with full speed forward
-        and with full speed backwar to determine
+        and with full speed backwards to determine
         the max speed in steps/s. The slowest
         motor is considered!
     end note
@@ -68,17 +67,13 @@ package "Application" as appLayer {
         Confirmation from operator is requested.
     end note
 
-    note bottom of DringState
+    note bottom of DrivingState
         The robot follows the line.
     end note
 
     note bottom of ReadyState
         The robot is stopped and waits for
         operator input.
-    end note
-
-    note bottom of TrainingState
-       the robot trains to follow the line.
     end note
 }
 
@@ -88,7 +83,6 @@ note top of  appLayer
 end note
 
 App *--> StateMachine
-
 StateMachine o--> "0..1" IState
 
 IState <|.. StartupState: <<realize>>
@@ -96,8 +90,7 @@ IState <|.... MotorSpeedCalibrationState: <<realize>>
 IState <|.. LineSensorsCalibrationState: <<realize>>
 IState <|.... ErrorState: <<realize>>
 IState <|.. ReadyState: <<realize>>
-IState <|.... TrainingState: <<realize>>
-IState <|.... DringState: <<realize>>
+IState <|.... DrivingState: <<realize>>
 
 
 @enduml

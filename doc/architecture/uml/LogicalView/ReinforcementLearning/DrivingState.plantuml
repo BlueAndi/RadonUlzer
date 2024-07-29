@@ -4,7 +4,7 @@ title Driving State
 
 package "Application" as appLayer {
 
-    class RacingState <<control>> {
+    class DrivingState <<control>> {
         + {static} getInstance() : DrivingState
         + entry() : void
         + process(sm : StateMachine&) : void
@@ -13,8 +13,7 @@ package "Application" as appLayer {
 
     class ReadyState <<control>>
 
-    RacingState .r.> ReadyState: <<use>>
-     
+    DrivingState .r.> ReadyState: <<use>>
 }
 
 package "Service" as serviceLayer {
@@ -94,12 +93,12 @@ package "HAL" as hal {
     }
 }
 
-RacingState *-> SimpleTimer
-RacingState ..> DifferentialDrive: <<use>>
-RacingState ...> IDisplay: <<use>>
-RacingState ...> ILineSensors: <<use>>
-RacingState ...> ILed: <<use>>
-RacingState ...> Board: <<use>>
-RacingState ...>WebotsSerialDrv: <<use>>
-RacingState ...>IButton: <<use>>
+DrivingState *-> SimpleTimer
+DrivingState ..> DifferentialDrive: <<use>>
+DrivingState ...> IDisplay: <<use>>
+DrivingState ...> ILineSensors: <<use>>
+DrivingState ...> ILed: <<use>>
+DrivingState ...> Board: <<use>>
+DrivingState ...>WebotsSerialDrv: <<use>>
+DrivingState ...>IButton: <<use>>
 @enduml

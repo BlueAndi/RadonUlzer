@@ -12,10 +12,8 @@ package "Application" as appLayer {
         + setLapTIme(lapTime : uint32_t)  void
     }
 
-    class TrainingState <<control>>
-    class RacingState <<control>>
-    ReadyState .r.> RacingState: <<use>>
-    ReadyState .l.> TrainingState: <<use>>
+    class DrivingState <<control>>
+    ReadyState .r.> DrivingState: <<use>>
 }
 
 package "HAL" as hal {

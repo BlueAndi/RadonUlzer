@@ -18,12 +18,6 @@ state ErrorState: /do Wait for pushbutton A is triggered.
 state ReadyState: /entry Show operator info on LCD.
 state ReadyState: /do Wait for button A or B to be triggered.
 
-state TrainingState: /entry Show operator info on LCD.
-state TrainingState: /entry Start observation timer.
-state TrainingState: /do Perform training.
-state DrivingState: /exit Stop observation timer.
-
-state DrivingState: /entry Show operator info on LCD. 
 state DrivingState: /entry Start observation timer.
 state DrivingState: /do Perform driving.
 state DrivingState: /exit Stop observation timer.
@@ -34,10 +28,8 @@ StartupState --> LineSensorsCalibrationState: [Pushbutton B triggered] and\n[Max
 MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
 LineSensorsCalibrationState --> ReadyState: [Calibration finished]
 LineSensorsCalibrationState --> ErrorState: [Calibration failed]
-ReadyState ---> DrivingState: [Pushbutton A triggered]
-ReadyState --> TrainingState: [Pushbutton B triggered]
-TrainingState --> ReadyState: [Pushbutton A triggered] or\n [End line detected] or\n[Observation timer timeout]
-DrivingState ---> ReadyState: [End line detected] or\n[Pushbutton A triggered] or\n[Observation timer timeout]
+ReadyState ---> DrivingState: [Pushbutton A triggered] or\n [Pushbutton B triggered] or \n [mode timer timeout]
+DrivingState ---> ReadyState: [End line detected] or\n [Observation timer timeout] or\n [No Line Deteceted]
 ErrorState --> StartupState: [Pushbutton A triggered]
 
 @enduml
