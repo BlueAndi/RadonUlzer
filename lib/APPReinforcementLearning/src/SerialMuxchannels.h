@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  *  @brief  Channel structure definition for the SerialMuxProt.
- *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *  @author @author Akram Bziouech 
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
@@ -91,29 +91,27 @@ namespace SMPChannelPayload
     /** Remote control commands. */
     typedef enum : uint8_t
     {
-        CMD_ID_IDLE = 0,                /**< Nothing to do. */
-        CMD_ID_SET_READY_STATE,         /**< Set Ready State. */
-        CMD_ID_SET_TRAINING_WAIT_STATE, /**< Set Training Wait State. */
+        CMD_ID_IDLE = 0,        /**< Nothing to do. */
+        CMD_ID_SET_READY_STATE  /**< Set Ready State. */
 
     } CmdId; /**< Command ID */
 
     /** Status flags. */
     typedef enum : uint8_t
     {
-        NOT_DONE = 0, /**< End Line Not Detected. */
-        DONE          /**< End Line Detected. */
+        NOT_DONE = 0, /**< The allotted time is not over. */
+        DONE          /**< Track is not finished within the allotted time. */
 
     } Status; /**< Status flag */
 
     typedef enum : uint8_t
     {   
         TRAINING_MODE = 0, /**< Driving Mode Selected. */
-        DRIVING_MODE     /**< Training Mode Selected. */
+        DRIVING_MODE       /**< Training Mode Selected. */
 
     } Mode; /**< Status flag */
 
 }
-
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData

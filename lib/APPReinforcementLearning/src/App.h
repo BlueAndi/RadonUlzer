@@ -43,11 +43,11 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+
 #include "SerialMuxChannels.h"
 #include <StateMachine.h>
 #include <SimpleTimer.h>
 #include <Arduino.h>
-
 
 /******************************************************************************
  * Macros
@@ -72,7 +72,7 @@ public:
         m_serialMuxProtChannelIdMode(0U),
         m_statusTimer(),
         m_sendLineSensorsDataInterval(),
-        m_sentmode(false),
+        m_modeSelectionSent(false),
         m_smpServer(Serial, this)
     {
     }
@@ -86,19 +86,19 @@ public:
 
     /**
      * Setup the application.
-    */
+     */
     void setup();
 
     /**
      * Process the application periodically.
-    */
+     */
     void loop();
 
     /**
      * Handle remote command received via SerialMuxProt.
      *
      * @param[in] cmd Command to handle.
-    */
+     */
     void handleRemoteCommand(const Command& cmd);
 
 private:
@@ -114,9 +114,7 @@ private:
     /** Timer used for differential drive control processing. */
     SimpleTimer m_controlInterval;
 
-    /**
-    * Timer for sending system status to DCS.
-    */
+    /** Timer for sending system status to DCS. */
     SimpleTimer m_statusTimer;
 
     /** Timer used for sending data periodically. */
@@ -141,8 +139,8 @@ private:
     SMPServer m_smpServer;
 
     /* Ensue that the mode is only sent once*/
-    bool m_sentmode;
-   
+    bool m_modeSelectionSent; 
+
     /**
      * Setup the SerialMuxProt channels.
      *
@@ -152,12 +150,26 @@ private:
     
     /**
      * Send line sensors data via SerialMuxProt.
-    */
+     */
     void sendLineSensorsData() const;
 
-    /* Not allowed. */
-    App(const App& app);            /**< Copy construction of an instance. */
-    App& operator=(const App& app); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] app Source instance.
+     */
+    App(const App& app);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] app Source instance.
+     *
+     * @returns Reference to App instance.
+     */
+    App& operator=(const App& app);
 };
 
 /******************************************************************************

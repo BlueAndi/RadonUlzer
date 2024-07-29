@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Driving state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author @author Akram Bziouech
  *
  * @addtogroup Application
  *
@@ -107,19 +107,17 @@ public:
 
 protected:
 private:
-
-
     /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
     static const uint32_t OBSERVATION_DURATION = 3000000;
-
-    /**< Observation timer to observe the max. time per challenge. */
-
-    SimpleTimer m_observationTimer; 
+    
+    SimpleTimer m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
 
     /**
      * Default constructor.
      */
-    DrivingState();
+    DrivingState() : m_observationTimer()
+    {
+    }
 
     /**
      * Default destructor.
@@ -128,12 +126,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    DrivingState(const DrivingState& state);            /**< Copy construction of an instance. */
-    DrivingState& operator=(const DrivingState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    DrivingState(const DrivingState& state);
 
-    
-
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to DrivingState instance.
+     */
+    DrivingState& operator=(const DrivingState& state);
 };
 
 /******************************************************************************

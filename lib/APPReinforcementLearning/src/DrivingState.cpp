@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Driving state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech 
  */
 
 /******************************************************************************
@@ -65,6 +65,7 @@
 void DrivingState::entry()
 {
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
     diffDrive.setLinearSpeed(0, 0);
     m_observationTimer.start(OBSERVATION_DURATION);
 }
@@ -80,7 +81,6 @@ void DrivingState::exit()
     m_observationTimer.stop();
 }
 
-
 void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
 {
     DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
@@ -90,15 +90,13 @@ bool DrivingState::isAbortRequired()
 {
     bool isAbort = false;
 
+    /* If track is not finished over a certain time, abort driving. */
     if (true == m_observationTimer.isTimeout())
     {
-            isAbort = true;
+        isAbort = true;
     }
     return isAbort;
 }
-
-
-
 
 /******************************************************************************
  * Protected Methods
@@ -107,10 +105,7 @@ bool DrivingState::isAbortRequired()
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-DrivingState::DrivingState() :
-    m_observationTimer()
-{
-}
+
 /******************************************************************************
  * External Functions
  *****************************************************************************/

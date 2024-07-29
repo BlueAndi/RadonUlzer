@@ -111,10 +111,10 @@ private:
     static const uint32_t INFO_DURATION = 2000;
 
     bool        m_isMaxMotorSpeedCalibAvailable; /**< Is max. motor speed calibration value available? */
-    SimpleTimer m_timer;              /**< Used to show information for a certain time before changing to the next info. */
-    UserInfo    m_userInfoState;      /**< Current user info state. */
-    bool        m_isButtonAPressed;   /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed;   /**< Is the button B pressed (last time)? */
+    SimpleTimer m_timer;            /**< Used to show information for a certain time before changing to the next info. */
+    UserInfo    m_userInfoState;    /**< Current user info state. */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
     /**
      * Default constructor.
      */
@@ -129,9 +129,23 @@ private:
     {
     }
 
-    /* Not allowed. */
-    StartupState(const StartupState& state);            /**< Copy construction of an instance. */
-    StartupState& operator=(const StartupState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    StartupState(const StartupState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to StartupState instance.
+     */
+    StartupState& operator=(const StartupState& state);
 
     /**
      * Show next user info.

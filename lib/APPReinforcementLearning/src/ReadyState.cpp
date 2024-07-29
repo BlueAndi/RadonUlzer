@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Ready state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech 
  */
 
 /******************************************************************************
@@ -37,10 +37,7 @@
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
 #include "DrivingState.h"
-#include "ErrorState.h"
-#include <Logging.h>
 #include <Util.h>
-#include <Odometry.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -61,6 +58,7 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
+
 const uint16_t ReadyState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
 
 /* Initialize the required sensor IDs to be generic. */
@@ -82,7 +80,6 @@ void ReadyState::entry()
 
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
     diffDrive.setLinearSpeed(0, 0);
-    LastLineStatus = false;
 
     if (true == m_isLapTimeAvailable)
     {   
@@ -91,23 +88,29 @@ void ReadyState::entry()
         display.print("ms");
     }
     m_modeTimeoutTimer.start(mode_selected_period);
+    m_mode = IDLE;
+    m_isLastStartStopLineDetected = false;
+    m_isButtonAPressed = false;
+    m_isButtonBPressed = false;
+    
 }
 
 void ReadyState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
     IButton& buttonB = Board::getInstance().getButtonB();
+
+    /* Get each sensor value. */
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-    m_mode = IDLE;
 
     /* Shall the driving mode be released? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
         m_mode = DRIVING_MODE; 
     }
-     /* Shall the Training mode be released? */
+    /* Shall the Training mode be released? */
     else if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
     {   
         m_mode = TRAINING_MODE;  
@@ -126,14 +129,13 @@ void ReadyState::process(StateMachine& sm)
     /**Drive forward until START LINE is crossed */
     DriveUntilStartLineisCrossed();
 
-    if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (LastLineStatus == true))
+    if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (m_isLastStartStopLineDetected == true))
     {
-        printf("StartStopLineDetected");
         sm.setState(&DrivingState::getInstance());
     }
     else
     {
-        LastLineStatus = isStartStopLineDetected(lineSensorValues, maxLineSensors);
+        m_isLastStartStopLineDetected = isStartStopLineDetected(lineSensorValues, maxLineSensors);
     }
 }
 
@@ -150,14 +152,33 @@ void ReadyState::setLapTime(uint32_t lapTime)
 
 uint8_t ReadyState::setSelectedMode()
 {
-    return (m_mode);
+    return m_mode;
+}
+
+/******************************************************************************
+ * Protected Methods
+ *****************************************************************************/
+
+/******************************************************************************
+ * Private Methods
+ *****************************************************************************/
+
+ReadyState::ReadyState() : 
+    m_isLapTimeAvailable(false), 
+    m_isButtonAPressed(false),
+    m_isButtonBPressed(false),
+    m_modeTimeoutTimer(),
+    m_lapTime(0),
+    m_isLastStartStopLineDetected(false),
+    m_mode(IDLE)   
+{
 }
 
 /**Drive forward until START LINE is crossed */
 void ReadyState :: DriveUntilStartLineisCrossed()
 {
     DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
-    int16_t         top_speed          = 2000;            /*Set a top speed of 2000 */
+    int16_t         top_speed          = 2000;            /* Set a top speed of 2000 */
     int16_t         leftMotor          = top_speed / 2U;  /* Drive at half speed */
     int16_t         rightMotor         = top_speed / 2U;  /* Drive at half speed */
     diffDrive.setLinearSpeed(leftMotor, rightMotor);
@@ -185,3 +206,11 @@ bool ReadyState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8
 
     return isDetected;
 }
+
+/******************************************************************************
+ * External Functions
+ *****************************************************************************/
+
+/******************************************************************************
+ * Local Functions
+ *****************************************************************************/

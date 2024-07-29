@@ -40,7 +40,6 @@
 #include <Util.h>
 #include "ReadyState.h"
 #include "ErrorState.h"
-#include "DrivingState.h" 
 
 /******************************************************************************
  * Compiler Switches

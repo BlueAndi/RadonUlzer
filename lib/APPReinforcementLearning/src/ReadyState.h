@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Ready state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech
  *
  * @addtogroup Application
  *
@@ -59,7 +59,6 @@
 class ReadyState : public IState
 {
 public:
-
     /**
      * Get state instance.
      *
@@ -103,14 +102,22 @@ public:
      *
      * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
      */
-
     uint8_t setSelectedMode( );
 
 protected:
 private:
-
+    /**
+     * The mode that can be selected.
+    */        
+    enum Mode 
+    {
+        IDLE = 0,       /**< No mode has been selected*/
+        DRIVING_MODE,   /**< Driving mode Selected. */
+        TRAINING_MODE   /**< Training mode Selected. */
+    };
+    
     /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
-    static const uint32_t  mode_selected_period = 100U;
+    static const uint32_t  mode_selected_period = 200U;
 
     /**
      * The line sensor threshold (normalized) used to detect the track.
@@ -136,50 +143,21 @@ private:
 
     /**
      * The max. normalized value of a sensor in digits.
-    */
+     */
     static const uint16_t SENSOR_VALUE_MAX;
 
-    /**
-     * last Line Status 
-    */
-    bool LastLineStatus ;
-
-    /** Timeout timer for the selected mode. */
-    SimpleTimer m_modeTimeoutTimer; 
-
-    /** The system state machine. */
-    StateMachine m_systemStateMachine;  
-
-    /**< Is set (true), if a lap time is available. */
-    bool m_isLapTimeAvailable; 
-
-    /**< Lap time in ms of the last successful driven round. */
-    uint32_t m_lapTime; 
+    bool        m_isLastStartStopLineDetected ; /**< Is the Last start/stop line detected? */
+    SimpleTimer m_modeTimeoutTimer; /**< Timeout timer for the selected mode. */
+    Mode        m_mode; /**< Mode that can select Driving Mode or Training Mode. */ 
+    bool        m_isLapTimeAvailable; /**< Is set (true), if a lap time is available. */
+    uint32_t    m_lapTime; /**< Lap time in ms of the last successful driven round. */
+    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
 
     /**
-     * The mode that can be selected.
-    */        
-    enum mode: uint8_t
-    {
-        IDLE = 0,        /**< No mode has been selected*/
-        DRIVING_MODE,    /**< Driving Mode Selected. */
-        TRAINING_MODE    /**< Training Mode Selected. */
-    };
-
-    bool m_isButtonAPressed;         /**< Is the button A pressed (last time)? */
-    bool m_isButtonBPressed;         /**< Is the button B pressed (last time)? */
-    mode m_mode;
-
-    ReadyState() : 
-               m_isLapTimeAvailable(false), 
-               m_isButtonAPressed(false),
-               m_isButtonBPressed(false),
-               m_modeTimeoutTimer(),
-               m_lapTime(0),
-               LastLineStatus(false),
-               m_mode(IDLE)   
-    {
-    }
+     * Default constructor.
+     */
+    ReadyState();
 
     /**
      * Default destructor.
@@ -188,14 +166,28 @@ private:
     {
     }
 
-    /* Not allowed. */
-    ReadyState(const ReadyState& state);            /**< Copy construction of an instance. */
-    ReadyState& operator=(const ReadyState& state); /**< Assignment of an instance. */
+    /**
+     * Copy construction of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     */
+    ReadyState(const ReadyState& state);
+
+    /**
+     * Assignment of an instance.
+     * Not allowed.
+     *
+     * @param[in] state Source instance.
+     *
+     * @returns Reference to ErrorState instance.
+     */
+    ReadyState& operator=(const ReadyState& state);
 
     /* 
      * The robot moves from its current position 
      * until it crosses and leaves the start line.
-    */
+     */
     void DriveUntilStartLineisCrossed();
 
     /**

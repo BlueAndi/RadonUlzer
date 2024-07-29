@@ -40,11 +40,9 @@
 #include <DifferentialDrive.h>
 #include "ErrorState.h"
 #include <Odometry.h>
-#include <Util.h>
-#include <Sound.h>
-#include <Logging.h>
-#include <WebotsSerialDrv.h>
 #include "ReadyState.h"
+#include <Logging.h>
+
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -61,6 +59,7 @@
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
+
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
@@ -72,13 +71,13 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  * Public Methods
  *****************************************************************************/
 
-
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
     /* Initialize HAL */
     Board::getInstance().init(); 
     Logging::disable();
+
     if (false == setupSerialMuxProt())
     {
         ErrorState::getInstance().setErrorMsg("SMP=0");
@@ -86,21 +85,11 @@ void App::setup()
     }
     else 
     {
-        /* Setup the state machine with the first state. */
-        m_systemStateMachine.setState(&StartupState::getInstance());
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
-        /* Setup the periodically processing of robot control.  */
         m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
+        m_systemStateMachine.setState(&StartupState::getInstance());
     }
-
-#ifdef DEBUG_ODOMETRY
-    /* Reset supervisor which set its observed position and orientation to 0. */
-    Board::getInstance().getSender().send("RST");
-#endif /* DEBUG_ODOMETRY */
-
-    /* Surprise the audience. */
-    Sound::playMelody(Sound::MELODY_WELCOME);
 }
 
 void App::loop()
@@ -122,23 +111,6 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-#ifdef DEBUG_ODOMETRY
-        {
-            Odometry&    odo         = Odometry::getInstance();
-            int32_t      posX        = 0;
-            int32_t      posY        = 0;
-            int32_t      orientation = odo.getOrientation();
-            const size_t BUFFER_SIZE = 128U;
-            char         buffer[BUFFER_SIZE];
-
-            odo.getPosition(posX, posY);
-
-            snprintf(buffer, BUFFER_SIZE, "ODO,%d,%d,%d", posX, posY, orientation);
-
-            Board::getInstance().getSender().send(buffer);
-        }
-#endif /* DEBUG_ODOMETRY */
-
         m_controlInterval.restart();
     }
     
@@ -150,7 +122,10 @@ void App::loop()
         {
             payload = {SMPChannelPayload::Status::DONE};
         }
+
+        /* Ignoring return value, as error handling is not available. */
         (void)m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+
         m_statusTimer.restart();
     }
     
@@ -163,14 +138,18 @@ void App::loop()
     }
 
     /* Send Mode selected to The Supervisor. */
-    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (!m_sentmode))
+    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (!m_modeSelectionSent))
     {    
-        int modeSelection = ReadyState::getInstance().setSelectedMode();
-        if(modeSelection > 0)
+        uint8_t mode_options = ReadyState::getInstance().setSelectedMode();
+
+        if(mode_options > 0)
         {
-             SMPChannelPayload::Mode payload = (modeSelection == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+            SMPChannelPayload::Mode payload = (mode_options == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+
+            /* Ignoring return value, as error handling is not available. */
             (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
-            m_sentmode = true;
+
+            m_modeSelectionSent = true;
         }
     }
 
@@ -190,9 +169,8 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_SET_READY_STATE:
-
         m_systemStateMachine.setState(&ReadyState::getInstance());
-        m_sentmode = false;
+        m_modeSelectionSent = false;
         break;
 
     default:
@@ -200,7 +178,6 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
     }
 }
-
 
 /******************************************************************************
  * Protected Methods
@@ -228,25 +205,29 @@ void App::sendLineSensorsData() const
         }
     }
 
+    /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
 }
 
 bool App::setupSerialMuxProt()
 {
     bool isSuccessful = false;
+
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME,App_cmdChannelCallback);
+
     /* Channel creation. */
     m_serialMuxProtChannelIdStatus = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
-    m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
+    m_serialMuxProtChannelIdLineSensors = 
+        m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
     m_serialMuxProtChannelIdMode = m_smpServer.createChannel(MODE_CHANNEL_NAME, MODE_CHANNEL_DLC);
 
-
     /* Channels succesfully created? */
-    if ((0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) && (0U != m_serialMuxProtChannelIdMode))
+    if ((0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) && 
+        (0U != m_serialMuxProtChannelIdMode))
     {
-       isSuccessful = true;
+        isSuccessful = true;
     }
 
     return isSuccessful;
@@ -259,6 +240,7 @@ bool App::setupSerialMuxProt()
 /******************************************************************************
  * Local Functions
  *****************************************************************************/
+
 /**
  * Receives remote control commands over SerialMuxProt channel.
  *

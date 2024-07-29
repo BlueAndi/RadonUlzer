@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  The simulation robot board realization.
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech
  */
 
 /******************************************************************************
@@ -86,7 +86,7 @@ Board::Board() :
     m_buzzer(m_robot.getSpeaker(RobotDeviceNames::SPEAKER_NAME)),
     m_display(m_robot.getDisplay(RobotDeviceNames::DISPLAY_NAME)),
     m_encoders(m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME),
-               m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
+                m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(
         m_robot.getEmitter(RobotDeviceNames::EMITTER_0_NAME), m_robot.getEmitter(RobotDeviceNames::EMITTER_1_NAME),
         m_robot.getEmitter(RobotDeviceNames::EMITTER_2_NAME), m_robot.getEmitter(RobotDeviceNames::EMITTER_3_NAME),
@@ -103,10 +103,6 @@ Board::Board() :
     m_serialDrv(m_robot.getEmitter(RobotDeviceNames::EMITTER_NAME_SERIAL),
                 m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)),
     m_settings()
-#ifdef DEBUG_ODOMETRY
-    ,
-    m_sender(m_robot.getEmitter(SENDER_NAME))
-#endif /* DEBUG_ODOMETRY */
 {
 }
 
