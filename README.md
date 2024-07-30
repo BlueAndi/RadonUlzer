@@ -14,6 +14,7 @@ Several kind of exclusive applications are available:
 * Remote Control - The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.
 * Sensor Fusion - The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information.
 * Line Follower with Reinforcement Learning - A line follower with reinforcement learning uses a learning agent that uses rewards and punishments to steer optimally in order to follow a line autonomously.
+
 ## Table of content
 
 * [The robot](#the-robot)
@@ -158,8 +159,7 @@ Example for the **LineFollowerTarget** application:
 | LineFollowerSimple | Just a simple line follower, using a PID controller. | Yes | No | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
 | RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | ./webots/world/zumo_with_com_system/* |
 | SensorFusion | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No | Yes | ./webots/worlds/zumo_with_com_system/LineFollowerTrack.wbt |
-| ReinforcementLearning | A line follower with reinforcement learning uses a learning agent that uses rewards and punishments to steer optimally in order to follow a line autonomously. 
-| Yes | No | ./webots/worlds/RL_LineFollower.wbt |
+| ReinforcementLearning | A line follower with reinforcement learning uses a learning agent that uses rewards and punishments to steer optimally in order to follow a line autonomously. | Yes | No | ./webots/worlds/RL_LineFollower.wbt |
 | Test | Only for testing purposes on native environment. | Yes | No | N/A |
 
 # Documentation
