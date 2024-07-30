@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  *  @brief  Channel structure definition for the SerialMuxProt.
- *  @author Akram Bziouech 
+ *  @author Akram Bziouech
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
@@ -76,8 +76,6 @@
 /** DLC of Mode Channel */
 #define MODE_CHANNEL_DLC (sizeof(Mode))
 
-
-
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -91,8 +89,8 @@ namespace SMPChannelPayload
     /** Remote control commands. */
     typedef enum : uint8_t
     {
-        CMD_ID_IDLE = 0,        /**< Nothing to do. */
-        CMD_ID_SET_READY_STATE  /**< Set Ready State. */
+        CMD_ID_IDLE = 0,       /**< Nothing to do. */
+        CMD_ID_SET_READY_STATE /**< Set Ready State. */
 
     } CmdId; /**< Command ID */
 
@@ -105,25 +103,25 @@ namespace SMPChannelPayload
     } Status; /**< Status flag */
 
     typedef enum : uint8_t
-    {   
+    {
         TRAINING_MODE = 0, /**< Driving Mode Selected. */
         DRIVING_MODE       /**< Training Mode Selected. */
 
     } Mode; /**< Status flag */
 
-}
+} // namespace SMPChannelPayload
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;   /**< Left motor speed [steps/s] */
-    int16_t right;  /**< Right motor speed [steps/s] */
+    int16_t left;  /**< Left motor speed [steps/s] */
+    int16_t right; /**< Right motor speed [steps/s] */
 } __attribute__((packed)) SpeedData;
 
 /** Struct of the "Mode" channel payload. */
 typedef struct _Mode
 {
-    SMPChannelPayload::Mode mode;  /**< Mode */      
+    SMPChannelPayload::Mode mode; /**< Mode */
 } __attribute__((packed)) Mode;
 
 /** Struct of the "Status" channel payload. */
@@ -136,7 +134,7 @@ typedef struct _Status
 typedef struct _Command
 {
     SMPChannelPayload::CmdId commandId; /**< Command ID */
-    
+
 } __attribute__((packed)) Command;
 
 /** Struct of the "Line Sensor" channel payload. */

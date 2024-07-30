@@ -57,14 +57,14 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The line follower application. */
+/** The line follower with reinforcement learning application. */
 class App
 {
 public:
     /**
-     * Construct the line follower application.
+     * Construct the line follower with reinforcement learning application.
      */
-    App() : 
+    App() :
         m_systemStateMachine(),
         m_controlInterval(),
         m_serialMuxProtChannelIdStatus(0U),
@@ -78,7 +78,7 @@ public:
     }
 
     /**
-     * Destroy the line follower application.
+     * Destroy the line follower with reinforcement learning application.
      */
     ~App()
     {
@@ -139,7 +139,7 @@ private:
     SMPServer m_smpServer;
 
     /* Ensue that the mode is only sent once*/
-    bool m_modeSelectionSent; 
+    bool m_modeSelectionSent;
 
     /**
      * Setup the SerialMuxProt channels.
@@ -147,7 +147,7 @@ private:
      * @return If successful returns true, otherwise false.
      */
     bool setupSerialMuxProt();
-    
+
     /**
      * Send line sensors data via SerialMuxProt.
      */

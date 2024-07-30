@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Ready state
- * @author Akram Bziouech 
+ * @author Akram Bziouech
  */
 
 /******************************************************************************
@@ -72,7 +72,7 @@ const uint8_t ReadyState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSen
 
 void ReadyState::entry()
 {
-    IDisplay&  display   = Board::getInstance().getDisplay();
+    IDisplay& display = Board::getInstance().getDisplay();
     display.clear();
     display.print("A: TMD");
     display.gotoXY(0, 1);
@@ -82,17 +82,16 @@ void ReadyState::entry()
     diffDrive.setLinearSpeed(0, 0);
 
     if (true == m_isLapTimeAvailable)
-    {   
+    {
         display.gotoXY(0, 2);
         display.print(m_lapTime);
         display.print("ms");
     }
     m_modeTimeoutTimer.start(mode_selected_period);
-    m_mode = IDLE;
+    m_mode                        = IDLE;
     m_isLastStartStopLineDetected = false;
-    m_isButtonAPressed = false;
-    m_isButtonBPressed = false;
-    
+    m_isButtonAPressed            = false;
+    m_isButtonBPressed            = false;
 }
 
 void ReadyState::process(StateMachine& sm)
@@ -108,12 +107,12 @@ void ReadyState::process(StateMachine& sm)
     /* Shall the driving mode be released? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        m_mode = DRIVING_MODE; 
+        m_mode = DRIVING_MODE;
     }
     /* Shall the Training mode be released? */
     else if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
-    {   
-        m_mode = TRAINING_MODE;  
+    {
+        m_mode = TRAINING_MODE;
     }
     else if (true == m_modeTimeoutTimer.isTimeout() && (m_mode == IDLE))
     {
@@ -163,24 +162,24 @@ uint8_t ReadyState::setSelectedMode()
  * Private Methods
  *****************************************************************************/
 
-ReadyState::ReadyState() : 
-    m_isLapTimeAvailable(false), 
+ReadyState::ReadyState() :
+    m_isLapTimeAvailable(false),
     m_isButtonAPressed(false),
     m_isButtonBPressed(false),
     m_modeTimeoutTimer(),
     m_lapTime(0),
     m_isLastStartStopLineDetected(false),
-    m_mode(IDLE)   
+    m_mode(IDLE)
 {
 }
 
 /**Drive forward until START LINE is crossed */
-void ReadyState :: DriveUntilStartLineisCrossed()
+void ReadyState ::DriveUntilStartLineisCrossed()
 {
-    DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
-    int16_t         top_speed          = 2000;            /* Set a top speed of 2000 */
-    int16_t         leftMotor          = top_speed / 2U;  /* Drive at half speed */
-    int16_t         rightMotor         = top_speed / 2U;  /* Drive at half speed */
+    DifferentialDrive& diffDrive  = DifferentialDrive::getInstance();
+    int16_t            top_speed  = 2000;           /* Set a top speed of 2000 */
+    int16_t            leftMotor  = top_speed / 2U; /* Drive at half speed */
+    int16_t            rightMotor = top_speed / 2U; /* Drive at half speed */
     diffDrive.setLinearSpeed(leftMotor, rightMotor);
 }
 

@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  LineFollower application with Reinforcement Learning
- * @author Akram Bziouech 
+ * @author Akram Bziouech
  */
 
 /******************************************************************************
@@ -55,7 +55,6 @@
  * Types and classes
  *****************************************************************************/
 
-
 /******************************************************************************
  * Prototypes
  *****************************************************************************/
@@ -75,7 +74,7 @@ void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
     /* Initialize HAL */
-    Board::getInstance().init(); 
+    Board::getInstance().init();
     Logging::disable();
 
     if (false == setupSerialMuxProt())
@@ -83,7 +82,7 @@ void App::setup()
         ErrorState::getInstance().setErrorMsg("SMP=0");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
-    else 
+    else
     {
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
@@ -113,8 +112,9 @@ void App::loop()
 
         m_controlInterval.restart();
     }
-    
-    if ((true == m_statusTimer.isTimeout()) && (true == m_smpServer.isSynced())&& (&DrivingState::getInstance() == m_systemStateMachine.getState()))
+
+    if ((true == m_statusTimer.isTimeout()) && (true == m_smpServer.isSynced()) &&
+        (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
         Status payload = {SMPChannelPayload::Status::NOT_DONE};
 
@@ -128,9 +128,10 @@ void App::loop()
 
         m_statusTimer.restart();
     }
-    
+
     /* Send periodically line sensor data. */
-    if (true == m_sendLineSensorsDataInterval.isTimeout() && (&DrivingState::getInstance() == m_systemStateMachine.getState()) )
+    if (true == m_sendLineSensorsDataInterval.isTimeout() &&
+        (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
         sendLineSensorsData();
 
@@ -139,12 +140,13 @@ void App::loop()
 
     /* Send Mode selected to The Supervisor. */
     if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (!m_modeSelectionSent))
-    {    
+    {
         uint8_t mode_options = ReadyState::getInstance().setSelectedMode();
 
-        if(mode_options > 0)
+        if (mode_options > 0)
         {
-            SMPChannelPayload::Mode payload = (mode_options == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+            SMPChannelPayload::Mode payload =
+                (mode_options == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
             /* Ignoring return value, as error handling is not available. */
             (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
@@ -153,7 +155,6 @@ void App::loop()
         }
     }
 
-    
     m_smpServer.process(millis());
 
     m_systemStateMachine.process();
@@ -215,16 +216,15 @@ bool App::setupSerialMuxProt()
 
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
-    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME,App_cmdChannelCallback);
+    m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
 
     /* Channel creation. */
-    m_serialMuxProtChannelIdStatus = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
-    m_serialMuxProtChannelIdLineSensors = 
-        m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
-    m_serialMuxProtChannelIdMode = m_smpServer.createChannel(MODE_CHANNEL_NAME, MODE_CHANNEL_DLC);
+    m_serialMuxProtChannelIdStatus      = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
+    m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
+    m_serialMuxProtChannelIdMode        = m_smpServer.createChannel(MODE_CHANNEL_NAME, MODE_CHANNEL_DLC);
 
     /* Channels succesfully created? */
-    if ((0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) && 
+    if ((0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) &&
         (0U != m_serialMuxProtChannelIdMode))
     {
         isSuccessful = true;

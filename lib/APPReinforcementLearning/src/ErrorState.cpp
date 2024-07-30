@@ -83,7 +83,6 @@ void ErrorState::entry()
     {
         display.print(m_errorMsg);
     }
-
 }
 
 void ErrorState::process(StateMachine& sm)

@@ -102,22 +102,22 @@ public:
      *
      * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
      */
-    uint8_t setSelectedMode( );
+    uint8_t setSelectedMode();
 
 protected:
 private:
     /**
      * The mode that can be selected.
-    */        
-    enum Mode 
+     */
+    enum Mode
     {
-        IDLE = 0,       /**< No mode has been selected*/
-        DRIVING_MODE,   /**< Driving mode Selected. */
-        TRAINING_MODE   /**< Training mode Selected. */
+        IDLE = 0,     /**< No mode has been selected*/
+        DRIVING_MODE, /**< Driving mode Selected. */
+        TRAINING_MODE /**< Training mode Selected. */
     };
-    
+
     /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
-    static const uint32_t  mode_selected_period = 200U;
+    static const uint32_t mode_selected_period = 200U;
 
     /**
      * The line sensor threshold (normalized) used to detect the track.
@@ -133,12 +133,12 @@ private:
 
     /**
      * ID of middle sensor.
-    */
+     */
     static const uint8_t SENSOR_ID_MIDDLE;
 
     /**
      * ID of most right sensor.
-    */
+     */
     static const uint8_t SENSOR_ID_MOST_RIGHT;
 
     /**
@@ -146,13 +146,13 @@ private:
      */
     static const uint16_t SENSOR_VALUE_MAX;
 
-    bool        m_isLastStartStopLineDetected ; /**< Is the Last start/stop line detected? */
-    SimpleTimer m_modeTimeoutTimer; /**< Timeout timer for the selected mode. */
-    Mode        m_mode; /**< Mode that can select Driving Mode or Training Mode. */ 
-    bool        m_isLapTimeAvailable; /**< Is set (true), if a lap time is available. */
-    uint32_t    m_lapTime; /**< Lap time in ms of the last successful driven round. */
-    bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
+    bool        m_isLastStartStopLineDetected; /**< Is the Last start/stop line detected? */
+    SimpleTimer m_modeTimeoutTimer;            /**< Timeout timer for the selected mode. */
+    Mode        m_mode;                        /**< Mode that can select Driving Mode or Training Mode. */
+    bool        m_isLapTimeAvailable;          /**< Is set (true), if a lap time is available. */
+    uint32_t    m_lapTime;                     /**< Lap time in ms of the last successful driven round. */
+    bool        m_isButtonAPressed;            /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed;            /**< Is the button B pressed (last time)? */
 
     /**
      * Default constructor.
@@ -184,8 +184,8 @@ private:
      */
     ReadyState& operator=(const ReadyState& state);
 
-    /* 
-     * The robot moves from its current position 
+    /*
+     * The robot moves from its current position
      * until it crosses and leaves the start line.
      */
     void DriveUntilStartLineisCrossed();

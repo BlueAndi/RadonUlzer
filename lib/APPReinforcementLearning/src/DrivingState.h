@@ -102,14 +102,14 @@ public:
      * Check the abort conditions while driving the challenge.
      *
      * @return If abort is required, it will return true otherwise false.
-    */
+     */
     bool isAbortRequired();
 
 protected:
 private:
     /** Observation duration in ms. This is the max. time within the robot must be finished its drive. */
     static const uint32_t OBSERVATION_DURATION = 3000000;
-    
+
     SimpleTimer m_observationTimer; /**< Observation timer to observe the max. time per challenge. */
 
     /**
