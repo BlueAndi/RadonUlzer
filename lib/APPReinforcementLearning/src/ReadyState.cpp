@@ -109,16 +109,23 @@ void ReadyState::process(StateMachine& sm)
     {
         m_mode = DRIVING_MODE;
     }
+
     /* Shall the Training mode be released? */
     else if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
     {
         m_mode = TRAINING_MODE;
     }
+
+    /*
+     * If either Button A or Button B is not pressed and the timer
+     * expires, the training mode should automatically activate.
+     */
     else if (true == m_modeTimeoutTimer.isTimeout() && (m_mode == IDLE))
     {
         m_mode = TRAINING_MODE;
         m_modeTimeoutTimer.restart();
     }
+
     else
     {
         /* Nothing to do. */
@@ -126,7 +133,7 @@ void ReadyState::process(StateMachine& sm)
     }
 
     /**Drive forward until START LINE is crossed */
-    DriveUntilStartLineisCrossed();
+    driveUntilStartLineisCrossed();
 
     if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (m_isLastStartStopLineDetected == true))
     {
@@ -174,7 +181,7 @@ ReadyState::ReadyState() :
 }
 
 /**Drive forward until START LINE is crossed */
-void ReadyState ::DriveUntilStartLineisCrossed()
+void ReadyState::driveUntilStartLineisCrossed()
 {
     DifferentialDrive& diffDrive  = DifferentialDrive::getInstance();
     int16_t            top_speed  = 2000;           /* Set a top speed of 2000 */

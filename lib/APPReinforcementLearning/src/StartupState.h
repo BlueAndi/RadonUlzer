@@ -115,6 +115,7 @@ private:
     UserInfo    m_userInfoState; /**< Current user info state. */
     bool        m_isButtonAPressed; /**< Is the button A pressed (last time)? */
     bool        m_isButtonBPressed; /**< Is the button B pressed (last time)? */
+
     /**
      * Default constructor.
      */

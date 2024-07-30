@@ -188,7 +188,7 @@ private:
      * The robot moves from its current position
      * until it crosses and leaves the start line.
      */
-    void DriveUntilStartLineisCrossed();
+    void driveUntilStartLineisCrossed();
 
     /**
      * Is the start/stop line detected?
