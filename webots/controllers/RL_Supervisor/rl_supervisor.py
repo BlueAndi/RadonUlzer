@@ -7,7 +7,7 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 import sys
 import struct
 from controller import Supervisor  # pylint: disable=import-error
-from Serial_webots import SerialWebots
+from serial_webots import SerialWebots
 from SerialMuxProt import Server
 
 # Constants
