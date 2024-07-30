@@ -13,7 +13,7 @@ Several kind of exclusive applications are available:
 * Line Follower - Just a line follower, using a PID controller.
 * Remote Control - The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.
 * Sensor Fusion - The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information.
-
+* Line Follower with Reinforcement Learning - Ein Linienfolger mit Reinforcement Learning verwendet einen lernenden Agenten, der durch Belohnungen und Bestrafungen optimal steuert, um eine Linie autonom zu folgen.
 ## Table of content
 
 * [The robot](#the-robot)
