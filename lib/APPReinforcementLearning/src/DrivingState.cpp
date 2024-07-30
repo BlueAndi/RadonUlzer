@@ -35,8 +35,6 @@
 #include "DrivingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
-#include <Board.h>
-#include <Odometry.h>
 
 /******************************************************************************
  * Compiler Switches
