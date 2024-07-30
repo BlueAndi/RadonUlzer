@@ -102,7 +102,7 @@ public:
      *
      * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
      */
-    uint8_t setSelectedMode();
+    uint8_t getSelectedMode();
 
 protected:
 private:

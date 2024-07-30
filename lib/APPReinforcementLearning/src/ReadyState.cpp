@@ -120,7 +120,7 @@ void ReadyState::process(StateMachine& sm)
      * If either Button A or Button B is not pressed and the timer
      * expires, the training mode should automatically activate.
      */
-    else if (true == m_modeTimeoutTimer.isTimeout() && (m_mode == IDLE))
+    else if (true == m_modeTimeoutTimer.isTimeout() && (IDLE == m_mode))
     {
         m_mode = TRAINING_MODE;
         m_modeTimeoutTimer.restart();
@@ -135,7 +135,7 @@ void ReadyState::process(StateMachine& sm)
     /**Drive forward until START LINE is crossed */
     driveUntilStartLineisCrossed();
 
-    if ((isStartStopLineDetected(lineSensorValues, maxLineSensors) == false) && (m_isLastStartStopLineDetected == true))
+    if (false == (isStartStopLineDetected(lineSensorValues, maxLineSensors)) && (true == m_isLastStartStopLineDetected))
     {
         sm.setState(&DrivingState::getInstance());
     }
@@ -156,7 +156,7 @@ void ReadyState::setLapTime(uint32_t lapTime)
     m_lapTime            = lapTime;
 }
 
-uint8_t ReadyState::setSelectedMode()
+uint8_t ReadyState::getSelectedMode()
 {
     return m_mode;
 }

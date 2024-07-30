@@ -118,7 +118,7 @@ void App::loop()
     {
         Status payload = {SMPChannelPayload::Status::NOT_DONE};
 
-        if (DrivingState::getInstance().isAbortRequired() == true)
+        if (true == DrivingState::getInstance().isAbortRequired())
         {
             payload = {SMPChannelPayload::Status::DONE};
         }
@@ -139,14 +139,14 @@ void App::loop()
     }
 
     /* Send Mode selected to The Supervisor. */
-    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (!m_modeSelectionSent))
+    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (false == m_modeSelectionSent))
     {
-        uint8_t mode_options = ReadyState::getInstance().setSelectedMode();
+        uint8_t mode_options = ReadyState::getInstance().getSelectedMode();
 
-        if (mode_options > 0)
+        if (0U < mode_options)
         {
             SMPChannelPayload::Mode payload =
-                (mode_options == 1) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+                (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
             /* Ignoring return value, as error handling is not available. */
             (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
@@ -196,7 +196,7 @@ void App::sendLineSensorsData() const
     uint8_t         lineSensorIdx    = 0U;
     LineSensorData  payload;
 
-    if (LINE_SENSOR_CHANNEL_DLC == maxLineSensors * sizeof(uint16_t))
+    if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
     {
         while (maxLineSensors > lineSensorIdx)
         {
