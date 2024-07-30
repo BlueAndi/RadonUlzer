@@ -138,7 +138,7 @@ private:
     /** SerialMuxProt Server Instance. */
     SMPServer m_smpServer;
 
-    /* Ensue that the mode is only sent once*/
+    /** Ensue that the mode is only sent once */
     bool m_modeSelectionSent;
 
     /**

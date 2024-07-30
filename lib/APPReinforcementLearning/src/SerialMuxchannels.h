@@ -102,12 +102,13 @@ namespace SMPChannelPayload
 
     } Status; /**< Status flag */
 
+    /** Mode flags */
     typedef enum : uint8_t
     {
         TRAINING_MODE = 0, /**< Driving Mode Selected. */
         DRIVING_MODE       /**< Training Mode Selected. */
 
-    } Mode; /**< Status flag */
+    } Mode; /**< Mode flag */
 
 } // namespace SMPChannelPayload
 
