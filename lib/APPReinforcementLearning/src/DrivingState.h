@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Driving state
- * @author @author Akram Bziouech
+ * @author Akram Bziouech
  *
  * @addtogroup Application
  *

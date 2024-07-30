@@ -65,8 +65,10 @@
 
 void ErrorState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-    
+    IBoard&   board   = Board::getInstance();
+    IDisplay& display = board.getDisplay();
+
+    /* Stop the motors in any case! */
     DifferentialDrive::getInstance().disable();
 
     display.clear();

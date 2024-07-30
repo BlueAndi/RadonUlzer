@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  *  @brief  Channel structure definition for the SerialMuxProt.
- *  @author @author Akram Bziouech 
+ *  @author Akram Bziouech 
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
