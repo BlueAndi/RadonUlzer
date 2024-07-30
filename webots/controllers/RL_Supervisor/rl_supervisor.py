@@ -27,11 +27,21 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 # SOFTWARE.
 #
 
+
+################################################################################
+# Imports
+################################################################################
+
 import sys
 import struct
 from controller import Supervisor  # pylint: disable=import-error
 from serial_webots import SerialWebots
 from SerialMuxProt import Server
+
+################################################################################
+# Variables
+################################################################################
+
 
 # Constants
 ROBOT_NAME = "ROBOT"
@@ -59,6 +69,11 @@ ORIENTATION_DATA = [
     0.9999999999990595,
     1.5880805820884731,
 ]
+
+
+################################################################################
+# Classes
+################################################################################
 
 
 class RobotController:
@@ -156,6 +171,12 @@ class RobotController:
         self.__smp_server.process(self.__timestamp)
 
 
+################################################################################
+# Functions
+################################################################################
+
+
+# pylint: disable=duplicate-code
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller.
@@ -235,3 +256,8 @@ def main_loop():
 
 
 sys.exit(main_loop())
+
+
+################################################################################
+# Main
+################################################################################
