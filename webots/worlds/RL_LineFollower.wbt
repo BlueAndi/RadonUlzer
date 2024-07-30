@@ -40,7 +40,7 @@ DEF ROBOT Zumo32U4 {
   contactMaterial "rubber"
 }
 Supervisor {
-  name "RL_Supervisor"
-  controller "RL_Supervisor"
+  name "rl_supervisor"
+  controller "rl_supervisor"
   supervisor TRUE
 }
