@@ -1,0 +1,35 @@
+@startuml
+
+title System States
+
+state StartupState: /entry Initialize HAL.
+state StartupState: /entry Show operator info on LCD.
+state StartupState: /do Wait for pushbutton A or B is triggered.
+
+state MotorSpeedCalibrationState: /entry Show operator info on LCD.
+state MotorSpeedCalibrationState: /do Perform calibration.
+
+state LineSensorsCalibrationState: /entry Show operator info on LCD.
+state LineSensorsCalibrationState: /do Perform calibration.
+
+state ErrorState: /entry Show error info on LCD.
+state ErrorState: /do Wait for pushbutton A is triggered.
+
+state ReadyState: /entry Show operator info on LCD.
+state ReadyState: /do Wait for button A or B to be triggered.
+
+state DrivingState: /entry Start observation timer.
+state DrivingState: /do Perform driving.
+state DrivingState: /exit Stop observation timer.
+
+[*] --> StartupState: Power up
+StartupState --> MotorSpeedCalibrationState: [Pushbutton A triggered]
+StartupState --> LineSensorsCalibrationState: [Pushbutton B triggered] and\n[Max. motor speed calib. is available in settings]
+MotorSpeedCalibrationState --> LineSensorsCalibrationState: [Calibration finished]
+LineSensorsCalibrationState --> ReadyState: [Calibration finished]
+LineSensorsCalibrationState --> ErrorState: [Calibration failed]
+ReadyState ---> DrivingState: [Pushbutton A triggered] or\n [Pushbutton B triggered] or \n [mode timer timeout]
+DrivingState ---> ReadyState: [End line detected] or\n [Observation timer timeout] or\n [No Line Deteceted]
+ErrorState --> StartupState: [Pushbutton A triggered]
+
+@enduml

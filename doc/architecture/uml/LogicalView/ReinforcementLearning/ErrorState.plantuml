@@ -1,0 +1,52 @@
+@startuml
+
+title Error State
+
+package "Application" as appLayer {
+
+    class ErrorState <<control>> {
+        + {static} getInstance() : ErrorState
+        + entry() : void
+        + process(sm : StateMachine&) : void
+        + exit() : void
+        + setErrorMsg(msg : const String&) : void
+    }
+
+    class StartupState <<control>>
+
+    ErrorState .r.> StartupState: <<use>>
+}
+
+package "HAL" as hal {
+
+    package "Interfaces" as halInterfaces {
+        interface IDisplay {
+            + {abstract} clear() : void
+            + {abstract} gotoXY(xCoord : uint8_t, yCoord : uint8_t) : void
+            + {abstract} print(str : const String&) : size_t
+            + {abstract} print(str : const char[]) : size_t
+            + {abstract} print(value : uint8_t) : size_t
+            + {abstract} print(value : uint16_t) : size_t
+            + {abstract} print(value : uint32_t) : size_t
+            + {abstract} print(value : int8_t) : size_t
+            + {abstract} print(value : int16_t) : size_t
+            + {abstract} print(value : int32_t) : size_t
+        }
+
+        interface IButton {
+            + {abstract} isPressed() : bool
+            + {abstract} waitForRelease() : void
+        }
+    }
+
+    class Board << namespace >> {
+        + getDisplay() : IDisplay&
+        + getButtonA() : IButton&
+    }
+}
+
+ErrorState ..> Board: <<use>>
+ErrorState ..> IDisplay: <<use>>
+ErrorState ..> IButton: <<use>>
+
+@enduml

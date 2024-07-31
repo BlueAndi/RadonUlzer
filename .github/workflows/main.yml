@@ -148,7 +148,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "LineFollowerSimpleTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyFollowerSim", "ConvoyLeaderSim", "LineFollowerSim", "LineFollowerSimpleSim", "RemoteControlSim", "SensorFusionSim"]
+        environment: ["CalibTarget", "ConvoyFollowerTarget", "ConvoyLeaderTarget", "LineFollowerTarget", "LineFollowerSimpleTarget", "RemoteControlTarget", "SensorFusionTarget", "CalibSim", "ConvoyFollowerSim", "ConvoyLeaderSim", "LineFollowerSim", "LineFollowerSimpleSim", "ReinforcementLearningSim", "RemoteControlSim", "SensorFusionSim"]
 
     steps:
     - name: Checkout repository
@@ -212,7 +212,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pylint
+          pip install pylint "git+https://github.com/gabryelreyes/SerialMuxProt.git#egg=SerialMuxProt&subdirectory=python/SerialMuxProt"
 
       - name: Analysing the code with pylint
         run: |

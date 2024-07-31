@@ -39,7 +39,6 @@
 #include <DifferentialDrive.h>
 #include <Logging.h>
 #include <Util.h>
-
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -59,11 +58,6 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
-
-/**
- * Error logging tag.
- */
-LOG_TAG("EState");
 
 /******************************************************************************
  * Public Methods
@@ -89,8 +83,6 @@ void ErrorState::entry()
     {
         display.print(m_errorMsg);
     }
-
-    LOG_ERROR_VAL("Error: ", m_errorMsg);
 }
 
 void ErrorState::process(StateMachine& sm)

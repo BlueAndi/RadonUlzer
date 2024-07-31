@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Ready state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech
  */
 
 /******************************************************************************
@@ -35,8 +35,8 @@
 #include "ReadyState.h"
 #include <Board.h>
 #include <StateMachine.h>
-#include "ReleaseTrackState.h"
-#include <Logging.h>
+#include <DifferentialDrive.h>
+#include "DrivingState.h"
 #include <Util.h>
 
 /******************************************************************************
@@ -59,10 +59,12 @@
  * Local Variables
  *****************************************************************************/
 
-/**
- * Logging source.
- */
-LOG_TAG("RState");
+const uint16_t ReadyState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
+
+/* Initialize the required sensor IDs to be generic. */
+const uint8_t ReadyState::SENSOR_ID_MOST_LEFT  = 0U;
+const uint8_t ReadyState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
+const uint8_t ReadyState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /******************************************************************************
  * Public Methods
@@ -70,78 +72,81 @@ LOG_TAG("RState");
 
 void ReadyState::entry()
 {
-    IDisplay&     display                 = Board::getInstance().getDisplay();
-    const int32_t SENSOR_VALUE_OUT_PERIOD = 1000; /* ms */
-
+    IDisplay& display = Board::getInstance().getDisplay();
     display.clear();
-    display.print("A: Go");
+    display.print("A: TMD");
+    display.gotoXY(0, 1);
+    display.print("B: DMD");
+
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    diffDrive.setLinearSpeed(0, 0);
 
     if (true == m_isLapTimeAvailable)
     {
-        display.gotoXY(0, 1);
+        display.gotoXY(0, 2);
         display.print(m_lapTime);
         display.print("ms");
-
-        LOG_INFO_VAL("Lap time: ", m_lapTime);
     }
-
-    /* The line sensor value shall be output on console cyclic. */
-    m_timer.start(SENSOR_VALUE_OUT_PERIOD);
+    m_modeTimeoutTimer.start(mode_selected_period);
+    m_mode                        = IDLE;
+    m_isLastStartStopLineDetected = false;
+    m_isButtonAPressed            = false;
+    m_isButtonBPressed            = false;
 }
 
 void ReadyState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
+    IButton& buttonB = Board::getInstance().getButtonB();
 
-    /* Shall track be released? */
+    /* Get each sensor value. */
+    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
+    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+
+    /* Shall the driving mode be released? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        sm.setState(&ReleaseTrackState::getInstance());
+        m_mode = DRIVING_MODE;
     }
 
-    /* Shall the line sensor values be printed out on console? */
-    if (true == m_timer.isTimeout())
+    /* Shall the Training mode be released? */
+    else if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
     {
-        ILineSensors&   lineSensors  = Board::getInstance().getLineSensors();
-        uint8_t         index        = 0;
-        int16_t         position     = lineSensors.readLine();
-        const uint16_t* sensorValues = lineSensors.getSensorValues();
-        char            valueStr[10];
-
-        LOG_DEBUG_HEAD();
-
-        /* Print line sensor value on console for debug purposes. */
-        for (index = 0; index < lineSensors.getNumLineSensors(); ++index)
-        {
-            if (0 < index)
-            {
-                LOG_DEBUG_MSG(" / ");
-            }
-
-            Util::uintToStr(valueStr, sizeof(valueStr), sensorValues[index]);
-
-            LOG_DEBUG_MSG(valueStr);
-        }
-
-        LOG_DEBUG_MSG(" -> ");
-
-        Util::intToStr(valueStr, sizeof(valueStr), position);
-        LOG_DEBUG_MSG(valueStr);
-
-        LOG_DEBUG_TAIL();
-
-        m_timer.restart();
+        m_mode = TRAINING_MODE;
     }
+
+    /*
+     * If either Button A or Button B is not pressed and the timer
+     * expires, the training mode should automatically activate.
+     */
+    else if (true == m_modeTimeoutTimer.isTimeout() && (IDLE == m_mode))
+    {
+        m_mode = TRAINING_MODE;
+        m_modeTimeoutTimer.restart();
+    }
+
     else
     {
         /* Nothing to do. */
         ;
     }
+
+    /**Drive forward until START LINE is crossed */
+    driveUntilStartLineisCrossed();
+
+    if (false == (isStartStopLineDetected(lineSensorValues, maxLineSensors)) && (true == m_isLastStartStopLineDetected))
+    {
+        sm.setState(&DrivingState::getInstance());
+    }
+    else
+    {
+        m_isLastStartStopLineDetected = isStartStopLineDetected(lineSensorValues, maxLineSensors);
+    }
 }
 
 void ReadyState::exit()
 {
-    m_timer.stop();
     m_isLapTimeAvailable = false;
 }
 
@@ -151,6 +156,11 @@ void ReadyState::setLapTime(uint32_t lapTime)
     m_lapTime            = lapTime;
 }
 
+uint8_t ReadyState::getSelectedMode()
+{
+    return m_mode;
+}
+
 /******************************************************************************
  * Protected Methods
  *****************************************************************************/
@@ -158,6 +168,50 @@ void ReadyState::setLapTime(uint32_t lapTime)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+ReadyState::ReadyState() :
+    m_isLapTimeAvailable(false),
+    m_isButtonAPressed(false),
+    m_isButtonBPressed(false),
+    m_modeTimeoutTimer(),
+    m_lapTime(0),
+    m_isLastStartStopLineDetected(false),
+    m_mode(IDLE)
+{
+}
+
+/**Drive forward until START LINE is crossed */
+void ReadyState::driveUntilStartLineisCrossed()
+{
+    DifferentialDrive& diffDrive  = DifferentialDrive::getInstance();
+    int16_t            top_speed  = 2000;           /* Set a top speed of 2000 */
+    int16_t            leftMotor  = top_speed / 2U; /* Drive at half speed */
+    int16_t            rightMotor = top_speed / 2U; /* Drive at half speed */
+    diffDrive.setLinearSpeed(leftMotor, rightMotor);
+}
+
+bool ReadyState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
+{
+    bool           isDetected  = false;
+    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
+    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
+
+    /*
+     * ===     =     ===
+     *   +   + + +   +
+     *   L     M     R
+     */
+    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE - 1U]) &&
+        (LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MIDDLE]) &&
+        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE + 1U]) &&
+        (LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]))
+    {
+        isDetected = true;
+    }
+
+    return isDetected;
+}
 
 /******************************************************************************
  * External Functions

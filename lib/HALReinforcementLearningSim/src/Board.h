@@ -63,10 +63,6 @@
 #include <SimTime.h>
 #include <WebotsSerialDrv.h>
 
-#ifdef DEBUG_ODOMETRY
-#include <Sender.h>
-#endif /* DEBUG_ODOMETRY */
-
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -218,20 +214,6 @@ public:
         return m_settings;
     }
 
-#ifdef DEBUG_ODOMETRY
-
-    /**
-     * Get the sender driver, used to send data to the webots supervisor.
-     *
-     * @return Sender driver
-     */
-    ISender& getSender() final
-    {
-        return m_sender;
-    }
-
-#endif /* DEBUG_ODOMETRY */
-
     /**
      * Process actuators and sensors.
      */
@@ -241,7 +223,6 @@ public:
     }
 
 private:
-
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -284,15 +265,11 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
+    /** Simulation serial driver */
+    WebotsSerialDrv m_serialDrv;
+
     /** Settings */
     Settings m_settings;
-
-#ifdef DEBUG_ODOMETRY
-
-    /** Sender driver for supervisor communication. */
-    Sender m_sender;
-
-#endif /* DEBUG_ODOMETRY */
 
     /**
      * Constructs the concrete board.
@@ -333,8 +310,7 @@ private:
      */
     WebotsSerialDrv* getSimSerial()
     {
-        /* Not supported. */
-        return nullptr;
+        return &m_serialDrv;
     }
 
     /**

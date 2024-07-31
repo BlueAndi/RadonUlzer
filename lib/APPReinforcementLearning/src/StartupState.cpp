@@ -40,7 +40,6 @@
 #include "Sound.h"
 #include <DifferentialDrive.h>
 #include <Util.h>
-
 /******************************************************************************
  * Compiler Switches
  *****************************************************************************/
@@ -88,7 +87,6 @@ void StartupState::entry()
 
         m_isMaxMotorSpeedCalibAvailable = true;
     }
-
     showUserInfo(m_userInfoState);
 }
 
@@ -97,10 +95,10 @@ void StartupState::process(StateMachine& sm)
     Board&   board   = Board::getInstance();
     IButton& buttonA = board.getButtonA();
 
-    /* Start line sensor calibration? */
+    /* Start max. motor speed calibration? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        sm.setState(&LineSensorsCalibrationState::getInstance());
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 
     /* If the max. motor speed calibration is done, it will be possible to
@@ -170,7 +168,6 @@ void StartupState::showUserInfo(UserInfo next)
 
     case USER_INFO_UI:
         display.print("A: MCAL");
-
         if (true == m_isMaxMotorSpeedCalibAvailable)
         {
             display.gotoXY(0, 1);

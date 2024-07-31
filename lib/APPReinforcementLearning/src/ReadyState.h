@@ -26,7 +26,7 @@
 *******************************************************************************/
 /**
  * @brief  Ready state
- * @author Andreas Merkle <web@blue-andi.de>
+ * @author Akram Bziouech
  *
  * @addtogroup Application
  *
@@ -45,6 +45,7 @@
  *****************************************************************************/
 #include <IState.h>
 #include <SimpleTimer.h>
+#include <StateMachine.h>
 
 /******************************************************************************
  * Macros
@@ -96,19 +97,67 @@ public:
      */
     void setLapTime(uint32_t lapTime);
 
+    /**
+     *  Set the selected mode.
+     *
+     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
+     */
+    uint8_t getSelectedMode();
+
 protected:
 private:
-    SimpleTimer m_timer;              /**< Timer used for cyclic debug output. */
-    bool        m_isLapTimeAvailable; /**< Is set (true), if a lap time is available. */
-    uint32_t    m_lapTime;            /**< Lap time in ms of the last successful driven round. */
-    bool        m_isButtonAPressed;   /**< Is the button A pressed (last time)? */
+    /**
+     * The mode that can be selected.
+     */
+    enum Mode
+    {
+        IDLE = 0,     /**< No mode has been selected*/
+        DRIVING_MODE, /**< Driving mode Selected. */
+        TRAINING_MODE /**< Training mode Selected. */
+    };
+
+    /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
+    static const uint32_t mode_selected_period = 200U;
+
+    /**
+     * The line sensor threshold (normalized) used to detect the track.
+     * The track is detected in case the received value is greater or equal than
+     * the threshold.
+     */
+    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
+
+    /**
+     * ID of most left sensor.
+     */
+    static const uint8_t SENSOR_ID_MOST_LEFT;
+
+    /**
+     * ID of middle sensor.
+     */
+    static const uint8_t SENSOR_ID_MIDDLE;
+
+    /**
+     * ID of most right sensor.
+     */
+    static const uint8_t SENSOR_ID_MOST_RIGHT;
+
+    /**
+     * The max. normalized value of a sensor in digits.
+     */
+    static const uint16_t SENSOR_VALUE_MAX;
+
+    bool        m_isLastStartStopLineDetected; /**< Is the Last start/stop line detected? */
+    SimpleTimer m_modeTimeoutTimer;            /**< Timeout timer for the selected mode. */
+    Mode        m_mode;                        /**< Mode that can select Driving Mode or Training Mode. */
+    bool        m_isLapTimeAvailable;          /**< Is set (true), if a lap time is available. */
+    uint32_t    m_lapTime;                     /**< Lap time in ms of the last successful driven round. */
+    bool        m_isButtonAPressed;            /**< Is the button A pressed (last time)? */
+    bool        m_isButtonBPressed;            /**< Is the button B pressed (last time)? */
 
     /**
      * Default constructor.
      */
-    ReadyState() : m_timer(), m_isLapTimeAvailable(false), m_lapTime(0), m_isButtonAPressed(false)
-    {
-    }
+    ReadyState();
 
     /**
      * Default destructor.
@@ -134,6 +183,22 @@ private:
      * @returns Reference to ErrorState instance.
      */
     ReadyState& operator=(const ReadyState& state);
+
+    /*
+     * The robot moves from its current position
+     * until it crosses and leaves the start line.
+     */
+    void driveUntilStartLineisCrossed();
+
+    /**
+     * Is the start/stop line detected?
+     *
+     * @param[in] lineSensorValues  The line sensor values as array.
+     * @param[in] length            The number of line sensor values.
+     *
+     * @return If start/stop line detected, it will return true otherwise false.
+     */
+    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
 };
 
 /******************************************************************************
