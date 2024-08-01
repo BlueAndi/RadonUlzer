@@ -54,7 +54,7 @@ xcopy /s /y %TEMP_PLATOON_LEADER_PATH%\ %TEMP_PLATOON_LEADER_NEW_PATH%\
 
 rem Copy follower folder according to a new folder with the robot's name.
 rem The copy ensures that a existing settings.json will be kept.
-for /L %%i in (1, 1, 2) do (
+for /L %%i in (1, 1, 10) do (
     xcopy /s /y %TEMP_PLATOON_FOLLOWER_PATH%\ %TEMP_PLATOON_FOLLOWER_NEW_PATH%%%i\
 )
 
@@ -67,7 +67,7 @@ echo Start convoy leader.
 start "Convoy Leader" ""%WEBOTS_CONTROLLER%"" --robot-name=%CONVOY_LEADER_ROBOT_NAME% --stdout-redirect %TEMP_PLATOON_LEADER_NEW_PATH%\%PROGRAM_NAME% -n %CONVOY_LEADER_ROBOT_NAME% -c --serialRxCh=%CONVOY_LEADER_RX_CHANNEL% --serialTxCh=%CONVOY_LEADER_TX_CHANNEL% -v"
 
 rem Start the followers
-for /L %%i in (1, 1, 2) do (
+for /L %%i in (1, 1, 10) do (
     echo Start convoy follower %%i.
     call :StartFollower %%i
 )
