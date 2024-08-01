@@ -50,6 +50,9 @@ PROTO ZumoComSystem [
         GPS {
           name "gps"
         }
+        Compass {
+          name "compass"
+        }
       ]
       name IS name
       description "DroidControlShip"
