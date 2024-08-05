@@ -89,8 +89,9 @@ namespace SMPChannelPayload
     /** Remote control commands. */
     typedef enum : uint8_t
     {
-        CMD_ID_IDLE = 0,       /**< Nothing to do. */
-        CMD_ID_SET_READY_STATE /**< Set Ready State. */
+        CMD_ID_IDLE = 0,          /**< Nothing to do. */
+        CMD_ID_SET_READY_STATE,   /**< Set Ready State. */
+        CMD_ID_SET_TRAINING_STATE /**< Set Training State */
 
     } CmdId; /**< Command ID */
 
