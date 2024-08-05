@@ -42,6 +42,7 @@
 #include <Odometry.h>
 #include "ReadyState.h"
 #include <Logging.h>
+#include "TrainingState.h"
 
 /******************************************************************************
  * Compiler Switches
@@ -123,8 +124,7 @@ void App::loop()
             payload = {SMPChannelPayload::Status::DONE};
         }
 
-        /* Ignoring return value, as error handling is not available. */
-        (void)m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+        m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
 
         m_statusTimer.restart();
     }
@@ -133,7 +133,23 @@ void App::loop()
     if (true == m_sendLineSensorsDataInterval.isTimeout() &&
         (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
-        sendLineSensorsData();
+        ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+        uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
+        const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+        uint8_t         lineSensorIdx    = 0U;
+        LineSensorData  payload;
+
+        if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
+        {
+            while (maxLineSensors > lineSensorIdx)
+            {
+                payload.lineSensorData[lineSensorIdx] = lineSensorValues[lineSensorIdx];
+
+                ++lineSensorIdx;
+            }
+        }
+
+        m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
 
         m_sendLineSensorsDataInterval.restart();
     }
@@ -148,11 +164,17 @@ void App::loop()
             SMPChannelPayload::Mode payload =
                 (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
-            /* Ignoring return value, as error handling is not available. */
-            (void)m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+            m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
 
             m_modeSelectionSent = true;
         }
+    }
+
+    if (false == m_data_sent)
+    {
+        /* Failed to send data to the supervisor. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("DSF");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
     }
 
     m_smpServer.process(millis());
@@ -174,6 +196,13 @@ void App::handleRemoteCommand(const Command& cmd)
         m_modeSelectionSent = false;
         break;
 
+    case SMPChannelPayload::CmdId::CMD_ID_SET_TRAINING_STATE:
+        Odometry::getInstance().clearPosition();
+        Odometry::getInstance().clearMileage();
+
+        m_systemStateMachine.setState(&TrainingState::getInstance());
+        break;
+
     default:
         /* Nothing to do. */
         break;
@@ -187,28 +216,6 @@ void App::handleRemoteCommand(const Command& cmd)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
-
-void App::sendLineSensorsData() const
-{
-    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
-    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-    uint8_t         lineSensorIdx    = 0U;
-    LineSensorData  payload;
-
-    if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
-    {
-        while (maxLineSensors > lineSensorIdx)
-        {
-            payload.lineSensorData[lineSensorIdx] = lineSensorValues[lineSensorIdx];
-
-            ++lineSensorIdx;
-        }
-    }
-
-    /* Ignoring return value, as error handling is not available. */
-    (void)m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
-}
 
 bool App::setupSerialMuxProt()
 {
