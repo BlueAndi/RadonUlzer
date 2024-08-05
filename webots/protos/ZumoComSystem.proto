@@ -9,7 +9,6 @@ PROTO ZumoComSystem [
   Slot {
     type "ZumoComSystem"
     endPoint Robot {
-      translation -0.005 0 0.018
       children [
         DEF BODY Group {
           children [
@@ -27,10 +26,15 @@ PROTO ZumoComSystem [
               ]
             }
             %< } else { >%
-            Shape {
-              geometry Box {
-                size 0.06 0.05 0.01
-              }
+            Transform {
+              translation -0.005 0 0.018
+              children [
+                Shape {
+                  geometry Box {
+                    size 0.06 0.05 0.01
+                  }
+                }
+              ]
             }
             %<}>%
           ]
@@ -45,6 +49,9 @@ PROTO ZumoComSystem [
         }
         GPS {
           name "gps"
+        }
+        Compass {
+          name "compass"
         }
       ]
       name IS name
