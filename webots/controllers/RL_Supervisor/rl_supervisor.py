@@ -34,9 +34,11 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 
 import sys
 import struct
+import os
 from controller import Supervisor  # pylint: disable=import-error
 from serial_webots import SerialWebots
 from SerialMuxProt import Server
+from agent import Agent
 
 ################################################################################
 # Variables
@@ -62,14 +64,12 @@ STATUS_CHANNEL_ERROR_VAL = 1
 
 MODE_CHANNEL_NAME = "MODE"
 CMD_ID_SET_READY_STATE = 1
-POSITION_DATA = [-0.24713614078815466, -0.04863962992854465, 0.013994298332013683]
-ORIENTATION_DATA = [
-    -1.0564747468923541e-06,
-    8.746699709178704e-07,
-    0.9999999999990595,
-    1.5880805820884731,
-]
+MIN_NUMBER_OF_STEPS = 200
+SENSOR_ID_MOST_LEFT = 0
+SENSOR_ID_MOST_RIGHT = 4
 
+# Path of saved models
+PATH = "models/"
 
 ################################################################################
 # Classes
@@ -79,51 +79,28 @@ ORIENTATION_DATA = [
 class RobotController:
     """Class for data flow control logic"""
 
-    def __init__(self, robot_node, smp_server, tick_size):
-        self.__robot_node = robot_node
+    def __init__(self, smp_server, tick_size, agent):
         self.__smp_server = smp_server
+        self.__agent = agent
         self.__tick_size = tick_size
         self.__no_line_detection_count = 0
         self.__timestamp = 0  # Elapsed time since reset [ms]
-        self.is_sequence_complete = False
+        self.last_sensor_data = None
+        self.steps = 0
 
-    def reinitialize(self):
-        """Re-initialization of position and orientation of The ROBOT."""
-        trans_field = self.__robot_node.getField("translation")
-        rot_field = self.__robot_node.getField("rotation")
-        initial_position = POSITION_DATA
-        initial_orientation = ORIENTATION_DATA
-        trans_field.setSFVec3f(initial_position)
-        rot_field.setSFRotation(initial_orientation)
-
-    def callback_status(self, payload: bytearray) -> int:
+    def callback_status(self, payload: bytearray) -> None:
         """Callback Status Channel."""
 
         # perform action on robot status feedback
         if payload[0] == STATUS_CHANNEL_ERROR_VAL:
             print("robot has reached error-state (max. lap time passed in robot)")
 
-            # stop robot motors
-            self.__smp_server.send_data(SPEED_SET_CHANNEL_NAME, struct.pack("2H", 0, 0))
-
-            # switch robot to ready state
-            self.__smp_server.send_data(
-                COMMAND_CHANNEL_NAME, struct.pack("B", CMD_ID_SET_READY_STATE)
-            )
-
-            # perform robot state reset
-            self.is_sequence_complete = True
+            self.__agent.done = 1
 
     def callback_line_sensors(self, payload: bytearray) -> None:
         """Callback LINE_SENS Channel."""
         sensor_data = struct.unpack("5H", payload)
-
-        for idx in range(5):
-            if idx == 4:
-                print(f"Sensor[{idx}] = {sensor_data[idx]}")
-            else:
-                print(f"Sensor[{idx}] = {sensor_data[idx]}, ", end="")
-
+        self.steps += 1
         # determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
@@ -134,34 +111,67 @@ class RobotController:
         is_start_stop = all(
             value >= LINE_SENSOR_ON_TRACK_MIN_VALUE for value in sensor_data
         )
+        # Detect Start/Stop Line before Finish Trajectories
+        if (is_start_stop is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+            sensor_data = list(sensor_data)
+            sensor_data[SENSOR_ID_MOST_LEFT] = 0
+            sensor_data[SENSOR_ID_MOST_RIGHT] = 0
 
-        # sequence stop criterion debounce no line detection and
-        if (self.__no_line_detection_count >= 20) or is_start_stop:
-            # Stop motors, maximum NO Line Detection Counter reached
-            self.__smp_server.send_data(SPEED_SET_CHANNEL_NAME, struct.pack("2H", 0, 0))
+        # sequence stop criterion debounce no line detection and start/stop line detected
+        if self.__no_line_detection_count >= 30 or (
+            is_start_stop and (self.steps >= MIN_NUMBER_OF_STEPS)
+        ):
+            self.__agent.done = True
+            self.__no_line_detection_count = 0
 
-            # SENDING A COMMAND ID SET READY STATUS
-            self.__smp_server.send_data(
-                COMMAND_CHANNEL_NAME, struct.pack("B", CMD_ID_SET_READY_STATE)
-            )
-            self.is_sequence_complete = True
+        # The sequence of states and actions is stored in memory for the training phase.
+        if self.__agent.train_mode:
+            reward = self.__agent.calculate_reward(sensor_data)
 
-        else:
-            # [PLACEHOLDER] replace with line sensor data receiver
+            # Start storage The data after the second received sensor data
+            if self.last_sensor_data is not None:
+                normalized_sensor_data = self.__agent.normalize_sensor_data(sensor_data)
+                self.__agent.store_transition(
+                    normalized_sensor_data,
+                    self.__agent.action,
+                    self.__agent.adjusted_log_prob,
+                    self.__agent.value,
+                    reward,
+                    self.__agent.done,
+                )
+            self.last_sensor_data = sensor_data
 
-            # Set left and right motors speed to 1000
-            self.__smp_server.send_data(
-                SPEED_SET_CHANNEL_NAME, struct.pack("2H", 1000, 1000)
-            )
+        # Sends the motor speeds to the robot.
+        if self.__agent.done is False and self.__agent.state == "READY":
+            self.__agent.send_motor_speeds(sensor_data)
 
     def callback_mode(self, payload: bytearray) -> None:
         """Callback MODE Channel."""
         driving_mode = payload[0]
 
         if driving_mode:
-            print("Driving Mode Selected.")
+            self.__agent.set_drive_mode()
+
         else:
-            print("Train Mode Selected.")
+            self.__agent.set_train_mode()
+
+    def load_models(self, path) -> None:
+        """Load Model if exist"""
+        if os.path.exists(path):
+            self.__agent.load_models()
+
+    def retry_unsent_data(self, unsent_data: list) -> bool:
+        """Resent any unsent Data"""
+        retry_succesful = True
+
+        # Resent the unsent Data.
+        for data in unsent_data[:]:
+            if self.__smp_server.send_data(data[0], data[1]) is True:
+                unsent_data.remove(data)
+            else:
+                retry_succesful = False
+
+        return retry_succesful
 
     def process(self):
         """function performing controller step"""
@@ -177,6 +187,7 @@ class RobotController:
 
 
 # pylint: disable=duplicate-code
+# pylint: disable=too-many-branches
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller.
@@ -229,9 +240,11 @@ def main_loop():
     if sermux_channel_cmd_id == 0:
         print("ERROR: channel CMD not created.")
         status = -1
+    # create instance of intelligence Agent
+    agent = Agent(smp_server)
 
     # create instance of robot logic class
-    controller = RobotController(robot_node, smp_server, timestep)
+    controller = RobotController(smp_server, timestep, agent)
 
     smp_server.subscribe_to_channel(STATUS_CHANNEL_NAME, controller.callback_status)
 
@@ -243,14 +256,37 @@ def main_loop():
 
     # setup successful
     if status != -1:
+
+        controller.load_models(PATH)
         # simulation loop
         while supervisor.step(timestep) != -1:
             controller.process()
 
-            # stopping condition for sequence was reached
-            if controller.is_sequence_complete is True:
-                controller.reinitialize()
-                controller.is_sequence_complete = False
+            # Checks if the sequence has ended
+            if agent.state == "READY":
+                agent.update(robot_node)
+
+            # Start the training
+            elif agent.state == "TRAINING":
+                controller.steps = 0
+                agent.perform_training()
+
+            if 1000 <= agent.num_episodes:
+                print(f"Episodes: {agent.num_episodes}")
+
+            # Resent any unsent Data
+            if agent.unsent_data:
+
+                # Stop The Simulation. Handel unsent Data
+                supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
+
+                # Set simulation mode to real time when unsent data is resent
+                if controller.retry_unsent_data(agent.unsent_data) is True:
+                    supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_REAL_TIME)
+
+                # Reset The Simulation
+                else:
+                    supervisor.simulationReset()
 
     return status
 
