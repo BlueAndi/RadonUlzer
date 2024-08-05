@@ -4,8 +4,6 @@ name: main
 on:
   push:
     branches: [ '**' ]
-  pull_request:
-    branches: [ main ]
   release:
     # A release, pre-release, or draft of a release is published.
     types: [ published ]
