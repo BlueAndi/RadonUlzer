@@ -59,13 +59,6 @@
  * Local Variables
  *****************************************************************************/
 
-const uint16_t ReadyState::SENSOR_VALUE_MAX = Board::getInstance().getLineSensors().getSensorValueMax();
-
-/* Initialize the required sensor IDs to be generic. */
-const uint8_t ReadyState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t ReadyState::SENSOR_ID_MIDDLE     = Board::getInstance().getLineSensors().getNumLineSensors() / 2U;
-const uint8_t ReadyState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
-
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -87,6 +80,7 @@ void ReadyState::entry()
         display.print(m_lapTime);
         display.print("ms");
     }
+    m_stateTransitionTimer.start(m_state_Transition_period);
     m_modeTimeoutTimer.start(mode_selected_period);
     m_mode                        = IDLE;
     m_isLastStartStopLineDetected = false;
@@ -98,11 +92,6 @@ void ReadyState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
     IButton& buttonB = Board::getInstance().getButtonB();
-
-    /* Get each sensor value. */
-    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
-    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
 
     /* Shall the driving mode be released? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
@@ -132,16 +121,10 @@ void ReadyState::process(StateMachine& sm)
         ;
     }
 
-    /**Drive forward until START LINE is crossed */
-    driveUntilStartLineisCrossed();
-
-    if (false == (isStartStopLineDetected(lineSensorValues, maxLineSensors)) && (true == m_isLastStartStopLineDetected))
+    /* Set DrivingState */
+    if (true == m_stateTransitionTimer.isTimeout())
     {
         sm.setState(&DrivingState::getInstance());
-    }
-    else
-    {
-        m_isLastStartStopLineDetected = isStartStopLineDetected(lineSensorValues, maxLineSensors);
     }
 }
 
@@ -174,43 +157,11 @@ ReadyState::ReadyState() :
     m_isButtonAPressed(false),
     m_isButtonBPressed(false),
     m_modeTimeoutTimer(),
+    m_stateTransitionTimer(),
     m_lapTime(0),
     m_isLastStartStopLineDetected(false),
     m_mode(IDLE)
 {
-}
-
-/**Drive forward until START LINE is crossed */
-void ReadyState::driveUntilStartLineisCrossed()
-{
-    DifferentialDrive& diffDrive  = DifferentialDrive::getInstance();
-    int16_t            top_speed  = 2000;           /* Set a top speed of 2000 */
-    int16_t            leftMotor  = top_speed / 2U; /* Drive at half speed */
-    int16_t            rightMotor = top_speed / 2U; /* Drive at half speed */
-    diffDrive.setLinearSpeed(leftMotor, rightMotor);
-}
-
-bool ReadyState::isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const
-{
-    bool           isDetected  = false;
-    const uint32_t LINE_MAX_30 = (SENSOR_VALUE_MAX * 3U) / 10U; /* 30 % of max. value */
-    const uint32_t LINE_MAX_70 = (SENSOR_VALUE_MAX * 7U) / 10U; /* 70 % of max. value */
-
-    /*
-     * ===     =     ===
-     *   +   + + +   +
-     *   L     M     R
-     */
-    if ((LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_LEFT]) &&
-        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE - 1U]) &&
-        (LINE_MAX_70 <= lineSensorValues[SENSOR_ID_MIDDLE]) &&
-        (LINE_MAX_70 > lineSensorValues[SENSOR_ID_MIDDLE + 1U]) &&
-        (LINE_MAX_30 <= lineSensorValues[SENSOR_ID_MOST_RIGHT]))
-    {
-        isDetected = true;
-    }
-
-    return isDetected;
 }
 
 /******************************************************************************

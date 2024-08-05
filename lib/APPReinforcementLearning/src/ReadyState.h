@@ -117,8 +117,9 @@ private:
     };
 
     /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
-    static const uint32_t mode_selected_period = 200U;
+    static const uint32_t mode_selected_period = 100;
 
+    static const uint32_t m_state_Transition_period = 150;
     /**
      * The line sensor threshold (normalized) used to detect the track.
      * The track is detected in case the received value is greater or equal than
@@ -153,7 +154,7 @@ private:
     uint32_t    m_lapTime;                     /**< Lap time in ms of the last successful driven round. */
     bool        m_isButtonAPressed;            /**< Is the button A pressed (last time)? */
     bool        m_isButtonBPressed;            /**< Is the button B pressed (last time)? */
-
+    SimpleTimer m_stateTransitionTimer;        /**< Timer to handle State changes */
     /**
      * Default constructor.
      */
@@ -183,22 +184,6 @@ private:
      * @returns Reference to ErrorState instance.
      */
     ReadyState& operator=(const ReadyState& state);
-
-    /*
-     * The robot moves from its current position
-     * until it crosses and leaves the start line.
-     */
-    void driveUntilStartLineisCrossed();
-
-    /**
-     * Is the start/stop line detected?
-     *
-     * @param[in] lineSensorValues  The line sensor values as array.
-     * @param[in] length            The number of line sensor values.
-     *
-     * @return If start/stop line detected, it will return true otherwise false.
-     */
-    bool isStartStopLineDetected(const uint16_t* lineSensorValues, uint8_t length) const;
 };
 
 /******************************************************************************
