@@ -79,9 +79,15 @@ void DrivingState::exit()
     m_observationTimer.stop();
 }
 
-void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+void DrivingState::setTargetSpeeds(int16_t leftSpeed, int16_t rightSpeed)
 {
-    DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+    DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
+    const int16_t      MAX_MOTOR_SPEED = diffDrive.getMaxMotorSpeed();
+    const int16_t      MIN_MOTOR_SPEED = 0;
+    leftSpeed                          = constrain(leftSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
+    rightSpeed                         = constrain(rightSpeed, MIN_MOTOR_SPEED, MAX_MOTOR_SPEED);
+
+    DifferentialDrive::getInstance().setLinearSpeed(leftSpeed, rightSpeed);
 }
 
 bool DrivingState::isAbortRequired()
