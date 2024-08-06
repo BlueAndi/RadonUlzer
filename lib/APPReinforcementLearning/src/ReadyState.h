@@ -119,7 +119,9 @@ private:
     /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
     static const uint32_t mode_selected_period = 100;
 
+    /** Duration to handle State changes in ms. */
     static const uint32_t m_state_Transition_period = 150;
+
     /**
      * The line sensor threshold (normalized) used to detect the track.
      * The track is detected in case the received value is greater or equal than
