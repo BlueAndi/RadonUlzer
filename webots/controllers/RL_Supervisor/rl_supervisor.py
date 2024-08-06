@@ -43,7 +43,7 @@ from agent import Agent
 ################################################################################
 # Variables
 ################################################################################
-
+# pylint: disable=duplicate-code
 
 # Constants
 ROBOT_NAME = "ROBOT"
@@ -63,7 +63,7 @@ STATUS_CHANNEL_NAME = "STATUS"
 STATUS_CHANNEL_ERROR_VAL = 1
 
 MODE_CHANNEL_NAME = "MODE"
-CMD_ID_SET_READY_STATE = 1
+
 MIN_NUMBER_OF_STEPS = 200
 SENSOR_ID_MOST_LEFT = 0
 SENSOR_ID_MOST_RIGHT = 4
@@ -188,6 +188,7 @@ class RobotController:
 
 # pylint: disable=duplicate-code
 # pylint: disable=too-many-branches
+# pylint: disable=too-many-statements
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller.
@@ -277,7 +278,7 @@ def main_loop():
             # Resent any unsent Data
             if agent.unsent_data:
 
-                # Stop The Simulation. Handel unsent Data
+                # Stop The Simulation. Handle unsent Data
                 supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
 
                 # Set simulation mode to real time when unsent data is resent

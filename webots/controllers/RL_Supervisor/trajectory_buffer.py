@@ -28,7 +28,7 @@
 # Imports
 ################################################################################
 
-import numpy as np
+import numpy as np  # pylint: disable=import-error
 
 ################################################################################
 # Variables
@@ -93,7 +93,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         )
 
     def get_sum_rewards(self) -> float:
-        """Calculate sum of reward"""
+        """Calculate total rewards"""
         sum_rewards = sum(self.__rewards)
 
         return sum_rewards

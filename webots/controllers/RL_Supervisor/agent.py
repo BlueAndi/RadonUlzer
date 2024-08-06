@@ -1,4 +1,4 @@
-""" Implementation ofintelligent agent."""
+"""Implementation of intelligent agent."""
 
 # MIT License
 #
@@ -29,15 +29,16 @@
 ################################################################################
 
 import struct
-import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
+import numpy as np  # pylint: disable=import-error
+import tensorflow as tf  # pylint: disable=import-error
+import tensorflow_probability as tfp  # pylint: disable=import-error
 from trajectory_buffer import Memory
 from networks import Networks
 
 ################################################################################
 # Variables
 ################################################################################
+# pylint: disable=duplicate-code
 
 # Constants
 COMMAND_CHANNEL_NAME = "CMD"
@@ -63,8 +64,8 @@ ORIENTATION_DATA = [
     1.5880805820884731,
 ]
 MAX_SENSOR_VALUE = 1000
-MIN_STD_DEV = 0.1
-STD_DEV_FACTOR = 0.3995
+MIN_STD_DEV = 0.1  # Minimum standard deviation
+STD_DEV_FACTOR = 0.3995  # Discounter standard deviation factor
 
 ################################################################################
 # Classes
@@ -370,10 +371,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         return advantages
 
-    def learn(
-        self, states, actions, old_probs, values, rewards, dones
-    ):  # pylint: disable=too-many-arguments
-        # pylint: disable=too-many-locals
+    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-locals
+    def learn(self, states, actions, old_probs, values, rewards, dones):
         """Perform training to optimize model weights"""
 
         advantages = self.calculate_advantages(rewards, values, dones)

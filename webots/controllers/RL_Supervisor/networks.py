@@ -28,7 +28,7 @@
 # Imports
 ################################################################################
 
-import tensorflow as tf
+import tensorflow as tf  # pylint: disable=import-error
 from tensorflow.keras import layers  # pylint: disable=import-error
 
 ################################################################################
