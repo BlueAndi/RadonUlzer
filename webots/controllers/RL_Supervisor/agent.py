@@ -27,7 +27,8 @@
 ################################################################################
 # Imports
 ################################################################################
-
+import csv
+import os
 import struct
 import numpy as np  # pylint: disable=import-error
 import tensorflow as tf  # pylint: disable=import-error
@@ -65,7 +66,7 @@ ORIENTATION_DATA = [
 ]
 MAX_SENSOR_VALUE = 1000
 MIN_STD_DEV = 0.1  # Minimum standard deviation
-STD_DEV_FACTOR = 0.3995  # Discounter standard deviation factor
+STD_DEV_FACTOR = 0.99995  # Discounter standard deviation factor
 
 ################################################################################
 # Classes
@@ -110,6 +111,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.state = "IDLE"
         self.data_sent = True
         self.unsent_data = []
+        self.critic_loss_history = []
+        self.actor_loss_history = []
+        self.reward_history = []
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -155,30 +159,33 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # Calculation of probabilities by the Actor neural network
         probs = self.__neural_network.actor_network(state)
 
-        # Create a normal distribution with the calculated probabilities and the standard deviation
-        dist = tfp.distributions.Normal(probs, self.__std_dev)
+        if self.train_mode is True:
+            # Create a normal distribution with the calculated probabilities and the standard deviation
+            dist = tfp.distributions.Normal(probs, self.__std_dev)
 
-        # Sampling an action from the normal distribution
-        sampled_action = dist.sample()
+            # Sampling an action from the normal distribution
+            sampled_action = dist.sample()
 
-        # Apply the Tanh transformation to the sampled action
-        transformed_action = tf.tanh(sampled_action)
+            # Apply the Tanh transformation to the sampled action
+            transformed_action = tf.tanh(sampled_action)
 
-        # Calculation of the logarithm of the probability density of the sampled action
-        log_prob = dist.log_prob(sampled_action)
+            # Calculation of the logarithm of the probability density of the sampled action
+            log_prob = dist.log_prob(sampled_action)
 
-        # Calculation of the Jacobian determinant for the Tanh transformation
-        jacobian_log_det = tf.math.log(1 - tf.square(transformed_action) + 1e-6)
+            # Calculation of the Jacobian determinant for the Tanh transformation
+            jacobian_log_det = tf.math.log(1 - tf.square(transformed_action) + 1e-6)
 
-        # Calculation of Adjusted probabilities by the neural network
-        adjusted_log_prob = log_prob - jacobian_log_det
+            # Calculation of Adjusted probabilities by the neural network
+            adjusted_log_prob = log_prob - jacobian_log_det
 
-        # calculate the estimated value of a state, which is determined by the Critic network
-        value = self.__neural_network.critic_network(state)
+            # calculate the estimated value of a state, which is determined by the Critic network
+            value = self.__neural_network.critic_network(state)
 
-        self.action = transformed_action.numpy()[0]
-        self.value = value.numpy()[0]
-        self.adjusted_log_prob = adjusted_log_prob.numpy()[0]
+            self.action = transformed_action.numpy()[0]
+            self.value = value.numpy()[0]
+            self.adjusted_log_prob = adjusted_log_prob.numpy()[0]
+        else:
+            self.action = probs.numpy()[0]
 
         return self.action
 
@@ -419,11 +426,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         with tf.GradientTape() as tape:
 
             critic_value = self.__neural_network.critic_network(states)
-            critic_value = tf.squeeze(critic_value, 1)
             returns = advantages + values
-
             # Generate loss
-            critic_loss = tf.keras.losses.MSE(critic_value, returns)
+            critic_loss = tf.math.reduce_mean(tf.math.pow(returns - critic_value, 2))
 
         # calculate gradient
         critic_params = self.__neural_network.critic_network.trainable_variables
@@ -431,6 +436,32 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__neural_network.critic_optimizer.apply_gradients(
             zip(critic_grads, critic_params)
         )
+        self.actor_loss_history.append(actor_loss.numpy())
+        self.critic_loss_history.append(critic_loss.numpy())
+        self.reward_history.append(sum(rewards))
+
+        # saving logs in a CSV file
+        self.save_logs_to_csv()
+
+    def save_logs_to_csv(self):
+        """Function for saving logs in a CSV file"""
+
+        # Ensure the directory exists
+        log_dir = "logs"
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "training_logs.csv")
+
+        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(["Actor Loss", "Critic Loss", "Reward"])
+            for indx, reward in enumerate(self.reward_history):
+                writer.writerow(
+                    [
+                        self.actor_loss_history[indx],
+                        self.critic_loss_history[indx],
+                        reward,
+                    ]
+                )
 
     def perform_training(self):
         """Runs the training process."""
