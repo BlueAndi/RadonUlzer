@@ -160,7 +160,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         probs = self.__neural_network.actor_network(state)
 
         if self.train_mode is True:
-            # Create a normal distribution with the calculated probabilities and the standard deviation
+            # Create a normal distribution with the calculated probabilities
+            # and the standard deviation
             dist = tfp.distributions.Normal(probs, self.__std_dev)
 
             # Sampling an action from the normal distribution
@@ -425,10 +426,17 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # optimize Critic Network weights
         with tf.GradientTape() as tape:
 
+            #  The critical value represents the expected return from state 𝑠𝑡.
+            # It provides an estimate of how good it is to be in a given state.
             critic_value = self.__neural_network.critic_network(states)
-            returns = advantages + values
+
+            # the total discounted reward accumulated from time step 𝑡
+            estimate_returns = advantages + values
+
             # Generate loss
-            critic_loss = tf.math.reduce_mean(tf.math.pow(returns - critic_value, 2))
+            critic_loss = tf.math.reduce_mean(
+                tf.math.pow(estimate_returns - critic_value, 2)
+            )
 
         # calculate gradient
         critic_params = self.__neural_network.critic_network.trainable_variables

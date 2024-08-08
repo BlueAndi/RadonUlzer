@@ -1,8 +1,8 @@
 """ Plotting script  with Matplotlib """
 
 # Imports
-import matplotlib.pyplot as plt
-import pandas as pd
+import matplotlib.pyplot as plt  # pylint: disable=import-error
+import pandas as pd  # pylint: disable=import-error
 
 # Define the path to the CSV file
 LOG_FILE = "logs/training_logs.csv"
