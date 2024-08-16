@@ -33,6 +33,7 @@
  * Includes
  *****************************************************************************/
 #include <Util.h>
+#include <RobotConstants.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -208,6 +209,17 @@ bool Util::isButtonTriggered(IButton& button, bool& lastState)
     lastState = isPressed;
 
     return isTriggered;
+}
+
+int32_t Util::stepsPerSecondToMillimetersPerSecond(int16_t speedStepsPerSec)
+{
+    return (static_cast<int32_t>(speedStepsPerSec) * 1000 / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M));
+}
+
+int16_t Util::millimetersPerSecondToStepsPerSecond(int32_t speedMmPerSec)
+{
+    int32_t speedStepsPerSec = speedMmPerSec * static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+    return (static_cast<int16_t>(speedStepsPerSec / 1000));
 }
 
 /******************************************************************************
