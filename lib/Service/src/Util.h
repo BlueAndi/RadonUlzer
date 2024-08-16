@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <IButton.h>
+#include <RobotConstants.h>
 
 /**
  * Utilities
@@ -85,20 +86,20 @@ namespace Util
 
     /**
      * Divide and round.
-     * 
+     *
      * @param[in] numerator     The numerator.
      * @param[in] denominator   The denominator.
-     * 
+     *
      * @return Result
      */
     uint32_t divRoundUp(uint32_t numerator, uint32_t denominator);
 
     /**
      * Divide and round.
-     * 
+     *
      * @param[in] numerator     The numerator.
      * @param[in] denominator   The denominator.
-     * 
+     *
      * @return Result
      */
     int32_t divRoundUp(int32_t numerator, int32_t denominator);
@@ -106,13 +107,39 @@ namespace Util
     /**
      * Is button triggered?
      * Triggered means a pressed/released change.
-     * 
+     *
      * @param[in]       button      The button.
      * @param[inout]    lastState   The last button state.
-     * 
+     *
      * @return If button is triggered, it will return true otherwise false.
      */
     bool isButtonTriggered(IButton& button, bool& lastState);
+
+    /**
+     * Convert a speed in encoder steps per second to a speed in mm/s.
+     *
+     * @param[in]   speedStepsPerSec Speed in encoder steps per second
+     *
+     * @return Speed in mm/s
+     */
+    inline int32_t stepsPerSecondToMillimetersPerSecond(int16_t speedStepsPerSec)
+    {
+        return (static_cast<int32_t>(speedStepsPerSec) * 1000 /
+                static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M));
+    }
+
+    /**
+     * Convert a speed in mm/s to a speed in encoder steps per second.
+     *
+     * @param[in]   speedMmPerSec Speed in mm/s
+     *
+     * @return Speed in encoder steps per second
+     */
+    inline int16_t millimetersPerSecondToStepsPerSecond(int32_t speedMmPerSec)
+    {
+        int32_t speedStepsPerSec = speedMmPerSec * static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+        return (static_cast<int16_t>(speedStepsPerSec / 1000));
+    }
 
 } /* namespace Util */
 
