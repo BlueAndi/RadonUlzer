@@ -46,6 +46,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <IButton.h>
+#include <RobotConstants.h>
 
 /**
  * Utilities
@@ -121,7 +122,11 @@ namespace Util
      *
      * @return Speed in mm/s
      */
-    int32_t stepsPerSecondToMillimetersPerSecond(int16_t speedStepsPerSec);
+    inline int32_t stepsPerSecondToMillimetersPerSecond(int16_t speedStepsPerSec)
+    {
+        return (static_cast<int32_t>(speedStepsPerSec) * 1000 /
+                static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M));
+    }
 
     /**
      * Convert a speed in mm/s to a speed in encoder steps per second.
@@ -130,7 +135,11 @@ namespace Util
      *
      * @return Speed in encoder steps per second
      */
-    int16_t millimetersPerSecondToStepsPerSecond(int32_t speedMmPerSec);
+    inline int16_t millimetersPerSecondToStepsPerSecond(int32_t speedMmPerSec)
+    {
+        int32_t speedStepsPerSec = speedMmPerSec * static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+        return (static_cast<int16_t>(speedStepsPerSec / 1000));
+    }
 
 } /* namespace Util */
 
