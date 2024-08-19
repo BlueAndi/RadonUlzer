@@ -82,6 +82,12 @@
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
+/** Name of the Channel to send Turtle Speeds. */
+#define TURTLE_CHANNEL_NAME "TURTLE"
+
+/** DLC of Turtle Channel */
+#define TURTLE_CHANNEL_DLC (sizeof(TurtleSpeed))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -204,6 +210,13 @@ typedef struct _LineSensorData
 {
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
+
+/** Struct of the "Turtle" channel payload. */
+typedef struct _TurtleSpeed
+{
+    int32_t linearCenter; /**< Linear speed of the vehicle center. [mm/s] */
+    int32_t angular;      /**< Angular speed. [mrad/s] */
+} __attribute__((packed)) TurtleSpeed;
 
 /******************************************************************************
  * Functions

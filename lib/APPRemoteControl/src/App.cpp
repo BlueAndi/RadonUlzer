@@ -63,6 +63,7 @@
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -287,6 +288,7 @@ bool App::setupSerialMuxProt()
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
     m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
+    m_smpServer.subscribeToChannel(TURTLE_CHANNEL_NAME, App_turtleChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -382,5 +384,35 @@ void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize
         const Status* currentStatus = reinterpret_cast<const Status*>(payload);
         App*          application   = reinterpret_cast<App*>(userData);
         application->systemStatusCallback(currentStatus->status);
+    }
+}
+
+/**
+ * Receives Turtle speed setpoints over SerialMuxProt channel.
+ *
+ * @param[in] payload       Linear and angular speed setpoints in a TurtleSpeed structure.
+ * @param[in] payloadSize   Size of the TurtleSpeed structure.
+ * @param[in] userData      Instance of App class.
+ */
+void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    (void)userData;
+    if ((nullptr != payload) && (TURTLE_CHANNEL_DLC == payloadSize))
+    {
+        const TurtleSpeed* turtleSpeedData = reinterpret_cast<const TurtleSpeed*>(payload);
+        DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
+        int16_t            angularSpeed    = static_cast<int16_t>(turtleSpeedData->angular);
+
+        /* Convert to [steps/s] */
+        int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(turtleSpeedData->linearCenter);
+
+        /* Linear speed is set first. Overwrites all speed setpoints. */
+        diffDrive.setLinearSpeed(centerSpeed);
+
+        /* Angular speed is set on-top of the linear speed. Must be called after setLinearSpeed(). */
+        diffDrive.setAngularSpeed(angularSpeed);
+
+        /* Turtle expects no initial data. Can be called without side-effects when no longer in StartupState. */
+        StartupState::getInstance().notifyInitialDataIsSet();
     }
 }
