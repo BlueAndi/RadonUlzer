@@ -390,7 +390,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         advantages = self.calculate_advantages(rewards, values, dones)
 
-        # optimize Actor Network weights 
+        # optimize Actor Network weights
         with tf.GradientTape() as tape:
             states = tf.convert_to_tensor(states)
             actions = tf.convert_to_tensor(actions)
