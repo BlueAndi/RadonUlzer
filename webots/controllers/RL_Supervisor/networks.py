@@ -30,6 +30,7 @@
 
 import tensorflow as tf  # pylint: disable=import-error
 from tensorflow.keras import layers  # pylint: disable=import-error
+from tensorflow.keras.regularizers import l2  # pylint: disable=import-error
 
 ################################################################################
 # Variables
@@ -59,22 +60,31 @@ class Networks:
             64,
             activation="relu",
             kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
             bias_initializer="zeros",
         )(state_input)
         fc2 = layers.Dense(
             64,
             activation="relu",
             kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
             bias_initializer="zeros",
         )(fc1)
-        mu = layers.Dense(
+        fc3 = layers.Dense(
+            32,
+            activation="relu",
+            kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
+            bias_initializer="zeros",
+        )(fc2)
+        mean = layers.Dense(
             1,
             activation="tanh",
             kernel_initializer="glorot_uniform",
             bias_initializer="zeros",
-        )(fc2)
+        )(fc3)
 
-        return tf.keras.models.Model(inputs=state_input, outputs=mu)
+        return tf.keras.models.Model(inputs=state_input, outputs=mean)
 
     def build_critic_network(self):
         """Build Critic Network"""
@@ -84,15 +94,24 @@ class Networks:
             64,
             activation="relu",
             kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
             bias_initializer="zeros",
         )(state_input)
         fc2 = layers.Dense(
             64,
             activation="relu",
             kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
             bias_initializer="zeros",
         )(fc1)
-        value = layers.Dense(1)(fc2)  # Value output
+        fc3 = layers.Dense(
+            32,
+            activation="relu",
+            kernel_initializer="he_normal",
+            kernel_regularizer=l2(0.01),
+            bias_initializer="zeros",
+        )(fc2)
+        value = layers.Dense(1)(fc3)  # Value output
 
         return tf.keras.models.Model(inputs=state_input, outputs=value)
 

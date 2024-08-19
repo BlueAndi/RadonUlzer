@@ -101,13 +101,14 @@ class RobotController:
         """Callback LINE_SENS Channel."""
         sensor_data = struct.unpack("5H", payload)
         self.steps += 1
-        # determine lost line condition
+
+        # Determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
         else:
             self.__no_line_detection_count = 0
 
-        # detect start/stop line
+        # Detect start/stop line
         is_start_stop = all(
             value >= LINE_SENSOR_ON_TRACK_MIN_VALUE for value in sensor_data
         )
@@ -126,7 +127,12 @@ class RobotController:
 
         # The sequence of states and actions is stored in memory for the training phase.
         if self.__agent.train_mode:
-            reward = self.__agent.calculate_reward(sensor_data)
+
+            # receive a -1 punishment if the robot leaves the line
+            if self.__no_line_detection_count > 0:
+                reward = -1
+            else:
+                reward = self.__agent.calculate_reward(sensor_data)
 
             # Start storage The data after the second received sensor data
             if self.last_sensor_data is not None:
@@ -159,6 +165,8 @@ class RobotController:
         """Load Model if exist"""
         if os.path.exists(path):
             self.__agent.load_models()
+        else:
+            print("No model available")
 
     def retry_unsent_data(self, unsent_data: list) -> bool:
         """Resent any unsent Data"""
@@ -259,6 +267,7 @@ def main_loop():
     if status != -1:
 
         controller.load_models(PATH)
+
         # simulation loop
         while supervisor.step(timestep) != -1:
             controller.process()
@@ -273,7 +282,7 @@ def main_loop():
                 agent.perform_training()
 
             if 1000 <= agent.num_episodes:
-                print(f"Episodes: {agent.num_episodes}")
+                print(f"The number of episodes:{agent.num_episodes}")
 
             # Resent any unsent Data
             if agent.unsent_data:

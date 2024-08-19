@@ -102,7 +102,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__neural_network = Networks(self.__alpha)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
-        self.__std_dev = 1
+        self.__std_dev = 0.9
         self.done = False
         self.action = None
         self.value = None
@@ -156,13 +156,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         m_state = self.normalize_sensor_data(state)
         state = tf.convert_to_tensor([m_state], dtype=tf.float32)
 
-        # Calculation of probabilities by the Actor neural network
-        probs = self.__neural_network.actor_network(state)
+        # output from the Actor Network.
+        action_mean = self.__neural_network.actor_network(state)
 
+        # Training mode is set.
         if self.train_mode is True:
-            # Create a normal distribution with the calculated probabilities
-            # and the standard deviation
-            dist = tfp.distributions.Normal(probs, self.__std_dev)
+
+            # Create a normal distribution
+            dist = tfp.distributions.Normal(action_mean, self.__std_dev)
 
             # Sampling an action from the normal distribution
             sampled_action = dist.sample()
@@ -185,8 +186,10 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.action = transformed_action.numpy()[0]
             self.value = value.numpy()[0]
             self.adjusted_log_prob = adjusted_log_prob.numpy()[0]
+
+        # Driving mode is set
         else:
-            self.action = probs.numpy()[0]
+            self.action = action_mean.numpy()[0]
 
         return self.action
 
@@ -240,6 +243,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.data_sent = self.__serialmux.send_data(
                 "SPEED_SET", motorcontrol
             )  # stop the motors immediately
+
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
                 self.unsent_data.append(("SPEED_SET", motorcontrol))
@@ -253,28 +257,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
     def normalize_sensor_data(self, sensor_data):
         """The normalize_sensor_data function scales the sensor data to a range between 0 and 1."""
 
-        # Normalized sensor data
         sensor_data = np.array(sensor_data) / MAX_SENSOR_VALUE
-
         return sensor_data
-
-    def calculate_reward(self, sensor_data):
-        """
-        The calculate_reward function evaluates the consequences of a certain
-        action performed in a certain state by calculating the resulting reward
-        """
-        estimated_pos = self.calculate_position(sensor_data)
-
-        # Return reward between 0 and 10
-        if 500 <= estimated_pos <= 2000:
-            reward = ((1 / 150) * estimated_pos) - (10 / 3)
-            return reward
-
-        if 2000 < estimated_pos <= 3500:
-            reward = ((-1 / 150) * estimated_pos) + (70 / 3)
-            return reward
-
-        return 0
 
     def calculate_position(self, sensor_data):
         """
@@ -339,6 +323,26 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         return estimated_pos
 
+    def calculate_reward(self, sensor_data):
+        """
+        The calculate_reward function evaluates the consequences of a certain
+        action performed in a certain state by calculating the resulting reward.
+        A reward of 1 means that the robot is in the center of the Line.
+        """
+        estimated_pos = self.calculate_position(sensor_data)
+
+        # Reward scaled between 0 and 1 If robot is in line.
+        if 500 <= estimated_pos <= 2000:
+            reward = (((1 / 150) * estimated_pos) - (10 / 3)) / 10
+            return reward
+
+        # Reward scaled between 1 and 0 If robot is in line.
+        if 2000 < estimated_pos <= 3500:
+            reward = (((-1 / 150) * estimated_pos) + (70 / 3))/10
+            return reward
+
+        return 0
+
     def calculate_advantages(self, rewards, values, dones):
         """Calculate advantages for each state in a mini-batch."""
 
@@ -386,7 +390,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         advantages = self.calculate_advantages(rewards, values, dones)
 
-        # optimize Actor Network weights
+        # optimize Actor Network weights 
         with tf.GradientTape() as tape:
             states = tf.convert_to_tensor(states)
             actions = tf.convert_to_tensor(actions)
@@ -426,7 +430,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # optimize Critic Network weights
         with tf.GradientTape() as tape:
 
-            #  The critical value represents the expected return from state 𝑠𝑡.
+            # The critical value represents the expected return from state 𝑠𝑡.
             # It provides an estimate of how good it is to be in a given state.
             critic_value = self.__neural_network.critic_network(states)
 
@@ -479,7 +483,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             # Grab sample from memory
             self.__current_batch = self.__memory.generate_batches()
 
-        # Perform training with mini batchtes.
+        # Perform training with mini batches.
         if self.__training_index < len(self.__current_batch[-1]):
             (
                 state_arr,
