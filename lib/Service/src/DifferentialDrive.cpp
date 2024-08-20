@@ -245,9 +245,10 @@ DifferentialDrive::DifferentialDrive() :
 void DifferentialDrive::calculateLinearSpeedLeftRight(int16_t linearSpeedCenter, int16_t angularSpeed,
                                                       int16_t& linearSpeedLeft, int16_t& linearSpeedRight)
 {
-    int32_t linearSpeedCenter32 = static_cast<int32_t>(linearSpeedCenter);          /* [steps/s] */
-    int32_t angularSpeed32      = static_cast<int32_t>(angularSpeed);               /* [mrad/s] */
-    int32_t wheelBase32         = static_cast<int32_t>(RobotConstants::WHEEL_BASE); /* [mm] */
+    int32_t linearSpeedCenter32 = static_cast<int32_t>(linearSpeedCenter);                   /* [steps/s] */
+    int32_t angularSpeed32      = static_cast<int32_t>(angularSpeed);                        /* [mrad/s] */
+    int32_t wheelBase32         = static_cast<int32_t>(RobotConstants::WHEEL_BASE);          /* [mm] */
+    int32_t encoderSteps32      = static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* [steps/m] */
 
     /* angular speed = 2 * (linear speed right - linear speed left ) / wheel base
      * linear speed right - linear speed left = angular speed * wheel base / 2
@@ -255,8 +256,8 @@ void DifferentialDrive::calculateLinearSpeedLeftRight(int16_t linearSpeedCenter,
      * linear speed right = - linear speed left
      */
 
-    linearSpeedLeft  = linearSpeedCenter32 - (angularSpeed32 * wheelBase32) / 2;
-    linearSpeedRight = linearSpeedCenter32 + (angularSpeed32 * wheelBase32) / 2;
+    linearSpeedLeft  = (linearSpeedCenter32 / 2) - ((angularSpeed32 / 1000) * (wheelBase32) * (encoderSteps32 / 1000));
+    linearSpeedRight = (linearSpeedCenter32 / 2) + ((angularSpeed32 / 1000) * (wheelBase32) * (encoderSteps32 / 1000));
 }
 
 void DifferentialDrive::calculateLinearAndAngularSpeedCenter(int16_t linearSpeedLeft, int16_t linearSpeedRight,
