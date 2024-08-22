@@ -150,7 +150,12 @@ private:
      *
      * @return If successful returns true, otherwise false.
      */
-    bool setupSerialMuxProt();
+    bool setupSerialMuxProt()
+
+    /**
+     * Send line sensors data via SerialMuxProt.
+     */
+    void sendLineSensorsData() ;
 
     /**
      * Copy construction of an instance.

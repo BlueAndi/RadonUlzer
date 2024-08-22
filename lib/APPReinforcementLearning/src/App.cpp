@@ -133,23 +133,7 @@ void App::loop()
     if (true == m_sendLineSensorsDataInterval.isTimeout() &&
         (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
-        ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
-        uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
-        const uint16_t* lineSensorValues = lineSensors.getSensorValues();
-        uint8_t         lineSensorIdx    = 0U;
-        LineSensorData  payload;
-
-        if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
-        {
-            while (maxLineSensors > lineSensorIdx)
-            {
-                payload.lineSensorData[lineSensorIdx] = lineSensorValues[lineSensorIdx];
-
-                ++lineSensorIdx;
-            }
-        }
-
-        m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
+        sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
     }
@@ -216,6 +200,28 @@ void App::handleRemoteCommand(const Command& cmd)
 /******************************************************************************
  * Private Methods
  *****************************************************************************/
+
+void App::sendLineSensorsData() 
+{
+    ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+    uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
+    const uint16_t* lineSensorValues = lineSensors.getSensorValues();
+    uint8_t         lineSensorIdx    = 0U;
+    LineSensorData  payload;
+
+    if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
+    {
+        while (maxLineSensors > lineSensorIdx)
+        {
+            payload.lineSensorData[lineSensorIdx] = lineSensorValues[lineSensorIdx];
+
+            ++lineSensorIdx;
+        }
+    }
+
+    /* Ignoring return value, as error handling is not available. */
+    m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
+}
 
 bool App::setupSerialMuxProt()
 {
