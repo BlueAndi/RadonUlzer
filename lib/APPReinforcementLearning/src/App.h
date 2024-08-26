@@ -73,7 +73,7 @@ public:
         m_statusTimer(),
         m_sendLineSensorsDataInterval(),
         m_modeSelectionSent(false),
-        m_data_sent(true),
+        m_dataSent(true),
         m_smpServer(Serial, this)
     {
     }
@@ -143,7 +143,7 @@ private:
     bool m_modeSelectionSent;
 
     /** check if the data has been sent */
-    bool m_data_sent;
+    bool m_dataSent;
 
     /**
      * Setup the SerialMuxProt channels.
@@ -155,7 +155,7 @@ private:
     /**
      * Send line sensors data via SerialMuxProt.
      */
-    void sendLineSensorsData();
+    bool sendLineSensorsData() const;
 
     /**
      * Copy construction of an instance.

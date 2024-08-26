@@ -124,7 +124,7 @@ void App::loop()
             payload = {SMPChannelPayload::Status::DONE};
         }
 
-        m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+        m_dataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
 
         m_statusTimer.restart();
     }
@@ -133,7 +133,7 @@ void App::loop()
     if (true == m_sendLineSensorsDataInterval.isTimeout() &&
         (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
-        sendLineSensorsData();
+        m_dataSent = sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
     }
@@ -148,13 +148,13 @@ void App::loop()
             SMPChannelPayload::Mode payload =
                 (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
-            m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+            m_dataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
 
             m_modeSelectionSent = true;
         }
     }
 
-    if (false == m_data_sent)
+    if (false == m_dataSent)
     {
         /* Failed to send data to the supervisor. Go to error state. */
         ErrorState::getInstance().setErrorMsg("DSF");
@@ -201,12 +201,13 @@ void App::handleRemoteCommand(const Command& cmd)
  * Private Methods
  *****************************************************************************/
 
-void App::sendLineSensorsData() 
+bool App::sendLineSensorsData() const 
 {
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         lineSensorIdx    = 0U;
+    bool            isDataSent       = true;
     LineSensorData  payload;
 
     if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
@@ -219,8 +220,9 @@ void App::sendLineSensorsData()
         }
     }
 
-    /* Ignoring return value, as error handling is not available. */
-    m_data_sent = m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
+    isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
+
+    return isDataSent;
 }
 
 bool App::setupSerialMuxProt()

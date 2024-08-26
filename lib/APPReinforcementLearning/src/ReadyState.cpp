@@ -80,8 +80,8 @@ void ReadyState::entry()
         display.print(m_lapTime);
         display.print("ms");
     }
-    m_stateTransitionTimer.start(m_state_Transition_period);
-    m_modeTimeoutTimer.start(mode_selected_period);
+    m_stateTransitionTimer.start(STATE_TRANSITION_PERIOD);
+    m_modeTimeoutTimer.start(MODE_SELECTED_PERIOD);
     m_mode                        = IDLE;
     m_isLastStartStopLineDetected = false;
     m_isButtonAPressed            = false;
