@@ -132,7 +132,7 @@ class RobotController:
             if self.__no_line_detection_count > 0:
                 reward = -1
             else:
-                reward = self.__agent.calculate_reward(sensor_data)
+                reward = self.__agent.determine_reward(sensor_data)
 
             # Start storage The data after the second received sensor data
             if self.last_sensor_data is not None:
@@ -272,17 +272,23 @@ def main_loop():
         while supervisor.step(timestep) != -1:
             controller.process()
 
-            # Checks if the sequence has ended
-            if agent.state == "READY":
-                agent.update(robot_node)
+            match (agent.state):
+                case "READY":
+                    agent.update(robot_node)
 
-            # Start the training
-            elif agent.state == "TRAINING":
-                controller.steps = 0
-                agent.perform_training()
+                case "TRAINING":
+                    controller.steps = 0
+                    agent.perform_training()
+                    print(f"#{agent.num_episodes} actor loss: {agent.actor_loss_history[-1]:.4f},"
+                            f"critic loss: {agent.critic_loss_history[-1]:.4f}")
 
-            if 1000 <= agent.num_episodes:
-                print(f"The number of episodes:{agent.num_episodes}")
+                    # save model
+                    if (agent.num_episodes > 1) and (agent.num_episodes % 50 == 0):
+                        print(f"The number of episodes:{agent.num_episodes}")
+                        agent.save_models()
+
+                case "IDLE":
+                    pass
 
             # Resent any unsent Data
             if agent.unsent_data:

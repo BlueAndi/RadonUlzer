@@ -1,5 +1,10 @@
 """ Plotting script  with Matplotlib """
 
+# Description: This script generates three separate plots using Matplotlib to visualize
+# the Actor Loss, Critic Loss, and Reward over time based on data collected during the
+# training process. Each plot represents the respective metric as a function of
+# mini-batch steps.
+
 # Imports
 import matplotlib.pyplot as plt  # pylint: disable=import-error
 import pandas as pd  # pylint: disable=import-error

@@ -154,6 +154,8 @@ private:
 
     /**
      * Send line sensors data via SerialMuxProt.
+     * 
+     * * @return true if data has been sent, false otherwise.
      */
     bool sendLineSensorsData() const;
 
