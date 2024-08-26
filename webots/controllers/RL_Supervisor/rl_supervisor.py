@@ -272,23 +272,21 @@ def main_loop():
         while supervisor.step(timestep) != -1:
             controller.process()
 
-            match (agent.state):
-                case "READY":
-                    agent.update(robot_node)
+            if agent.state == "READY":
+                agent.update(robot_node)
 
-                case "TRAINING":
-                    controller.steps = 0
-                    agent.perform_training()
-                    print(f"#{agent.num_episodes} actor loss: {agent.actor_loss_history[-1]:.4f},"
+            # Start the training
+            elif agent.state == "TRAINING":
+                supervisor.last_sensor_data = None
+                controller.steps = 0
+                agent.perform_training()
+
+                print(f"#{agent.num_episodes} actor loss: {agent.actor_loss_history[-1]:.4f},"
                             f"critic loss: {agent.critic_loss_history[-1]:.4f}")
 
-                    # save model
-                    if (agent.num_episodes > 1) and (agent.num_episodes % 50 == 0):
-                        print(f"The number of episodes:{agent.num_episodes}")
-                        agent.save_models()
-
-                case "IDLE":
-                    pass
+                # save model
+                if (agent.num_episodes > 1) and (agent.num_episodes % 50 == 0):
+                    agent.save_models()
 
             # Resent any unsent Data
             if agent.unsent_data:
