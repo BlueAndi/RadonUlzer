@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
+#include <unistd.h>
 #include <Arduino.h>
 #include <Board.h>
 #include <RobotDeviceNames.h>
@@ -77,6 +78,7 @@ static void          systemDelay(unsigned long ms);
 static const struct option LONG_OPTIONS[] = {{"help", no_argument, nullptr, 0},
                                              {"serialRxCh", required_argument, nullptr, 0},
                                              {"serialTxCh", required_argument, nullptr, 0},
+                                             {"cwd",        required_argument, nullptr, 0},
                                              {nullptr, no_argument, nullptr, 0}}; /* Marks the end. */
 
 /** Program argument default value of the robot name. */
@@ -263,6 +265,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             {
                 prgArguments.serialTxChannel = optarg;
             }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "cwd"))
+            {
+                chdir(optarg);
+            }
             else
             {
                 status = -1;
@@ -307,6 +313,7 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         printf("\t--serialTxCh <CHANNEL>\t\tSet serial tx channel (ZumoComSystem)."); /* Serial txchannel */
         printf(" Default: %s\n", PRG_ARG_SERIAL_TX_CH_DEFAULT); /* Serial tx channel default value */
         printf("\t-v\t\t\tVerbose mode. Default: Disabled\n");  /* Flag */
+        printf("\t--cwd <dir>\t\tSpecify working directory.");  /* Set process working directory */
     }
 
     return status;
