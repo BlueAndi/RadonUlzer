@@ -98,7 +98,7 @@ void Speedometer::process()
 
         if (currentDrivingDirection != m_lastDirectionRight)
         {
-            resetLeft = true;
+            resetRight = true;
         }
 
         m_lastDirectionRight = currentDrivingDirection;
