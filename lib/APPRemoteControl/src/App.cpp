@@ -364,7 +364,7 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (MOTOR_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const MotorSpeed* motorSpeedData = reinterpret_cast<const MotorSpeed*>(payload);
-        DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
+        DrivingState::getInstance().setMotorSpeeds(motorSpeedData->left, motorSpeedData->right);
     }
 }
 
@@ -404,10 +404,7 @@ void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize
         /* Convert to [steps/s] */
         int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(turtleSpeedData->linearCenter);
 
-        /* Linear speed is set first. Overwrites all speed setpoints. */
-        diffDrive.setLinearSpeed(centerSpeed);
-
-        /* Angular speed is set on-top of the linear speed. Must be called after setLinearSpeed(). */
-        diffDrive.setAngularSpeed(angularSpeed);
+        /* Set the robot speeds. */
+        DrivingState::getInstance().setRobotSpeeds(centerSpeed, angularSpeed);
     }
 }
