@@ -59,10 +59,16 @@
 #define COMMAND_RESPONSE_CHANNEL_DLC (sizeof(CommandResponse))
 
 /** Name of Channel to send Motor Speed Setpoints to. */
-#define SPEED_SETPOINT_CHANNEL_NAME "SPEED_SET"
+#define MOTOR_SPEED_SETPOINT_CHANNEL_NAME "MOTOR_SET"
 
-/** DLC of Speedometer Channel */
-#define SPEED_SETPOINT_CHANNEL_DLC (sizeof(SpeedData))
+/** DLC of Motor Speed Setpoint Channel */
+#define MOTOR_SPEED_SETPOINT_CHANNEL_DLC (sizeof(MotorSpeed))
+
+/** Name of the Channel to send Robot Speed Setpoints to. */
+#define ROBOT_SPEED_SETPOINT_CHANNEL_NAME "ROBOT_SET"
+
+/** DLC of Robot Speed Setpoint Channel */
+#define ROBOT_SPEED_SETPOINT_CHANNEL_DLC (sizeof(RobotSpeed))
 
 /** Name of Channel to send Current Vehicle Data to. */
 #define CURRENT_VEHICLE_DATA_CHANNEL_NAME "CURR_DATA"
@@ -81,12 +87,6 @@
 
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
-
-/** Name of the Channel to send Turtle Speeds. */
-#define TURTLE_CHANNEL_NAME "TURTLE"
-
-/** DLC of Turtle Channel */
-#define TURTLE_CHANNEL_DLC (sizeof(TurtleSpeed))
 
 /******************************************************************************
  * Types and Classes
@@ -179,13 +179,19 @@ typedef struct _CommandResponse
     };
 } __attribute__((packed)) CommandResponse;
 
-/** Struct of the "Speed" channel payload. */
-typedef struct _SpeedData
+/** Struct of the "Motor Speed Setpoints" channel payload. */
+typedef struct _MotorSpeed
 {
-    int32_t left;   /**< Left motor speed [mm/s] */
-    int32_t right;  /**< Right motor speed [mm/s] */
-    int32_t center; /**< Center motor speed [mm/s] */
-} __attribute__((packed)) SpeedData;
+    int32_t left;  /**< Left motor speed [mm/s] */
+    int32_t right; /**< Right motor speed [mm/s] */
+} __attribute__((packed)) MotorSpeed;
+
+/** Struct of the "Robot Speed Setpoints" channel payload. */
+typedef struct _RobotSpeed
+{
+    int32_t linearCenter; /**< Linear speed of the vehicle center. [mm/s] */
+    int32_t angular;      /**< Angular speed. [mrad/s] */
+} __attribute__((packed)) RobotSpeed;
 
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
@@ -210,13 +216,6 @@ typedef struct _LineSensorData
 {
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
-
-/** Struct of the "Turtle" channel payload. */
-typedef struct _TurtleSpeed
-{
-    int32_t linearCenter; /**< Linear speed of the vehicle center. [mm/s] */
-    int32_t angular;      /**< Angular speed. [mrad/s] */
-} __attribute__((packed)) TurtleSpeed;
 
 /******************************************************************************
  * Functions

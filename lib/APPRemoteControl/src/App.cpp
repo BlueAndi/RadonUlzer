@@ -284,9 +284,9 @@ bool App::setupSerialMuxProt()
 
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
-    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(MOTOR_SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
-    m_smpServer.subscribeToChannel(TURTLE_CHANNEL_NAME, App_turtleChannelCallback);
+    m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_turtleChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -361,9 +361,9 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
+    if ((nullptr != payload) && (MOTOR_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
-        const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
+        const MotorSpeed* motorSpeedData = reinterpret_cast<const MotorSpeed*>(payload);
         DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
     }
 }
@@ -388,16 +388,16 @@ void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize
 /**
  * Receives Turtle speed setpoints over SerialMuxProt channel.
  *
- * @param[in] payload       Linear and angular speed setpoints in a TurtleSpeed structure.
- * @param[in] payloadSize   Size of the TurtleSpeed structure.
+ * @param[in] payload       Linear and angular speed setpoints in a RobotSpeed structure.
+ * @param[in] payloadSize   Size of the RobotSpeed structure.
  * @param[in] userData      Instance of App class.
  */
 void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (TURTLE_CHANNEL_DLC == payloadSize))
+    if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
-        const TurtleSpeed* turtleSpeedData = reinterpret_cast<const TurtleSpeed*>(payload);
+        const RobotSpeed*  turtleSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
         DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
         int16_t            angularSpeed    = static_cast<int16_t>(turtleSpeedData->angular);
 
