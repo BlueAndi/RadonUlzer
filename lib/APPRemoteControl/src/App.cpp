@@ -200,8 +200,6 @@ void App::handleRemoteCommand(const Command& cmd)
         Odometry::getInstance().clearMileage();
         Odometry::getInstance().setPosition(cmd.xPos, cmd.yPos);
         Odometry::getInstance().setOrientation(cmd.orientation);
-
-        StartupState::getInstance().notifyInitialDataIsSet();
         break;
 
     default:
@@ -411,8 +409,5 @@ void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize
 
         /* Angular speed is set on-top of the linear speed. Must be called after setLinearSpeed(). */
         diffDrive.setAngularSpeed(angularSpeed);
-
-        /* Turtle expects no initial data. Can be called without side-effects when no longer in StartupState. */
-        StartupState::getInstance().notifyInitialDataIsSet();
     }
 }
