@@ -63,7 +63,7 @@
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
-static void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -286,7 +286,7 @@ bool App::setupSerialMuxProt()
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
     m_smpServer.subscribeToChannel(MOTOR_SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
-    m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_turtleChannelCallback);
+    m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_robotSpeedSetpointChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -386,23 +386,22 @@ void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize
 }
 
 /**
- * Receives Turtle speed setpoints over SerialMuxProt channel.
+ * Receives robot speed setpoints over SerialMuxProt channel.
  *
  * @param[in] payload       Linear and angular speed setpoints in a RobotSpeed structure.
  * @param[in] payloadSize   Size of the RobotSpeed structure.
  * @param[in] userData      Instance of App class.
  */
-void App_turtleChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
     if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
-        const RobotSpeed*  turtleSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
-        DifferentialDrive& diffDrive       = DifferentialDrive::getInstance();
-        int16_t            angularSpeed    = static_cast<int16_t>(turtleSpeedData->angular);
+        const RobotSpeed* robotSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
+        int16_t           angularSpeed   = static_cast<int16_t>(robotSpeedData->angular);
 
         /* Convert to [steps/s] */
-        int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(turtleSpeedData->linearCenter);
+        int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(robotSpeedData->linearCenter);
 
         /* Set the robot speeds. */
         DrivingState::getInstance().setRobotSpeeds(centerSpeed, angularSpeed);
