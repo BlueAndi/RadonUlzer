@@ -84,11 +84,25 @@ void DrivingState::exit()
     DifferentialDrive::getInstance().disable();
 }
 
-void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)
 {
     if (true == m_isActive)
     {
         DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+    }
+}
+
+void DrivingState::setRobotSpeeds(int16_t linearSpeed, int16_t angularSpeed)
+{
+    if (true == m_isActive)
+    {
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+        /* Linear speed is set first. Overwrites all speed setpoints. */
+        diffDrive.setLinearSpeed(linearSpeed);
+
+        /* Angular speed is set on-top of the linear speed. Must be called after setLinearSpeed(). */
+        diffDrive.setAngularSpeed(angularSpeed);
     }
 }
 
