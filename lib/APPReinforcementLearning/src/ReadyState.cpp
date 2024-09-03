@@ -125,6 +125,7 @@ void ReadyState::process(StateMachine& sm)
     if (true == m_stateTransitionTimer.isTimeout())
     {
         sm.setState(&DrivingState::getInstance());
+        m_stateTransitionTimer.restart();
     }
 }
 
