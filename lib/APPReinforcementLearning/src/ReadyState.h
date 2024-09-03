@@ -60,6 +60,16 @@ class ReadyState : public IState
 {
 public:
     /**
+     * The mode that can be selected.
+     */
+    enum Mode: uint8_t
+    {
+        IDLE = 0,     /**< No mode has been selected*/
+        DRIVING_MODE, /**< Driving mode Selected. */
+        TRAINING_MODE /**< Training mode Selected. */
+    };
+
+    /**
      * Get state instance.
      *
      * @return State instance.
@@ -100,21 +110,12 @@ public:
     /**
      *  Set the selected mode.
      *
-     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected.
+     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected, otherwise 0.
      */
-    uint8_t getSelectedMode();
+    Mode getSelectedMode();
 
 protected:
 private:
-    /**
-     * The mode that can be selected.
-     */
-    enum Mode
-    {
-        IDLE = 0,     /**< No mode has been selected*/
-        DRIVING_MODE, /**< Driving mode Selected. */
-        TRAINING_MODE /**< Training mode Selected. */
-    };
 
     /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
     static const uint32_t MODE_SELECTED_PERIOD = 2000U;

@@ -140,7 +140,7 @@ void ReadyState::setLapTime(uint32_t lapTime)
     m_lapTime            = lapTime;
 }
 
-uint8_t ReadyState::getSelectedMode()
+ReadyState::Mode ReadyState::getSelectedMode()
 {
     return m_mode;
 }
