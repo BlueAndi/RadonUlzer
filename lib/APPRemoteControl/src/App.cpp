@@ -363,8 +363,10 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     (void)userData;
     if ((nullptr != payload) && (MOTOR_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
-        const MotorSpeed* motorSpeedData = reinterpret_cast<const MotorSpeed*>(payload);
-        DrivingState::getInstance().setMotorSpeeds(motorSpeedData->left, motorSpeedData->right);
+        const MotorSpeed* motorSpeedData  = reinterpret_cast<const MotorSpeed*>(payload);
+        int16_t           leftMotorSpeed  = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->left);
+        int16_t           rightMotorSpeed = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->right);
+        DrivingState::getInstance().setMotorSpeeds(leftMotorSpeed, rightMotorSpeed);
     }
 }
 
