@@ -73,7 +73,6 @@ public:
         m_statusTimer(),
         m_sendLineSensorsDataInterval(),
         m_modeSelectionSent(false),
-        m_dataSent(true),
         m_smpServer(Serial, this)
     {
     }
@@ -141,9 +140,6 @@ private:
 
     /** Ensue that the mode is only sent once */
     bool m_modeSelectionSent;
-
-    /** check if the data has been sent */
-    bool m_dataSent;
 
     /**
      * Setup the SerialMuxProt channels.
