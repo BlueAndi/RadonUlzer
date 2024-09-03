@@ -64,7 +64,7 @@ STATUS_CHANNEL_ERROR_VAL = 1
 
 MODE_CHANNEL_NAME = "MODE"
 
-MIN_NUMBER_OF_STEPS = 200
+MIN_NUMBER_OF_STEPS = 400
 SENSOR_ID_MOST_LEFT = 0
 SENSOR_ID_MOST_RIGHT = 4
 
@@ -76,8 +76,8 @@ PATH = "models/"
 ################################################################################
 
 
-class RobotController:
-    """Class for data flow control logic"""
+class RobotController:   # pylint: disable=too-many-instance-attributes
+    """Class for data flow control logic."""
 
     def __init__(self, smp_server, tick_size, agent):
         self.__smp_server = smp_server
@@ -86,6 +86,7 @@ class RobotController:
         self.__no_line_detection_count = 0
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
+        self.start_stop_line_detected = False
         self.steps = 0
 
     def callback_status(self, payload: bytearray) -> None:
@@ -94,8 +95,7 @@ class RobotController:
         # perform action on robot status feedback
         if payload[0] == STATUS_CHANNEL_ERROR_VAL:
             print("robot has reached error-state (max. lap time passed in robot)")
-
-            self.__agent.done = 1
+            self.__agent.done = True
 
     def callback_line_sensors(self, payload: bytearray) -> None:
         """Callback LINE_SENS Channel."""
@@ -109,21 +109,24 @@ class RobotController:
             self.__no_line_detection_count = 0
 
         # Detect start/stop line
-        is_start_stop = all(
-            value >= LINE_SENSOR_ON_TRACK_MIN_VALUE for value in sensor_data
-        )
+        if ((sensor_data[SENSOR_ID_MOST_LEFT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE) and
+            (sensor_data[SENSOR_ID_MOST_RIGHT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE)):
+            self.start_stop_line_detected = True
+
         # Detect Start/Stop Line before Finish Trajectories
-        if (is_start_stop is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+        if (self.start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
             sensor_data = list(sensor_data)
             sensor_data[SENSOR_ID_MOST_LEFT] = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
+            self.start_stop_line_detected = False
 
         # sequence stop criterion debounce no line detection and start/stop line detected
         if self.__no_line_detection_count >= 30 or (
-            is_start_stop and (self.steps >= MIN_NUMBER_OF_STEPS)
+            (self.start_stop_line_detected is True) and (self.steps >= MIN_NUMBER_OF_STEPS)
         ):
             self.__agent.done = True
             self.__no_line_detection_count = 0
+            self.steps = 0
 
         # The sequence of states and actions is stored in memory for the training phase.
         if self.__agent.train_mode:
@@ -136,7 +139,7 @@ class RobotController:
 
             # Start storage The data after the second received sensor data
             if self.last_sensor_data is not None:
-                normalized_sensor_data = self.__agent.normalize_sensor_data(sensor_data)
+                normalized_sensor_data = self.__agent.normalize_sensor_data(self.last_sensor_data)
                 self.__agent.store_transition(
                     normalized_sensor_data,
                     self.__agent.action,
@@ -278,7 +281,6 @@ def main_loop():
             # Start the training
             elif agent.state == "TRAINING":
                 supervisor.last_sensor_data = None
-                controller.steps = 0
                 agent.perform_training()
 
                 print(f"#{agent.num_episodes} actor loss: {agent.actor_loss_history[-1]:.4f},"

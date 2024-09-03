@@ -28,9 +28,9 @@
 # Imports
 ################################################################################
 
-import tensorflow as tf  # pylint: disable=import-error
-from tensorflow.keras import layers  # pylint: disable=import-error
-from tensorflow.keras.regularizers import l2  # pylint: disable=import-error
+from tensorflow import keras  # pylint: disable=import-error
+from keras import layers  # pylint: disable=import-error
+from keras.regularizers import l2  # pylint: disable=import-error
 
 ################################################################################
 # Variables
@@ -42,15 +42,16 @@ from tensorflow.keras.regularizers import l2  # pylint: disable=import-error
 ################################################################################
 
 
-class Networks:
-    """Class for building networks of actors and critics"""
+class Models:
+    """Class for building networks of actors and critics."""
 
-    def __init__(self, alpha):
-        self.__learning_rate = alpha
+    def __init__(self, actor_alpha, critic_alpha):
+        self.__actor_learning_rate = actor_alpha
+        self.__critic_learning_rate = critic_alpha
         self.actor_network = self.build_actor_network()
         self.critic_network = self.build_critic_network()
-        self.actor_optimizer = tf.keras.optimizers.Adam(self.__learning_rate)
-        self.critic_optimizer = tf.keras.optimizers.Adam(self.__learning_rate)
+        self.actor_optimizer = keras.optimizers.Adam(self.__actor_learning_rate)
+        self.critic_optimizer = keras.optimizers.Adam(self.__critic_learning_rate)
 
     def build_actor_network(self):
         """Build Actor Network."""
@@ -84,7 +85,7 @@ class Networks:
             bias_initializer="zeros",
         )(fc3)
 
-        return tf.keras.models.Model(inputs=state_input, outputs=mean)
+        return keras.models.Model(inputs=state_input, outputs=mean)
 
     def build_critic_network(self):
         """Build Critic Network"""
@@ -113,7 +114,7 @@ class Networks:
         )(fc2)
         value = layers.Dense(1)(fc3)  # Value output
 
-        return tf.keras.models.Model(inputs=state_input, outputs=value)
+        return keras.models.Model(inputs=state_input, outputs=value)
 
 
 ################################################################################

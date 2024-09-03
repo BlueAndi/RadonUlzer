@@ -33,8 +33,8 @@ import struct
 import numpy as np  # pylint: disable=import-error
 import tensorflow as tf  # pylint: disable=import-error
 import tensorflow_probability as tfp  # pylint: disable=import-error
-from trajectory_buffer import Buffer
-from networks import Networks
+from trajectory_buffer import Memory
+from networks import Models
 
 ################################################################################
 # Variables
@@ -57,16 +57,16 @@ STATUS_CHANNEL_ERROR_VAL = 1
 MODE_CHANNEL_NAME = "MODE"
 CMD_ID_SET_READY_STATE = 1
 CMD_ID_SET_TRAINING_STATE = 2
-POSITION_DATA = [-0.24713614078815466, 0.01, 0.013994298332013683]
+POSITION_DATA = [-0.24713614078815466, -0.04863962992854465, 0.013994298332013683]
 ORIENTATION_DATA = [
     -1.0564747468923541e-06,
     8.746699709178704e-07,
     0.9999999999990595,
-    1.5880805820884731,
+    1.5880805820884731
 ]
 MAX_SENSOR_VALUE = 1000
-MIN_STD_DEV = 0.1  # Minimum standard deviation
-STD_DEV_FACTOR = 0.9995  # Discounter standard deviation factor
+MIN_STD_DEV = 0.01  # Minimum standard deviation
+STD_DEV_FACTOR = 0.995  # Discounter standard deviation factor
 
 ################################################################################
 # Classes
@@ -74,15 +74,18 @@ STD_DEV_FACTOR = 0.9995  # Discounter standard deviation factor
 
 
 class Agent:  # pylint: disable=too-many-instance-attributes
-    """The Agent class represents an intelligent agent that makes decisions to
-    control motors based on the position of the robot."""
+    """
+    The Agent class represents an intelligent agent that makes decisions to
+    control motors based on the position of the robot.
+    """
 
     # pylint: disable=too-many-arguments
     def __init__(
         self,
         smp_server,
         gamma=0.99,
-        alpha=0.0003,
+        actor_alpha=0.0001,
+        critic_alpha=0.0003,
         gae_lambda=0.95,
         policy_clip=0.2,
         batch_size=64,
@@ -91,17 +94,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         max_buffer_length=65536,
     ):
         self.__serialmux = smp_server
-        self.__alpha = alpha
         self.__policy_clip = policy_clip
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__buffer = Buffer(batch_size, max_buffer_length, gamma, gae_lambda)
-        self.__neural_network = Networks(self.__alpha)
+        self.__memory = Memory(batch_size, max_buffer_length, gamma, gae_lambda)
+        self.__neural_network = Models(actor_alpha, critic_alpha)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
-        self.__std_dev = 0.9
-        self.n_epochs = 10
+        self.__std_dev = 0.05
+        self.n_epochs = 3
         self.done = False
         self.action = None
         self.value = None
@@ -139,7 +141,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             reward: The reward received.
             done: Indicating whether the target sequence has been reached.
         """
-        self.__buffer.store_memory(state, action, probs, value, reward, done)
+        self.__memory.store_memory(state, action, probs, value, reward, done)
 
     def save_models(self):
         """Saves the models in the specified file."""
@@ -250,7 +252,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         # Checks whether the sequence has ended if it is set to Training mode.
         if (self.train_mode is True) and (
-            (self.done is True) or (self.__buffer.is_memory_full() is True)
+            (self.done is True) or (self.__memory.is_memory_full() is True)
         ):
             cmd_payload = struct.pack("B", CMD_ID_SET_TRAINING_STATE)
             self.data_sent = self.__serialmux.send_data("CMD", cmd_payload)
@@ -277,11 +279,13 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             if self.data_sent is False:
                 self.unsent_data.append(("SPEED_SET", motorcontrol))
 
+            self.reinitialize(robot_node)
             self.data_sent = self.__serialmux.send_data("CMD", cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
                 self.unsent_data.append(("CMD", cmd_payload))
+            self.state = "IDLE"
 
     def normalize_sensor_data(self, sensor_data):
         """
@@ -314,29 +318,26 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             float: the Resulting Reward
 
         """
-        reward = self.__buffer.calculate_reward(sensor_data)
+        reward = self.__memory.calculate_reward(sensor_data)
         return reward
 
     # pylint: disable=too-many-arguments
     # pylint: disable=too-many-locals
-    def learn(self, states, actions, old_probs, values, rewards, dones):
+    def learn(self, states, actions, old_probs, values, rewards, advantages):
         """
         Perform training to optimize model weights.
 
         Parameters
         ----------
-            states:    The saved states observed during interactions with the environment.
-            actions:   The saved actions taken in response to the observed states.
-            old_probs: The saved probabilities of the actions taken, based on the previous policy.
-            values:    The saved estimated values of the observed states.
-            rewards:   The saved rewards received for taking the actions.
-            dones:     The saved flags indicating whether the target sequence or episode has 
-                        been completed.
+            states:     The saved states observed during interactions with the environment.
+            actions:    The saved actions taken in response to the observed states.
+            old_probs:  The saved probabilities of the actions taken, based on the previous policy.
+            values:     The saved estimated values of the observed states.
+            rewards:    The saved rewards received for taking the actions.
+            advantages: the computed advantage values for each state in a given Data size. 
         """
-        for _ in range(self.n_epochs):
 
-            #the computed advantage values for each state in a given batch of experiences.
-            advantages = self.__buffer.calculate_advantages(rewards, values, dones)
+        for _ in range(self.n_epochs):
 
             # optimize Actor Network weights
             with tf.GradientTape() as tape:
@@ -407,8 +408,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 self.critic_loss_history.append(critic_loss.numpy())
                 self.reward_history.append(sum(rewards))
 
-                # saving logs in a CSV file
-                self.save_logs_to_csv()
+            # saving logs in a CSV file
+            self.save_logs_to_csv()
 
     def save_logs_to_csv(self):
         """Function for saving logs in a CSV file"""
@@ -436,7 +437,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         if self.__current_batch is None:
 
             # Grab sample from memory
-            self.__current_batch = self.__buffer.generate_batches()
+            self.__current_batch = self.__memory.generate_batches()
 
         # Perform training with mini batches.
         if self.__training_index < len(self.__current_batch[-1]):
@@ -446,18 +447,19 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 old_prob_arr,
                 vals_arr,
                 reward_arr,
-                dones_arr,
+                advatage_arr,
                 batches,
             ) = self.__current_batch
             batch = batches[self.__training_index]
 
+            # pylint: disable=too-many-arguments
             self.learn(
                 state_arr[batch],
                 action_arr[batch],
                 old_prob_arr[batch],
                 vals_arr[batch],
                 reward_arr[batch],
-                dones_arr[batch],
+                advatage_arr[batch]
             )
             self.__training_index += 1
 
@@ -466,7 +468,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__training_index = 0
             self.__current_batch = None
             self.done = False
-            self.__buffer.clear_memory()
+            self.__memory.clear_memory()
             self.state = "IDLE"
             self.num_episodes += 1
             cmd_payload = struct.pack("B", CMD_ID_SET_READY_STATE)

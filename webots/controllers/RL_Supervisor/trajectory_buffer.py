@@ -40,8 +40,8 @@ import numpy as np  # pylint: disable=import-error
 ################################################################################
 
 
-class Buffer:  # pylint: disable=too-many-instance-attributes
-    """Class for store and manage experience tuples during reinforcement learning"""
+class Memory:  # pylint: disable=too-many-instance-attributes
+    """Class for store and manage experience tuples during Reinforcement learning."""
 
     # pylint: disable=too-many-arguments
     def __init__(self, batch_size, max_length, gamma, gae_lambda):
@@ -51,6 +51,7 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
         self.__actions = []
         self.__rewards = []
         self.__dones = []
+        self.__advatages = []
         self.__batch_size = batch_size
         self.__max_length = max_length
         self.__batch_size = batch_size
@@ -85,14 +86,18 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
         # Create batches by dividing the indices into groups of the batch_size
         batches = [indices[indx : indx + self.__batch_size] for indx in batch_start]
 
+        # the computed advantage values for each state in a given Data size.
+        self.__advatages = self.calculate_advantages(self.__rewards,
+                                                    self.__vals, self.__dones)
         return (
             np.array(self.__states),
             np.array(self.__actions),
             np.array(self.__probs),
             np.array(self.__vals),
             np.array(self.__rewards),
-            np.array(self.__dones),
+            np.array(self.__advatages),
             batches,
+
         )
 
     def get_sum_rewards(self) -> float:
@@ -139,6 +144,8 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
         self.__actions = []
         self.__rewards = []
         self.__dones = []
+        self.__advatages = []
+        self.__current_index = 0
 
     def is_memory_full(self):
         """
@@ -148,8 +155,11 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
         ----------
         - Bool: Memory is full or not
         """
+        is_full = False
 
-        is_full = self.__current_index >= self.__max_length
+        if self.__current_index >= self.__max_length:
+            is_full = True
+
         return is_full
 
     def calculate_advantages(self, rewards, values, dones):
@@ -167,19 +177,19 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
         Returns
         ----------
             NumPy array of float32: the computed advantage values for each 
-            state in a given batch of experiences.
+            state in a given Data size.
         """
 
-        mini_batch_size = rewards.shape[0]
+        data_size = len(rewards)
 
         # Create empty advantages array
-        advantages = np.zeros(mini_batch_size, dtype=np.float32)
+        advantages = np.zeros(data_size, dtype=np.float32)
 
-        for start_index in range(mini_batch_size):
+        for start_index in range(data_size-1):
             discount = 1
             advantage = 0
 
-            for future_index in range(start_index, mini_batch_size - 1):
+            for future_index in range(start_index, data_size - 1):
 
                 # Calculate the temporal difference (TD)
                 delta = (
@@ -197,10 +207,6 @@ class Buffer:  # pylint: disable=too-many-instance-attributes
 
                 # Update the discount factor for the next step
                 discount *= self.__gamma * self.__gae_lambda
-
-                # Stop if a terminal state is reached
-                if dones[future_index]:
-                    break
 
             # Save the calculated advantage for the current state
             advantages[start_index] = advantage
