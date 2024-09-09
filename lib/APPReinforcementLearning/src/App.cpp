@@ -96,7 +96,9 @@ void App::loop()
 {
     Board::getInstance().process();
     Speedometer::getInstance().process();
-    bool  isDataSent = true;
+    bool  isSensorDataSent = true;
+    bool  isModeDataSent   = true;
+    bool  isStatusDataSent = true;
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -125,7 +127,7 @@ void App::loop()
             payload = {SMPChannelPayload::Status::DONE};
         }
 
-        isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+        isStatusDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
 
         m_statusTimer.restart();
     }
@@ -134,7 +136,7 @@ void App::loop()
     if (true == m_sendLineSensorsDataInterval.isTimeout() &&
         (&DrivingState::getInstance() == m_systemStateMachine.getState()))
     {
-        isDataSent = sendLineSensorsData();
+        isSensorDataSent = sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
     }
@@ -149,16 +151,30 @@ void App::loop()
             SMPChannelPayload::Mode payload =
                 (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
-            isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+            isModeDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
 
             m_modeSelectionSent = true;
         }
     }
 
-    if (false == isDataSent)
+    if (false == isSensorDataSent)
     {
-        /* Failed to send data to the supervisor. Go to error state. */
-        ErrorState::getInstance().setErrorMsg("DSF");
+        /* Failed to send Senssor data to the supervisor. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("SEND_SF");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+    }
+
+    if (false == isStatusDataSent)
+    {
+        /* Failed to send Status data to the supervisor. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("SD_SF");
+        m_systemStateMachine.setState(&ErrorState::getInstance());
+    }
+
+    if (false == isModeDataSent)
+    {
+        /* Failed to send Mode data to the supervisor. Go to error state. */
+        ErrorState::getInstance().setErrorMsg("MD_SF");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
 
@@ -208,7 +224,7 @@ bool App::sendLineSensorsData() const
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         lineSensorIdx    = 0U;
-    bool            isPayloadSent       = true;
+    bool            isPayloadSent    = true;
     LineSensorData  payload;
 
     if (LINE_SENSOR_CHANNEL_DLC == (maxLineSensors * sizeof(uint16_t)))
