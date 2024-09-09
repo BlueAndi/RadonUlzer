@@ -31,9 +31,9 @@
 import csv
 import os
 import struct
-import numpy as np
-import tensorflow as tf
-import tensorflow_probability as tfp
+import numpy as np                     # pylint: disable=import-error
+import tensorflow as tf                # pylint: disable=import-error
+import tensorflow_probability as tfp   # pylint: disable=import-error
 from   trajectory_buffer import Memory
 from   networks import Models
 
