@@ -110,7 +110,7 @@ public:
     /**
      *  Set the selected mode.
      *
-     * @return It returns 1 if DrivingMode is selected or 2 if TrainingMode is selected, otherwise 0.
+     * @return It returns the selected Mode.
      */
     Mode getSelectedMode();
 
