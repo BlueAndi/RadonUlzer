@@ -28,7 +28,7 @@
 # Imports
 ################################################################################
 
-import numpy as np  # pylint: disable=import-error
+import numpy as np
 
 ################################################################################
 # Variables
@@ -70,7 +70,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         Numpy-Array: Probs
         Numpy-Array: Vals
         Numpy-Array: Rewards
-        Numpy-Array: dones
+        Numpy-Array: Advantages
         List: Batches
         """
 
