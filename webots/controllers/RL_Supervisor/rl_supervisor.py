@@ -68,6 +68,10 @@ MIN_NUMBER_OF_STEPS = 400
 SENSOR_ID_MOST_LEFT = 0
 SENSOR_ID_MOST_RIGHT = 4
 
+IDLE = "IDLE_STATE"
+READY = "READY_STATE"
+TRAINING = "TRAINING_STATE"
+
 # Path of saved models
 PATH = "models/"
 
@@ -76,7 +80,7 @@ PATH = "models/"
 ################################################################################
 
 
-class RobotController:   # pylint: disable=too-many-instance-attributes
+class RobotController:
     """Class for data flow control logic."""
 
     def __init__(self, smp_server, tick_size, agent):
@@ -86,7 +90,6 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
         self.__no_line_detection_count = 0
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
-        self.start_stop_line_detected = False
         self.steps = 0
 
     def callback_status(self, payload: bytearray) -> None:
@@ -102,6 +105,7 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
         sensor_data = struct.unpack("5H", payload)
         self.steps += 1
 
+        is_start_stop_line_detected = False
         # Determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
@@ -111,19 +115,18 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
         # Detect start/stop line
         if ((sensor_data[SENSOR_ID_MOST_LEFT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE) and
             (sensor_data[SENSOR_ID_MOST_RIGHT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE)):
-            self.start_stop_line_detected = True
+            is_start_stop_line_detected = True
 
         # Detect Start/Stop Line before Finish Trajectories
-        if (self.start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+        if (is_start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
             sensor_data = list(sensor_data)
-            sensor_data[SENSOR_ID_MOST_LEFT] = 0
+            sensor_data[SENSOR_ID_MOST_LEFT]  = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
-            self.start_stop_line_detected = False
+            is_start_stop_line_detected       = False
 
         # sequence stop criterion debounce no line detection and start/stop line detected
-        if self.__no_line_detection_count >= 30 or (
-            (self.start_stop_line_detected is True) and (self.steps >= MIN_NUMBER_OF_STEPS)
-        ):
+        if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
+                                                and  (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
             self.__no_line_detection_count = 0
             self.steps = 0
@@ -139,9 +142,8 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
 
             # Start storage The data after the second received sensor data
             if self.last_sensor_data is not None:
-                normalized_sensor_data = self.__agent.normalize_sensor_data(self.last_sensor_data)
                 self.__agent.store_transition(
-                    normalized_sensor_data,
+                    self.last_sensor_data,
                     self.__agent.action,
                     self.__agent.adjusted_log_prob,
                     self.__agent.value,
@@ -151,7 +153,7 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
             self.last_sensor_data = sensor_data
 
         # Sends the motor speeds to the robot.
-        if self.__agent.done is False and self.__agent.state == "READY":
+        if self.__agent.done is False and self.__agent.state == READY:
             self.__agent.send_motor_speeds(sensor_data)
 
     def callback_mode(self, payload: bytearray) -> None:
@@ -191,6 +193,20 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
         # process new data (callbacks will be executed)
         self.__smp_server.process(self.__timestamp)
 
+    def manage_agent_cycle(self,robot_node):
+        """The function controls agent behavior"""
+        if self.__agent.state == READY:
+            self.__agent.update(robot_node)
+
+        # Start the training
+        elif self.__agent.state == TRAINING:
+            self.last_sensor_data = None
+            self.__agent.perform_training()
+
+            # save model
+            if (self.__agent.num_episodes > 1) and (self.__agent.num_episodes % 50 == 0):
+                self.__agent.save_models()
+
 
 ################################################################################
 # Functions
@@ -198,7 +214,6 @@ class RobotController:   # pylint: disable=too-many-instance-attributes
 
 
 # pylint: disable=duplicate-code
-# pylint: disable=too-many-branches
 # pylint: disable=too-many-statements
 def main_loop():
     """Main loop:
@@ -275,20 +290,7 @@ def main_loop():
         while supervisor.step(timestep) != -1:
             controller.process()
 
-            if agent.state == "READY":
-                agent.update(robot_node)
-
-            # Start the training
-            elif agent.state == "TRAINING":
-                supervisor.last_sensor_data = None
-                agent.perform_training()
-
-                print(f"#{agent.num_episodes} actor loss: {agent.actor_loss_history[-1]:.4f},"
-                            f"critic loss: {agent.critic_loss_history[-1]:.4f}")
-
-                # save model
-                if (agent.num_episodes > 1) and (agent.num_episodes % 50 == 0):
-                    agent.save_models()
+            controller.manage_agent_cycle(robot_node)
 
             # Resent any unsent Data
             if agent.unsent_data:

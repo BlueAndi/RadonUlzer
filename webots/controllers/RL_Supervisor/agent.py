@@ -27,14 +27,15 @@
 ################################################################################
 # Imports
 ################################################################################
+
 import csv
 import os
 import struct
-import numpy as np  # pylint: disable=import-error
-import tensorflow as tf  # pylint: disable=import-error
-import tensorflow_probability as tfp  # pylint: disable=import-error
-from trajectory_buffer import Memory
-from networks import Models
+import numpy as np
+import tensorflow as tf
+import tensorflow_probability as tfp
+from   trajectory_buffer import Memory
+from   networks import Models
 
 ################################################################################
 # Variables
@@ -68,6 +69,16 @@ MAX_SENSOR_VALUE = 1000
 MIN_STD_DEV = 0.01  # Minimum standard deviation
 STD_DEV_FACTOR = 0.995  # Discounter standard deviation factor
 
+TRANSLATION_FIELD = "translation"
+ROTATION_FIELD = "rotation"
+
+IDLE = "IDLE_STATE"
+READY = "READY_STATE"
+TRAINING = "TRAINING_STATE"
+
+DIRECTORY = "logs"
+FILE_DIRECTORY = "training_logs.csv"
+
 ################################################################################
 # Classes
 ################################################################################
@@ -94,37 +105,34 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         max_buffer_length=65536,
     ):
         self.__serialmux = smp_server
-        self.__policy_clip = policy_clip
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
+        self.__std_dev = 0.05
         self.__memory = Memory(batch_size, max_buffer_length, gamma, gae_lambda)
-        self.__neural_network = Models(actor_alpha, critic_alpha)
+        self.__neural_network = Models(actor_alpha, critic_alpha, self.__std_dev, policy_clip)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
-        self.__std_dev = 0.05
         self.n_epochs = 3
         self.done = False
         self.action = None
         self.value = None
         self.adjusted_log_prob = None
         self.num_episodes = 0
-        self.state = "IDLE"
+        self.state = IDLE
         self.data_sent = True
         self.unsent_data = []
-        self.critic_loss_history = []
-        self.actor_loss_history = []
         self.reward_history = []
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
         self.train_mode = True
-        self.state = "READY"
+        self.state = READY
 
     def set_drive_mode(self):
         """Set the Agent mode to drive mode."""
         self.train_mode = False
-        self.state = "READY"
+        self.state = READY
         self.num_episodes = 0
 
     def store_transition(
@@ -235,11 +243,11 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         right_motor_speed = int(self.__top_speed + speed_difference)
 
         control_data = struct.pack("2H", left_motor_speed, right_motor_speed)
-        self.data_sent = self.__serialmux.send_data("SPEED_SET", control_data)
+        self.data_sent = self.__serialmux.send_data(SPEED_SET_CHANNEL_NAME, control_data)
 
         # Failed to send data. Appends the data to unsent_data List.
         if self.data_sent is False:
-            self.unsent_data.append(("SPEED_SET", control_data))
+            self.unsent_data.append((SPEED_SET_CHANNEL_NAME, control_data))
 
     def update(self, robot_node):
         """
@@ -251,19 +259,19 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         """
 
         # Checks whether the sequence has ended if it is set to Training mode.
-        if (self.train_mode is True) and (
-            (self.done is True) or (self.__memory.is_memory_full() is True)
-        ):
+        if self.train_mode is True  and (
+            self.done is True or self.__memory.is_memory_full() is True):
+
             cmd_payload = struct.pack("B", CMD_ID_SET_TRAINING_STATE)
-            self.data_sent = self.__serialmux.send_data("CMD", cmd_payload)
+            self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List.
             if self.data_sent is False:
-                self.unsent_data.append(("CMD", cmd_payload))
+                self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
 
             # Stopping condition for sequence was reached.
             self.reinitialize(robot_node)
-            self.state = "TRAINING"
+            self.state = TRAINING
 
         # Checks whether the sequence has ended if it is set to driving mode.
         if (self.train_mode is False) and (self.done is True):
@@ -272,20 +280,20 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             cmd_payload = struct.pack("B", CMD_ID_SET_READY_STATE)
 
             self.data_sent = self.__serialmux.send_data(
-                "SPEED_SET", motorcontrol
+                SPEED_SET_CHANNEL_NAME, motorcontrol
             )  # stop the motors immediately
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
-                self.unsent_data.append(("SPEED_SET", motorcontrol))
+                self.unsent_data.append((SPEED_SET_CHANNEL_NAME, motorcontrol))
 
             self.reinitialize(robot_node)
-            self.data_sent = self.__serialmux.send_data("CMD", cmd_payload)
+            self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
-                self.unsent_data.append(("CMD", cmd_payload))
-            self.state = "IDLE"
+                self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
+            self.state = IDLE
 
     def normalize_sensor_data(self, sensor_data):
         """
@@ -300,8 +308,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             NumPy array of float32: Normalized Sensor Data
         """
 
-        sensor_data = np.array(sensor_data) / MAX_SENSOR_VALUE
-        return sensor_data
+        normalized_sensor_data = np.array(sensor_data) / MAX_SENSOR_VALUE
+        return normalized_sensor_data
 
     def determine_reward(self, sensor_data):
         """
@@ -315,14 +323,12 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            float: the Resulting Reward
+            float: The Resulting Reward.
 
         """
         reward = self.__memory.calculate_reward(sensor_data)
         return reward
 
-    # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-locals
     def learn(self, states, actions, old_probs, values, rewards, advantages):
         """
         Perform training to optimize model weights.
@@ -336,88 +342,34 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             rewards:    The saved rewards received for taking the actions.
             advantages: the computed advantage values for each state in a given Data size. 
         """
+        # scales the sensor data to a range between 0 and 1
+        m_states = self.normalize_sensor_data(states)
 
         for _ in range(self.n_epochs):
 
+            states = tf.convert_to_tensor(m_states)
+            actions = tf.convert_to_tensor(actions)
+            old_probs = tf.convert_to_tensor(old_probs)
+
             # optimize Actor Network weights
-            with tf.GradientTape() as tape:
-                states = tf.convert_to_tensor(states)
-                actions = tf.convert_to_tensor(actions)
-                old_probs = tf.convert_to_tensor(old_probs)
-
-                # Forward pass through the actor network to get the action mean
-                predict_mean = self.__neural_network.actor_network(states)
-
-                # Create the normal distribution with the predicted mean
-                new_dist = tfp.distributions.Normal(predict_mean, self.__std_dev)
-
-                # Invert the tanh transformation to recover the original actions before tanh
-                untransformed_actions = tf.atanh(actions)
-
-                new_log_prob = new_dist.log_prob(untransformed_actions)
-
-                # Compute the log of the Jacobian for the tanh transformation
-                jacobian_log_det = tf.math.log(1 - tf.square(actions))
-                adjusted_new_log_prob = new_log_prob - jacobian_log_det
-
-                # The ratio between the new model and the old model’s action log probabilities
-                prob_ratio = tf.exp(adjusted_new_log_prob - old_probs)
-
-                # If the ratio is too large or too small, it will be
-                # clipped according to the surrogate function.
-                weighted_probs = prob_ratio * advantages
-                clipped_probs = tf.clip_by_value(
-                    prob_ratio, 1 - self.__policy_clip, 1 + self.__policy_clip
-                )
-                weighted_clipped_probs = clipped_probs * advantages
-
-                # Policy Gradient Loss
-                actor_loss = -tf.reduce_mean(
-                    tf.minimum(weighted_probs, weighted_clipped_probs)
-                )
-
-            # calculate gradient
-            actor_params = self.__neural_network.actor_network.trainable_variables
-            actor_grads = tape.gradient(actor_loss, actor_params)
-            self.__neural_network.actor_optimizer.apply_gradients(
-                zip(actor_grads, actor_params)
-            )
+            self.__neural_network.compute_actor_gradient(states, actions, old_probs, advantages)
 
             # optimize Critic Network weights
-            with tf.GradientTape() as tape:
+            self.__neural_network.compute_critic_gradient(states, values, advantages)
 
-                # The critical value represents the expected return from state 𝑠𝑡.
-                # It provides an estimate of how good it is to be in a given state.
-                critic_value = self.__neural_network.critic_network(states)
+            # Save the rewards received
+            self.reward_history.append(sum(rewards))
 
-                # the total discounted reward accumulated from time step 𝑡
-                estimate_returns = advantages + values
-
-                # Generate loss
-                critic_loss = tf.math.reduce_mean(
-                    tf.math.pow(estimate_returns - critic_value, 2)
-                )
-
-                # calculate gradient
-                critic_params = self.__neural_network.critic_network.trainable_variables
-                critic_grads = tape.gradient(critic_loss, critic_params)
-                self.__neural_network.critic_optimizer.apply_gradients(
-                    zip(critic_grads, critic_params)
-                )
-                self.actor_loss_history.append(actor_loss.numpy())
-                self.critic_loss_history.append(critic_loss.numpy())
-                self.reward_history.append(sum(rewards))
-
-            # saving logs in a CSV file
-            self.save_logs_to_csv()
+        # saving logs in a CSV file
+        self.save_logs_to_csv()
 
     def save_logs_to_csv(self):
         """Function for saving logs in a CSV file"""
 
         # Ensure the directory exists
-        log_dir = "logs"
+        log_dir = DIRECTORY
         os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, "training_logs.csv")
+        log_file = os.path.join(log_dir, FILE_DIRECTORY)
 
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
@@ -425,8 +377,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             for indx, reward in enumerate(self.reward_history):
                 writer.writerow(
                     [
-                        self.actor_loss_history[indx],
-                        self.critic_loss_history[indx],
+                        self.__neural_network.actor_loss_history[indx],
+                        self.__neural_network.critic_loss_history[indx],
                         reward,
                     ]
                 )
@@ -469,14 +421,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__current_batch = None
             self.done = False
             self.__memory.clear_memory()
-            self.state = "IDLE"
+            self.state = IDLE
             self.num_episodes += 1
             cmd_payload = struct.pack("B", CMD_ID_SET_READY_STATE)
-            self.data_sent = self.__serialmux.send_data("CMD", cmd_payload)
+            self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
-                self.unsent_data.append(("CMD", cmd_payload))
+                self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
 
             # Minimize standard deviation until the minimum standard deviation is reached
             self.__std_dev = self.__std_dev * STD_DEV_FACTOR
@@ -490,8 +442,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         ----------
             robot_node: The Robot interface
         """
-        trans_field = robot_node.getField("translation")
-        rot_field = robot_node.getField("rotation")
+        trans_field = robot_node.getField(TRANSLATION_FIELD)
+        rot_field = robot_node.getField(ROTATION_FIELD)
         initial_position = POSITION_DATA
         initial_orientation = ORIENTATION_DATA
         trans_field.setSFVec3f(initial_position)
