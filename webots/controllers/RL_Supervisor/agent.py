@@ -108,7 +108,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__std_dev = 0.05
+        self.__std_dev = 0.05   # When training without an existing model this should be
+                                # set to 0.9 manually
         self.__memory = Memory(batch_size, max_buffer_length, gamma, gae_lambda)
         self.__neural_network = Models(actor_alpha, critic_alpha, self.__std_dev, policy_clip)
         self.__training_index = 0  # Track batch index during training
