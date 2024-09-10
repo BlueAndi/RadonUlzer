@@ -28,11 +28,11 @@
 # Imports
 ################################################################################
 
-import tensorflow as tf               # pylint: disable=import-error
-import tensorflow_probability as tfp  # pylint: disable=import-error
-from tensorflow import keras          # pylint: disable=import-error
-from keras import layers              # pylint: disable=import-error
-from keras.regularizers import l2     # pylint: disable=import-error
+import tensorflow as tf
+import tensorflow_probability as tfp
+from tensorflow import keras
+from keras import layers
+from keras.regularizers import l2
 
 ################################################################################
 # Variables

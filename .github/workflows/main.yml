@@ -198,7 +198,7 @@ jobs:
     needs: intro
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job.
     steps:
@@ -209,11 +209,11 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: .github/workflows/requirements.txt
 
       - name: Install dependencies
-        run: |
-          pip install pylint "git+https://github.com/gabryelreyes/SerialMuxProt.git#egg=SerialMuxProt&subdirectory=python/SerialMuxProt"
+        run: pip install -r .github/workflows/requirements.txt
 
       - name: Analysing the code with pylint
-        run: |
-          pylint ./webots/controllers/*/*.py
+        run: pylint ./webots/controllers/*/*.py

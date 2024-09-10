@@ -1,0 +1,10 @@
+platformio==6.1.15
+numpy==1.26.4
+tensorflow==2.10.0
+tensorflow-probability==0.15.0
+keras==2.10.0
+matplotlib==3.9.0
+pandas==2.2.2
+pytest==8.3.2
+pylint==3.2.7
+git+https://github.com/gabryelreyes/SerialMuxProt.git#egg=SerialMuxProt&subdirectory=python/SerialMuxProt
