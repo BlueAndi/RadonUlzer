@@ -125,28 +125,25 @@ void App::loop()
             payload = {SMPChannelPayload::Status::DONE};
         }
 
-        isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
-
-        m_statusTimer.restart();
-    }
-
-    if (false == isDataSent)
-    {
-        /* Failed to send Status data to the Supervisor. Go to error state. */
-        ErrorState::getInstance().setErrorMsg("SD_SF");
-        m_systemStateMachine.setState(&ErrorState::getInstance());
-    }
-    else
-    {
-        /* Send periodically line sensor data. */
-        if (true == m_sendLineSensorsDataInterval.isTimeout() &&
-            (&DrivingState::getInstance() == m_systemStateMachine.getState()))
+        if (false == m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload)))
         {
-            isDataSent = sendLineSensorsData();
-
-            m_sendLineSensorsDataInterval.restart();
+            /* Failed to send Status data to the Supervisor. Go to error state. */
+            ErrorState::getInstance().setErrorMsg("SD_SF");
+            m_systemStateMachine.setState(&ErrorState::getInstance());
         }
-        if (false == isDataSent)
+        else
+        {
+            m_statusTimer.restart();
+        }
+
+        
+    }
+
+    /* Send periodically line sensor data. */
+    if (true == m_sendLineSensorsDataInterval.isTimeout() &&
+        (&DrivingState::getInstance() == m_systemStateMachine.getState()))
+    {
+        if (false == sendLineSensorsData())
         {
             /* Failed to send Sensor data to the Supervisor. Go to error state. */
             ErrorState::getInstance().setErrorMsg("SEND_SF");
@@ -154,26 +151,29 @@ void App::loop()
         }
         else
         {
-            /* Send Mode selected to The Supervisor. */
-            if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (false == m_modeSelectionSent))
-            {
-                uint8_t mode_options = ReadyState::getInstance().getSelectedMode();
+            m_sendLineSensorsDataInterval.restart();
+        }
+    }
 
-                if (0U < mode_options)
-                {
-                    SMPChannelPayload::Mode payload =
-                        (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+    /* Send Mode selected to The Supervisor. */
+    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (false == m_modeSelectionSent))
+    {
+        uint8_t mode_options = ReadyState::getInstance().getSelectedMode();
 
-                    isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+        if (0U < mode_options)
+        {
+            SMPChannelPayload::Mode payload =
+                (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
 
-                    m_modeSelectionSent = true;
-                }
-            }
-            if (false == isDataSent)
+            if(false == m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload)))
             {
                 /* Failed to send Mode data to the Supervisor. Go to error state. */
                 ErrorState::getInstance().setErrorMsg("MD_SF");
                 m_systemStateMachine.setState(&ErrorState::getInstance());
+            }
+            else
+            {
+                m_modeSelectionSent = true;
             }
         }
     }
