@@ -96,9 +96,7 @@ void App::loop()
 {
     Board::getInstance().process();
     Speedometer::getInstance().process();
-    bool  isSensorDataSent = true;
-    bool  isModeDataSent   = true;
-    bool  isStatusDataSent = true;
+    bool  isDataSent = true;
 
     if (true == m_controlInterval.isTimeout())
     {
@@ -127,55 +125,57 @@ void App::loop()
             payload = {SMPChannelPayload::Status::DONE};
         }
 
-        isStatusDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
+        isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdStatus, &payload, sizeof(payload));
 
         m_statusTimer.restart();
     }
 
-    /* Send periodically line sensor data. */
-    if (true == m_sendLineSensorsDataInterval.isTimeout() &&
-        (&DrivingState::getInstance() == m_systemStateMachine.getState()))
-    {
-        isSensorDataSent = sendLineSensorsData();
-
-        m_sendLineSensorsDataInterval.restart();
-    }
-
-    /* Send Mode selected to The Supervisor. */
-    if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (false == m_modeSelectionSent))
-    {
-        uint8_t mode_options = ReadyState::getInstance().getSelectedMode();
-
-        if (0U < mode_options)
-        {
-            SMPChannelPayload::Mode payload =
-                (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
-
-            isModeDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
-
-            m_modeSelectionSent = true;
-        }
-    }
-
-    if (false == isSensorDataSent)
-    {
-        /* Failed to send Senssor data to the supervisor. Go to error state. */
-        ErrorState::getInstance().setErrorMsg("SEND_SF");
-        m_systemStateMachine.setState(&ErrorState::getInstance());
-    }
-
-    if (false == isStatusDataSent)
+    if (false == isDataSent)
     {
         /* Failed to send Status data to the supervisor. Go to error state. */
         ErrorState::getInstance().setErrorMsg("SD_SF");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
-
-    if (false == isModeDataSent)
+    else
     {
-        /* Failed to send Mode data to the supervisor. Go to error state. */
-        ErrorState::getInstance().setErrorMsg("MD_SF");
-        m_systemStateMachine.setState(&ErrorState::getInstance());
+        /* Send periodically line sensor data. */
+        if (true == m_sendLineSensorsDataInterval.isTimeout() &&
+            (&DrivingState::getInstance() == m_systemStateMachine.getState()))
+        {
+            isDataSent = sendLineSensorsData();
+
+            m_sendLineSensorsDataInterval.restart();
+        }
+        if (false == isDataSent)
+        {
+            /* Failed to send Sensor data to the supervisor. Go to error state. */
+            ErrorState::getInstance().setErrorMsg("SEND_SF");
+            m_systemStateMachine.setState(&ErrorState::getInstance());
+        }
+        else
+        {
+            /* Send Mode selected to The Supervisor. */
+            if (&ReadyState::getInstance() == m_systemStateMachine.getState() && (false == m_modeSelectionSent))
+            {
+                uint8_t mode_options = ReadyState::getInstance().getSelectedMode();
+
+                if (0U < mode_options)
+                {
+                    SMPChannelPayload::Mode payload =
+                        (1 == mode_options) ? SMPChannelPayload::Mode::DRIVING_MODE : SMPChannelPayload::Mode::TRAINING_MODE;
+
+                    isDataSent = m_smpServer.sendData(m_serialMuxProtChannelIdMode, &payload, sizeof(payload));
+
+                    m_modeSelectionSent = true;
+                }
+            }
+            if (false == isDataSent)
+            {
+                /* Failed to send Mode data to the supervisor. Go to error state. */
+                ErrorState::getInstance().setErrorMsg("MD_SF");
+                m_systemStateMachine.setState(&ErrorState::getInstance());
+            }
+        }
     }
 
     m_smpServer.process(millis());
