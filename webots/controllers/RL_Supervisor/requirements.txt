@@ -1,5 +1,4 @@
-tensorflow
-tensorflow-probability
-tf-keras
-
+numpy==1.26.4
+tensorflow==2.10.0
+tensorflow-probability==0.15.0
 git+https://github.com/gabryelreyes/SerialMuxProt.git#egg=SerialMuxProt&subdirectory=python/SerialMuxProt
