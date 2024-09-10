@@ -1,0 +1,5 @@
+tensorflow
+tensorflow-probability
+tf-keras
+
+git+https://github.com/gabryelreyes/SerialMuxProt.git#egg=SerialMuxProt&subdirectory=python/SerialMuxProt
