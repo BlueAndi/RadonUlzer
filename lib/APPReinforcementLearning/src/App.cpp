@@ -132,7 +132,7 @@ void App::loop()
 
     if (false == isDataSent)
     {
-        /* Failed to send Status data to the supervisor. Go to error state. */
+        /* Failed to send Status data to the Supervisor. Go to error state. */
         ErrorState::getInstance().setErrorMsg("SD_SF");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
@@ -148,7 +148,7 @@ void App::loop()
         }
         if (false == isDataSent)
         {
-            /* Failed to send Sensor data to the supervisor. Go to error state. */
+            /* Failed to send Sensor data to the Supervisor. Go to error state. */
             ErrorState::getInstance().setErrorMsg("SEND_SF");
             m_systemStateMachine.setState(&ErrorState::getInstance());
         }
@@ -171,7 +171,7 @@ void App::loop()
             }
             if (false == isDataSent)
             {
-                /* Failed to send Mode data to the supervisor. Go to error state. */
+                /* Failed to send Mode data to the Supervisor. Go to error state. */
                 ErrorState::getInstance().setErrorMsg("MD_SF");
                 m_systemStateMachine.setState(&ErrorState::getInstance());
             }
