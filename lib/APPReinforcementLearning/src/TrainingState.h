@@ -25,7 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Training state
  * @author Akram Bziouech
  *
  * @addtogroup Application
@@ -33,8 +33,8 @@
  * @{
  */
 
-#ifndef READY_STATE_H
-#define READY_STATE_H
+#ifndef TRAINING_STATE_H
+#define TRAINING_STATE_H
 
 /******************************************************************************
  * Compile Switches
@@ -43,9 +43,9 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
+#include <stdint.h>
 #include <IState.h>
 #include <SimpleTimer.h>
-#include <StateMachine.h>
 
 /******************************************************************************
  * Macros
@@ -55,28 +55,18 @@
  * Types and Classes
  *****************************************************************************/
 
-/** The system ready state. */
-class ReadyState : public IState
+/** The system Training state. */
+class TrainingState : public IState
 {
 public:
-    /**
-     * The mode that can be selected.
-     */
-    enum Mode: uint8_t
-    {
-        IDLE = 0,     /**< No mode has been selected*/
-        DRIVING_MODE, /**< Driving mode Selected. */
-        TRAINING_MODE /**< Training mode Selected. */
-    };
-
     /**
      * Get state instance.
      *
      * @return State instance.
      */
-    static ReadyState& getInstance()
+    static TrainingState& getInstance()
     {
-        static ReadyState instance;
+        static TrainingState instance;
 
         /* Singleton idiom to force initialization during first usage. */
 
@@ -100,73 +90,19 @@ public:
      */
     void exit() final;
 
-    /**
-     * Set lap time, which to show on the display.
-     *
-     * @param[in] lapTime   Lap time in ms
-     */
-    void setLapTime(uint32_t lapTime);
-
-    /**
-     *  Set the selected mode.
-     *
-     * @return It returns the selected Mode.
-     */
-    Mode getSelectedMode();
-
 protected:
 private:
-
-    /** Duration of the selected mode in ms. This is the maximum time to select a mode. */
-    static const uint32_t MODE_SELECTED_PERIOD = 2000U;
-
-    /** Duration to handle State changes in ms. */
-    static const uint32_t STATE_TRANSITION_PERIOD = 2100U;
-
-    /**
-     * The line sensor threshold (normalized) used to detect the track.
-     * The track is detected in case the received value is greater or equal than
-     * the threshold.
-     */
-    static const uint16_t LINE_SENSOR_ON_TRACK_MIN_VALUE = 200U;
-
-    /**
-     * ID of most left sensor.
-     */
-    static const uint8_t SENSOR_ID_MOST_LEFT;
-
-    /**
-     * ID of middle sensor.
-     */
-    static const uint8_t SENSOR_ID_MIDDLE;
-
-    /**
-     * ID of most right sensor.
-     */
-    static const uint8_t SENSOR_ID_MOST_RIGHT;
-
-    /**
-     * The max. normalized value of a sensor in digits.
-     */
-    static const uint16_t SENSOR_VALUE_MAX;
-
-    bool        m_isLastStartStopLineDetected; /**< Is the Last start/stop line detected? */
-    SimpleTimer m_modeTimeoutTimer;            /**< Timeout timer for the selected mode. */
-    Mode        m_mode;                        /**< Mode that can select Driving Mode or Training Mode. */
-    bool        m_isLapTimeAvailable;          /**< Is set (true), if a lap time is available. */
-    uint32_t    m_lapTime;                     /**< Lap time in ms of the last successful driven round. */
-    bool        m_isButtonAPressed;            /**< Is the button A pressed (last time)? */
-    bool        m_isButtonBPressed;            /**< Is the button B pressed (last time)? */
-    SimpleTimer m_stateTransitionTimer;        /**< Timer to handle State changes */
     /**
      * Default constructor.
      */
-    ReadyState();
+    TrainingState()
+    {
+    }
 
     /**
      * Default destructor.
      */
-    ~ReadyState()
+    ~TrainingState()
     {
     }
 
@@ -176,7 +112,7 @@ private:
      *
      * @param[in] state Source instance.
      */
-    ReadyState(const ReadyState& state);
+    TrainingState(const TrainingState& state);
 
     /**
      * Assignment of an instance.
@@ -184,14 +120,14 @@ private:
      *
      * @param[in] state Source instance.
      *
-     * @returns Reference to ErrorState instance.
+     * @returns Reference to Training instance.
      */
-    ReadyState& operator=(const ReadyState& state);
+    TrainingState& operator=(const TrainingState& state);
 };
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
-#endif /* READY_STATE_H */
+#endif /* TRAINING_STATE_H */
 /** @} */

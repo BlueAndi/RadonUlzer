@@ -25,19 +25,16 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Ready state
+ * @brief  Training state
  * @author Akram Bziouech
  */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include "ReadyState.h"
-#include <Board.h>
+#include "TrainingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
-#include "DrivingState.h"
-#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -63,86 +60,22 @@
  * Public Methods
  *****************************************************************************/
 
-void ReadyState::entry()
+void TrainingState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-    display.clear();
-    display.print("A: TMD");
-    display.gotoXY(0, 1);
-    display.print("B: DMD");
-
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
     diffDrive.setLinearSpeed(0, 0);
-
-    if (true == m_isLapTimeAvailable)
-    {
-        display.gotoXY(0, 2);
-        display.print(m_lapTime);
-        display.print("ms");
-    }
-    m_stateTransitionTimer.start(STATE_TRANSITION_PERIOD);
-    m_modeTimeoutTimer.start(MODE_SELECTED_PERIOD);
-    m_mode                        = IDLE;
-    m_isLastStartStopLineDetected = false;
-    m_isButtonAPressed            = false;
-    m_isButtonBPressed            = false;
+    diffDrive.disable();
 }
 
-void ReadyState::process(StateMachine& sm)
+void TrainingState::process(StateMachine& sm)
 {
-    IButton& buttonA = Board::getInstance().getButtonA();
-    IButton& buttonB = Board::getInstance().getButtonB();
-
-    /* Shall the driving mode be released? */
-    if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
-    {
-        m_mode = DRIVING_MODE;
-    }
-
-    /* Shall the Training mode be released? */
-    else if (true == Util::isButtonTriggered(buttonB, m_isButtonBPressed))
-    {
-        m_mode = TRAINING_MODE;
-    }
-
-    /*
-     * If either Button A or Button B is not pressed and the timer
-     * expires, the training mode should automatically activate.
-     */
-    else if (true == m_modeTimeoutTimer.isTimeout() && (IDLE == m_mode))
-    {
-        m_mode = TRAINING_MODE;
-        m_modeTimeoutTimer.restart();
-    }
-
-    else
-    {
-        /* Nothing to do. */
-        ;
-    }
-
-    /* Set DrivingState */
-    if (true == m_stateTransitionTimer.isTimeout())
-    {
-        sm.setState(&DrivingState::getInstance());
-        m_stateTransitionTimer.restart();
-    }
+    /* Nothing to do. */
+    (void)sm;
 }
 
-void ReadyState::exit()
+void TrainingState::exit()
 {
-    m_isLapTimeAvailable = false;
-}
-
-void ReadyState::setLapTime(uint32_t lapTime)
-{
-    m_isLapTimeAvailable = true;
-    m_lapTime            = lapTime;
-}
-
-ReadyState::Mode ReadyState::getSelectedMode()
-{
-    return m_mode;
+    DifferentialDrive::getInstance().enable();
 }
 
 /******************************************************************************
@@ -153,22 +86,6 @@ ReadyState::Mode ReadyState::getSelectedMode()
  * Private Methods
  *****************************************************************************/
 
-ReadyState::ReadyState() :
-    m_isLapTimeAvailable(false),
-    m_isButtonAPressed(false),
-    m_isButtonBPressed(false),
-    m_modeTimeoutTimer(),
-    m_stateTransitionTimer(),
-    m_lapTime(0),
-    m_isLastStartStopLineDetected(false),
-    m_mode(IDLE)
-{
-}
-
 /******************************************************************************
  * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
  *****************************************************************************/

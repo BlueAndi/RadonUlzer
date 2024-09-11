@@ -150,8 +150,10 @@ private:
 
     /**
      * Send line sensors data via SerialMuxProt.
+     * 
+     * @return true if data has been sent, false otherwise.
      */
-    void sendLineSensorsData() const;
+    bool sendLineSensorsData() const;
 
     /**
      * Copy construction of an instance.
