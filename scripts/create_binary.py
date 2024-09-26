@@ -53,8 +53,16 @@ CMD = "${OBJCOPY} -I ihex \"" + INPUT_FILE +\
 ################################################################################
 
 
-def create_binary(source, target, env):
-    """Create a binary file from the .hex file."""
+def create_binary(source, target, env) -> None:
+    """Create a binary file from the .hex file.
+    Arguments:
+        source: Output binary of build process.
+        target: File that triggered this callback. INPUT_FILE in this case.
+        env: SCons build environment
+
+    Return:
+        None. Exits on fail.
+    """
     # pylint: disable=unused-argument
 
     # Convert .hex into .bin using objcopy.
