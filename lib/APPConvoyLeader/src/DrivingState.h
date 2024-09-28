@@ -141,7 +141,7 @@ private:
     LineStatus             m_lineStatus;  /**< Status of start-/end line detection */
     TrackStatus            m_trackStatus; /**< Status of track which means on track or track lost, etc. */
     uint8_t m_startEndLineDebounce;       /**< Counter used for easys debouncing of the start-/end line detection. */
-    MovAvg<int16_t, 2> m_posMovAvg;       /**< The moving average of the position over 2 calling cycles. */
+    MovAvg<int16_t, uint32_t, 2> m_posMovAvg; /**< The moving average of the position over 2 calling cycles. */
 
     /**
      * Default constructor.
