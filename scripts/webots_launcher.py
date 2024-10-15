@@ -48,21 +48,21 @@ PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--serialTxCh ' + ROBOT_SERIAL_TX_CHANNEL + ' ' \
                                 + '-v'
 WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
+WEBOTS_HOME = os.getenv('WEBOTS_HOME')
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
-    WEBOTS_HOME = os.getenv('WEBOTS_HOME').replace('\\', '/')
-    WEBOTS_CONTROLLER = '"' + WEBOTS_HOME + '/msys64/mingw64/bin/webots-controller.exe"'
+    WEBOTS_CONTROLLER = f"\"{WEBOTS_HOME.replace('\\', '/')}/msys64/mingw64/bin/webots-controller.exe\""
     PROGRAM_NAME = "${PROGNAME}.exe"
 
 elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:
 
-    WEBOTS_CONTROLLER = "$WEBOTS_HOME/webots-controller"
+    WEBOTS_CONTROLLER = f"{WEBOTS_HOME}/webots-controller"
     PROGRAM_NAME = "${PROGNAME}"
 
 elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_MACOS:
 
-    WEBOTS_CONTROLLER = "$WEBOTS_HOME/Contents/MacOS/webots-controller"
+    WEBOTS_CONTROLLER = f"{WEBOTS_HOME}/Contents/MacOS/webots-controller"
     PROGRAM_NAME = "${PROGNAME}"
 
 else:
