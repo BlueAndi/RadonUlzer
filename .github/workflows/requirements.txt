@@ -1,0 +1,3 @@
+platformio==6.1.15
+pylint==3.2.6
+SerialMuxProt @ git+https://github.com/gabryelreyes/SerialMuxProt.git@10270033b0eb5e19cae39c35978745a778eb6acc#subdirectory=python/SerialMuxProt

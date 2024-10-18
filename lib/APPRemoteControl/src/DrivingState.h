@@ -91,12 +91,20 @@ public:
     void exit() final;
 
     /**
-     * Set target motor speeds.
+     * Set the motor speeds.
      *
      * @param[in] leftMotor  Left motor speed. [steps/s]
      * @param[in] rightMotor Right motor speed. [steps/s]
      */
-    void setTargetSpeeds(int16_t leftMotor, int16_t rightMotor);
+    void setMotorSpeeds(int16_t leftMotor, int16_t rightMotor);
+
+    /**
+     * Set the robot speeds.
+     *
+     * @param[in] linearSpeed   Linear speed in [steps/s]
+     * @param[in] angularSpeed  Angular speed in [mrad/s]
+     */
+    void setRobotSpeeds(int16_t linearSpeed, int16_t angularSpeed);
 
 protected:
 private:

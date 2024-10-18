@@ -42,6 +42,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -182,7 +183,8 @@ void App::handleRemoteCommand(const Command& cmd)
     switch (cmd.commandId)
     {
     case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
-        rsp.maxMotorSpeed = ParameterSets::getInstance().getParameterSet().topSpeed;
+        rsp.maxMotorSpeed =
+            Util::stepsPerSecondToMillimetersPerSecond(ParameterSets::getInstance().getParameterSet().topSpeed);
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
@@ -245,6 +247,9 @@ void App::reportVehicleData()
     uint8_t            averageCounts = 0U;
     uint8_t            leftCounts    = 0U;
     uint8_t            rightCounts   = 0U;
+    int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
+    int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
+    int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
 
     proximitySensors.read();
     leftCounts  = proximitySensors.countsFrontWithLeftLeds();
@@ -258,9 +263,9 @@ void App::reportVehicleData()
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
-    payload.left        = speedometer.getLinearSpeedLeft();
-    payload.right       = speedometer.getLinearSpeedRight();
-    payload.center      = speedometer.getLinearSpeedCenter();
+    payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
+    payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
+    payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
     payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
@@ -331,7 +336,8 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        DrivingState::getInstance().setTopSpeed(motorSpeedData->center);
+        int16_t          topSpeed       = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->center);
+        DrivingState::getInstance().setTopSpeed(topSpeed);
     }
 }
 

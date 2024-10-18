@@ -1,43 +1,62 @@
 #VRML_SIM R2023a utf8
+# template language: javascript
 
 PROTO ZumoComSystem [
-  field SFVec3f     translation 0 0 0
-  field SFRotation  rotation    0 0 1 0
-  field SFString    name        "ZumoComSystem"
+  field SFString name             "ZumoComSystem"
+  field SFBool   performanceMode  FALSE           # Use basic blocks for the robot instead of meshes. Increases performance.
 ]
 {
-  Robot {
-    translation IS translation
-    rotation IS rotation
-    children [
-      DEF BODY Group {
-        children [
-          Shape {
-            geometry Box {
-              size 0.06 0.05 0.01
+  Slot {
+    type "ZumoComSystem"
+    endPoint Robot {
+      children [
+        DEF BODY Group {
+          children [
+             %< if (false == fields.performanceMode.value) { >%
+            Transform {
+              translation -0.05 0.033 0
+              rotation 8.8992e-07 1.07489e-06 1 -1.5535153071795866
+              scale 0.01 0.01 0.01
+              children [
+                CadShape {
+                  url [
+                    "./mesh_ZumoComSystem/ZumoComSystem.obj"
+                  ]
+                }
+              ]
             }
-          }
-        ]
-      }
-      Receiver {
-        name "serialComRx"
-        type "serial"
-      }
-      Emitter {
-        name "serialComTx"
-        type "serial"
-      }
-      GPS {
-        name "gps"
-      }
-    ]
-    name IS name
-    description "DroidControlShip"
-    boundingObject USE BODY
-    physics Physics {
-      density -1
-      mass 0.1
+            %< } else { >%
+            Transform {
+              translation -0.005 0 0.018
+              children [
+                Shape {
+                  geometry Box {
+                    size 0.06 0.05 0.01
+                  }
+                }
+              ]
+            }
+            %<}>%
+          ]
+        }
+        Receiver {
+          name "serialComRx"
+          type "serial"
+        }
+        Emitter {
+          name "serialComTx"
+          type "serial"
+        }
+        GPS {
+          name "gps"
+        }
+        Compass {
+          name "compass"
+        }
+      ]
+      name IS name
+      description "DroidControlShip"
+      controller "<extern>"
     }
-    controller "<extern>"
   }
 }

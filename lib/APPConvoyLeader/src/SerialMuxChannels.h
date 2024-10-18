@@ -163,16 +163,16 @@ typedef struct _CommandResponse
     /** Response Payload. */
     union
     {
-        int16_t maxMotorSpeed; /**< Max speed [steps/s]. */
+        int32_t maxMotorSpeed; /**< Max speed [mm/s]. */
     };
 } __attribute__((packed)) CommandResponse;
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
 {
-    int16_t left;   /**< Left motor speed [steps/s] */
-    int16_t right;  /**< Right motor speed [steps/s] */
-    int16_t center; /**< Center motor speed [steps/s] */
+    int32_t left;   /**< Left motor speed [mm/s] */
+    int32_t right;  /**< Right motor speed [mm/s] */
+    int32_t center; /**< Center motor speed [mm/s] */
 } __attribute__((packed)) SpeedData;
 
 /** Struct of the "Current Vehicle Data" channel payload. */
@@ -181,9 +181,9 @@ typedef struct _VehicleData
     int32_t                  xPos;        /**< X position [mm]. */
     int32_t                  yPos;        /**< Y position [mm]. */
     int32_t                  orientation; /**< Orientation [mrad]. */
-    int16_t                  left;        /**< Left motor speed [steps/s]. */
-    int16_t                  right;       /**< Right motor speed [steps/s]. */
-    int16_t                  center;      /**< Center speed [steps/s]. */
+    int32_t                  left;        /**< Left motor speed [mm/s]. */
+    int32_t                  right;       /**< Right motor speed [mm/s]. */
+    int32_t                  center;      /**< Center speed [mm/s]. */
     SMPChannelPayload::Range proximity;   /**< Range at which object is found [range]. */
 } __attribute__((packed)) VehicleData;
 

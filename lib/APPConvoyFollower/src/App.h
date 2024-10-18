@@ -171,7 +171,7 @@ private:
     /**
      * Moving average filter for proximity sensors.
      */
-    MovAvg<uint8_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
+    MovAvg<uint8_t, uint16_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
 
     /**
      * Report the current vehicle data.

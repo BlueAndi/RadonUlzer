@@ -35,6 +35,6 @@ PROTO Obstacle [
     ]
     name IS name
     boundingObject USE BODY
-    controller "Obstacle"
+    controller "obstacle"
   }
 }

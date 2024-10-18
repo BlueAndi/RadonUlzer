@@ -36,7 +36,7 @@ package "Service" as serviceLayer {
         on the track.
     end note
 
-    class MovAvg < T, length > <<service>>
+    class MovAvg < T, U, length > <<service>>
 
     note top of MovAvg
         Moving average filter which can be

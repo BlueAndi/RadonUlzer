@@ -9,3 +9,4 @@ lib/Webots
 webots/worlds/*.jpg
 doc/doxygen/*/*
 __pycache__
+tmp/

@@ -96,7 +96,7 @@ void StartupState::process(StateMachine& sm)
         ErrorState::getInstance().setErrorMsg("MCAL=0");
         sm.setState(&ErrorState::getInstance());
     }
-    else if (true == m_initialDataSet)
+    else
     {
         sm.setState(&DrivingState::getInstance());
     }

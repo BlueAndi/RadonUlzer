@@ -97,10 +97,10 @@ void StartupState::process(StateMachine& sm)
     Board&   board   = Board::getInstance();
     IButton& buttonA = board.getButtonA();
 
-    /* Start line sensor calibration? */
+    /* Start motor calibration? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {
-        sm.setState(&LineSensorsCalibrationState::getInstance());
+        sm.setState(&MotorSpeedCalibrationState::getInstance());
     }
 
     /* If the max. motor speed calibration is done, it will be possible to
