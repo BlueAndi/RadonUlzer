@@ -118,9 +118,9 @@ namespace Util
     /**
      * Convert a speed in encoder steps per second to a speed in mm/s.
      *
-     * @param[in]   speedStepsPerSec Speed in encoder steps per second
+     * @param[in]   speedStepsPerSec Speed in encoder steps per second.
      *
-     * @return Speed in mm/s
+     * @return Speed in mm/s.
      */
     inline int32_t stepsPerSecondToMillimetersPerSecond(int16_t speedStepsPerSec)
     {
@@ -131,9 +131,9 @@ namespace Util
     /**
      * Convert a speed in mm/s to a speed in encoder steps per second.
      *
-     * @param[in]   speedMmPerSec Speed in mm/s
+     * @param[in]   speedMmPerSec Speed in mm/s.
      *
-     * @return Speed in encoder steps per second
+     * @return Speed in encoder steps per second.
      */
     inline int16_t millimetersPerSecondToStepsPerSecond(int32_t speedMmPerSec)
     {

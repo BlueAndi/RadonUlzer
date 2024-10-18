@@ -87,7 +87,6 @@ Linear speed right\
 $v_R [\frac{steps}{s}] = \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
 
 Consider robot linear speed center\
-
 Linear speed left\
 $v_L [\frac{steps}{s}] = \frac{v_{Linear}}{2} [\frac{steps}{s}] -\frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
 

@@ -245,13 +245,14 @@ DifferentialDrive::DifferentialDrive() :
 void DifferentialDrive::calculateLinearSpeedLeftRight(int16_t linearSpeedCenter, int16_t angularSpeed,
                                                       int16_t& linearSpeedLeft, int16_t& linearSpeedRight)
 {
-    int32_t linearSpeedCenter32     = static_cast<int32_t>(linearSpeedCenter);                   /* [steps/s] */
-    int32_t halfLinearSpeedCenter32 = linearSpeedCenter32 / 2;                                   /* [steps/s] */
-    int32_t angularSpeed32          = static_cast<int32_t>(angularSpeed);                        /* [mrad/s] */
-    int32_t wheelBase32             = static_cast<int32_t>(RobotConstants::WHEEL_BASE);          /* [mm] */
-    int32_t encoderStepsPerM32      = static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* [steps/m] */
-    int32_t linearSpeedTurnInPlace32 =
-        (angularSpeed32 * wheelBase32 * encoderStepsPerM32) / static_cast<int32_t>(2000000); /* [steps/s] */
+    static const int32_t ANGULAR_TO_LINEAR_SPEED_FACTOR = 2000000;                                 /* 2 * 1000 mrad */
+    int32_t              linearSpeedCenter32            = static_cast<int32_t>(linearSpeedCenter); /* [steps/s] */
+    int32_t              halfLinearSpeedCenter32        = linearSpeedCenter32 / 2;                 /* [steps/s] */
+    int32_t              angularSpeed32                 = static_cast<int32_t>(angularSpeed);      /* [mrad/s] */
+    int32_t              wheelBase32                    = static_cast<int32_t>(RobotConstants::WHEEL_BASE); /* [mm] */
+    int32_t              encoderStepsPerM32 = static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* [steps/m] */
+    int32_t              linearSpeedTurnInPlace32 = (angularSpeed32 * wheelBase32 * encoderStepsPerM32) /
+                                       static_cast<int32_t>(ANGULAR_TO_LINEAR_SPEED_FACTOR); /* [steps/s] */
 
     linearSpeedLeft  = halfLinearSpeedCenter32 - linearSpeedTurnInPlace32; /* [steps/s] */
     linearSpeedRight = halfLinearSpeedCenter32 + linearSpeedTurnInPlace32; /* [steps/s] */
