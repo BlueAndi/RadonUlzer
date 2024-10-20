@@ -58,6 +58,48 @@ The following applications are supported:
 
 ![differentialDrive](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/DifferentialDrive.plantuml)
 
+Robot angular speed vs wheel linear speed\
+$v [\frac{mm}{s}] = \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2}$
+
+* $v$: The linear speed of one wheel relative to the other $[\frac{mm}{s}]$.
+* $w_r$: The robot's angular speed $[\frac{rad}{s}]$.
+* $W$: The robot's wheel base $[mm]$.
+* $v_L = -v_R$ by rotation about midpoint of the wheel axis.
+
+Linear speed left\
+$v_L [\frac{mm}{s}] = -\frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2}$
+
+Linear speed right\
+$v_R [\frac{mm}{s}] = \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2}$
+
+Consider encoder steps per m\
+$v [\frac{steps}{s}] = \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+* $v$: The linear speed of one wheel relative to the other $[\frac{steps}{s}]$.
+* $w_r$: The robot's angular speed $[\frac{rad}{s}]$.
+* $W$: The robot's wheel base $[mm]$.
+* $ENC$: The number of encoder steps per m $[\frac{steps}{m}]$.
+
+Linear speed left\
+$v_L [\frac{steps}{s}] = -\frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+Linear speed right\
+$v_R [\frac{steps}{s}] = \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+Consider robot linear speed center\
+Linear speed left\
+$v_L [\frac{steps}{s}] = \frac{v_{Linear}}{2} [\frac{steps}{s}] -\frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+Linear speed right\
+$v_R [\frac{steps}{s}] = \frac{v_{Linear}}{2} [\frac{steps}{s}] + \frac{w_r [\frac{rad}{s}] \cdot W [mm]}{2} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+Consider angular speed in mrad per s\
+Linear speed left\
+$v_L [\frac{steps}{s}] = \frac{v_{Linear}}{2} [\frac{steps}{s}] -\frac{w_r [\frac{mrad}{s}] \cdot W [mm]}{2 \cdot 1000} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
+Linear speed right\
+$v_R [\frac{steps}{s}] = \frac{v_{Linear}}{2} [\frac{steps}{s}] + \frac{w_r [\frac{mrad}{s}] \cdot W [mm]}{2 \cdot 1000} \cdot \frac{ENC [\frac{steps}{m}]}{1000}$
+
 #### Odometry
 
 ![odometry](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/Odometry.plantuml)

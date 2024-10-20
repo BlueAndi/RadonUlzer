@@ -52,7 +52,10 @@ WEBOTS_HOME = os.getenv('WEBOTS_HOME')
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
-    WEBOTS_CONTROLLER = f"\"{WEBOTS_HOME.replace('\\', '/')}/msys64/mingw64/bin/webots-controller.exe\""
+    WEBOTS_HOME = WEBOTS_HOME.replace('\\', '/')
+    WEBOTS_CONTROLLER  = "\""
+    WEBOTS_CONTROLLER += f"{WEBOTS_HOME}/msys64/mingw64/bin/webots-controller.exe"
+    WEBOTS_CONTROLLER += "\""
     PROGRAM_NAME = "${PROGNAME}.exe"
 
 elif OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_LINUX:

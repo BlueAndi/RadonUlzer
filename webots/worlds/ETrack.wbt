@@ -55,6 +55,6 @@ DEF ROBOT Zumo32U4 {
 }
 Supervisor {
   name "Supervisor"
-  controller "Supervisor"
+  controller "supervisor"
   supervisor TRUE
 }
