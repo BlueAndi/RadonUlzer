@@ -33,6 +33,7 @@ Several kind of exclusive applications are available:
   - [Simulation Performance Issue](#simulation-performance-issue)
 - [The target](#the-target)
   - [Build and flash procedure](#build-and-flash-procedure)
+- [User Specific Configuration](#user-specific-configuration)
 - [The Applications](#the-applications)
 - [Documentation](#documentation)
 - [Used Libraries](#used-libraries)
@@ -170,6 +171,10 @@ To increase the performance, the robot model can be simplified by enabling the p
 Example for the **LineFollowerTarget** application:
 
 ![Example](./doc/images/pio_target_build_upload.jpg)
+
+## User Specific Configuration
+
+Change your com port settings in the *platformio_override.ini* to your needs, as well as for simulation the robot name and the serial rx/tx channels.
 
 ## The Applications
 
