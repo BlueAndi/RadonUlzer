@@ -1,6 +1,6 @@
-#VRML_SIM R2023a utf8
+#VRML_SIM R2025a utf8
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/RectangleArena.proto"
 
 PROTO PlatoonTrack [
   field SFString  contactMaterial "default" # Is `Solid.contactMaterial`.
