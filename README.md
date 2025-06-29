@@ -34,6 +34,7 @@ Several kind of exclusive applications are available:
 - [The target](#the-target)
   - [Build and flash procedure](#build-and-flash-procedure)
 - [User Specific Configuration](#user-specific-configuration)
+- [OLED Display Support](#oled-display-support)
 - [The Applications](#the-applications)
 - [Documentation](#documentation)
 - [Used Libraries](#used-libraries)
@@ -175,6 +176,10 @@ Example for the **LineFollowerTarget** application:
 ## User Specific Configuration
 
 Change your com port settings in the *platformio_override.ini* to your needs, as well as for simulation the robot name and the serial rx/tx channels.
+
+## OLED Display Support
+
+To enable the OLED display support set the *CONFIG_USE_OLED_DISPLAY* in the *platformio_override.ini* to 1 otherwise to 0.
 
 ## The Applications
 
