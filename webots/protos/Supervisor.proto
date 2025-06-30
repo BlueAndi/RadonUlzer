@@ -1,4 +1,4 @@
-#VRML_SIM R2023b utf8
+#VRML_SIM R2025a utf8
 # The supervisor observes the world and its robots. On demand it may influence them.
 
 PROTO Supervisor [

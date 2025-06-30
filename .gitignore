@@ -10,3 +10,4 @@ webots/worlds/*.jpg
 doc/doxygen/*/*
 __pycache__
 tmp/
+platformio_override.ini

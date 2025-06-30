@@ -1,75 +1,79 @@
 # Radon Ulzer - Line Follower <!-- omit in toc -->
 
-* [SW Architecture](#sw-architecture)
-  * [Logical View](#logical-view)
-    * [Application](#application)
-      * [Startup](#startup)
-      * [LineSensorsCalibration](#linesensorscalibration)
-      * [MotorSpeedCalibration](#motorspeedcalibration)
-      * [Ready](#ready)
-      * [Release Track](#release-track)
-      * [Driving](#driving)
-      * [Error](#error)
-  * [Process View](#process-view)
-* [Abbreviations](#abbreviations)
-* [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
-* [License](#license)
-* [Contribution](#contribution)
+- [SW Architecture](#sw-architecture)
+  - [Logical View](#logical-view)
+    - [Application](#application)
+      - [Startup](#startup)
+      - [LineSensorsCalibration](#linesensorscalibration)
+      - [MotorSpeedCalibration](#motorspeedcalibration)
+      - [Ready](#ready)
+      - [Release Track](#release-track)
+      - [Driving](#driving)
+      - [Error](#error)
+  - [Process View](#process-view)
+- [Abbreviations](#abbreviations)
+- [Issues, Ideas And Bugs](#issues-ideas-and-bugs)
+- [License](#license)
+- [Contribution](#contribution)
 
-# SW Architecture
+## SW Architecture
+
 The following part contains the specific details of the LineFollower application.
 
-## Logical View
+### Logical View
 
-### Application
+#### Application
 
 ![application](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/Application.plantuml)
 
-#### Startup
+##### Startup
 
 ![startup](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/StartupState.plantuml)
 
-#### LineSensorsCalibration
+##### LineSensorsCalibration
 
 ![lineSensorsCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
 
-#### MotorSpeedCalibration
+##### MotorSpeedCalibration
 
 ![MotorSpeedCalibration](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/LineSensorsCalibrationState.plantuml)
 
-#### Ready
+##### Ready
 
 ![ready](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/ReadyState.plantuml)
 
-#### Release Track
+##### Release Track
 
 ![releaseTrack](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/ReleaseTrackState.plantuml)
 
-#### Driving
+##### Driving
 
 ![driving](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/DrivingState.plantuml)
 
-#### Error
+##### Error
 
 ![error](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/LogicalView/LineFollower/ErrorState.plantuml)
 
-## Process View
+### Process View
 
 ![processView](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/ProcessView/LineFollower/SystemStates2.plantuml)
 
-# Abbreviations
+## Abbreviations
 
 | Abbreviation | Description |
 | - | - |
 | HAL | Hardware Abstraction Layer |
 
-# Issues, Ideas And Bugs
+## Issues, Ideas And Bugs
+
 If you have further ideas or you found some bugs, great! Create a [issue](https://github.com/BlueAndi/RadonUlzer/issues) or if you are able and willing to fix it by yourself, clone the repository and create a pull request.
 
-# License
+## License
+
 The whole source code is published under the [MIT license](http://choosealicense.com/licenses/mit/).
 Consider the different licenses of the used third party libraries too!
 
-# Contribution
+## Contribution
+
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, shall be licensed as above, without any
 additional terms or conditions.
