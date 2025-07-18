@@ -96,7 +96,7 @@ end note
 
 note bottom of webotsLib
     Provided by Cyberbotics.
-    https://cyberbotics.com/doc/reference/thanks?version=R2023b
+    https://cyberbotics.com/doc/reference/thanks?version=R2025a
 end note
 
 ImuTarget *--> Zumo32U4IMU

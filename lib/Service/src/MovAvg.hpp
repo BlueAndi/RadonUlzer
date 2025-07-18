@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,9 +58,10 @@
  * It is designed for fix point integers.
  *
  * @tparam T    The data type of the moving average result and input values.
+ * @tparam U    The data type of the moving average sum. Must be able to store the maximum value of T * length.
  * @tparam length The number of values, which are considered in the moving average calculation.
  */
-template<typename T, uint8_t length>
+template<typename T, typename U, uint8_t length>
 class MovAvg
 {
 public:
@@ -149,7 +150,7 @@ private:
     T       m_values[length]; /**< List of values, used for moving average calculation. */
     uint8_t m_wrIdx;          /**< Write index to list of values */
     uint8_t m_written;        /**< The number of written values to the list of values, till length is reached. */
-    T       m_sum;            /**< Sum of all values */
+    U       m_sum;            /**< Sum of all values */
 
     /**
      * Copy construction of an instance.

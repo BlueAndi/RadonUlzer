@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -89,14 +89,6 @@ public:
      */
     void exit() final;
 
-    /**
-     * Notify the state, that the initial data set was received.
-     */
-    void notifyInitialDataIsSet()
-    {
-        m_initialDataSet = true;
-    }
-
 protected:
 private:
     /**
@@ -105,14 +97,9 @@ private:
     static const uint32_t APP_NAME_DURATION = 2000U;
 
     /**
-     * Flag to indicate, that the initial data was set.
-     */
-    bool m_initialDataSet;
-
-    /**
      * Default constructor.
      */
-    StartupState() : m_initialDataSet(false)
+    StartupState()
     {
     }
 

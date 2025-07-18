@@ -1,7 +1,7 @@
-#VRML_SIM R2023a utf8
+#VRML_SIM R2025a utf8
 # template language: javascript
 
-EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/appearances/protos/Rubber.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/appearances/protos/Rubber.proto"
 
 PROTO Zumo32U4 [
   field SFVec3f     translation       0 0 0

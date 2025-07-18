@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <getopt.h>
 #include <string.h>
+#include <unistd.h>
 #include <Arduino.h>
 #include <Board.h>
 #include <RobotDeviceNames.h>
@@ -57,6 +58,7 @@ typedef struct
     bool        isZumoComSystemEnabled; /**< Is the ZumoComSystem enabled? */
     const char* serialRxChannel;        /**< Serial Rx channel */
     const char* serialTxChannel;        /**< Serial Tx channel */
+    const char* cwd;                    /**< Current working directory */
 
 } PrgArguments;
 
@@ -77,6 +79,7 @@ static void          systemDelay(unsigned long ms);
 static const struct option LONG_OPTIONS[] = {{"help", no_argument, nullptr, 0},
                                              {"serialRxCh", required_argument, nullptr, 0},
                                              {"serialTxCh", required_argument, nullptr, 0},
+                                             {"cwd", required_argument, nullptr, 0},
                                              {nullptr, no_argument, nullptr, 0}}; /* Marks the end. */
 
 /** Program argument default value of the robot name. */
@@ -93,6 +96,9 @@ static const char PRG_ARG_SERIAL_RX_CH_DEFAULT[] = "1";
 
 /** Program argument default value of the serial tx channel. */
 static const char PRG_ARG_SERIAL_TX_CH_DEFAULT[] = "2";
+
+/** Program argument default value of the current working directory. */
+static const char* PRG_ARG_CWD_DEFAULT = ".";
 
 /**
  * The maximum duration a simulated time step can have.
@@ -140,6 +146,16 @@ extern int main(int argc, char** argv)
         if (true == prgArguments.verbose)
         {
             showPrgArguments(prgArguments);
+        }
+
+        /* Set the current working directory. */
+        if (0 != strcmp(PRG_ARG_CWD_DEFAULT, prgArguments.cwd))
+        {
+            if (0 != chdir(prgArguments.cwd))
+            {
+                printf("Failed to set current working directory: %s\n", prgArguments.cwd);
+                status = -1;
+            }
         }
 
         /* It might happen that the user enables the ZumoComSystem, but the
@@ -244,6 +260,7 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     prgArguments.isZumoComSystemEnabled = PRG_ARG_IS_ZUMO_COM_SYSTEM_ENABLED_DEFAULT;
     prgArguments.serialRxChannel        = PRG_ARG_SERIAL_RX_CH_DEFAULT;
     prgArguments.serialTxChannel        = PRG_ARG_SERIAL_TX_CH_DEFAULT;
+    prgArguments.cwd                    = PRG_ARG_CWD_DEFAULT;
 
     while ((-1 != option) && (0 == status))
     {
@@ -262,6 +279,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "serialTxCh"))
             {
                 prgArguments.serialTxChannel = optarg;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "cwd"))
+            {
+                prgArguments.cwd = optarg;
             }
             else
             {
@@ -307,6 +328,7 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         printf("\t--serialTxCh <CHANNEL>\t\tSet serial tx channel (ZumoComSystem)."); /* Serial txchannel */
         printf(" Default: %s\n", PRG_ARG_SERIAL_TX_CH_DEFAULT); /* Serial tx channel default value */
         printf("\t-v\t\t\tVerbose mode. Default: Disabled\n");  /* Flag */
+        printf("\t--cwd <dir>\t\tSpecify working directory.");  /* Set process working directory */
     }
 
     return status;
@@ -323,6 +345,7 @@ static void showPrgArguments(const PrgArguments& prgArgs)
     printf("ZumoComSystem    : %s\n", (false == prgArgs.isZumoComSystemEnabled) ? "disabled" : "enabled");
     printf("Serial rx channel: %s\n", prgArgs.serialRxChannel);
     printf("Serial tx channel: %s\n", prgArgs.serialTxChannel);
+    printf("Current working directory: %s\n", prgArgs.cwd);
     /* Skip verbose flag. */
 }
 

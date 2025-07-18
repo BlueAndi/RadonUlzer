@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -96,7 +96,7 @@ void StartupState::process(StateMachine& sm)
         ErrorState::getInstance().setErrorMsg("MCAL=0");
         sm.setState(&ErrorState::getInstance());
     }
-    else if (true == m_initialDataSet)
+    else
     {
         sm.setState(&DrivingState::getInstance());
     }

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
-#include <Buzzer.h>
+#include <NoBuzzer.hpp>
 #include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
@@ -237,8 +237,8 @@ private:
     /** Button C driver */
     ButtonC m_buttonC;
 
-    /** Buzzer driver */
-    Buzzer m_buzzer;
+    /** Buzzer driver as a dummy */
+    NoBuzzer m_buzzer;
 
     /** Display driver */
     Display m_display;

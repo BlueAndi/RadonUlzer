@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -227,7 +227,7 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
     }
     else
     {
-        int32_t maxSpeed32 = static_cast<int32_t>(maxSpeed) * 1000 / static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M);
+        int32_t maxSpeed32 = Util::stepsPerSecondToMillimetersPerSecond(maxSpeed);
 
         LOG_INFO_VAL("Calibrated max. speed (steps/s): ", maxSpeed);
         LOG_INFO_VAL("Calibrated max. speed (mm/s): ", maxSpeed32);

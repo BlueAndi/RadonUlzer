@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -189,7 +190,8 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
-        rsp.maxMotorSpeed = Board::getInstance().getSettings().getMaxSpeed();
+        rsp.maxMotorSpeed =
+            Util::stepsPerSecondToMillimetersPerSecond(Board::getInstance().getSettings().getMaxSpeed());
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
@@ -252,6 +254,9 @@ void App::reportVehicleData()
     uint8_t            averageCounts = 0U;
     uint8_t            leftCounts    = 0U;
     uint8_t            rightCounts   = 0U;
+    int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
+    int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
+    int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
 
     proximitySensors.read();
     leftCounts  = proximitySensors.countsFrontWithLeftLeds();
@@ -265,9 +270,9 @@ void App::reportVehicleData()
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
-    payload.left        = speedometer.getLinearSpeedLeft();
-    payload.right       = speedometer.getLinearSpeedRight();
-    payload.center      = speedometer.getLinearSpeedCenter();
+    payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
+    payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
+    payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
     payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
@@ -359,7 +364,9 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
+        int16_t          leftSpeed      = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->left);
+        int16_t          rightSpeed     = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->right);
+        DrivingState::getInstance().setTargetSpeeds(leftSpeed, rightSpeed);
     }
 }
 

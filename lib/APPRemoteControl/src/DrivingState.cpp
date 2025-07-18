@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,11 +84,25 @@ void DrivingState::exit()
     DifferentialDrive::getInstance().disable();
 }
 
-void DrivingState::setTargetSpeeds(int16_t leftMotor, int16_t rightMotor)
+void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)
 {
     if (true == m_isActive)
     {
         DifferentialDrive::getInstance().setLinearSpeed(leftMotor, rightMotor);
+    }
+}
+
+void DrivingState::setRobotSpeeds(int16_t linearSpeed, int16_t angularSpeed)
+{
+    if (true == m_isActive)
+    {
+        DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+        /* Linear speed is set first. Overwrites all speed setpoints. */
+        diffDrive.setLinearSpeed(linearSpeed);
+
+        /* Angular speed is set on-top of the linear speed. Must be called after setLinearSpeed(). */
+        diffDrive.setAngularSpeed(angularSpeed);
     }
 }
 

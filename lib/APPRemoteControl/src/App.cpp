@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@
 #include <DifferentialDrive.h>
 #include <Odometry.h>
 #include <Logging.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -62,6 +63,7 @@
 static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -189,7 +191,8 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
-        rsp.maxMotorSpeed = Board::getInstance().getSettings().getMaxSpeed();
+        rsp.maxMotorSpeed =
+            Util::stepsPerSecondToMillimetersPerSecond(Board::getInstance().getSettings().getMaxSpeed());
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
@@ -197,8 +200,6 @@ void App::handleRemoteCommand(const Command& cmd)
         Odometry::getInstance().clearMileage();
         Odometry::getInstance().setPosition(cmd.xPos, cmd.yPos);
         Odometry::getInstance().setOrientation(cmd.orientation);
-
-        StartupState::getInstance().notifyInitialDataIsSet();
         break;
 
     default:
@@ -252,6 +253,9 @@ void App::reportVehicleData()
     uint8_t            averageCounts = 0U;
     uint8_t            leftCounts    = 0U;
     uint8_t            rightCounts   = 0U;
+    int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
+    int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
+    int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
 
     proximitySensors.read();
     leftCounts  = proximitySensors.countsFrontWithLeftLeds();
@@ -265,9 +269,9 @@ void App::reportVehicleData()
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
-    payload.left        = speedometer.getLinearSpeedLeft();
-    payload.right       = speedometer.getLinearSpeedRight();
-    payload.center      = speedometer.getLinearSpeedCenter();
+    payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
+    payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
+    payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
     payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
@@ -280,8 +284,9 @@ bool App::setupSerialMuxProt()
 
     /* Channel subscription. */
     m_smpServer.subscribeToChannel(COMMAND_CHANNEL_NAME, App_cmdChannelCallback);
-    m_smpServer.subscribeToChannel(SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
+    m_smpServer.subscribeToChannel(MOTOR_SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
+    m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_robotSpeedSetpointChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -356,10 +361,12 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     (void)userData;
-    if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
+    if ((nullptr != payload) && (MOTOR_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
-        const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
-        DrivingState::getInstance().setTargetSpeeds(motorSpeedData->left, motorSpeedData->right);
+        const MotorSpeed* motorSpeedData  = reinterpret_cast<const MotorSpeed*>(payload);
+        int16_t           leftMotorSpeed  = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->left);
+        int16_t           rightMotorSpeed = Util::millimetersPerSecondToStepsPerSecond(motorSpeedData->right);
+        DrivingState::getInstance().setMotorSpeeds(leftMotorSpeed, rightMotorSpeed);
     }
 }
 
@@ -377,5 +384,28 @@ void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize
         const Status* currentStatus = reinterpret_cast<const Status*>(payload);
         App*          application   = reinterpret_cast<App*>(userData);
         application->systemStatusCallback(currentStatus->status);
+    }
+}
+
+/**
+ * Receives robot speed setpoints over SerialMuxProt channel.
+ *
+ * @param[in] payload       Linear and angular speed setpoints in a RobotSpeed structure.
+ * @param[in] payloadSize   Size of the RobotSpeed structure.
+ * @param[in] userData      Instance of App class.
+ */
+void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    (void)userData;
+    if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
+    {
+        const RobotSpeed* robotSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
+        int16_t           angularSpeed   = static_cast<int16_t>(robotSpeedData->angular);
+
+        /* Convert to [steps/s] */
+        int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(robotSpeedData->linearCenter);
+
+        /* Set the robot speeds. */
+        DrivingState::getInstance().setRobotSpeeds(centerSpeed, angularSpeed);
     }
 }

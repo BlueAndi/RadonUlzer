@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -172,7 +172,7 @@ private:
     /**
      * Moving average filter for proximity sensors.
      */
-    MovAvg<uint8_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
+    MovAvg<uint8_t, uint16_t, MOVAVG_PROXIMITY_SENSOR_NUM_MEASUREMENTS> m_movAvgProximitySensor;
 
     /**
      * Report the current vehicle data.
