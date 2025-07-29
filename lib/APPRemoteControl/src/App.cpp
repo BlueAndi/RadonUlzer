@@ -179,6 +179,10 @@ void App::handleRemoteCommand(const Command& cmd)
         m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
         break;
 
+    case SMPChannelPayload::CmdId::CMD_ID_START_MOTOR_SPEED_CALIB:
+        /* Not supported. */
+        break;
+
     case SMPChannelPayload::CmdId::CMD_ID_REINIT_BOARD:
         /* Ensure that the motors are stopped, before re-initialize the board. */
         DifferentialDrive::getInstance().setLinearSpeed(0, 0);
@@ -193,6 +197,10 @@ void App::handleRemoteCommand(const Command& cmd)
     case SMPChannelPayload::CmdId::CMD_ID_GET_MAX_SPEED:
         rsp.maxMotorSpeed =
             Util::stepsPerSecondToMillimetersPerSecond(Board::getInstance().getSettings().getMaxSpeed());
+        break;
+
+    case SMPChannelPayload::CmdId::CMD_ID_START_DRIVING:
+        /* Not supported. */
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_SET_INIT_POS:
