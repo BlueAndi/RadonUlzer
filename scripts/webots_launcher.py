@@ -29,6 +29,7 @@ import os
 import sys
 import platform
 
+# pyright: reportUndefinedVariable=false
 Import("env") # pylint: disable=undefined-variable
 
 ################################################################################
@@ -41,11 +42,15 @@ OS_PLATFORM_TYPE = platform.system()
 ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
 ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
 ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
+SETTINGS_PATH = env.GetProjectOption("settings_path") # pylint: disable=undefined-variable
+PROJECT_PATH = env["PROJECT_DIR"]  # pylint: disable=undefined-variable
+ABS_SETTINGS_PATH = os.path.join(PROJECT_PATH, SETTINGS_PATH)
 PROGRAM_PATH = "$BUILD_DIR/"
-PROGRAM_OPTIONS = ''
+PROGRAM_OPTIONS = '--settingsPath "' + ABS_SETTINGS_PATH + '" '
 PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--serialRxCh ' + ROBOT_SERIAL_RX_CHANNEL + ' ' \
                                 + '--serialTxCh ' + ROBOT_SERIAL_TX_CHANNEL + ' ' \
+                                + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \
                                 + '-v'
 WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')

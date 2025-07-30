@@ -349,6 +349,26 @@ private:
     void enableSimulationDevices();
 
     /**
+     * Get the settings path.
+     * 
+     * @return Settings path.
+     */
+    const char* getSettingsPath() const
+    {
+        return m_settings.getPath();
+    }
+
+    /**
+     * Set the settings path. This must be called before the settings are initialized.
+     *
+     * @param[in] path  Settings path.
+     */
+    void setSettingsPath(const char* path)
+    {
+        m_settings.setPath(path);
+    }
+
+    /**
      * The main entry needs access to the simulation robot instance.
      * But all other application parts shall have no access, which is
      * solved by this friend.
