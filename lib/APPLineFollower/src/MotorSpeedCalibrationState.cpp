@@ -147,7 +147,10 @@ void MotorSpeedCalibrationState::process(StateMachine& sm)
 
 void MotorSpeedCalibrationState::exit()
 {
-    /* Nothing to do. */
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    /* Differential drive can now be used. */
+    diffDrive.enable();
 }
 
 /******************************************************************************
@@ -216,9 +219,6 @@ void MotorSpeedCalibrationState::finishCalibration(StateMachine& sm)
      * can now be used.
      */
     diffDrive.setMaxMotorSpeed(maxSpeed);
-
-    /* Differential drive can now be used. */
-    diffDrive.enable();
 
     if (0 == maxSpeed)
     {
