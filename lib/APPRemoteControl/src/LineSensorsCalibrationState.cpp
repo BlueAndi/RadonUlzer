@@ -87,6 +87,8 @@ void LineSensorsCalibrationState::entry()
     /* Wait some time, before starting the calibration drive. */
     m_phase = PHASE_1_WAIT;
     m_timer.start(WAIT_TIME);
+
+    diffDrive.enable();
 }
 
 void LineSensorsCalibrationState::process(StateMachine& sm)
@@ -137,7 +139,14 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
+    IDisplay&          display   = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    diffDrive.disable();
     m_timer.stop();
+
+    display.clear();
+    display.print("Idle");
 }
 
 /******************************************************************************

@@ -28,6 +28,8 @@ Required for flashing the firmware through the DCS."""
 ################################################################################
 
 import os
+
+# pyright: reportUndefinedVariable=false
 Import("env")  # pylint: disable=undefined-variable
 
 ################################################################################

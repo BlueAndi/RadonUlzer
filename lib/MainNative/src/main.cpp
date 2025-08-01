@@ -59,6 +59,7 @@ typedef struct
     const char* serialRxChannel;        /**< Serial Rx channel */
     const char* serialTxChannel;        /**< Serial Tx channel */
     const char* cwd;                    /**< Current working directory */
+    const char* settingsPath;           /**< Path to the settings file */
 
 } PrgArguments;
 
@@ -80,6 +81,7 @@ static const struct option LONG_OPTIONS[] = {{"help", no_argument, nullptr, 0},
                                              {"serialRxCh", required_argument, nullptr, 0},
                                              {"serialTxCh", required_argument, nullptr, 0},
                                              {"cwd", required_argument, nullptr, 0},
+                                             {"settingsPath", required_argument, nullptr, 0},
                                              {nullptr, no_argument, nullptr, 0}}; /* Marks the end. */
 
 /** Program argument default value of the robot name. */
@@ -99,6 +101,9 @@ static const char PRG_ARG_SERIAL_TX_CH_DEFAULT[] = "2";
 
 /** Program argument default value of the current working directory. */
 static const char* PRG_ARG_CWD_DEFAULT = ".";
+
+/** Program argument default value of the settings path. */
+static const char* PRG_ARG_SETTINGS_PATH_DEFAULT = nullptr;
 
 /**
  * The maximum duration a simulated time step can have.
@@ -136,6 +141,9 @@ extern int main(int argc, char** argv)
     /* Remove any buffering from stout and stderr to get the printed information immediately. */
     (void)setvbuf(stdout, NULL, _IONBF, 0);
     (void)setvbuf(stderr, NULL, _IONBF, 0);
+
+    /* Before handling the command line arguments, set the default settings path. */
+    PRG_ARG_SETTINGS_PATH_DEFAULT = board.getSettingsPath();
 
     /* Parse command line arguments. */
     status = handleCommandLineArguments(prgArguments, argc, argv);
@@ -196,8 +204,7 @@ extern int main(int argc, char** argv)
 
     if (0 == status)
     {
-        /**
-         * Synchronization between the simulation steps and the control steps is done automatically
+        /* Synchronization between the simulation steps and the control steps is done automatically
          * by Webots (If the synchronization field in the robot node is set to TRUE).
          * For a more detailed explanation see:
          * https://cyberbotics.com/doc/reference/robot#synchronous-versus-asynchronous-controllers
@@ -205,6 +212,9 @@ extern int main(int argc, char** argv)
 
         /* Enable all simulation devices. Must be done before any other access to the devices. */
         board.enableSimulationDevices();
+
+        /* Specify the settings path. */
+        board.setSettingsPath(prgArguments.settingsPath);
 
         /* Do one single simulation step to force that all sensors will deliver already data.
          * Otherwise e.g. the position sensor will provide NaN.
@@ -261,6 +271,7 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     prgArguments.serialRxChannel        = PRG_ARG_SERIAL_RX_CH_DEFAULT;
     prgArguments.serialTxChannel        = PRG_ARG_SERIAL_TX_CH_DEFAULT;
     prgArguments.cwd                    = PRG_ARG_CWD_DEFAULT;
+    prgArguments.settingsPath           = PRG_ARG_SETTINGS_PATH_DEFAULT;
 
     while ((-1 != option) && (0 == status))
     {
@@ -283,6 +294,10 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "cwd"))
             {
                 prgArguments.cwd = optarg;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "settingsPath"))
+            {
+                prgArguments.settingsPath = optarg;
             }
             else
             {
@@ -329,6 +344,8 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
         printf(" Default: %s\n", PRG_ARG_SERIAL_TX_CH_DEFAULT); /* Serial tx channel default value */
         printf("\t-v\t\t\tVerbose mode. Default: Disabled\n");  /* Flag */
         printf("\t--cwd <dir>\t\tSpecify working directory.");  /* Set process working directory */
+        printf("\t--settingsPath <path>\t\tSpecify settings file path. Default: %s\n",
+               PRG_ARG_SETTINGS_PATH_DEFAULT); /* Settings path default value */
     }
 
     return status;
@@ -346,6 +363,7 @@ static void showPrgArguments(const PrgArguments& prgArgs)
     printf("Serial rx channel: %s\n", prgArgs.serialRxChannel);
     printf("Serial tx channel: %s\n", prgArgs.serialTxChannel);
     printf("Current working directory: %s\n", prgArgs.cwd);
+    printf("Settings path    : %s\n", prgArgs.settingsPath);
     /* Skip verbose flag. */
 }
 

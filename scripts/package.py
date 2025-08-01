@@ -29,6 +29,7 @@ import platform
 import sys
 from zipfile import ZipFile
 
+# pyright: reportUndefinedVariable=false
 Import("env") # pylint: disable=undefined-variable
 
 ################################################################################

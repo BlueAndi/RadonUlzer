@@ -63,8 +63,10 @@
 
 void ErrorState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-    DifferentialDrive::getInstance().disable();
+    IDisplay&          display   = Board::getInstance().getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    diffDrive.disable();
 
     display.clear();
     display.print("Error");

@@ -64,21 +64,7 @@ public:
     /**
      * Construct the remote control application.
      */
-    App() :
-        m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
-        m_serialMuxProtChannelIdCurrentVehicleData(0U),
-        m_serialMuxProtChannelIdStatus(0U),
-        m_serialMuxProtChannelIdLineSensors(0U),
-        m_systemStateMachine(),
-        m_controlInterval(),
-        m_reportTimer(),
-        m_statusTimer(),
-        m_statusTimeoutTimer(),
-        m_sendLineSensorsDataInterval(),
-        m_smpServer(Serial, this),
-        m_movAvgProximitySensor()
-    {
-    }
+    App();
 
     /**
      * Destroy the remote control application.
@@ -167,6 +153,9 @@ private:
 
     /** SerialMuxProt Server Instance. */
     SMPServer m_smpServer;
+
+    /** Indicates whether the line sensor calibration is pending or not. */
+    bool m_isLineSensorCalibPending;
 
     /**
      * Moving average filter for proximity sensors.
