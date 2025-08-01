@@ -72,6 +72,23 @@ static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payl
  * Public Methods
  *****************************************************************************/
 
+App::App() :
+    m_serialMuxProtChannelIdRemoteCtrlRsp(0U),
+    m_serialMuxProtChannelIdCurrentVehicleData(0U),
+    m_serialMuxProtChannelIdStatus(0U),
+    m_serialMuxProtChannelIdLineSensors(0U),
+    m_systemStateMachine(),
+    m_controlInterval(),
+    m_reportTimer(),
+    m_statusTimer(),
+    m_statusTimeoutTimer(),
+    m_sendLineSensorsDataInterval(),
+    m_smpServer(Serial, this),
+    m_isLineSensorCalibPending(false),
+    m_movAvgProximitySensor()
+{
+}
+
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
@@ -162,6 +179,17 @@ void App::loop()
     m_smpServer.process(millis());
 
     m_systemStateMachine.process();
+
+    /* If line sensor calibration is completed, send response to the remote driver. */
+    if ((true == m_isLineSensorCalibPending) &&
+        (&LineSensorsCalibrationState::getInstance() != m_systemStateMachine.getState()))
+    {
+        CommandResponse rsp = {SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB, SMPChannelPayload::RSP_ID_OK};
+
+        (void)m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &rsp, sizeof(rsp));
+
+        m_isLineSensorCalibPending = false;
+    }
 }
 
 void App::handleRemoteCommand(const Command& cmd)
@@ -175,6 +203,8 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB:
+        rsp.responseId             = SMPChannelPayload::RSP_ID_PENDING;
+        m_isLineSensorCalibPending = true;
         m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
         break;
 
