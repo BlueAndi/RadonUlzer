@@ -35,6 +35,7 @@
 #include "DrivingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
+#include <Board.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -62,7 +63,11 @@
 
 void DrivingState::entry()
 {
+    IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+
+    display.clear();
+    display.print("Drv");
 
     m_isActive = true;
     diffDrive.setLinearSpeed(0, 0);
@@ -77,6 +82,7 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
+    IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
     
     m_isActive = false;
@@ -84,6 +90,9 @@ void DrivingState::exit()
     /* Stop motors. */
     diffDrive.setLinearSpeed(0, 0);
     diffDrive.disable();
+
+    display.clear();
+    display.print("Idle");
 }
 
 void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)

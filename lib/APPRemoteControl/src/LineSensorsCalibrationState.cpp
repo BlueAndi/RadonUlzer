@@ -139,10 +139,14 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
+    IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
     m_timer.stop();
+
+    display.clear();
+    display.print("Idle");
 }
 
 /******************************************************************************
