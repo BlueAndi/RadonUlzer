@@ -77,11 +77,13 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
+    
     m_isActive = false;
 
     /* Stop motors. */
-    DifferentialDrive::getInstance().setLinearSpeed(0, 0);
-    DifferentialDrive::getInstance().disable();
+    diffDrive.setLinearSpeed(0, 0);
+    diffDrive.disable();
 }
 
 void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)

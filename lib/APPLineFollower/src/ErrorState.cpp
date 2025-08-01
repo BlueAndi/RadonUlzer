@@ -71,11 +71,12 @@ LOG_TAG("EState");
 
 void ErrorState::entry()
 {
-    IBoard&   board   = Board::getInstance();
-    IDisplay& display = board.getDisplay();
+    IBoard&            board     = Board::getInstance();
+    IDisplay&          display   = board.getDisplay();
+    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     /* Stop the motors in any case! */
-    DifferentialDrive::getInstance().disable();
+    diffDrive.disable();
 
     display.clear();
     display.print("A: CONT");
