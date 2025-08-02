@@ -2,7 +2,42 @@
     by using a webots supervisor.
 """
 
+# MIT License
+#
+# Copyright (c) 2019 - 2025 Andreas Merkle (web@blue-andi.de)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+################################################################################
+# Imports
+################################################################################
+
 import math
+from typing import Any, List, Tuple
+
+################################################################################
+# Variables
+################################################################################
+
+################################################################################
+# Classes
+################################################################################
 
 
 class RobotObserver():
@@ -10,17 +45,17 @@ class RobotObserver():
         about a robot by using a supervisor.
     """
 
-    def __init__(self, robot_node):
+    def __init__(self, robot_node: Any) -> None:
         self._robot_node = robot_node
         self._ref_position = [0, 0, 0]  # x, y, z
         self._ref_orientation_euler = [0, 0, 0, 0]  # roll, pitch and yaw angle
         self._factor_m_to_mm = 1000
 
-    def _get_position(self):
+    def _get_position(self) -> List[float]:
         """Get robot position (x, y, z) in m.
 
         Returns:
-            list[float]: Robot position (x, y, z) in m
+            List[float]: Robot position (x, y, z) in m
         """
         position = [0, 0, 0]
 
@@ -29,11 +64,11 @@ class RobotObserver():
 
         return position
 
-    def _get_orientation(self):
+    def _get_orientation(self) -> List[float]:
         """Get robot orientation as 3x3 orthogonal rotation matrix.
 
         Returns:
-            list[float]: 3x3 orthogonal rotation matrix
+            List[float]: 3x3 orthogonal rotation matrix
         """
         orientation = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
@@ -42,11 +77,11 @@ class RobotObserver():
 
         return orientation
 
-    def _get_orientation_euler(self):
+    def _get_orientation_euler(self) -> Tuple[float, float, float]:
         """Get euler angles in rad.
 
         Returns:
-            tuple[float, float, float]: Roll, pitch and yaw angle in rad, range [-PI; PI].
+            Tuple[float, float, float]: Roll, pitch and yaw angle in rad, range [-PI; PI].
         """
         roll_angle = 0
         pitch_angle = 0
@@ -67,7 +102,7 @@ class RobotObserver():
 
         return roll_angle, pitch_angle, yaw_angle
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         """Returns whether the robot observer is valid.
             If the robot node was not found by name, it will be invalid.
 
@@ -76,16 +111,16 @@ class RobotObserver():
         """
         return self._robot_node is not None
 
-    def set_current_position_as_reference(self):
+    def set_current_position_as_reference(self) -> None:
         """Set the current robot position as reference.
         """
         self._ref_position = self._get_position()
 
-    def get_rel_position(self):
+    def get_rel_position(self) -> List[float]:
         """Get the robot position relative to the reference position.
 
         Returns:
-            list[float]: Relative position (x, y, z) in mm.
+            List[float]: Relative position (x, y, z) in mm.
         """
         abs_position = self._get_position()
 
@@ -97,17 +132,17 @@ class RobotObserver():
 
         return rel_position
 
-    def set_current_orientation_as_reference(self):
+    def set_current_orientation_as_reference(self) -> None:
         """Set the current robot orientation as reference.
         """
         self._ref_orientation_euler = self._get_orientation_euler()
 
-    def get_rel_orientation(self):
+    def get_rel_orientation(self) -> List[float]:
         """Get the robot orientation relative to the reference orientation.
             The angle increases clockwise and decreases counter-clockwise.
 
         Returns:
-            list[float]: Robot orientation (roll, pitch, yaw) in rad, range [-PI; PI].
+            List[float]: Robot orientation (roll, pitch, yaw) in rad, range [-PI; PI].
         """
         abs_orientation_euler = self._get_orientation_euler()
 
@@ -119,12 +154,12 @@ class RobotObserver():
 
         return rel_orientation_euler
 
-    def process_communication(self):
+    def process_communication(self) -> None:
         """Process communication with the robot.
         """
 
 
-def rad_to_deg(angle_rad):
+def rad_to_deg(angle_rad: float) -> float:
     """Convert angle in rad to degree.
 
     Args:
@@ -136,7 +171,7 @@ def rad_to_deg(angle_rad):
     return angle_rad * 180 / math.pi
 
 
-def has_position_changed(position, position_old):
+def has_position_changed(position: List[float], position_old: List[float]) -> bool:
     """Returns whether the position changed.
 
     Args:
@@ -156,7 +191,7 @@ def has_position_changed(position, position_old):
     return has_changed
 
 
-def has_orientation_changed(orientation, orientation_old):
+def has_orientation_changed(orientation: List[float], orientation_old: List[float]) -> bool:
     """Returns whether the orientation changed.
 
     Args:
@@ -174,3 +209,11 @@ def has_orientation_changed(orientation, orientation_old):
             break
 
     return has_changed
+
+################################################################################
+# Functions
+################################################################################
+
+################################################################################
+# Main
+################################################################################

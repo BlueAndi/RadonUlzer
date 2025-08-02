@@ -2,10 +2,11 @@
 # The supervisor observes the world and its robots. On demand it may influence them.
 
 PROTO Supervisor [
-  field SFString name "robot"
+  field SFString name "supervisor"
   field SFString controller "<generic>"
   field SFBool supervisor FALSE
-  field SFString serialReceiver "serialComRx"
+  field SFString serialReceiver "supervisorComRx"
+  field SFString serialSender "supervisorComTx"
 ]
 {
   Robot {
@@ -15,6 +16,10 @@ PROTO Supervisor [
     children [
       Receiver {
         name IS serialReceiver
+        type "serial"
+      }
+      Emitter {
+        name IS serialSender
         type "serial"
       }
     ]
