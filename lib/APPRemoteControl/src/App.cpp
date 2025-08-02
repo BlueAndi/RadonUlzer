@@ -233,9 +233,16 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB:
-        rsp.responseId             = SMPChannelPayload::RSP_ID_PENDING;
-        m_isLineSensorCalibPending = true;
-        m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        rsp.responseId = SMPChannelPayload::RSP_ID_PENDING;
+
+        /* If line sensor calibration is not pending, set the state machine to the
+         * line sensor calibration state.
+         */
+        if (false == m_isLineSensorCalibPending)
+        {
+            m_isLineSensorCalibPending = true;
+            m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        }
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_START_MOTOR_SPEED_CALIB:
