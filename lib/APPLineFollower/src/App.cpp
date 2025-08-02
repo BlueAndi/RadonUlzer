@@ -78,10 +78,12 @@ void App::setup()
     /* Setup the periodically processing of robot control.  */
     m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
 
-#ifdef DEBUG_ODOMETRY
+#if CONFIG_SUPERVISOR != 0
+#if CONFIG_ODOMETRY_TO_SUPERVISOR != 0
     /* Reset supervisor which set its observed position and orientation to 0. */
-    Board::getInstance().getSender().send("RST");
-#endif /* DEBUG_ODOMETRY */
+    Board::getInstance().getSupervisorSerialDrv().print("RST");
+#endif /* CONFIG_ODOMETRY_TO_SUPERVISOR != 0 */
+#endif /* CONFIG_SUPERVISOR != 0 */
 
     /* Surprise the audience. */
     Sound::playMelody(Sound::MELODY_WELCOME);
@@ -106,7 +108,8 @@ void App::loop()
          */
         Odometry::getInstance().process();
 
-#ifdef DEBUG_ODOMETRY
+#if CONFIG_SUPERVISOR != 0
+#if CONFIG_ODOMETRY_TO_SUPERVISOR != 0
         {
             Odometry&    odo         = Odometry::getInstance();
             int32_t      posX        = 0;
@@ -119,9 +122,10 @@ void App::loop()
 
             snprintf(buffer, BUFFER_SIZE, "ODO,%d,%d,%d", posX, posY, orientation);
 
-            Board::getInstance().getSender().send(buffer);
+            Board::getInstance().getSupervisorSerialDrv().print(buffer);
         }
-#endif /* DEBUG_ODOMETRY */
+#endif /* CONFIG_ODOMETRY_TO_SUPERVISOR != 0 */
+#endif /* CONFIG_SUPERVISOR != 0 */
 
         m_controlInterval.restart();
     }

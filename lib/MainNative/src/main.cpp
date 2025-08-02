@@ -56,8 +56,10 @@ typedef struct
     const char* robotName;              /**< Robot name */
     bool        verbose;                /**< Show verbose information */
     bool        isZumoComSystemEnabled; /**< Is the ZumoComSystem enabled? */
-    const char* serialRxChannel;        /**< Serial Rx channel */
-    const char* serialTxChannel;        /**< Serial Tx channel */
+    const char* supervisorRxChannel;    /**< Supervisor serial Rx channel */
+    const char* supervisorTxChannel;    /**< Supervisor serial Tx channel */
+    const char* serialRxChannel;        /**< Robot serial Rx channel */
+    const char* serialTxChannel;        /**< Robot serial Tx channel */
     const char* cwd;                    /**< Current working directory */
     const char* settingsPath;           /**< Path to the settings file */
 
@@ -78,6 +80,10 @@ static void          systemDelay(unsigned long ms);
 
 /** Supported long program arguments. */
 static const struct option LONG_OPTIONS[] = {{"help", no_argument, nullptr, 0},
+                                             {"supervisorRxCh", required_argument, nullptr, 0},
+                                             {"supervisorTxCh", required_argument, nullptr, 0},
+                                             {"serialRxCh", required_argument, nullptr, 0},
+                                             {"serialTxCh", required_argument, nullptr, 0},
                                              {"serialRxCh", required_argument, nullptr, 0},
                                              {"serialTxCh", required_argument, nullptr, 0},
                                              {"cwd", required_argument, nullptr, 0},
@@ -94,10 +100,16 @@ static bool PRG_ARG_VERBOSE_DEFAULT = false;
 static bool PRG_ARG_IS_ZUMO_COM_SYSTEM_ENABLED_DEFAULT = false;
 
 /** Program argument default value of the serial rx channel. */
-static const char PRG_ARG_SERIAL_RX_CH_DEFAULT[] = "1";
+static const char PRG_ARG_SUPERVISOR_RX_CH_DEFAULT[] = "1";
 
 /** Program argument default value of the serial tx channel. */
-static const char PRG_ARG_SERIAL_TX_CH_DEFAULT[] = "2";
+static const char PRG_ARG_SUPERVISOR_TX_CH_DEFAULT[] = "2";
+
+/** Program argument default value of the serial rx channel. */
+static const char PRG_ARG_SERIAL_RX_CH_DEFAULT[] = "3";
+
+/** Program argument default value of the serial tx channel. */
+static const char PRG_ARG_SERIAL_TX_CH_DEFAULT[] = "4";
 
 /** Program argument default value of the current working directory. */
 static const char* PRG_ARG_CWD_DEFAULT = ".";
@@ -132,9 +144,10 @@ extern int main(int argc, char** argv)
 {
     int              status = 0;
     PrgArguments     prgArguments;
-    Board&           board     = Board::getInstance();
-    Keyboard&        keyboard  = board.getKeyboard();
-    WebotsSerialDrv* simSerial = board.getSimSerial();
+    Board&           board            = Board::getInstance();
+    Keyboard&        keyboard         = board.getKeyboard();
+    WebotsSerialDrv* simSerial        = board.getSimSerial();
+    WebotsSerialDrv* supervisorSerial = board.getSimSupervisorSerial();
 
     printf("\n*** Radon Ulzer ***\n");
 
@@ -188,6 +201,17 @@ extern int main(int argc, char** argv)
              */
             Serial.setStream(*simSerial);
             Logging::disable();
+        }
+
+        /* Set the supervisor serial rx/tx channels for communication with the supervisor. */
+        if (nullptr != supervisorSerial)
+        {
+            supervisorSerial->setRxChannel(atoi(prgArguments.supervisorRxChannel));
+            supervisorSerial->setTxChannel(atoi(prgArguments.supervisorTxChannel));
+        }
+        else
+        {
+            printf("Warning: No supervisor serial driver available.\n");
         }
 
         /* Get simulation time handler. It will be used by millis() and delay(). */
@@ -268,6 +292,8 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     prgArguments.robotName              = PRG_ARG_ROBOT_NAME_DEFAULT;
     prgArguments.verbose                = PRG_ARG_VERBOSE_DEFAULT;
     prgArguments.isZumoComSystemEnabled = PRG_ARG_IS_ZUMO_COM_SYSTEM_ENABLED_DEFAULT;
+    prgArguments.supervisorRxChannel    = PRG_ARG_SUPERVISOR_RX_CH_DEFAULT;
+    prgArguments.supervisorTxChannel    = PRG_ARG_SUPERVISOR_TX_CH_DEFAULT;
     prgArguments.serialRxChannel        = PRG_ARG_SERIAL_RX_CH_DEFAULT;
     prgArguments.serialTxChannel        = PRG_ARG_SERIAL_TX_CH_DEFAULT;
     prgArguments.cwd                    = PRG_ARG_CWD_DEFAULT;
@@ -282,6 +308,14 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
             if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "help"))
             {
                 status = -1;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "supervisorRxCh"))
+            {
+                prgArguments.supervisorRxChannel = optarg;
+            }
+            else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "supervisorTxCh"))
+            {
+                prgArguments.supervisorTxChannel = optarg;
             }
             else if (0 == strcmp(LONG_OPTIONS[optionIndex].name, "serialRxCh"))
             {
@@ -335,15 +369,22 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
     if (0 > status)
     {
         printf("Usage: %s <option(s)>\nOptions:\n", programName);
-        printf("\t-h\t\t\tShow this help message.\n");                                /* Help */
-        printf("\t-n <NAME>\t\tSet robot name.\n");                                   /* Robot Name */
-        printf("\t-c\t\t\tEnable ZumoComSystem. Default: Disabled\n");                /* Flag */
+        printf("\t-h\t\t\tShow this help message.\n");                 /* Help */
+        printf("\t-n <NAME>\t\tSet robot name.\n");                    /* Robot Name */
+        printf("\t-c\t\t\tEnable ZumoComSystem. Default: Disabled\n"); /* Flag */
+
+        printf("\t--supervisorRxCh <CHANNEL>\tSet supervisor rx channel."); /* Supervisor rx channel */
+        printf(" Default: %s\n", PRG_ARG_SUPERVISOR_RX_CH_DEFAULT);         /* Supervisor rx channel default value */
+        printf("\t--supervisorTxCh <CHANNEL>\tSet supervisor tx channel."); /* Supervisor txchannel */
+        printf(" Default: %s\n", PRG_ARG_SUPERVISOR_TX_CH_DEFAULT);         /* Supervisor tx channel default value */
+
         printf("\t--serialRxCh <CHANNEL>\t\tSet serial rx channel (ZumoComSystem)."); /* Serial rx channel */
         printf(" Default: %s\n", PRG_ARG_SERIAL_RX_CH_DEFAULT); /* Serial rx channel default value */
         printf("\t--serialTxCh <CHANNEL>\t\tSet serial tx channel (ZumoComSystem)."); /* Serial txchannel */
         printf(" Default: %s\n", PRG_ARG_SERIAL_TX_CH_DEFAULT); /* Serial tx channel default value */
-        printf("\t-v\t\t\tVerbose mode. Default: Disabled\n");  /* Flag */
-        printf("\t--cwd <dir>\t\tSpecify working directory.");  /* Set process working directory */
+
+        printf("\t-v\t\t\tVerbose mode. Default: Disabled\n"); /* Flag */
+        printf("\t--cwd <dir>\t\tSpecify working directory."); /* Set process working directory */
         printf("\t--settingsPath <path>\t\tSpecify settings file path. Default: %s\n",
                PRG_ARG_SETTINGS_PATH_DEFAULT); /* Settings path default value */
     }
@@ -358,12 +399,14 @@ static int handleCommandLineArguments(PrgArguments& prgArguments, int argc, char
  */
 static void showPrgArguments(const PrgArguments& prgArgs)
 {
-    printf("Robot name       : %s\n", prgArgs.robotName);
-    printf("ZumoComSystem    : %s\n", (false == prgArgs.isZumoComSystemEnabled) ? "disabled" : "enabled");
-    printf("Serial rx channel: %s\n", prgArgs.serialRxChannel);
-    printf("Serial tx channel: %s\n", prgArgs.serialTxChannel);
+    printf("Robot name               : %s\n", prgArgs.robotName);
+    printf("ZumoComSystem            : %s\n", (false == prgArgs.isZumoComSystemEnabled) ? "disabled" : "enabled");
+    printf("Supervisor rx channel    : %s\n", prgArgs.supervisorRxChannel);
+    printf("Supervisor tx channel    : %s\n", prgArgs.supervisorTxChannel);
+    printf("Serial rx channel        : %s\n", prgArgs.serialRxChannel);
+    printf("Serial tx channel        : %s\n", prgArgs.serialTxChannel);
     printf("Current working directory: %s\n", prgArgs.cwd);
-    printf("Settings path    : %s\n", prgArgs.settingsPath);
+    printf("Settings path            : %s\n", prgArgs.settingsPath);
     /* Skip verbose flag. */
 }
 

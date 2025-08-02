@@ -39,15 +39,27 @@ OS_PLATFORM_TYPE_WIN = "Windows"
 OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
+
 ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
+
+SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
+SUPERVISOR_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_tx_channel") # pylint: disable=undefined-variable
+
 ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
 ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
+
 SETTINGS_PATH = env.GetProjectOption("settings_path") # pylint: disable=undefined-variable
+
 PROJECT_PATH = env["PROJECT_DIR"]  # pylint: disable=undefined-variable
 ABS_SETTINGS_PATH = os.path.join(PROJECT_PATH, SETTINGS_PATH)
 PROGRAM_PATH = "$BUILD_DIR/"
-PROGRAM_OPTIONS = '--settingsPath "' + ABS_SETTINGS_PATH + '" '
+PROGRAM_OPTIONS = '--settingsPath "' \
+                + ABS_SETTINGS_PATH + '" ' \
+                + '--supervisorRxCh ' + SUPERVISOR_SERIAL_RX_CHANNEL + ' ' \
+                + '--supervisorTxCh ' + SUPERVISOR_SERIAL_TX_CHANNEL + ' '
 PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
+                                + '--supervisorRxCh ' + SUPERVISOR_SERIAL_RX_CHANNEL + ' ' \
+                                + '--supervisorTxCh ' + SUPERVISOR_SERIAL_TX_CHANNEL + ' ' \
                                 + '--serialRxCh ' + ROBOT_SERIAL_RX_CHANNEL + ' ' \
                                 + '--serialTxCh ' + ROBOT_SERIAL_TX_CHANNEL + ' ' \
                                 + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \

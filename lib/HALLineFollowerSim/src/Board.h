@@ -63,10 +63,6 @@
 #include <SimTime.h>
 #include <WebotsSerialDrv.h>
 
-#ifdef DEBUG_ODOMETRY
-#include <Sender.h>
-#endif /* DEBUG_ODOMETRY */
-
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -218,19 +214,15 @@ public:
         return m_settings;
     }
 
-#ifdef DEBUG_ODOMETRY
-
     /**
-     * Get the sender driver, used to send data to the webots supervisor.
+     * Get the serial driver, used to communicate with the webots supervisor.
      *
-     * @return Sender driver
+     * @return Serial driver
      */
-    ISender& getSender() final
+    WebotsSerialDrv& getSupervisorSerialDrv() final
     {
-        return m_sender;
+        return m_supervisorSerialDrv;
     }
-
-#endif /* DEBUG_ODOMETRY */
 
     /**
      * Process actuators and sensors.
@@ -284,15 +276,11 @@ private:
     /** Red LED driver */
     LedGreen m_ledGreen;
 
+    /** Simulation supervisor serial driver */
+    WebotsSerialDrv m_supervisorSerialDrv;
+
     /** Settings */
     Settings m_settings;
-
-#ifdef DEBUG_ODOMETRY
-
-    /** Sender driver for supervisor communication. */
-    Sender m_sender;
-
-#endif /* DEBUG_ODOMETRY */
 
     /**
      * Constructs the concrete board.
@@ -338,6 +326,16 @@ private:
     }
 
     /**
+     * Get the simulation supervisor serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSupervisorSerial()
+    {
+        return &m_supervisorSerialDrv;
+    }
+
+    /**
      * Enable all simulation devices.
      * It is called by the main entry only.
      * Devices must be enabled before they can be used, and a simulation step must be performed before the application
@@ -347,7 +345,7 @@ private:
 
     /**
      * Get the settings path.
-     * 
+     *
      * @return Settings path.
      */
     const char* getSettingsPath() const

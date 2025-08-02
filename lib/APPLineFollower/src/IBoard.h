@@ -53,9 +53,9 @@
 #include <ILed.h>
 #include <ISettings.h>
 
-#ifdef DEBUG_ODOMETRY
-#include <ISender.h>
-#endif /* DEBUG_ODOMETRY */
+#if CONFIG_SUPERVISOR != 0
+#include <WebotsSerialDrv.h>
+#endif /* CONFIG_SUPERVISOR != 0 */
 
 /******************************************************************************
  * Macros
@@ -168,16 +168,16 @@ public:
      */
     virtual ISettings& getSettings() = 0;
 
-#ifdef DEBUG_ODOMETRY
+#if CONFIG_SUPERVISOR != 0
 
     /**
-     * Get the sender driver, used to send data to the webots supervisor.
+     * Get the serial driver, used to communicate with the webots supervisor.
      *
-     * @return Sender driver
+     * @return Serial driver
      */
-    virtual ISender& getSender() = 0;
+    virtual WebotsSerialDrv& getSupervisorSerialDrv() = 0;
 
-#endif /* DEBUG_ODOMETRY */
+#endif /* CONFIG_SUPERVISOR != 0 */
 
     /**
      * Process actuators and sensors.
