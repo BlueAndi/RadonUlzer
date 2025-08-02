@@ -109,20 +109,89 @@ Board::Board() :
 
 void Board::enableSimulationDevices()
 {
-    const int timeStep = m_simTime.getTimeStep();
+    const int               timeStep       = m_simTime.getTimeStep();
+    webots::Keyboard*       keyboard       = m_robot.getKeyboard();
+    webots::PositionSensor* leftPosSensor  = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME);
+    webots::PositionSensor* rightPosSensor = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME);
+    webots::DistanceSensor* lightSensor0   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_0_NAME);
+    webots::DistanceSensor* lightSensor1   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_1_NAME);
+    webots::DistanceSensor* lightSensor2   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME);
+    webots::DistanceSensor* lightSensor3   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME);
+    webots::DistanceSensor* lightSensor4   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME);
+    webots::Accelerometer*  accelerometer  = m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME);
+    webots::Gyro*           gyro           = m_robot.getGyro(RobotDeviceNames::GYRO_NAME);
+    webots::Compass*        magnetometer   = m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME);
+    webots::Receiver*       receiver       = m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL);
 
-    m_robot.getKeyboard()->enable(timeStep);
-    m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME)->enable(timeStep);
-    m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_0_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_1_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME)->enable(timeStep);
-    m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME)->enable(timeStep);
-    m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME)->enable(timeStep);
-    m_robot.getGyro(RobotDeviceNames::GYRO_NAME)->enable(timeStep);
-    m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME)->enable(timeStep);
-    m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)->enable(timeStep);
+    if (nullptr != keyboard)
+    {
+        keyboard->enable(timeStep);
+    }
+
+    if (nullptr != leftPosSensor)
+    {
+        leftPosSensor->enable(timeStep);
+    }
+
+    if (nullptr != rightPosSensor)
+    {
+        rightPosSensor->enable(timeStep);
+    }
+
+    if (nullptr != lightSensor0)
+    {
+        lightSensor0->enable(timeStep);
+    }
+
+    if (nullptr != lightSensor1)
+    {
+        lightSensor1->enable(timeStep);
+    }
+
+    if (nullptr != lightSensor2)
+    {
+        lightSensor2->enable(timeStep);
+    }
+
+    if (nullptr != lightSensor3)
+    {
+        lightSensor3->enable(timeStep);
+    }
+
+    if (nullptr != lightSensor4)
+    {
+        lightSensor4->enable(timeStep);
+    }
+
+    if (nullptr != proximitySensorFrontLeft)
+    {
+        proximitySensorFrontLeft->enable(timeStep);
+    }
+
+    if (nullptr != proximitySensorFrontRight)
+    {
+        proximitySensorFrontRight->enable(timeStep);
+    }
+
+    if (nullptr != accelerometer)
+    {
+        accelerometer->enable(timeStep);
+    }
+
+    if (nullptr != gyro)
+    {
+        gyro->enable(timeStep);
+    }
+
+    if (nullptr != magnetometer)
+    {
+        magnetometer->enable(timeStep);
+    }
+
+    if (nullptr != receiver)
+    {
+        receiver->enable(timeStep);
+    }
 }
 
 /******************************************************************************
