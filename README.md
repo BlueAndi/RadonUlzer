@@ -58,6 +58,10 @@ The simulation is based on the open source robot simulator *Webots*. The applica
 - Compatible webots versions:
   - v2025a
 
+Example deployment of the remote control application:
+
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/PhysicalView/RemoteControl/SimulationDeployment.plantuml)
+
 ### Installation
 
 1. Install [Webots](https://cyberbotics.com).
