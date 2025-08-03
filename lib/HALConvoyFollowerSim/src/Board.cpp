@@ -34,6 +34,7 @@
  *****************************************************************************/
 #include <Board.h>
 #include <RobotDeviceNames.h>
+#include <SupervisorDeviceNames.h>
 
 /******************************************************************************
  * Compiler Switches
