@@ -24,6 +24,14 @@ PROTO Zumo32U4 [
         name "serialComTx"
         type "serial"
       }
+      Receiver {
+        name "supervisorComRx"
+        type "serial"
+      }
+      Emitter {
+        name "supervisorComTx"
+        type "serial"
+      }
       Speaker {
       }
       Slot {

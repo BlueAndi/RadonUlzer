@@ -54,6 +54,10 @@
 #include <IProximitySensors.h>
 #include <ISettings.h>
 
+#if CONFIG_SUPERVISOR != 0
+#include <WebotsSerialDrv.h>
+#endif /* CONFIG_SUPERVISOR != 0 */
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -170,6 +174,17 @@ public:
      * @return Settings
      */
     virtual ISettings& getSettings() = 0;
+
+#if CONFIG_SUPERVISOR != 0
+
+    /**
+     * Get the serial driver, used to communicate with the webots supervisor.
+     *
+     * @return Serial driver
+     */
+    virtual WebotsSerialDrv& getSupervisorSerialDrv() = 0;
+
+#endif /* CONFIG_SUPERVISOR != 0 */
 
     /**
      * Process actuators and sensors.

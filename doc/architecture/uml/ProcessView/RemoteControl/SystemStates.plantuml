@@ -3,32 +3,22 @@
 title System States
 
 state StartupState
-state MotorSpeedCalibrationState
 state LineSensorsCalibrationState
 state ErrorState
-state RemoteCtrlState
+state DrivingState
 
 [*] --> StartupState: Power up
-StartupState --> RemoteCtrlState
+StartupState --> DrivingState
 
-RemoteCtrlState --> MotorSpeedCalibrationState: [on remote request]
-RemoteCtrlState --> LineSensorsCalibrationState: [on remote request]
+DrivingState --> LineSensorsCalibrationState: [on remote request]
 
-MotorSpeedCalibrationState --> RemoteCtrlState: [Calibration finished]
-MotorSpeedCalibrationState --> ErrorState: [Calibration failed]
-
-LineSensorsCalibrationState --> RemoteCtrlState: [Calibration finished]
+LineSensorsCalibrationState --> DrivingState: [Calibration finished]
 LineSensorsCalibrationState --> ErrorState: [Calibration failed]
 
-ErrorState --> RemoteCtrlState: [Pushbutton A triggered]
+ErrorState --> DrivingState: [Pushbutton A triggered]
 
 note right of StartupState
     Initialize the system and show application name.
-end note
-
-note right of MotorSpeedCalibrationState
-    Measures the max. left/right encoder steps / s with
-    100% motor speed. Required for the motor speed PID.
 end note
 
 note right of LineSensorsCalibrationState
@@ -40,9 +30,8 @@ note left of ErrorState
     Shows error to the operator.
 end note
 
-note right of RemoteCtrlState
+note right of DrivingState
     The system drives according to the commands sent by the operator.
-    Additionally, it prevents crashes using the proximity sensors.
 end note
 
 @enduml

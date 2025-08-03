@@ -29,6 +29,7 @@ Several kind of exclusive applications are available:
     - [Run without Webots launcher](#run-without-webots-launcher)
     - [Run via terminal](#run-via-terminal)
   - [Running the robot on track](#running-the-robot-on-track)
+  - [Communicate with the supervisor](#communicate-with-the-supervisor)
   - [Communicate with the DroidControlShip](#communicate-with-the-droidcontrolship)
   - [Simulation Performance Issue](#simulation-performance-issue)
 - [The target](#the-target)
@@ -56,6 +57,10 @@ The simulation is based on the open source robot simulator *Webots*. The applica
 - Github: <https://github.com/cyberbotics/webots>
 - Compatible webots versions:
   - v2025a
+
+Example deployment of the remote control application:
+
+![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/main/doc/architecture/uml/PhysicalView/RemoteControl/SimulationDeployment.plantuml)
 
 ### Installation
 
@@ -134,6 +139,20 @@ Example for **LineFollowerSim** application:
 
 1. Click in the simulation on the display to focus the simulation.
 2. Now the keyboard keys a, b and c can be used to control the robot according to the implemented application logic.
+
+### Communicate with the supervisor
+
+The communication with the supervisor goes via a Webots serial connection, which is disabled by default.
+
+Use the -c flag to enable it with default channels (see *webots_supervisor_serial_rx_channel* and *webots_supervisor_serial_tx_channel* in [platformio.ini](./platformio.ini)).
+
+```bash
+program.exe -c
+```
+
+For simplicity a Platformio project task was added, which enables the Webots serial connection as well.
+
+![Example](./doc/images/pio_webots_launcher_zumo_com_system.jpg)
 
 ### Communicate with the DroidControlShip
 

@@ -1,4 +1,4 @@
-@startuml
+@startuml Deployment
 
 title Deployment
 
@@ -8,19 +8,18 @@ node "Pololu Zumo32U4" as zumo32u4 {
 
     node "Main Board" as mainBoard {
 
-        component "MCU\nAVR32U4" as mcu {
-            component "Software" as software
+        node "MCU\nAVR32U4" as mcu {
+            component "Radon Ulzer" as software <<software>>
         }
 
-        component "Buttons" as buttons
-        
-        component "Buzzer" as buzzer
-        component "Motors" as motors
-        component "Encoders" as encoders
-        component "LEDs" as leds
-        component "ProximitySensors" as proximitySensors
-        component "Accelerometer" as accelerometer
-        component "Gyroscope" as gyroscope 
+        component "Buttons" as buttons <<hardware>>
+        component "Buzzer" as buzzer <<hardware>>
+        component "Motors" as motors <<hardware>>
+        component "Encoders" as encoders <<hardware>>
+        component "LEDs" as leds <<hardware>>
+        component "ProximitySensors" as proximitySensors <<hardware>>
+        component "Accelerometer" as accelerometer <<hardware>>
+        component "Gyroscope" as gyroscope <<hardware>>
 
         software -u- buttons
         software -u- leds
@@ -33,11 +32,11 @@ node "Pololu Zumo32U4" as zumo32u4 {
     }
 
     node "Front Sensor Array" {
-        component "Line sensors" as lineSensors
+        component "Line sensors" as lineSensors <<hardware>>
     }
 
     node "LCD" {
-        component "LCD" as lcd
+        component "LCD" as lcd <<hardware>>
     }
 
     software - lcd
@@ -51,6 +50,8 @@ usb )-l- pc
 
 note top of zumo32u4
     Only the used actors and sensors are shown.
+    The LCD and front sensor array are connected to the main board
+    and can be plugged in or out.
 end note
 
 @enduml

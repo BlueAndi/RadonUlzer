@@ -1,5 +1,5 @@
 {
-    "name": "HALLineFollowerSim",
+    "name": "Supervisor",
     "version": "0.1.0",
     "description": "...",
     "authors": [{
@@ -9,11 +9,7 @@
         "maintainer": true
     }],
     "license": "MIT",
-    "dependencies": [{
-        "name": "Supervisor"
-    },{
-        "name": "Webots"
-    }],
+    "dependencies": [],
     "frameworks": "*",
     "platforms": "*"
 }
