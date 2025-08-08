@@ -163,16 +163,6 @@ void Board::enableSimulationDevices()
         lightSensor4->enable(timeStep);
     }
 
-    if (nullptr != proximitySensorFrontLeft)
-    {
-        proximitySensorFrontLeft->enable(timeStep);
-    }
-
-    if (nullptr != proximitySensorFrontRight)
-    {
-        proximitySensorFrontRight->enable(timeStep);
-    }
-
     if (nullptr != accelerometer)
     {
         accelerometer->enable(timeStep);
