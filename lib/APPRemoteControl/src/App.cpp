@@ -332,6 +332,7 @@ void App::reportVehicleData()
     int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
     int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
     int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
+    uint32_t        timestamp     = millis();
 
     proximitySensors.read();
     leftCounts  = proximitySensors.countsFrontWithLeftLeds();
@@ -343,7 +344,7 @@ void App::reportVehicleData()
 
     odometry.getPosition(xPos, yPos);
 
-    payload.timestamp   = static_cast<int64_t>(millis());
+    payload.timestamp   = timestamp;
 
     payload.xPos        = xPos;
     payload.yPos        = yPos;
@@ -369,14 +370,11 @@ bool App::setupSerialMuxProt()
     m_smpServer.subscribeToChannel(TIME_SYNC_REQUEST_CHANNEL_NAME, App_timeSyncReqChannelCallback);
 
     /* Channel creation. */
-    m_serialMuxProtChannelIdRemoteCtrlRsp =
-        m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
-    m_serialMuxProtChannelIdCurrentVehicleData =
-        m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
+    m_serialMuxProtChannelIdRemoteCtrlRsp = m_smpServer.createChannel(COMMAND_RESPONSE_CHANNEL_NAME, COMMAND_RESPONSE_CHANNEL_DLC);
+    m_serialMuxProtChannelIdCurrentVehicleData = m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
     m_serialMuxProtChannelIdStatus      = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
     m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
-    m_serialMuxProtChannelIdTimeSyncRsp =
-        m_smpServer.createChannel(TIME_SYNC_RESPONSE_CHANNEL_NAME, TIME_SYNC_RESPONSE_CHANNEL_DLC);
+    m_serialMuxProtChannelIdTimeSyncRsp = m_smpServer.createChannel(TIME_SYNC_RESPONSE_CHANNEL_NAME, TIME_SYNC_RESPONSE_CHANNEL_DLC);
 
     /* Channels succesfully created? */
     if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
@@ -523,11 +521,10 @@ void App_timeSyncReqChannelCallback(const uint8_t* payload,
 
 void App::handleTimeSyncRequest(const TimeSyncRequest& req, const uint32_t t2)
 {
-    TimeSyncResponse rsp{req.seq, req.t1_ms, t2, millis()};
-
     if (m_serialMuxProtChannelIdTimeSyncRsp == 0U)
     {
         return;
     }
+    TimeSyncResponse rsp{req.seq, req.t1_ms, t2, millis()};
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdTimeSyncRsp, &rsp, sizeof(rsp));
 }

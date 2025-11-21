@@ -208,7 +208,7 @@ typedef struct _RobotSpeed
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
 {
-    int64_t                  timestamp;   /**< Timestamp [ms]. */
+    uint32_t                 timestamp;   /**< Timestamp [ms]. */
     int32_t                  xPos;        /**< X position [mm]. */
     int32_t                  yPos;        /**< Y position [mm]. */
     int32_t                  orientation; /**< Orientation [mrad]. */
