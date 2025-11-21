@@ -64,6 +64,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_timeSyncReqChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -78,6 +79,7 @@ App::App() :
     m_serialMuxProtChannelIdCurrentVehicleData(0U),
     m_serialMuxProtChannelIdStatus(0U),
     m_serialMuxProtChannelIdLineSensors(0U),
+    m_serialMuxProtChannelIdTimeSyncRsp(0U),
     m_systemStateMachine(),
     m_controlInterval(),
     m_reportTimer(),
@@ -340,6 +342,9 @@ void App::reportVehicleData()
     averageCounts = m_movAvgProximitySensor.write(maxCounts);
 
     odometry.getPosition(xPos, yPos);
+
+    payload.timestamp   = static_cast<int64_t>(millis());
+
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
@@ -361,6 +366,7 @@ bool App::setupSerialMuxProt()
     m_smpServer.subscribeToChannel(MOTOR_SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
     m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_robotSpeedSetpointChannelCallback);
+    m_smpServer.subscribeToChannel(TIME_SYNC_REQUEST_CHANNEL_NAME, App_timeSyncReqChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -369,10 +375,13 @@ bool App::setupSerialMuxProt()
         m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
     m_serialMuxProtChannelIdStatus      = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
     m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
+    m_serialMuxProtChannelIdTimeSyncRsp =
+        m_smpServer.createChannel(TIME_SYNC_RESPONSE_CHANNEL_NAME, TIME_SYNC_RESPONSE_CHANNEL_DLC);
 
     /* Channels succesfully created? */
     if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
-        (0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors))
+        (0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) &&
+        (0U != m_serialMuxProtChannelIdTimeSyncRsp))
     {
         isSuccessful = true;
     }
@@ -483,4 +492,42 @@ void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t
         /* Set the robot speeds. */
         DrivingState::getInstance().setRobotSpeeds(centerSpeed, angularSpeed);
     }
+}
+
+/**
+ * Receives time sync requests and responds with timestamps.
+ *
+ * @param[in] payload       TimeSyncRequest structure.
+ * @param[in] payloadSize   Size of TimeSyncRequest structure.
+ * @param[in] userData      Instance of App class.
+ */
+void App_timeSyncReqChannelCallback(const uint8_t* payload,
+                                    uint8_t        payloadSize,
+                                    void*          userData)
+{
+    const uint32_t t2 = millis();
+    if ((payload == nullptr) ||
+        (userData == nullptr) ||
+        (payloadSize != TIME_SYNC_REQUEST_CHANNEL_DLC))
+    {
+        return;
+    }
+
+    App* app = static_cast<App*>(userData);
+
+    TimeSyncRequest req;
+    memcpy(&req, payload, sizeof(req));
+
+    app->handleTimeSyncRequest(req, t2);
+}
+
+void App::handleTimeSyncRequest(const TimeSyncRequest& req, const uint32_t t2)
+{
+    TimeSyncResponse rsp{req.seq, req.t1_ms, t2, millis()};
+
+    if (m_serialMuxProtChannelIdTimeSyncRsp == 0U)
+    {
+        return;
+    }
+    (void)m_smpServer.sendData(m_serialMuxProtChannelIdTimeSyncRsp, &rsp, sizeof(rsp));
 }

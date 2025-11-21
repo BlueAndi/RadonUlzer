@@ -88,6 +88,18 @@
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
+/** Name of the Channel to receive Time Sync Request from the DCS. */
+#define TIME_SYNC_REQUEST_CHANNEL_NAME "TIME_SYNC_REQ"
+
+/** DLC of Time Sync Request Channel */
+#define TIME_SYNC_REQUEST_CHANNEL_DLC (sizeof(TimeSyncRequest))
+
+/** Name of the Channel to send Time Sync Response to the DCS. */
+#define TIME_SYNC_RESPONSE_CHANNEL_NAME "TIME_SYNC_RSP"
+
+/** DLC of Time Sync Response Channel */
+#define TIME_SYNC_RESPONSE_CHANNEL_DLC (sizeof(TimeSyncResponse))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -196,6 +208,7 @@ typedef struct _RobotSpeed
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
 {
+    int64_t                  timestamp;   /**< Timestamp [ms]. */
     int32_t                  xPos;        /**< X position [mm]. */
     int32_t                  yPos;        /**< Y position [mm]. */
     int32_t                  orientation; /**< Orientation [mrad]. */
@@ -216,6 +229,22 @@ typedef struct _LineSensorData
 {
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
+
+/** Struct of the "Time Sync Request" channel payload. */
+typedef struct _TimeSyncRequest
+{
+    uint32_t seq;  /**< Sequence number to match request/response. */
+    uint32_t t1_ms;/**< Timestamp at sender when request left [ms]. */
+} __attribute__((packed)) TimeSyncRequest;
+
+/** Struct of the "Time Sync Response" channel payload. */
+typedef struct _TimeSyncResponse
+{
+    uint32_t seq;   /**< Sequence number to match request/response. */
+    uint32_t t1_ms; /**< Echo of request timestamp [ms]. */
+    uint32_t t2_ms; /**< Timestamp at receiver when request arrived [ms]. */
+    uint32_t t3_ms; /**< Timestamp at receiver when response sent [ms]. */
+} __attribute__((packed)) TimeSyncResponse;
 
 /******************************************************************************
  * Functions
