@@ -140,23 +140,6 @@ namespace SMPChannelPayload
 
     } Status; /**< Status flag */
 
-    /**
-     * Range in which a detected object may be.
-     * Equivalent to the brightness levels.
-     * Values estimated from user's guide.
-     */
-    typedef enum : uint8_t
-    {
-        RANGE_NO_OBJECT = 0U, /**< No object detected */
-        RANGE_25_30,          /**< Object detected in range 25 to 30 cm */
-        RANGE_20_25,          /**< Object detected in range 20 to 25 cm */
-        RANGE_15_20,          /**< Object detected in range 15 to 20 cm */
-        RANGE_10_15,          /**< Object detected in range 10 to 15 cm */
-        RANGE_5_10,           /**< Object detected in range 5 to 10 cm */
-        RANGE_0_5             /**< Object detected in range 0 to 5 cm */
-
-    } Range; /**< Proximity Sensor Ranges */
-
 } /* namespace SMPChannelPayload */
 
 /** Struct of the "Command" channel payload. */
@@ -215,7 +198,6 @@ typedef struct _VehicleData
     int32_t                  left;        /**< Left motor speed [mm/s]. */
     int32_t                  right;       /**< Right motor speed [mm/s]. */
     int32_t                  center;      /**< Center speed [mm/s]. */
-    SMPChannelPayload::Range proximity;   /**< Range at which object is found [range]. */
 } __attribute__((packed)) VehicleData;
 
 /** Struct of the "Status" channel payload. */

@@ -140,6 +140,7 @@ static const char gStarWarsMelody[] PROGMEM = "! O2 T100 MS"
  * External Functions
  *****************************************************************************/
 
+#if CONFIG_HAS_BUZZER
 void Sound::playAlarm()
 {
     IBuzzer& buzzer = Board::getInstance().getBuzzer();
@@ -200,6 +201,19 @@ void Sound::playMelody(Melody melody)
         buzzer.playMelodyPGM(song);
     }
 }
+#else  /* CONFIG_HAS_BUZZER */
+void Sound::playAlarm()
+{
+}
+
+void Sound::playBeep()
+{
+}
+
+void Sound::playMelody(Melody)
+{
+}
+#endif /* CONFIG_HAS_BUZZER */
 
 /******************************************************************************
  * Local Functions

@@ -65,7 +65,6 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
-    m_proximitySensors.initFrontSensor();
     m_settings.init();
 }
 
@@ -85,8 +84,6 @@ Board::Board() :
     m_buttonA(m_keyboard),
     m_buttonB(m_keyboard),
     m_buttonC(m_keyboard),
-    m_buzzer(m_robot.getSpeaker(RobotDeviceNames::SPEAKER_NAME)),
-    m_display(m_robot.getDisplay(RobotDeviceNames::DISPLAY_NAME)),
     m_encoders(m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME),
                m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(
@@ -102,8 +99,6 @@ Board::Board() :
     m_ledRed(m_robot.getLED(RobotDeviceNames::LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(RobotDeviceNames::LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(RobotDeviceNames::LED_GREEN_NAME)),
-    m_proximitySensors(m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_LEFT_NAME),
-                       m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_RIGHT_NAME)),
     m_serialDrv(m_robot.getEmitter(RobotDeviceNames::EMITTER_NAME_SERIAL),
                 m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)),
     m_supervisorSerialDrv(m_robot.getEmitter(SupervisorDeviceNames::SUPERVISOR_SENDER_NAME),
@@ -123,10 +118,6 @@ void Board::enableSimulationDevices()
     webots::DistanceSensor* lightSensor2   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME);
     webots::DistanceSensor* lightSensor3   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME);
     webots::DistanceSensor* lightSensor4   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME);
-    webots::DistanceSensor* proximitySensorFrontLeft =
-        m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_LEFT_NAME);
-    webots::DistanceSensor* proximitySensorFrontRight =
-        m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_RIGHT_NAME);
     webots::Receiver* receiver           = m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL);
     webots::Receiver* supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
 
@@ -168,16 +159,6 @@ void Board::enableSimulationDevices()
     if (nullptr != lightSensor4)
     {
         lightSensor4->enable(timeStep);
-    }
-
-    if (nullptr != proximitySensorFrontLeft)
-    {
-        proximitySensorFrontLeft->enable(timeStep);
-    }
-
-    if (nullptr != proximitySensorFrontRight)
-    {
-        proximitySensorFrontRight->enable(timeStep);
     }
 
     if (nullptr != receiver)

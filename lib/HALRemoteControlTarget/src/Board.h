@@ -47,15 +47,12 @@
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
-#include <Buzzer.h>
-#include <Display.h>
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
-#include <ProximitySensors.h>
 #include <Settings.h>
 
 /******************************************************************************
@@ -120,26 +117,6 @@ public:
     }
 
     /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    IBuzzer& getBuzzer() final
-    {
-        return m_buzzer;
-    }
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    IDisplay& getDisplay() final
-    {
-        return m_display;
-    }
-
-    /**
      * Get encoders.
      *
      * @return Encoders driver.
@@ -200,16 +177,6 @@ public:
     }
 
     /**
-     * Get proximity sensors driver.
-     *
-     * @return Proximity sensors driver
-     */
-    IProximitySensors& getProximitySensors() final
-    {
-        return m_proximitySensors;
-    }
-
-    /**
      * Get settings instance.
      *
      * @return Settings
@@ -224,7 +191,6 @@ public:
      */
     void process() final
     {
-        m_buzzer.process();
     }
 
 private:
@@ -236,12 +202,6 @@ private:
 
     /** Button C driver */
     ButtonC m_buttonC;
-
-    /** Buzzer driver */
-    Buzzer m_buzzer;
-
-    /** Display driver */
-    Display m_display;
 
     /** Encoders driver */
     Encoders m_encoders;
@@ -260,9 +220,6 @@ private:
 
     /** Green LED driver */
     LedGreen m_ledGreen;
-
-    /** Proximity sensors */
-    ProximitySensors m_proximitySensors;
 
     /** Settings */
     Settings m_settings;

@@ -67,15 +67,9 @@
 
 void LineSensorsCalibrationState::entry()
 {
-    IDisplay&          display     = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
     Odometry&          odometry    = Odometry::getInstance();
     ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
-
-    display.clear();
-    display.print("Calib");
-    display.gotoXY(0, 1);
-    display.print("Lines");
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
@@ -139,14 +133,10 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
     m_timer.stop();
-
-    display.clear();
-    display.print("Idle");
 }
 
 /******************************************************************************

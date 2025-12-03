@@ -87,8 +87,7 @@ App::App() :
     m_statusTimeoutTimer(),
     m_sendLineSensorsDataInterval(),
     m_smpServer(Serial, this),
-    m_isLineSensorCalibPending(false),
-    m_movAvgProximitySensor()
+    m_isLineSensorCalibPending(false)
 {
 }
 
@@ -319,28 +318,15 @@ void App::systemStatusCallback(SMPChannelPayload::Status status)
 
 void App::reportVehicleData()
 {
-    IProximitySensors& proximitySensors = Board::getInstance().getProximitySensors();
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
     VehicleData        payload;
     int32_t            xPos          = 0;
     int32_t            yPos          = 0;
-    uint8_t            maxCounts     = 0U;
-    uint8_t            averageCounts = 0U;
-    uint8_t            leftCounts    = 0U;
-    uint8_t            rightCounts   = 0U;
     int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
     int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
     int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
-    uint32_t        timestamp     = millis();
-
-    proximitySensors.read();
-    leftCounts  = proximitySensors.countsFrontWithLeftLeds();
-    rightCounts = proximitySensors.countsFrontWithRightLeds();
-
-    /* Use the sensor value with the maximum counts. */
-    maxCounts     = leftCounts > rightCounts ? leftCounts : rightCounts;
-    averageCounts = m_movAvgProximitySensor.write(maxCounts);
+    uint32_t           timestamp     = millis();
 
     odometry.getPosition(xPos, yPos);
 
@@ -352,7 +338,6 @@ void App::reportVehicleData()
     payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
     payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
     payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
-    payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));

@@ -92,11 +92,6 @@ public:
 protected:
 private:
     /**
-     * Duration in ms how long the application name shall be shown at startup.
-     */
-    static const uint32_t APP_NAME_DURATION = 2000U;
-
-    /**
      * Default constructor.
      */
     StartupState()

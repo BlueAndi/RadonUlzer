@@ -65,16 +65,8 @@
 
 void StartupState::entry()
 {
-    IDisplay& display = Board::getInstance().getDisplay();
-
     /* Initialize HAL */
     Board::getInstance().init();
-
-    display.clear();
-    display.print("Remote");
-    display.gotoXY(0, 1);
-    display.print("Ctrl");
-    delay(APP_NAME_DURATION);
 }
 
 void StartupState::process(StateMachine& sm)

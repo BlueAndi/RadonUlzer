@@ -33,7 +33,6 @@
  * Includes
  *****************************************************************************/
 #include "ErrorState.h"
-#include <Board.h>
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
 
@@ -63,15 +62,9 @@
 
 void ErrorState::entry()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
-
-    display.clear();
-    display.print("Error");
-    display.gotoXY(0, 1);
-    display.print(m_errorMsg);
 }
 
 void ErrorState::process(StateMachine& sm)

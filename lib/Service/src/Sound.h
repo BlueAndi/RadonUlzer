@@ -44,6 +44,11 @@
  * Includes
  *****************************************************************************/
 
+/* Allow applications without buzzer hardware to stub out sound handling. */
+#ifndef CONFIG_HAS_BUZZER
+#define CONFIG_HAS_BUZZER 1
+#endif
+
 /** The buzzer can play different kind of notification sounds. */
 namespace Sound
 {

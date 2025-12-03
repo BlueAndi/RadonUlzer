@@ -45,13 +45,10 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IButton.h>
-#include <IBuzzer.h>
-#include <IDisplay.h>
 #include <IEncoders.h>
 #include <ILineSensors.h>
 #include <IMotors.h>
 #include <ILed.h>
-#include <IProximitySensors.h>
 #include <ISettings.h>
 
 #if CONFIG_SUPERVISOR != 0
@@ -106,20 +103,6 @@ public:
     virtual IButton& getButtonC() = 0;
 
     /**
-     * Get buzzer driver.
-     *
-     * @return Buzzer driver.
-     */
-    virtual IBuzzer& getBuzzer() = 0;
-
-    /**
-     * Get LCD driver.
-     *
-     * @return LCD driver.
-     */
-    virtual IDisplay& getDisplay() = 0;
-
-    /**
      * Get encoders driver.
      *
      * @return Encoders driver.
@@ -160,13 +143,6 @@ public:
      * @return Green LED driver.
      */
     virtual ILed& getGreenLed() = 0;
-
-    /**
-     * Get proximity sensors driver.
-     *
-     * @return Proximity sensors driver
-     */
-    virtual IProximitySensors& getProximitySensors() = 0;
 
     /**
      * Get settings instance.
