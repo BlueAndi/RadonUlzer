@@ -1,0 +1,176 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../../protos/Zumo32U4_0.proto"
+EXTERNPROTO "../../protos/Zumo32U4_1.proto"
+EXTERNPROTO "../../protos/Zumo32U4_2.proto"
+EXTERNPROTO "../../protos/Zumo32U4_3.proto"
+EXTERNPROTO "../../protos/Zumo32U4_4.proto"
+EXTERNPROTO "../../protos/ZumoComSystem.proto"
+EXTERNPROTO "../../protos/SensorFusionTrack.proto"
+IMPORTABLE EXTERNPROTO "../../protos/Supervisor.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/shapes/protos/TexturedBoxShape.proto"
+
+
+WorldInfo {
+  info [
+    "Example uses of Track nodes, as caterpillar tracks on a robot, or as a conveyor belt."
+  ]
+  title "Track"
+  basicTimeStep 8
+  contactProperties [
+    ContactProperties {
+      material1 "rubber"
+      material2 "cardboard"
+      coulombFriction [
+        0.65
+      ]
+    }
+  ]
+}
+Viewpoint {
+  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
+  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+SensorFusionTrack {
+  contactMaterial "cardboard"
+}
+DEF ROBOT Zumo32U4_0 {
+  translation -0.24713614078815466 -0.04863962992854465 0.013994298332013683
+  rotation -1.0564747468923541e-06 8.746699709178704e-07 0.9999999999990595 1.5880805820884731
+  name "Zumo"
+  contactMaterial "rubber"
+  zumoComSystemSlot ZumoComSystem {
+    name "ZumoComSystem"
+  }
+}
+Supervisor {
+  name "Supervisor"
+  controller "supervisor"
+  supervisor TRUE
+}
+
+Solid {
+  translation 0.92 0.92 -0.049
+  rotation 0.5773512691895147 0.5773492691885823 0.5773502691890485 -2.094395307179586
+  children [
+    TexturedBoxShape {
+      textureUrl [
+        "../../protos/markers/13.png"
+      ]
+    }
+  ]
+  name "solid_tr"
+  boundingObject Box {
+    size 0.1 0.1 0.1
+  }
+}
+Solid {
+  translation 0.92 -0.92 -0.049
+  rotation 0.5773512691895147 0.5773492691885823 0.5773502691890485 -2.094395307179586
+  children [
+    TexturedBoxShape {
+      textureUrl [
+        "../../protos/markers/35.png"
+      ]
+    }
+  ]
+  name "solid_br"
+  boundingObject Box {
+    size 0.1 0.1 0.1
+  }
+}
+Solid {
+  translation -0.92 0.92 -0.049
+  rotation 0.5773512691895147 0.5773492691885823 0.5773502691890485 -2.094395307179586
+  children [
+    TexturedBoxShape {
+      textureUrl [
+        "../../protos/markers/6.png"
+      ]
+    }
+  ]
+  name "solid_tl"
+  boundingObject Box {
+    size 0.1 0.1 0.1
+  }
+}
+Solid {
+  translation -0.92 -0.92 -0.049
+  rotation 0.5773512691895147 0.5773492691885823 0.5773502691890485 -2.094395307179586
+  children [
+    TexturedBoxShape {
+      textureUrl [
+        "../../protos/markers/49.png"
+      ]
+    }
+  ]
+  name "solid_bl"
+  boundingObject Box {
+    size 0.1 0.1 0.1
+  }
+}
+
+Robot {
+  translation 0 0 3.15
+  rotation -0.5773509358554485 0.5773489358556708 0.5773509358554485 2.0944
+  children [
+    Pose {
+      translation 0 0 0.0415
+      rotation 0 0 1 -1.570796
+      children [
+        Shape {
+          appearance PBRAppearance {
+            baseColor 0.0820075 0.364731 0.8
+            roughness 1
+            metalness 0
+          }
+          geometry DEF BODY Cylinder {
+            height 0.08
+            radius 0.045
+          }
+        }
+      ]
+    }
+    Camera {
+      translation 0.04 0 0.0915
+      children [
+        Pose {
+          translation -0.015 0 0
+          rotation -0.5771968951617173 -0.577656895078166 -0.5771968951617173 -2.093935
+          children [
+            Shape {
+              appearance PBRAppearance {
+                roughness 1
+                metalness 0
+              }
+              geometry Cylinder {
+                height 0.03
+                radius 0.01
+              }
+            }
+          ]
+        }
+      ]
+      fieldOfView 1
+      width 1920
+      height 1440
+    }
+  ]
+  name "MyBot"
+  boundingObject Pose {
+    translation 0 0 0.0415
+    rotation 0 0 1 -1.570796
+    children [
+      USE BODY
+    ]
+  }
+  controller "<extern>"
+}
+
+
