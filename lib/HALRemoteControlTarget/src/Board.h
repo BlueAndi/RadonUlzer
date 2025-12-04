@@ -53,6 +53,7 @@
 #include <LedRed.h>
 #include <LedYellow.h>
 #include <LedGreen.h>
+#include <IMU.h>
 #include <Settings.h>
 
 /******************************************************************************
@@ -177,6 +178,16 @@ public:
     }
 
     /**
+     * Get IMU (Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
+    /**
      * Get settings instance.
      *
      * @return Settings
@@ -220,6 +231,9 @@ private:
 
     /** Green LED driver */
     LedGreen m_ledGreen;
+
+    /** IMU driver */
+    IMU m_imu;
 
     /** Settings */
     Settings m_settings;

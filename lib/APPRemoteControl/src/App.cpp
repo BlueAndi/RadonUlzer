@@ -38,6 +38,7 @@
 #include "DrivingState.h"
 #include "LineSensorsCalibrationState.h"
 #include <Board.h>
+#include <IIMU.h>
 #include <Speedometer.h>
 #include <DifferentialDrive.h>
 #include <Odometry.h>
@@ -320,6 +321,7 @@ void App::reportVehicleData()
 {
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
+    IIMU&              imu              = Board::getInstance().getIMU();
     VehicleData        payload;
     int32_t            xPos          = 0;
     int32_t            yPos          = 0;
@@ -327,6 +329,13 @@ void App::reportVehicleData()
     int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
     int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
     uint32_t           timestamp     = millis();
+    IMUData            accelerationValues;
+    IMUData            turnRates;
+
+    imu.readAccelerometer();
+    imu.readGyro();
+    imu.getAccelerationValues(&accelerationValues);
+    imu.getTurnRates(&turnRates);
 
     odometry.getPosition(xPos, yPos);
 
@@ -338,6 +347,8 @@ void App::reportVehicleData()
     payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
     payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
     payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
+    payload.accelerationX = accelerationValues.valueX;
+    payload.turnRateZ     = turnRates.valueZ;
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));

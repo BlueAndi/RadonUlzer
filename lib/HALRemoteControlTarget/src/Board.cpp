@@ -63,6 +63,10 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
+    (void)m_imu.init();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();
+    m_imu.calibrate();
     m_settings.init();
 }
 
@@ -85,6 +89,7 @@ Board::Board() :
     m_ledRed(),
     m_ledYellow(),
     m_ledGreen(),
+    m_imu(),
     m_settings()
 {
 }

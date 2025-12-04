@@ -65,6 +65,10 @@ void Board::init()
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
+    (void)m_imu.init();
+    m_imu.enableDefault();
+    m_imu.configureForTurnSensing();
+    m_imu.calibrate();
     m_settings.init();
 }
 
@@ -99,6 +103,9 @@ Board::Board() :
     m_ledRed(m_robot.getLED(RobotDeviceNames::LED_RED_NAME)),
     m_ledYellow(m_robot.getLED(RobotDeviceNames::LED_YELLOW_NAME)),
     m_ledGreen(m_robot.getLED(RobotDeviceNames::LED_GREEN_NAME)),
+    m_imu(m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME),
+          m_robot.getGyro(RobotDeviceNames::GYRO_NAME),
+          m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME)),
     m_serialDrv(m_robot.getEmitter(RobotDeviceNames::EMITTER_NAME_SERIAL),
                 m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL)),
     m_supervisorSerialDrv(m_robot.getEmitter(SupervisorDeviceNames::SUPERVISOR_SENDER_NAME),
@@ -118,6 +125,9 @@ void Board::enableSimulationDevices()
     webots::DistanceSensor* lightSensor2   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME);
     webots::DistanceSensor* lightSensor3   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME);
     webots::DistanceSensor* lightSensor4   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME);
+    webots::Accelerometer*  accelerometer  = m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME);
+    webots::Gyro*           gyro           = m_robot.getGyro(RobotDeviceNames::GYRO_NAME);
+    webots::Compass*        magnetometer   = m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME);
     webots::Receiver* receiver           = m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL);
     webots::Receiver* supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
 
@@ -159,6 +169,21 @@ void Board::enableSimulationDevices()
     if (nullptr != lightSensor4)
     {
         lightSensor4->enable(timeStep);
+    }
+
+    if (nullptr != accelerometer)
+    {
+        accelerometer->enable(timeStep);
+    }
+
+    if (nullptr != gyro)
+    {
+        gyro->enable(timeStep);
+    }
+
+    if (nullptr != magnetometer)
+    {
+        magnetometer->enable(timeStep);
     }
 
     if (nullptr != receiver)

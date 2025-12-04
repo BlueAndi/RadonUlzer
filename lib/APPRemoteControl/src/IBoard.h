@@ -49,6 +49,7 @@
 #include <ILineSensors.h>
 #include <IMotors.h>
 #include <ILed.h>
+#include <IIMU.h>
 #include <ISettings.h>
 
 #if CONFIG_SUPERVISOR != 0
@@ -143,6 +144,13 @@ public:
      * @return Green LED driver.
      */
     virtual ILed& getGreenLed() = 0;
+
+    /**
+     * Get IMU (Inertial Measurement Unit) driver.
+     *
+     * @return IMU driver
+     */
+    virtual IIMU& getIMU() = 0;
 
     /**
      * Get settings instance.
