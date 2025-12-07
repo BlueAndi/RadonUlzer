@@ -100,6 +100,7 @@ public:
      * Handle a Time Sync request and send response via SerialMuxProt.
      *
      * @param[in] req Time sync request payload.
+     * @param[in] t2  Local receive timestamp of the request.
      */
     void handleTimeSyncRequest(const TimeSyncRequest& req, uint32_t t2);
 
