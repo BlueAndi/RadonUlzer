@@ -44,7 +44,10 @@
  * Includes
  *****************************************************************************/
 
-/* Allow applications without buzzer hardware to stub out sound handling. */
+/**
+ * @def CONFIG_HAS_BUZZER
+ * @brief Enables buzzer support (1 = buzzer available, 0 = no buzzer).
+ */
 #ifndef CONFIG_HAS_BUZZER
 #define CONFIG_HAS_BUZZER 1
 #endif
