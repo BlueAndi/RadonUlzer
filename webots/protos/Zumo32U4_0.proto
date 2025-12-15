@@ -16,6 +16,13 @@ PROTO Zumo32U4_0 [
     translation IS translation
     rotation IS rotation
     children [
+      GPS {
+	accuracy 0
+	noiseCorrelation 0
+	resolution -1
+	speedNoise 0
+	speedResolution -1
+      }
       Receiver {
         name "serialComRx"
         type "serial"
