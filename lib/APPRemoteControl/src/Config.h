@@ -25,20 +25,39 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @brief  Error state
+ * @brief  Compile time configuration for the Remote Control application
  * @author Andreas Merkle <web@blue-andi.de>
+ *
+ * @addtogroup HALInterfaces
+ *
+ * @{
  */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
+
+/** Used to disable a feature at compile time. */
+#define CONFIG_DISABLE 0
+
+/** Used to enable a feature at compile time. */
+#define CONFIG_ENABLE 1
+
+#ifndef CONFIG_BUZZER
+/** Configuration for buzzer usage. */
+#define CONFIG_BUZZER CONFIG_ENABLE
+#endif /* CONFIG_BUZZER */
+
+#ifndef CONFIG_DISPLAY
+/** Configuration for display usage. */
+#define CONFIG_DISPLAY CONFIG_ENABLE
+#endif /* CONFIG_DISPLAY */
 
 /******************************************************************************
  * Includes
- *****************************************************************************/
-#include "ErrorState.h"
-#include <Board.h>
-#include <StateMachine.h>
-#include <DifferentialDrive.h>
-
-/******************************************************************************
- * Compiler Switches
  *****************************************************************************/
 
 /******************************************************************************
@@ -46,74 +65,12 @@
  *****************************************************************************/
 
 /******************************************************************************
- * Types and classes
+ * Types and Classes
  *****************************************************************************/
 
 /******************************************************************************
- * Prototypes
+ * Functions
  *****************************************************************************/
 
-/******************************************************************************
- * Local Variables
- *****************************************************************************/
-
-/******************************************************************************
- * Public Methods
- *****************************************************************************/
-
-void ErrorState::entry()
-{
-#if CONFIG_DISPLAY == CONFIG_ENABLE
-    IDisplay&          display   = Board::getInstance().getDisplay();
-#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
-    DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-
-    diffDrive.disable();
-
-#if CONFIG_DISPLAY == CONFIG_ENABLE
-    display.clear();
-    display.print("Error");
-    display.gotoXY(0, 1);
-    display.print(m_errorMsg);
-#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
-}
-
-void ErrorState::process(StateMachine& sm)
-{
-    /* Nothing to do. */
-    (void)sm;
-}
-
-void ErrorState::exit()
-{
-    /* Nothing to do. */
-}
-
-void ErrorState::setErrorMsg(const char* msg)
-{
-    if (nullptr == msg)
-    {
-        m_errorMsg[0] = '\0';
-    }
-    else
-    {
-        strncpy(m_errorMsg, msg, ERROR_MSG_SIZE - 1);
-        m_errorMsg[ERROR_MSG_SIZE - 1] = '\0';
-    }
-}
-
-/******************************************************************************
- * Protected Methods
- *****************************************************************************/
-
-/******************************************************************************
- * Private Methods
- *****************************************************************************/
-
-/******************************************************************************
- * External Functions
- *****************************************************************************/
-
-/******************************************************************************
- * Local Functions
- *****************************************************************************/
+#endif /* CONFIG_H */
+/** @} */

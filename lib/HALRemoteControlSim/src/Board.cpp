@@ -85,8 +85,12 @@ Board::Board() :
     m_buttonA(m_keyboard),
     m_buttonB(m_keyboard),
     m_buttonC(m_keyboard),
+#if CONFIG_BUZZER == CONFIG_ENABLE
     m_buzzer(m_robot.getSpeaker(RobotDeviceNames::SPEAKER_NAME)),
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(m_robot.getDisplay(RobotDeviceNames::DISPLAY_NAME)),
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     m_encoders(m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME),
                m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(

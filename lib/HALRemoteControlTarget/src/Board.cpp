@@ -80,8 +80,12 @@ Board::Board() :
     m_buttonA(),
     m_buttonB(),
     m_buttonC(),
+#if CONFIG_BUZZER == CONFIG_ENABLE
     m_buzzer(),
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(),
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     m_encoders(),
     m_lineSensors(),
     m_motors(),

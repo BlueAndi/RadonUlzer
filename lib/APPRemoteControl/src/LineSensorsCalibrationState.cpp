@@ -67,15 +67,19 @@
 
 void LineSensorsCalibrationState::entry()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display     = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
     Odometry&          odometry    = Odometry::getInstance();
     ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Calib");
     display.gotoXY(0, 1);
     display.print("Lines");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
@@ -139,14 +143,18 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display   = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
     m_timer.stop();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Idle");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 /******************************************************************************

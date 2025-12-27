@@ -65,16 +65,20 @@
 
 void StartupState::entry()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay& display = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /* Initialize HAL */
     Board::getInstance().init();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Remote");
     display.gotoXY(0, 1);
     display.print("Ctrl");
     delay(APP_NAME_DURATION);
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 void StartupState::process(StateMachine& sm)

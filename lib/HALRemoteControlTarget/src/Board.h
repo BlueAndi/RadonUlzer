@@ -43,12 +43,20 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <Config.h>
 #include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
+
+#if CONFIG_BUZZER == CONFIG_ENABLE
 #include <Buzzer.h>
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
 #include <Display.h>
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
@@ -119,6 +127,8 @@ public:
         return m_buttonC;
     }
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /**
      * Get buzzer driver.
      *
@@ -129,6 +139,10 @@ public:
         return m_buzzer;
     }
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /**
      * Get LCD driver.
      *
@@ -138,6 +152,8 @@ public:
     {
         return m_display;
     }
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /**
      * Get encoders.
@@ -224,7 +240,9 @@ public:
      */
     void process() final
     {
+#if CONFIG_BUZZER == CONFIG_ENABLE
         m_buzzer.process();
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
     }
 
 private:
@@ -237,11 +255,19 @@ private:
     /** Button C driver */
     ButtonC m_buttonC;
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /** Buzzer driver */
     Buzzer m_buzzer;
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /** Display driver */
     Display m_display;
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /** Encoders driver */
     Encoders m_encoders;

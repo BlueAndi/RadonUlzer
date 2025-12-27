@@ -63,11 +63,15 @@
 
 void DrivingState::entry()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display   = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Drv");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     m_isActive = true;
     diffDrive.setLinearSpeed(0, 0);
@@ -82,7 +86,9 @@ void DrivingState::process(StateMachine& sm)
 
 void DrivingState::exit()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display   = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
     
     m_isActive = false;
@@ -91,8 +97,10 @@ void DrivingState::exit()
     diffDrive.setLinearSpeed(0, 0);
     diffDrive.disable();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Idle");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)

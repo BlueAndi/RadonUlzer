@@ -45,8 +45,15 @@
  *****************************************************************************/
 #include <stdint.h>
 #include <IButton.h>
+
+#if CONFIG_BUZZER == CONFIG_ENABLE
 #include <IBuzzer.h>
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
 #include <IDisplay.h>
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
 #include <IEncoders.h>
 #include <ILineSensors.h>
 #include <IMotors.h>
@@ -105,6 +112,8 @@ public:
      */
     virtual IButton& getButtonC() = 0;
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /**
      * Get buzzer driver.
      *
@@ -112,12 +121,18 @@ public:
      */
     virtual IBuzzer& getBuzzer() = 0;
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /**
      * Get LCD driver.
      *
      * @return LCD driver.
      */
     virtual IDisplay& getDisplay() = 0;
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /**
      * Get encoders driver.

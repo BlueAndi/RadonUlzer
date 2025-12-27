@@ -41,6 +41,21 @@
  * Compiler Switches
  *****************************************************************************/
 
+#ifndef CONFIG_DISABLE
+/** Used to disable a feature at compile time. */
+#define CONFIG_DISABLE 0
+#endif /* CONFIG_DISABLE */
+
+#ifndef CONFIG_ENABLE
+/** Used to enable a feature at compile time. */
+#define CONFIG_ENABLE 1
+#endif /* CONFIG_ENABLE */
+
+#ifndef CONFIG_BUZZER
+/** Configuration for buzzer usage. */
+#define CONFIG_BUZZER CONFIG_ENABLE
+#endif /* CONFIG_BUZZER */
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -56,6 +71,8 @@
 /******************************************************************************
  * Local Variables
  *****************************************************************************/
+
+#if CONFIG_BUZZER == CONFIG_ENABLE
 
 /** Alarm frequency in Hz. */
 static const uint16_t ALARM_FREQ = 500;
@@ -124,6 +141,8 @@ static const char gStarWarsMelody[] PROGMEM = "! O2 T100 MS"
                                               "ML"
                                               "a8. r16 f8 r16 >c16 a2. r8";
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
 /******************************************************************************
  * Public Methods
  *****************************************************************************/
@@ -142,6 +161,7 @@ static const char gStarWarsMelody[] PROGMEM = "! O2 T100 MS"
 
 void Sound::playAlarm()
 {
+#if CONFIG_BUZZER == CONFIG_ENABLE
     IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
     /* Req. 3.4.5-2:
@@ -164,20 +184,24 @@ void Sound::playAlarm()
 
     delay(SILENCE_DURATION);
     buzzer.playFrequency(ALARM_FREQ, ALARM_DURATION, VOLUME);
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
 }
 
 void Sound::playBeep()
 {
+#if CONFIG_BUZZER == CONFIG_ENABLE
     IBuzzer& buzzer = Board::getInstance().getBuzzer();
 
     /* Req. 3.4.5-1:
      * The Sound shall play a sound of 1000Hz frequency and 1s duration.
      */
     buzzer.playFrequency(BEEP_FREQ, BEEP_DURATION, VOLUME);
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
 }
 
 void Sound::playMelody(Melody melody)
 {
+#if CONFIG_BUZZER == CONFIG_ENABLE
     IBuzzer&    buzzer = Board::getInstance().getBuzzer();
     const char* song = nullptr;
 
@@ -199,6 +223,7 @@ void Sound::playMelody(Melody melody)
     {
         buzzer.playMelodyPGM(song);
     }
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
 }
 
 /******************************************************************************
