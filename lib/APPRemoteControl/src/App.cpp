@@ -43,6 +43,11 @@
 #include <Odometry.h>
 #include <Logging.h>
 #include <Util.h>
+#include <Config.h>
+
+#if CONFIG_IMU == CONFIG_ENABLE
+#include <IMU.h>
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
 /******************************************************************************
  * Compiler Switches
@@ -317,10 +322,12 @@ void App::systemStatusCallback(SMPChannelPayload::Status status)
 
 void App::reportVehicleData()
 {
-    IProximitySensors& proximitySensors = Board::getInstance().getProximitySensors();
+    Board&             board            = Board::getInstance();
+    IProximitySensors& proximitySensors = board.getProximitySensors();
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
     VehicleData        payload;
+    uint32_t           timestamp     = millis();
     int32_t            xPos          = 0;
     int32_t            yPos          = 0;
     uint8_t            maxCounts     = 0U;
@@ -330,6 +337,16 @@ void App::reportVehicleData()
     int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
     int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
     int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
+#if CONFIG_IMU == CONFIG_ENABLE
+    IIMU&   imu = board.getIMU();
+    IMUData accelerationValues;
+    IMUData turnRates;
+
+    imu.readAccelerometer();
+    imu.readGyro();
+    imu.getAccelerationValues(&accelerationValues);
+    imu.getTurnRates(&turnRates);
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     proximitySensors.read();
     leftCounts  = proximitySensors.countsFrontWithLeftLeds();
@@ -340,6 +357,7 @@ void App::reportVehicleData()
     averageCounts = m_movAvgProximitySensor.write(maxCounts);
 
     odometry.getPosition(xPos, yPos);
+    payload.timestamp   = timestamp;
     payload.xPos        = xPos;
     payload.yPos        = yPos;
     payload.orientation = odometry.getOrientation();
@@ -347,6 +365,10 @@ void App::reportVehicleData()
     payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
     payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
     payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
+#if CONFIG_IMU == CONFIG_ENABLE
+    payload.accelerationX = accelerationValues.valueX;
+    payload.turnRateZ     = turnRates.valueZ;
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));

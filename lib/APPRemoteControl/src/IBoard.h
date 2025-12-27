@@ -54,6 +54,10 @@
 #include <IDisplay.h>
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
+#if CONFIG_IMU == CONFIG_ENABLE
+#include <IIMU.h>
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
+
 #include <IEncoders.h>
 #include <ILineSensors.h>
 #include <IMotors.h>
@@ -133,6 +137,16 @@ public:
     virtual IDisplay& getDisplay() = 0;
 
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /**
+     * Get IMU driver.
+     *
+     * @return IMU driver.
+     */
+    virtual IIMU& getIMU() = 0;
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /**
      * Get encoders driver.

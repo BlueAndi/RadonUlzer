@@ -56,6 +56,10 @@
 #include <Display.h>
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
+#if CONFIG_IMU == CONFIG_ENABLE
+#include <IMU.h>
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
+
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
@@ -159,6 +163,20 @@ public:
     }
 
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /**
+     * Get IMU driver.
+     *
+     * @return IMU driver.
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /**
      * Get encoders.
@@ -292,6 +310,13 @@ private:
     Display m_display;
 
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /** IMU driver */
+    IMU m_imu;
+
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /** Encoders driver */
     Encoders m_encoders;

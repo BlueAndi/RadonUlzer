@@ -56,6 +56,11 @@
 #define CONFIG_DISPLAY CONFIG_ENABLE
 #endif /* CONFIG_DISPLAY */
 
+#ifndef CONFIG_IMU
+/** Configuration for IMU usage. */
+#define CONFIG_IMU CONFIG_ENABLE
+#endif /* CONFIG_IMU */
+
 /******************************************************************************
  * Includes
  *****************************************************************************/

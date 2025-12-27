@@ -62,6 +62,14 @@
 
 void Board::init()
 {
+#if CONFIG_IMU == CONFIG_ENABLE
+    if (true == m_imu.init())
+    {
+        m_imu.enableDefault();
+        m_imu.configureForTurnSensing();
+        m_imu.calibrate();
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
@@ -91,6 +99,10 @@ Board::Board() :
 #if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(m_robot.getDisplay(RobotDeviceNames::DISPLAY_NAME)),
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+#if CONFIG_IMU == CONFIG_ENABLE
+    m_imu(m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME), m_robot.getGyro(RobotDeviceNames::GYRO_NAME),
+          m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME)),
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders(m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME),
                m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(
@@ -133,6 +145,11 @@ void Board::enableSimulationDevices()
         m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_RIGHT_NAME);
     webots::Receiver* receiver           = m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL);
     webots::Receiver* supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
+#if CONFIG_IMU == CONFIG_ENABLE
+    webots::Accelerometer* accelerometer = m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME);
+    webots::Gyro*          gyro          = m_robot.getGyro(RobotDeviceNames::GYRO_NAME);
+    webots::Compass*       magnetometer  = m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME);
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     if (nullptr != keyboard)
     {
@@ -193,6 +210,24 @@ void Board::enableSimulationDevices()
     {
         supervisorReceiver->enable(timeStep);
     }
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    if (nullptr != accelerometer)
+    {
+        accelerometer->enable(timeStep);
+    }
+
+    if (nullptr != gyro)
+    {
+        gyro->enable(timeStep);
+    }
+
+    if (nullptr != magnetometer)
+    {
+        magnetometer->enable(timeStep);
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 }
 
 /******************************************************************************

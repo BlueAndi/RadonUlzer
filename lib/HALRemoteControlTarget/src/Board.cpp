@@ -60,6 +60,14 @@
 
 void Board::init()
 {
+#if CONFIG_IMU == CONFIG_ENABLE
+    if (true == m_imu.init())
+    {
+        m_imu.enableDefault();
+        m_imu.configureForTurnSensing();
+        m_imu.calibrate();
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
@@ -86,6 +94,9 @@ Board::Board() :
 #if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(),
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+#if CONFIG_IMU == CONFIG_ENABLE
+    m_imu(),
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders(),
     m_lineSensors(),
     m_motors(),

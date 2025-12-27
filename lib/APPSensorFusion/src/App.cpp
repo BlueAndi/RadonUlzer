@@ -141,7 +141,8 @@ void App::loop()
 void App::sendSensorData()
 {
     SensorData payload;
-    IIMU&      imu      = Board::getInstance().getIMU();
+    Board&     board    = Board::getInstance();
+    IIMU&      imu      = board.getIMU();
     Odometry&  odometry = Odometry::getInstance();
     int32_t    positionOdometryX;
     int32_t    positionOdometryY;

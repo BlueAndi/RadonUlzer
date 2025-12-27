@@ -196,13 +196,16 @@ typedef struct _RobotSpeed
 /** Struct of the "Current Vehicle Data" channel payload. */
 typedef struct _VehicleData
 {
-    int32_t                  xPos;        /**< X position [mm]. */
-    int32_t                  yPos;        /**< Y position [mm]. */
-    int32_t                  orientation; /**< Orientation [mrad]. */
-    int32_t                  left;        /**< Left motor speed [mm/s]. */
-    int32_t                  right;       /**< Right motor speed [mm/s]. */
-    int32_t                  center;      /**< Center speed [mm/s]. */
-    SMPChannelPayload::Range proximity;   /**< Range at which object is found [range]. */
+    uint32_t                 timestamp;     /**< Timestamp [ms]. */
+    int32_t                  xPos;          /**< X position [mm]. */
+    int32_t                  yPos;          /**< Y position [mm]. */
+    int32_t                  orientation;   /**< Orientation [mrad]. */
+    int32_t                  left;          /**< Left motor speed [mm/s]. */
+    int32_t                  right;         /**< Right motor speed [mm/s]. */
+    int32_t                  center;        /**< Center speed [mm/s]. */
+    SMPChannelPayload::Range proximity;     /**< Range at which object is found [range]. */
+    int16_t                  accelerationX; /**< Raw acceleration in X [digit]. */
+    int16_t                  turnRateZ;     /**< Raw turn rate around Z [digit]. */
 } __attribute__((packed)) VehicleData;
 
 /** Struct of the "Status" channel payload. */
