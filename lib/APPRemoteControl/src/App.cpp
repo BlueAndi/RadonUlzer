@@ -386,6 +386,7 @@ bool App::setupSerialMuxProt()
 void App::sendLineSensorsData() const
 {
     ILineSensors&   lineSensors      = Board::getInstance().getLineSensors();
+    (void)lineSensors.readLine();
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         lineSensorIdx    = 0U;
@@ -400,7 +401,6 @@ void App::sendLineSensorsData() const
             ++lineSensorIdx;
         }
     }
-
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdLineSensors, &payload, sizeof(payload));
 }
 
