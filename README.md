@@ -110,9 +110,22 @@ There are 3 ways how to run now the application. Choose according to your needs.
 
 #### Run with Webots launcher (recommended)
 
-Choose this one in case the simulation waits for more than one robot. Adapt the robot name in the *platformio.ini*.
+The Webots launcher is recommended to connect to the simulation.
 
-See (Single Simulation and Multiple Local Extern Robot Controllers)[https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-os=windows#single-simulation-and-multiple-local-extern-robot-controllers] for details.
+It is mandatory if the simulation contains more than one robot. The robot is identified by its name. Adapt the robot name in the [platformio_override.ini](./platformio_override.ini), see *webots_robot_name*.
+
+The Webots documentation has more details about [Single Simulation and Multiple Local Extern Robot Controllers](https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-os=windows#single-simulation-and-multiple-local-extern-robot-controllers).
+
+It is mandatory too if the simulation runs not locally (e.g. Webots run on windows host and RadonUlzer in WSL).
+Set the ip-address and the port in [platformio_override.ini](./platformio_override.ini), see *webots_ip_address* and *webots_protocol*.
+
+Use *ipc* as *webots_protocol* for local connections and *tcp* for remote connections.
+
+| Key | Description |
+| --- | ----------- |
+| webots\_ip\_address | The IP address of the Webots simulation, which is used for TCP communication. |
+| webots\_protocol | \[ipc\|tcp\] - ipc is faster but only works on the same machine, tcp works also over network. |
+| webots\_robot\_name | The robot name used to identify the robot in the Webots world. See Webots world robot prototype. |
 
 PlatformIO project tasks --> &lt;APP-NAME&gt; --> Custom --> WebotsLauncher
 
