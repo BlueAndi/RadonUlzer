@@ -73,6 +73,11 @@ WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' ' \
                             '--protocol=' + WEBOTS_PROTOCOL
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')
 
+if WEBOTS_HOME is None:
+    print("WEBOTS_HOME environment variable is not set. "
+          "Please set it to the Webots installation directory.")
+    sys.exit(1)
+
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
     WEBOTS_HOME = WEBOTS_HOME.replace('\\', '/')
