@@ -68,9 +68,9 @@ PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \
                                 + '-v'
 WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' ' \
-                            ' --stdout-redirect' + ' ' \
-                            ' --ip-address=' + WEBOTS_IP_ADDRESS + ' ' \
-                            ' --protocol=' + WEBOTS_PROTOCOL
+                            '--stdout-redirect' + ' ' \
+                            '--ip-address=' + WEBOTS_IP_ADDRESS + ' ' \
+                            '--protocol=' + WEBOTS_PROTOCOL
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
