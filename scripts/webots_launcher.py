@@ -40,6 +40,9 @@ OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
 
+WEBOTS_IP_ADDRESS = env.GetProjectOption("webots_ip_address")  # pylint: disable=undefined-variable
+WEBOTS_PROTOCOL = env.GetProjectOption("webots_protocol")  # pylint: disable=undefined-variable
+
 ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
 
 SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
@@ -64,8 +67,16 @@ PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--serialTxCh ' + ROBOT_SERIAL_TX_CHANNEL + ' ' \
                                 + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \
                                 + '-v'
-WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
+WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' ' \
+                            '--stdout-redirect' + ' ' \
+                            '--ip-address=' + WEBOTS_IP_ADDRESS + ' ' \
+                            '--protocol=' + WEBOTS_PROTOCOL
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')
+
+if WEBOTS_HOME is None:
+    print("WEBOTS_HOME environment variable is not set. "
+          "Please set it to the Webots installation directory.")
+    sys.exit(1)
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
