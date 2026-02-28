@@ -116,10 +116,8 @@ private:
 
     /**
      * SerialMuxProt Server Instance
-     *
-     * @tparam tMaxChannels set to MAX_CHANNELS, defined in SerialMuxChannels.h.
      */
-    SerialMuxProtServer<MAX_CHANNELS> m_smpServer;
+    SMPServer m_smpServer;
 
     /**
      * Send the Sensor data as a SensorData struct via SerialMuxProt.
