@@ -36,8 +36,8 @@
 /******************************************************************************
  * Includes
  *****************************************************************************/
-
 #include <stdint.h>
+#include <SerialMuxProtServer.hpp>
 
 /******************************************************************************
  * Macros
@@ -55,6 +55,9 @@
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
+
+/** SerialMuxProt Server with fixed template argument. */
+typedef SerialMuxProtServer<MAX_CHANNELS> SMPServer;
 
 /** Struct of the Sensor Data channel payload. */
 typedef struct _SensorData
@@ -84,6 +87,8 @@ typedef struct _SensorData
     uint16_t timePeriod;
 } __attribute__((packed)) SensorData;
 
+static_assert(sizeof(SensorData) <= MAX_DATA_LEN,
+              "SensorData struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
 
 /******************************************************************************
  * Functions
