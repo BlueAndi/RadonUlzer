@@ -40,18 +40,18 @@ OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
 
-WEBOTS_IP_ADDRESS = env.GetProjectOption("webots_ip_address")  # pylint: disable=undefined-variable
-WEBOTS_PROTOCOL = env.GetProjectOption("webots_protocol")  # pylint: disable=undefined-variable
+WEBOTS_IP_ADDRESS = env.GetProjectOption("custom_webots_ip_address")  # pylint: disable=undefined-variable
+WEBOTS_PROTOCOL = env.GetProjectOption("custom_webots_protocol")  # pylint: disable=undefined-variable
 
-ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
+ROBOT_NAME = env.GetProjectOption("custom_webots_robot_name") # pylint: disable=undefined-variable
 
-SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
-SUPERVISOR_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_tx_channel") # pylint: disable=undefined-variable
+SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("custom_webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
+SUPERVISOR_SERIAL_TX_CHANNEL = env.GetProjectOption("custom_webots_supervisor_serial_tx_channel") # pylint: disable=undefined-variable
 
-ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
-ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
+ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("custom_webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
+ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("custom_webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
 
-SETTINGS_PATH = env.GetProjectOption("settings_path") # pylint: disable=undefined-variable
+SETTINGS_PATH = env.GetProjectOption("custom_settings_path") # pylint: disable=undefined-variable
 
 PROJECT_PATH = env["PROJECT_DIR"]  # pylint: disable=undefined-variable
 ABS_SETTINGS_PATH = os.path.join(PROJECT_PATH, SETTINGS_PATH)
