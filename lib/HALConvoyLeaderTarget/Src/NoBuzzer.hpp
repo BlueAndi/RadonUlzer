@@ -45,6 +45,7 @@
  *****************************************************************************/
 
 #include <IBuzzer.h>
+#include <Util.h>
 
 /******************************************************************************
  * Macros
@@ -94,36 +95,36 @@ public:
     void playFrequency(uint16_t freq, uint16_t duration, uint8_t volume) final
     {
         /* Nothing to do. */
-        (void)freq;
-        (void)duration;
-        (void)volume;
+        UTIL_NOT_USED(freq);
+        UTIL_NOT_USED(duration);
+        UTIL_NOT_USED(volume);
     }
 
     /**
      * Plays a melody sequence out of RAM.
-     * 
+     *
      * @param[in] sequence Melody sequence in RAM
      */
     void playMelody(const char* sequence) final
     {
         /* Nothing to do. */
-        (void)sequence;
+        UTIL_NOT_USED(sequence);
     }
 
     /**
      * Plays a melody sequence out of program space.
-     * 
+     *
      * @param[in] sequence Melody sequence in program space
      */
     void playMelodyPGM(const char* sequence) final
     {
         /* Nothing to do. */
-        (void)sequence;
+        UTIL_NOT_USED(sequence);
     }
 
     /**
      * Checks whether a note, frequency, or sequence is being played.
-     * 
+     *
      * Note: Avoid calling this method inside a loop without processing the
      * buzzer. On the simulation additional the simulation time needs to run!
      *

@@ -37,6 +37,7 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -78,7 +79,7 @@ void ErrorState::entry()
 void ErrorState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void ErrorState::exit()

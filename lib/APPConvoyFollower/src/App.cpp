@@ -397,7 +397,8 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  */
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
+    UTIL_NOT_USED(userData);
+
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);
