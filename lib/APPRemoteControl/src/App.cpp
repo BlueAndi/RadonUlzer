@@ -34,17 +34,17 @@
  * Includes
  *****************************************************************************/
 #include "App.h"
-#include "StartupState.h"
-#include "ErrorState.h"
+#include "Config.h"
 #include "DrivingState.h"
+#include "ErrorState.h"
 #include "LineSensorsCalibrationState.h"
+#include "StartupState.h"
 #include <Board.h>
-#include <Speedometer.h>
 #include <DifferentialDrive.h>
-#include <Odometry.h>
 #include <Logging.h>
+#include <Odometry.h>
+#include <Speedometer.h>
 #include <Util.h>
-#include <Config.h>
 
 #if CONFIG_IMU == CONFIG_ENABLE
 #include <IMU.h>
@@ -327,17 +327,17 @@ void App::reportVehicleData()
     IProximitySensors& proximitySensors = board.getProximitySensors();
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
-    VehicleData        payload;
-    uint32_t           timestamp     = millis();
-    int32_t            xPos          = 0;
-    int32_t            yPos          = 0;
-    uint8_t            maxCounts     = 0U;
-    uint8_t            averageCounts = 0U;
-    uint8_t            leftCounts    = 0U;
-    uint8_t            rightCounts   = 0U;
-    int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
-    int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
-    int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
+    VehicleData        payload          = {};
+    uint32_t           timestamp        = millis();
+    int32_t            xPos             = 0;
+    int32_t            yPos             = 0;
+    uint8_t            maxCounts        = 0U;
+    uint8_t            averageCounts    = 0U;
+    uint8_t            leftCounts       = 0U;
+    uint8_t            rightCounts      = 0U;
+    int16_t            leftSpeed        = speedometer.getLinearSpeedLeft();
+    int16_t            rightSpeed       = speedometer.getLinearSpeedRight();
+    int16_t            centerSpeed      = speedometer.getLinearSpeedCenter();
 #if CONFIG_IMU == CONFIG_ENABLE
     IIMU&   imu = board.getIMU();
     IMUData accelerationValues;
@@ -393,7 +393,7 @@ bool App::setupSerialMuxProt()
     m_serialMuxProtChannelIdStatus      = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
     m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
 
-    /* Channels succesfully created? */
+    /* Channels successfully created? */
     if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
         (0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors))
     {
@@ -409,7 +409,7 @@ void App::sendLineSensorsData() const
     uint8_t         maxLineSensors   = lineSensors.getNumLineSensors();
     const uint16_t* lineSensorValues = lineSensors.getSensorValues();
     uint8_t         lineSensorIdx    = 0U;
-    LineSensorData  payload;
+    LineSensorData  payload          = {};
 
     if (LINE_SENSOR_CHANNEL_DLC == maxLineSensors * sizeof(uint16_t))
     {
@@ -456,9 +456,10 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  * @param[in] payloadSize   Size of twice motor speeds
  * @param[in] userData      User data
  */
-void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
+    UTIL_NOT_USED(userData);
+
     if ((nullptr != payload) && (MOTOR_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const MotorSpeed* motorSpeedData  = reinterpret_cast<const MotorSpeed*>(payload);
@@ -475,7 +476,7 @@ void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_
  * @param[in] payloadSize   Size of the Status Flag
  * @param[in] userData      Instance of App class.
  */
-void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
     if ((nullptr != payload) && (STATUS_CHANNEL_DLC == payloadSize) && (nullptr != userData))
     {
@@ -492,9 +493,10 @@ void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize
  * @param[in] payloadSize   Size of the RobotSpeed structure.
  * @param[in] userData      Instance of App class.
  */
-void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
+    UTIL_NOT_USED(userData);
+
     if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const RobotSpeed* robotSpeedData = reinterpret_cast<const RobotSpeed*>(payload);

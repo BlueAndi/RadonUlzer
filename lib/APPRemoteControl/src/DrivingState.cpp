@@ -37,6 +37,7 @@
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
 #include <Board.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -65,7 +66,7 @@
 void DrivingState::entry()
 {
 #if CONFIG_DISPLAY == CONFIG_ENABLE
-    IDisplay&          display   = Board::getInstance().getDisplay();
+    IDisplay& display = Board::getInstance().getDisplay();
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
@@ -82,16 +83,16 @@ void DrivingState::entry()
 void DrivingState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void DrivingState::exit()
 {
 #if CONFIG_DISPLAY == CONFIG_ENABLE
-    IDisplay&          display   = Board::getInstance().getDisplay();
+    IDisplay& display = Board::getInstance().getDisplay();
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-    
+
     m_isActive = false;
 
     /* Stop motors. */

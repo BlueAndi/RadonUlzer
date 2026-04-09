@@ -36,6 +36,7 @@
 #include "DrivingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -73,7 +74,7 @@ void DrivingState::entry()
 void DrivingState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void DrivingState::exit()

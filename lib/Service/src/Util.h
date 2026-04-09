@@ -49,6 +49,13 @@
 #include <IButton.h>
 #include <RobotConstants.h>
 
+/******************************************************************************
+ * Macros
+ *****************************************************************************/
+
+/** Use it to mark not used function parameters. */
+#define UTIL_NOT_USED(__var) (void)(__var)
+
 /**
  * Utilities
  */
