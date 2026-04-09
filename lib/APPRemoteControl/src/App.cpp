@@ -327,17 +327,17 @@ void App::reportVehicleData()
     IProximitySensors& proximitySensors = board.getProximitySensors();
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
-    VehicleData        payload;
-    uint32_t           timestamp     = millis();
-    int32_t            xPos          = 0;
-    int32_t            yPos          = 0;
-    uint8_t            maxCounts     = 0U;
-    uint8_t            averageCounts = 0U;
-    uint8_t            leftCounts    = 0U;
-    uint8_t            rightCounts   = 0U;
-    int16_t            leftSpeed     = speedometer.getLinearSpeedLeft();
-    int16_t            rightSpeed    = speedometer.getLinearSpeedRight();
-    int16_t            centerSpeed   = speedometer.getLinearSpeedCenter();
+    VehicleData        payload          = {};
+    uint32_t           timestamp        = millis();
+    int32_t            xPos             = 0;
+    int32_t            yPos             = 0;
+    uint8_t            maxCounts        = 0U;
+    uint8_t            averageCounts    = 0U;
+    uint8_t            leftCounts       = 0U;
+    uint8_t            rightCounts      = 0U;
+    int16_t            leftSpeed        = speedometer.getLinearSpeedLeft();
+    int16_t            rightSpeed       = speedometer.getLinearSpeedRight();
+    int16_t            centerSpeed      = speedometer.getLinearSpeedCenter();
 #if CONFIG_IMU == CONFIG_ENABLE
     IIMU&   imu = board.getIMU();
     IMUData accelerationValues;
