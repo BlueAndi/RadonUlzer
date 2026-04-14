@@ -113,6 +113,7 @@ void App::setup()
         m_controlInterval.start(DIFFERENTIAL_DRIVE_CONTROL_PERIOD);
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
+        m_statusTimeoutTimer.start(STATUS_STARTUP_TIMEOUT_TIMER_INTERVAL);
         m_systemStateMachine.setState(&StartupState::getInstance());
 
 #if CONFIG_SUPERVISOR != 0
@@ -199,7 +200,7 @@ void App::loop()
         }
         else
         {
-            /* Start status timeout timer once SMP is synced the first time. */
+            /* SMP is synced. Switch from startup timeout to normal SMP connection supervision interval. */
             m_statusTimeoutTimer.start(STATUS_TIMEOUT_TIMER_INTERVAL);
         }
     }
@@ -500,7 +501,10 @@ static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const 
     if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const RobotSpeed* robotSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
-        int16_t           angularSpeed   = static_cast<int16_t>(robotSpeedData->angular);
+        int32_t           angularRaw     = constrain(robotSpeedData->angular,
+                                                     static_cast<int32_t>(INT16_MIN),
+                                                     static_cast<int32_t>(INT16_MAX));
+        int16_t           angularSpeed   = static_cast<int16_t>(angularRaw);
 
         /* Convert to [steps/s] */
         int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(robotSpeedData->linearCenter);
