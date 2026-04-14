@@ -140,7 +140,7 @@ public:
 
     /**
      * Get current duration in ms, till the timer was started.
-     * It is independed of whether the timer is stopped or timeout.
+     * It is independent of whether the timer is stopped or timeout.
      *
      * @return Current duration in ms
      */
