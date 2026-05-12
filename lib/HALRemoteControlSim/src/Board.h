@@ -44,6 +44,7 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <Config.h>
 #include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
