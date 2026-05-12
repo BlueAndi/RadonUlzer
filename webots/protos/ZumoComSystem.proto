@@ -4,6 +4,7 @@
 PROTO ZumoComSystem [
   field SFString name             "ZumoComSystem"
   field SFBool   performanceMode  FALSE           # Use basic blocks for the robot instead of meshes. Increases performance.
+  field SFBool   synchronization  TRUE            # Set to FALSE when used alongside another extern controller.
 ]
 {
   Slot {
@@ -57,6 +58,7 @@ PROTO ZumoComSystem [
       name IS name
       description "DroidControlShip"
       controller "<extern>"
+      synchronization IS synchronization
     }
   }
 }
