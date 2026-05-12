@@ -158,6 +158,18 @@ def _get_available_ipc_slots():
 
 def _abort_missing_slot(protocol, ip, *robot_names):
     """Check all robot names have extern slots, print a clear error and exit if not."""
+    import socket
+
+    if protocol == "tcp":
+        try:
+            s = socket.create_connection((ip, 1234), timeout=2)
+            s.close()
+        except OSError:
+            print(f"Error: Cannot reach Webots at {ip}:1234 via TCP. Is Webots running?")
+            raise SystemExit(1)
+        print(f"Warning: Cannot verify extern slots over TCP — make sure the correct world is loaded.")
+        return
+
     available = _get_available_ipc_slots()
     if available is None:
         print("Error: Webots is not running or no world is loaded.")
