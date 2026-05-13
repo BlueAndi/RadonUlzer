@@ -45,6 +45,7 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <Config.h>
 #include <IButton.h>
 
 #if CONFIG_BUZZER == CONFIG_ENABLE
