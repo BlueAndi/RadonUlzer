@@ -1,0 +1,68 @@
+#VRML_SIM R2023b utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../../protos/ZumoComSystem.proto"
+EXTERNPROTO "../../protos/Zumo32U4.proto"
+EXTERNPROTO "../../protos/FlagShip.proto"
+EXTERNPROTO "./DcsMinTrack.proto"
+
+WorldInfo {
+  info [
+    "World for testing DroidControlShip and a standalone native ROS2 LiDAR robot."
+  ]
+  title "DCS Demo Track LiDAR Example"
+  basicTimeStep 8
+}
+
+Viewpoint {
+  orientation 0.3787583266277594 0.09714544028170935 -0.9203830145339561 2.677946076660944
+  position 1.2569587324159737 0.7945022889765716 1.5111964909293643
+}
+
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+
+DcsMinTrack {
+  contactMaterial "cardboard"
+}
+
+Zumo32U4 {
+  name "Zumo"
+  performanceMode TRUE
+  zumoComSystemSlot ZumoComSystem {
+    name "ZumoComSystem"
+    performanceMode TRUE
+    flagshipSlot FlagShip {
+      name "FlagShip"
+    }
+  }
+}
+
+Solid {
+  name "LidarTarget"
+  translation 0.6 0.02 0.0
+  children [
+    Shape {
+      appearance PBRAppearance {
+        baseColor 0.1 0.6 0.9
+        roughness 0.5
+        metalness 0
+      }
+      geometry Box {
+        size 0.12 0.2 0.12
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.12 0.2 0.12
+  }
+}
+
+Robot {
+  name "Ros2Supervisor"
+  controller "<extern>"
+  supervisor TRUE
+}

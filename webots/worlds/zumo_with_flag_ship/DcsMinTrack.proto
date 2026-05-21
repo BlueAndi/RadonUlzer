@@ -1,0 +1,40 @@
+#VRML_SIM R2023a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/floors/protos/RectangleArena.proto"
+
+PROTO DcsMinTrack [
+  field SFString  contactMaterial "default" # Is `Solid.contactMaterial`.
+]
+{
+  RectangleArena {
+    contactMaterial IS contactMaterial
+    floorSize 2 2
+    floorTileSize 4 4
+    floorAppearance PBRAppearance {
+      baseColorMap ImageTexture {
+        url [
+          "./dcs.png"
+        ]
+      }
+      roughness 1
+      roughnessMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_roughness.jpg"
+        ]
+      }
+      metalness 0
+      normalMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_normal.jpg"
+        ]
+      }
+      occlusionMap ImageTexture {
+        url [
+          "https://raw.githubusercontent.com/cyberbotics/webots/R2022a/projects/appearances/protos/textures/parquetry/chequered_parquetry_occlusion.jpg"
+        ]
+      }
+    }
+    wallThickness 0.001
+    wallHeight 0.05
+  }
+}
