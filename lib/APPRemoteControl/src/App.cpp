@@ -108,6 +108,13 @@ void App::setup()
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
         m_systemStateMachine.setState(&StartupState::getInstance());
+
+#if CONFIG_SUPERVISOR != 0
+#if CONFIG_ODOMETRY_TO_SUPERVISOR != 0
+        /* Reset supervisor which set its observed position and orientation to 0. */
+        Board::getInstance().getSupervisorSerialDrv().print("RST");
+#endif /* CONFIG_ODOMETRY_TO_SUPERVISOR != 0 */
+#endif /* CONFIG_SUPERVISOR != 0 */
     }
 }
 
@@ -129,6 +136,25 @@ void App::loop()
          * the differential drive control.
          */
         Odometry::getInstance().process();
+
+#if CONFIG_SUPERVISOR != 0
+#if CONFIG_ODOMETRY_TO_SUPERVISOR != 0
+        {
+            Odometry&    odo         = Odometry::getInstance();
+            int32_t      posX        = 0;
+            int32_t      posY        = 0;
+            int32_t      orientation = odo.getOrientation();
+            const size_t BUFFER_SIZE = 128U;
+            char         buffer[BUFFER_SIZE];
+
+            odo.getPosition(posX, posY);
+
+            snprintf(buffer, BUFFER_SIZE, "ODO,%d,%d,%d", posX, posY, orientation);
+
+            Board::getInstance().getSupervisorSerialDrv().print(buffer);
+        }
+#endif /* CONFIG_ODOMETRY_TO_SUPERVISOR != 0 */
+#endif /* CONFIG_SUPERVISOR != 0 */
 
         m_controlInterval.restart();
     }
@@ -173,7 +199,7 @@ void App::loop()
     }
 
     /* Send periodically line sensor data. */
-    if (true == m_sendLineSensorsDataInterval.isTimeout())
+    if ((true == m_sendLineSensorsDataInterval.isTimeout()) && (true == m_smpServer.isSynced()))
     {
         sendLineSensorsData();
 
@@ -207,9 +233,16 @@ void App::handleRemoteCommand(const Command& cmd)
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_START_LINE_SENSOR_CALIB:
-        rsp.responseId             = SMPChannelPayload::RSP_ID_PENDING;
-        m_isLineSensorCalibPending = true;
-        m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        rsp.responseId = SMPChannelPayload::RSP_ID_PENDING;
+
+        /* If line sensor calibration is not pending, set the state machine to the
+         * line sensor calibration state.
+         */
+        if (false == m_isLineSensorCalibPending)
+        {
+            m_isLineSensorCalibPending = true;
+            m_systemStateMachine.setState(&LineSensorsCalibrationState::getInstance());
+        }
         break;
 
     case SMPChannelPayload::CmdId::CMD_ID_START_MOTOR_SPEED_CALIB:

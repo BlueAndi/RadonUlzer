@@ -47,8 +47,8 @@ from agent import Agent
 
 # Constants
 ROBOT_NAME = "ROBOT"
-SUPERVISOR_RX_NAME = "serialComRx"
-SUPERVISOR_TX_NAME = "serialComTx"
+SUPERVISOR_RX_NAME = "supervisorComRx"
+SUPERVISOR_TX_NAME = "supervisorComTx"
 
 COMMAND_CHANNEL_NAME = "CMD"
 CMD_DLC = 1

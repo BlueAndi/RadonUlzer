@@ -226,6 +226,16 @@ public:
     }
 
     /**
+     * Get the serial driver, used to communicate with the webots supervisor.
+     *
+     * @return Serial driver
+     */
+    WebotsSerialDrv& getSupervisorSerialDrv() final
+    {
+        return m_supervisorSerialDrv;
+    }
+
+    /**
      * Process actuators and sensors.
      */
     void process() final
@@ -234,7 +244,6 @@ public:
     }
 
 private:
-
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -283,6 +292,9 @@ private:
     /** Simulation serial driver */
     WebotsSerialDrv m_serialDrv;
 
+    /** Simulation supervisor serial driver */
+    WebotsSerialDrv m_supervisorSerialDrv;
+
     /** Settings */
     Settings m_settings;
 
@@ -329,6 +341,16 @@ private:
     }
 
     /**
+     * Get the simulation supervisor serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSupervisorSerial()
+    {
+        return &m_supervisorSerialDrv;
+    }
+
+    /**
      * Enable all simulation devices.
      * It is called by the main entry only.
      * Devices must be enabled before they can be used, and a simulation step must be performed before the application
@@ -338,7 +360,7 @@ private:
 
     /**
      * Get the settings path.
-     * 
+     *
      * @return Settings path.
      */
     const char* getSettingsPath() const

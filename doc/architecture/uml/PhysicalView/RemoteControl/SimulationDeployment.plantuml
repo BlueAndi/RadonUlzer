@@ -1,0 +1,64 @@
+@startuml SimulationDeployment
+
+title Simulation deployment of remote control application
+
+node "PC" as pc {
+
+    node "Webots" <<executable>> as webots {
+        node "Zumo32U4" <<virtual robot>> as zumoRobot
+        node "ZumoComSystem" <<virtual robot>> as zumoComSystemRobot
+        node "Supervisor" <<virtual robot>> as supervisorRobot
+        interface "Webots serial\nRU: RxCh=3, TxCh=4" as iZumoComSystem
+        interface "Webots serial\nRU: RxCh=1, TxCh=2" as iSupervisorComSystem
+    }
+
+    node "Radon Ulzer\nRemote Control Application" <<executable>> as ru
+    node "Droid Control Ship" <<executable>> as dcs
+    node "Supervisor" <<script>> as supervisor
+
+    interface "Socket" as iZumoRobotSocket
+    interface "Socket" as iZumoComSystemRobotSocket
+    interface "Webots Python API" as iSupervisorSocket
+}
+
+zumoRobot -- iZumoRobotSocket: <<protocol>\nWebots specific
+iZumoRobotSocket )-- ru
+
+zumoComSystemRobot -- iZumoComSystemRobotSocket: <<protocol>\nWebots specific
+iZumoComSystemRobotSocket )-- dcs
+
+supervisorRobot -- iSupervisorSocket
+iSupervisorSocket )-- supervisor
+
+zumoRobot - iZumoComSystem: <<protocol>>\nSerialMuxProt
+iZumoComSystem )- zumoComSystemRobot
+
+zumoRobot -l- iSupervisorComSystem: <<protocol>>\nSerialMuxProt
+iSupervisorComSystem )-l- supervisorRobot
+
+note top of webots
+    The open source robot simulation.
+end note
+
+note bottom of ru
+    * The RadonUlzer application.
+    * Connects as external controller to the simulation.
+    * Depended on the choosen application:
+    ** It provides sensor data via SerialMuxProt protocol
+        over Webots serial to the DroidControlShip.
+    ** It requires actor data via SerialMuxProt protocol
+        over Webots serial from the DroidControlShip.
+end note
+
+note bottom of dcs
+    * The DroidControlShip application provides the calculation power,
+        and the connectivity to the outer world of the Radon Ulzer.
+    * Connects as external controller to the simulation.
+end note
+
+note bottom of supervisor
+    * The Supervisor script is used to control the simulation.
+    * It communicates with the Radon Ulzer application via Webots Python API.
+end note
+
+@enduml
