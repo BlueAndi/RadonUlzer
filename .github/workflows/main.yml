@@ -62,6 +62,7 @@ jobs:
         pip install -r .github/workflows/requirements.txt
     
     - name: Select target ${{ matrix.board }}
+      if: ${{ endsWith(matrix.environment, 'Target') }}
       run: platformio run --environment ${{ matrix.environment }} --target select_${{ matrix.board }}_target
 
     - name: Compile ${{ matrix.environment }} firmware for ${{ matrix.board }}
@@ -93,6 +94,7 @@ jobs:
         pip install -r .github/workflows/requirements.txt
 
     - name: Select target ${{ matrix.board }}
+      if: ${{ endsWith(matrix.environment, 'Target') }}
       run: platformio run --environment ${{ matrix.environment }} --target select_${{ matrix.board }}_target
 
     - name: Perform static checks on ${{ matrix.environment }} for ${{ matrix.board }}
