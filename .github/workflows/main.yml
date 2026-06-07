@@ -62,7 +62,7 @@ jobs:
         pip install -r .github/workflows/requirements.txt
     
     - name: Select target ${{ matrix.board }}
-      run: platformio run --environment select_${{ matrix.board }}_target
+      run: platformio run --environment ${{ matrix.environment }} --target select_${{ matrix.board }}_target
 
     - name: Compile ${{ matrix.environment }} firmware for ${{ matrix.board }}
       run: platformio run --environment ${{ matrix.environment }}
@@ -93,7 +93,7 @@ jobs:
         pip install -r .github/workflows/requirements.txt
 
     - name: Select target ${{ matrix.board }}
-      run: platformio run --environment select_${{ matrix.board }}_target
+      run: platformio run --environment ${{ matrix.environment }} --target select_${{ matrix.board }}_target
 
     - name: Perform static checks on ${{ matrix.environment }} for ${{ matrix.board }}
       run: platformio check --environment ${{ matrix.environment }} --fail-on-defect=medium --fail-on-defect=high
