@@ -69,21 +69,21 @@ class Models:  # pylint: disable=too-many-instance-attributes
             64,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(state_input)
         fc2 = layers.Dense(
             64,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(fc1)
         fc3 = layers.Dense(
             32,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(fc2)
         mean = layers.Dense(
@@ -103,21 +103,21 @@ class Models:  # pylint: disable=too-many-instance-attributes
             64,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(state_input)
         fc2 = layers.Dense(
             64,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(fc1)
         fc3 = layers.Dense(
             32,
             activation="relu",
             kernel_initializer="he_normal",
-            kernel_regularizer=l2(0.01),
+            kernel_regularizer=l2(0.001),
             bias_initializer="zeros",
         )(fc2)
         value = layers.Dense(1)(fc3)  # Value output

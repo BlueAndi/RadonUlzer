@@ -179,7 +179,7 @@ class RobotController:
 
     def load_models(self, path) -> None:
         """Load Model if exist"""
-        if os.path.exists(path):
+        if os.path.exists(path + "actor.weights.h5"):
             self.__agent.load_models()
         else:
             print("No model available")
@@ -208,6 +208,12 @@ class RobotController:
         """The function controls agent behavior"""
         if self.__agent.state == READY:
             self.__agent.update(robot_node)
+            # Clear stale sensor context whenever the robot is teleported so
+            # the first LINE_SENS of the new episode is treated as an initial
+            # observation rather than a transition from the previous episode.
+            if self.__agent.reinitialized:
+                self.last_sensor_data = None
+                self.__agent.reinitialized = False
 
         # Start the training
         elif self.__agent.state == TRAINING:
@@ -297,6 +303,8 @@ def main_loop():
 
         controller.load_models(PATH)
 
+        supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_FAST)
+
         # Training mode is entered on the first LINE_SENS callback (SMP synced,
         # robot already in DrivingState from startup).
 
@@ -312,10 +320,9 @@ def main_loop():
                 # Stop The Simulation. Handle unsent Data
                 supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
 
-                # Set simulation mode to real time when unsent data is resent
+                # Restore fast mode when unsent data is resent
                 if controller.retry_unsent_data(agent.unsent_data) is True:
-                    supervisor.simulationSetMode(
-                        Supervisor.SIMULATION_MODE_REAL_TIME)
+                    supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_FAST)
 
                 # Reset The Simulation
                 else:

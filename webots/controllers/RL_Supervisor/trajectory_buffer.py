@@ -44,7 +44,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
     """Class for store and manage experience tuples during Reinforcement learning."""
 
     # pylint: disable=too-many-arguments
-    def __init__(self, batch_size, max_length, gamma, gae_lambda):
+    def __init__(self, batch_size, max_length, gamma, gae_lambda, min_buffer_length=512):
         self.__states = []
         self.__probs = []
         self.__vals = []
@@ -54,7 +54,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         self.__advatages = []
         self.__batch_size = batch_size
         self.__max_length = max_length
-        self.__batch_size = batch_size
+        self.__min_buffer_length = min_buffer_length
         self.__gamma = gamma
         self.__gae_lambda = gae_lambda
         self.__current_index = 0
@@ -155,17 +155,22 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         ----------
         - Bool: Memory is full or not
         """
-        is_full = False
+        return self.__current_index >= self.__max_length
 
-        if self.__current_index >= self.__max_length:
-            is_full = True
+    def is_ready_for_training(self):
+        """
+        Checks whether enough transitions have been collected to run a training update.
 
-        return is_full
+        Returns
+        ----------
+        - Bool: Buffer has at least min_buffer_length transitions
+        """
+        return self.__current_index >= self.__min_buffer_length
 
     def calculate_advantages(self, rewards, values, dones):
         """
-        The function measures how much better or worse an action 
-        performed in a given state compared to the average action 
+        The function measures how much better or worse an action
+        performed in a given state compared to the average action
         the policy would take in that state.
 
         Parameters
@@ -176,40 +181,22 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            NumPy array of float32: the computed advantage values for each 
+            NumPy array of float32: the computed advantage values for each
             state in a given Data size.
         """
+        n = len(rewards)
+        advantages = np.zeros(n, dtype=np.float32)
+        gae = 0.0
 
-        data_size = len(rewards)
-
-        # Create empty advantages array
-        advantages = np.zeros(data_size, dtype=np.float32)
-
-        for start_index in range(data_size-1):
-            discount = 1
-            advantage = 0
-
-            for future_index in range(start_index, data_size - 1):
-
-                # Calculate the temporal difference (TD)
-                delta = (
-                    rewards[future_index]
-                    + (
-                        self.__gamma
-                        * values[future_index + 1]
-                        * (1 - int(dones[future_index]))
-                    )
-                    - values[future_index]
-                )
-
-                # Accumulate the advantage using the discount factor
-                advantage += discount * delta
-
-                # Update the discount factor for the next step
-                discount *= self.__gamma * self.__gae_lambda
-
-            # Save the calculated advantage for the current state
-            advantages[start_index] = advantage
+        # Reverse scan: O(n). Episode boundaries (done=True) zero out the
+        # carry so advantages do not bleed across resets.
+        for t in reversed(range(n - 1)):
+            not_done = 1 - int(dones[t])
+            delta = (rewards[t]
+                     + self.__gamma * values[t + 1] * not_done
+                     - values[t])
+            gae = delta + self.__gamma * self.__gae_lambda * not_done * gae
+            advantages[t] = gae
 
         return advantages
 

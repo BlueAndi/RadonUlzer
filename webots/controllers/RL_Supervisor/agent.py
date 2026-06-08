@@ -63,14 +63,23 @@ CMD_ID_IDLE = 0
 # stops motors and re-inits board; required after supervisor position reset
 CMD_ID_REINIT_BOARD = 3
 
-POSITION_DATA = [-0.24713614078815466, -
-                 0.04863962992854465, 0.013994298332013683]
-ORIENTATION_DATA = [
-    -1.0564747468923541e-06,
-    8.746699709178704e-07,
-    0.9999999999990595,
-    1.5880805820884731
+# Waypoints distributed around the rounded-rectangle loop track.
+# Each entry is ([x, y, z], z_rotation_angle_rad) for a Z-axis rotation.
+WAYPOINTS = [
+    ([-0.247, -0.048, 0.014],  1.551),  # top start line
+    ([-0.247, -0.140, 0.014], -1.571),  # top start line facing backwards
+    ([ 0.286, -0.094, 0.014],  1.551),  # opposite to start
+    ([-0.100, -0.280, 0.014], -1.551),  # opposite to start facing backwards
+    ([ 0.046,  0.437, 0.014],  3.190),  # right side
+    ([ 0.046,  0.437, 0.014],  3.190),  # right side
+    ([ 0.027, -0.405, 0.014], 0.01),  # left side
+    ([ 0.027, -0.405, 0.014], -3.14),  # left side
+    
 ]
+# ±15° heading perturbation applied to every waypoint so the policy learns
+# to recover from misalignment rather than memorising an exact heading.
+MAX_HEADING_PERTURB = 0.26  # radians
+
 MAX_SENSOR_VALUE = 1000
 MIN_STD_DEV = 0.01  # Minimum standard deviation
 STD_DEV_FACTOR = 0.995  # Discounter standard deviation factor
@@ -114,10 +123,10 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__std_dev = 0.05   # When training without an existing model this should be
-        # set to 0.9 manually
+        self.__std_dev = 0.5
         self.__memory = Memory(
-            batch_size, max_buffer_length, gamma, gae_lambda)
+            batch_size, max_buffer_length, gamma, gae_lambda,
+            min_buffer_length=max(batch_size * 8, 512))
         self.__neural_network = Models(
             actor_alpha, critic_alpha, self.__std_dev, policy_clip)
         self.__training_index = 0  # Track batch index during training
@@ -132,6 +141,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.data_sent = True
         self.unsent_data = []
         self.reward_history = []
+        self.reinitialized = False
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -163,19 +173,22 @@ class Agent:  # pylint: disable=too-many-instance-attributes
     def save_models(self):
         """Saves the models in the specified file."""
 
-        self.__neural_network.actor_network.save(
-            self.__chkpt_dir + "actor.keras")
-        self.__neural_network.critic_network.save(
-            self.__chkpt_dir + "critic.keras")
+        os.makedirs(self.__chkpt_dir, exist_ok=True)
+        self.__neural_network.actor_network.save_weights(
+            self.__chkpt_dir + "actor.weights.h5"
+        )
+        self.__neural_network.critic_network.save_weights(
+            self.__chkpt_dir + "critic.weights.h5"
+        )
 
     def load_models(self):
         """Loads the models in the specified file."""
 
-        self.__neural_network.actor_network = tf.keras.models.load_model(
-            self.__chkpt_dir + "actor.keras", compile=False
+        self.__neural_network.actor_network.load_weights(
+            self.__chkpt_dir + "actor.weights.h5"
         )
-        self.__neural_network.critic_network = tf.keras.models.load_model(
-            self.__chkpt_dir + "critic.keras", compile=False
+        self.__neural_network.critic_network.load_weights(
+            self.__chkpt_dir + "critic.weights.h5"
         )
 
     def predict_action(self, state):
@@ -287,9 +300,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             if self.data_sent is False:
                 self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
 
-            # Stopping condition for sequence was reached.
+            # Teleport the robot back to start for the next episode.
             self.reinitialize(robot_node)
-            self.state = TRAINING
+            self.done = False
+            self.reinitialized = True
+
+            # Only start training once enough experience is accumulated across
+            # episodes. Until then, keep collecting in READY state.
+            if self.__memory.is_ready_for_training():
+                self.state = TRAINING
 
         # Checks whether the sequence has ended if it is set to driving mode.
         if (self.train_mode is False) and (self.done is True):
@@ -449,9 +468,10 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__memory.clear_memory()
             self.num_episodes += 1
 
-            # Minimize standard deviation until the minimum standard deviation is reached
-            self.__std_dev = self.__std_dev * STD_DEV_FACTOR
-            self.__std_dev = max(self.__std_dev, MIN_STD_DEV)
+            self.__std_dev = max(self.__std_dev * STD_DEV_FACTOR, MIN_STD_DEV)
+            # Sync annealed std_dev to the network so the new-policy distribution
+            # in compute_actor_gradient uses the same value as data collection.
+            self.__neural_network.std_dev = self.__std_dev
 
             # APPRemoteControl stays in DrivingState — no command needed to restart.
             # Transition directly back to READY so motor speeds resume on the next
@@ -466,12 +486,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         ----------
             robot_node: The Robot interface
         """
+        idx = np.random.randint(len(WAYPOINTS))
+        position, base_angle = WAYPOINTS[idx]
+        perturb = np.random.uniform(-MAX_HEADING_PERTURB, MAX_HEADING_PERTURB)
+        angle = base_angle + perturb
+
         trans_field = robot_node.getField(TRANSLATION_FIELD)
         rot_field = robot_node.getField(ROTATION_FIELD)
-        initial_position = POSITION_DATA
-        initial_orientation = ORIENTATION_DATA
-        trans_field.setSFVec3f(initial_position)
-        rot_field.setSFRotation(initial_orientation)
+        trans_field.setSFVec3f(position)
+        rot_field.setSFRotation([0.0, 0.0, 1.0, angle])
 
 
 ################################################################################
