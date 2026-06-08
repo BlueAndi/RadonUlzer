@@ -208,7 +208,6 @@ extern int main(int argc, char** argv)
         {
             supervisorSerial->setRxChannel(atoi(prgArguments.supervisorRxChannel));
             supervisorSerial->setTxChannel(atoi(prgArguments.supervisorTxChannel));
-            Serial.setStream(*supervisorSerial);
         }
         else
         {
