@@ -103,7 +103,6 @@ class RobotController:
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
         self.steps = 0
-        self.__ready = False
 
     def callback_status(self, payload: bytearray) -> None:
         """Callback Status Channel."""
@@ -120,8 +119,7 @@ class RobotController:
         # First LINE_SENS proves SMP is synced and the robot is in DrivingState.
         # Webots DistanceSensor values are already in the 0-1000 range without
         # a separate calibration step, so enter training mode immediately.
-        if not self.__ready:
-            self.__ready = True
+        if self.__agent.state == IDLE:
             self.__agent.done = False
             self.__agent.set_train_mode()
             return
