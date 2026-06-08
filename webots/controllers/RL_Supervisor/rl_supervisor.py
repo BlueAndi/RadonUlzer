@@ -137,19 +137,19 @@ class RobotController:
 
         # Detect start/stop line
         if ((sensor_data[SENSOR_ID_MOST_LEFT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE) and
-            (sensor_data[SENSOR_ID_MOST_RIGHT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE)):
+                (sensor_data[SENSOR_ID_MOST_RIGHT] >= LINE_SENSOR_ON_TRACK_MIN_VALUE)):
             is_start_stop_line_detected = True
 
         # Detect Start/Stop Line before Finish Trajectories
         if (is_start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
             sensor_data = list(sensor_data)
-            sensor_data[SENSOR_ID_MOST_LEFT]  = 0
+            sensor_data[SENSOR_ID_MOST_LEFT] = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
-            is_start_stop_line_detected       = False
+            is_start_stop_line_detected = False
 
         # sequence stop criterion: debounce no-line and start/stop-line detection
         if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
-                                                and  (self.steps >= MIN_NUMBER_OF_STEPS))):
+                                                       and (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
             self.__no_line_detection_count = 0
             self.steps = 0
@@ -270,7 +270,8 @@ def main_loop():
     sermux_channel_motor_speed = smp_server.create_channel(
         MOTOR_SPEED_CHANNEL_NAME, MOTOR_SPEED_DLC
     )
-    sermux_channel_cmd = smp_server.create_channel(COMMAND_CHANNEL_NAME, CMD_DLC)
+    sermux_channel_cmd = smp_server.create_channel(
+        COMMAND_CHANNEL_NAME, CMD_DLC)
 
     if sermux_channel_motor_speed == 0:
         print("ERROR: channel MOTOR_SET not created.")
@@ -286,7 +287,8 @@ def main_loop():
     # create instance of robot logic class
     controller = RobotController(smp_server, timestep, agent)
 
-    smp_server.subscribe_to_channel(STATUS_CHANNEL_NAME, controller.callback_status)
+    smp_server.subscribe_to_channel(
+        STATUS_CHANNEL_NAME, controller.callback_status)
 
     smp_server.subscribe_to_channel(
         LINE_SENSOR_CHANNEL_NAME, controller.callback_line_sensors
@@ -314,7 +316,8 @@ def main_loop():
 
                 # Set simulation mode to real time when unsent data is resent
                 if controller.retry_unsent_data(agent.unsent_data) is True:
-                    supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_REAL_TIME)
+                    supervisor.simulationSetMode(
+                        Supervisor.SIMULATION_MODE_REAL_TIME)
 
                 # Reset The Simulation
                 else:
