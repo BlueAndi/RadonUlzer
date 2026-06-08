@@ -47,14 +47,27 @@ from agent import Agent
 
 # Constants
 ROBOT_NAME = "ROBOT"
+
+# Supervisor PROTO device names (supervisorComRx / supervisorComTx).
+# The rl_supervisor is launched via webots_launcher_zumo_com_system so the robot
+# runs with ZumoComSystem enabled (-c flag).  SerialMuxProt travels on the
+# robot's normal serial (channels 3/4); the supervisor serial (channels 1/2)
+# carries ODO text that is irrelevant for RL training.
 SUPERVISOR_RX_NAME = "supervisorComRx"
 SUPERVISOR_TX_NAME = "supervisorComTx"
 
-COMMAND_CHANNEL_NAME = "CMD"
-CMD_DLC = 1
+# Channel IDs matching webots_robot_serial_rx/tx_channel in platformio.ini [hal:Sim]
+# (robot normal serial RX=3, TX=4).
+SUPERVISOR_RX_CHANNEL = 4   # supervisor receives from robot normal-serial TX
+SUPERVISOR_TX_CHANNEL = 3   # supervisor sends to robot normal-serial RX
 
-SPEED_SET_CHANNEL_NAME = "SPEED_SET"
-SPEED_SET_DLC = 4
+COMMAND_CHANNEL_NAME = "CMD"
+# sizeof(Command) in APPRemoteControl SerialMuxChannels.h:
+# 1 byte CmdId + union { 3x int32 } = 13 bytes
+CMD_DLC = 13
+
+MOTOR_SPEED_CHANNEL_NAME = "MOTOR_SET"
+MOTOR_SPEED_DLC = 8  # MotorSpeed: 2x int32 (left, right) in mm/s
 
 LINE_SENSOR_CHANNEL_NAME = "LINE_SENS"
 LINE_SENSOR_ON_TRACK_MIN_VALUE = 200
@@ -62,8 +75,7 @@ LINE_SENSOR_ON_TRACK_MIN_VALUE = 200
 STATUS_CHANNEL_NAME = "STATUS"
 STATUS_CHANNEL_ERROR_VAL = 1
 
-MODE_CHANNEL_NAME = "MODE"
-
+# Command IDs matching SMPChannelPayload::CmdId in SerialMuxChannels.h
 MIN_NUMBER_OF_STEPS = 400
 SENSOR_ID_MOST_LEFT = 0
 SENSOR_ID_MOST_RIGHT = 4
@@ -91,6 +103,7 @@ class RobotController:
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
         self.steps = 0
+        self.__ready = False
 
     def callback_status(self, payload: bytearray) -> None:
         """Callback Status Channel."""
@@ -103,6 +116,16 @@ class RobotController:
     def callback_line_sensors(self, payload: bytearray) -> None:
         """Callback LINE_SENS Channel."""
         sensor_data = struct.unpack("5H", payload)
+
+        # First LINE_SENS proves SMP is synced and the robot is in DrivingState.
+        # Webots DistanceSensor values are already in the 0-1000 range without
+        # a separate calibration step, so enter training mode immediately.
+        if not self.__ready:
+            self.__ready = True
+            self.__agent.done = False
+            self.__agent.set_train_mode()
+            return
+
         self.steps += 1
 
         is_start_stop_line_detected = False
@@ -124,7 +147,7 @@ class RobotController:
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
             is_start_stop_line_detected       = False
 
-        # sequence stop criterion debounce no line detection and start/stop line detected
+        # sequence stop criterion: debounce no-line and start/stop-line detection
         if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
                                                 and  (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
@@ -156,16 +179,6 @@ class RobotController:
         if self.__agent.done is False and self.__agent.state == READY:
             self.__agent.send_motor_speeds(sensor_data)
 
-    def callback_mode(self, payload: bytearray) -> None:
-        """Callback MODE Channel."""
-        driving_mode = payload[0]
-
-        if driving_mode:
-            self.__agent.set_drive_mode()
-
-        else:
-            self.__agent.set_train_mode()
-
     def load_models(self, path) -> None:
         """Load Model if exist"""
         if os.path.exists(path):
@@ -193,7 +206,7 @@ class RobotController:
         # process new data (callbacks will be executed)
         self.__smp_server.process(self.__timestamp)
 
-    def manage_agent_cycle(self,robot_node):
+    def manage_agent_cycle(self, robot_node):
         """The function controls agent behavior"""
         if self.__agent.state == READY:
             self.__agent.update(robot_node)
@@ -234,7 +247,7 @@ def main_loop():
         status = -1
     else:
         supervisor_com_rx.enable(timestep)
-        supervisor_com_rx.setChannel(2)
+        supervisor_com_rx.setChannel(SUPERVISOR_RX_CHANNEL)
 
     # get serial emitter from supervisor
     supervisor_com_tx = supervisor.getDevice(SUPERVISOR_TX_NAME)
@@ -242,31 +255,31 @@ def main_loop():
         print(f"ERROR: {SUPERVISOR_TX_NAME} not found.")
         status = -1
     else:
-        # supervisor_com_tx.enable(timestep)
-        supervisor_com_tx.setChannel(1)
+        supervisor_com_tx.setChannel(SUPERVISOR_TX_CHANNEL)
 
-    # get robot defition
+    # get robot definition
     robot_node = supervisor.getFromDef(ROBOT_NAME)
     if robot_node is None:
         print(f"ERROR: {ROBOT_NAME} not found.")
         status = -1
 
-    # connect webots serial nodes to SerMuxProt
+    # connect webots serial nodes to SerialMuxProt
     s_client = SerialWebots(supervisor_com_tx, supervisor_com_rx)
     smp_server = Server(10, s_client)
 
-    sermux_channel_speed_set = smp_server.create_channel(
-        SPEED_SET_CHANNEL_NAME, SPEED_SET_DLC
+    sermux_channel_motor_speed = smp_server.create_channel(
+        MOTOR_SPEED_CHANNEL_NAME, MOTOR_SPEED_DLC
     )
-    sermux_channel_cmd_id = smp_server.create_channel(COMMAND_CHANNEL_NAME, CMD_DLC)
+    sermux_channel_cmd = smp_server.create_channel(COMMAND_CHANNEL_NAME, CMD_DLC)
 
-    if sermux_channel_speed_set == 0:
-        print("ERROR: channel SPEED_SET not created.")
+    if sermux_channel_motor_speed == 0:
+        print("ERROR: channel MOTOR_SET not created.")
         status = -1
 
-    if sermux_channel_cmd_id == 0:
+    if sermux_channel_cmd == 0:
         print("ERROR: channel CMD not created.")
         status = -1
+
     # create instance of intelligence Agent
     agent = Agent(smp_server)
 
@@ -279,12 +292,13 @@ def main_loop():
         LINE_SENSOR_CHANNEL_NAME, controller.callback_line_sensors
     )
 
-    smp_server.subscribe_to_channel(MODE_CHANNEL_NAME, controller.callback_mode)
-
     # setup successful
     if status != -1:
 
         controller.load_models(PATH)
+
+        # Training mode is entered on the first LINE_SENS callback (SMP synced,
+        # robot already in DrivingState from startup).
 
         # simulation loop
         while supervisor.step(timestep) != -1:

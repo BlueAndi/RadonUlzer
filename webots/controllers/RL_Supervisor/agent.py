@@ -43,11 +43,14 @@ from networks import Models
 # pylint: disable=duplicate-code
 
 # Constants
-COMMAND_CHANNEL_NAME = "CMD"
-CMD_DLC = 1
 
-SPEED_SET_CHANNEL_NAME = "SPEED_SET"
-SPEED_SET_DLC = 4
+# APPRemoteControl SerialMuxChannels: "MOTOR_SET" carries MotorSpeed (2x int32, mm/s)
+MOTOR_SPEED_CHANNEL_NAME = "MOTOR_SET"
+MOTOR_SPEED_DLC = 8  # 2x int32
+
+COMMAND_CHANNEL_NAME = "CMD"
+# sizeof(Command) in APPRemoteControl: 1 byte CmdId + union { 3x int32 } = 13 bytes
+CMD_DLC = 13
 
 LINE_SENSOR_CHANNEL_NAME = "LINE_SENS"
 LINE_SENSOR_ON_TRACK_MIN_VALUE = 200
@@ -55,9 +58,10 @@ LINE_SENSOR_ON_TRACK_MIN_VALUE = 200
 STATUS_CHANNEL_NAME = "STATUS"
 STATUS_CHANNEL_ERROR_VAL = 1
 
-MODE_CHANNEL_NAME = "MODE"
-CMD_ID_SET_READY_STATE = 1
-CMD_ID_SET_TRAINING_STATE = 2
+# APPRemoteControl command IDs (SMPChannelPayload::CmdId)
+CMD_ID_IDLE = 0
+CMD_ID_REINIT_BOARD = 3  # stops motors and re-inits board; required after supervisor position reset
+
 POSITION_DATA = [-0.24713614078815466, -0.04863962992854465, 0.013994298332013683]
 ORIENTATION_DATA = [
     -1.0564747468923541e-06,
@@ -101,7 +105,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         policy_clip=0.2,
         batch_size=64,
         chkpt_dir="models/",
-        top_speed=2000,
+        top_speed=250,  # mm/s (~2000 encoder steps/s on Zumo32U4)
         max_buffer_length=65536,
     ):
         self.__serialmux = smp_server
@@ -175,7 +179,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         Parameters
         ----------
             state: The state observed.
-        
+
         Returns
         ----------
             float32: The action taken.
@@ -240,15 +244,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         # Get individual motor speeds. The sign of speedDifference
         # determines if the robot turns left or right.
-        left_motor_speed = int(self.__top_speed - speed_difference)
+        left_motor_speed  = int(self.__top_speed - speed_difference)
         right_motor_speed = int(self.__top_speed + speed_difference)
 
-        control_data = struct.pack("2H", left_motor_speed, right_motor_speed)
-        self.data_sent = self.__serialmux.send_data(SPEED_SET_CHANNEL_NAME, control_data)
+        # MotorSpeed payload: 2x int32 in mm/s (little-endian, packed)
+        control_data = struct.pack("<2i", left_motor_speed, right_motor_speed)
+        self.data_sent = self.__serialmux.send_data(MOTOR_SPEED_CHANNEL_NAME, control_data)
 
         # Failed to send data. Appends the data to unsent_data List.
         if self.data_sent is False:
-            self.unsent_data.append((SPEED_SET_CHANNEL_NAME, control_data))
+            self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, control_data))
 
     def update(self, robot_node):
         """
@@ -260,10 +265,13 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         """
 
         # Checks whether the sequence has ended if it is set to Training mode.
-        if self.train_mode is True  and (
+        if self.train_mode is True and (
             self.done is True or self.__memory.is_memory_full() is True):
 
-            cmd_payload = struct.pack("B", CMD_ID_SET_TRAINING_STATE)
+            # REINIT_BOARD stops motors and re-initializes the board drivers.
+            # This is necessary because reinitialize() teleports the robot in
+            # Webots without restarting the controller executable.
+            cmd_payload = struct.pack("<Biii", CMD_ID_REINIT_BOARD, 0, 0, 0)
             self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List.
@@ -277,29 +285,33 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # Checks whether the sequence has ended if it is set to driving mode.
         if (self.train_mode is False) and (self.done is True):
             self.done = False
-            motorcontrol = struct.pack("2H", 0, 0)
-            cmd_payload = struct.pack("B", CMD_ID_SET_READY_STATE)
 
+            # Stop motors immediately
+            motorcontrol = struct.pack("<2i", 0, 0)
             self.data_sent = self.__serialmux.send_data(
-                SPEED_SET_CHANNEL_NAME, motorcontrol
-            )  # stop the motors immediately
+                MOTOR_SPEED_CHANNEL_NAME, motorcontrol
+            )
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
-                self.unsent_data.append((SPEED_SET_CHANNEL_NAME, motorcontrol))
+                self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, motorcontrol))
 
+            # Re-init board for next inference run
+            cmd_payload = struct.pack("<Biii", CMD_ID_REINIT_BOARD, 0, 0, 0)
             self.reinitialize(robot_node)
             self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
 
             # Failed to send data. Appends the data to unsent_data List
             if self.data_sent is False:
                 self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
-            self.state = IDLE
+
+            # Return directly to READY — APPRemoteControl stays in DrivingState
+            self.set_drive_mode()
 
     def normalize_sensor_data(self, sensor_data):
         """
         The normalize_sensor_data function scales the sensor data to a range between 0 and 1.
-        
+
         Parameters
         ----------
             sensor_data: The state observed.
@@ -341,7 +353,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             old_probs:  The saved probabilities of the actions taken, based on the previous policy.
             values:     The saved estimated values of the observed states.
             rewards:    The saved rewards received for taking the actions.
-            advantages: the computed advantage values for each state in a given Data size. 
+            advantages: the computed advantage values for each state in a given Data size.
         """
         # scales the sensor data to a range between 0 and 1
         m_states = self.normalize_sensor_data(states)
@@ -422,18 +434,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__current_batch = None
             self.done = False
             self.__memory.clear_memory()
-            self.state = IDLE
             self.num_episodes += 1
-            cmd_payload = struct.pack("B", CMD_ID_SET_READY_STATE)
-            self.data_sent = self.__serialmux.send_data(COMMAND_CHANNEL_NAME, cmd_payload)
-
-            # Failed to send data. Appends the data to unsent_data List
-            if self.data_sent is False:
-                self.unsent_data.append((COMMAND_CHANNEL_NAME, cmd_payload))
 
             # Minimize standard deviation until the minimum standard deviation is reached
             self.__std_dev = self.__std_dev * STD_DEV_FACTOR
             self.__std_dev = max(self.__std_dev, MIN_STD_DEV)
+
+            # APPRemoteControl stays in DrivingState — no command needed to restart.
+            # Transition directly back to READY so motor speeds resume on the next
+            # LINE_SENS callback.
+            self.set_train_mode()
 
     def reinitialize(self, robot_node):
         """
