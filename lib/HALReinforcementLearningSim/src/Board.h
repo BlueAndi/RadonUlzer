@@ -268,6 +268,9 @@ private:
     /** Simulation serial driver */
     WebotsSerialDrv m_serialDrv;
 
+    /** Simulation supervisor serial driver */
+    WebotsSerialDrv m_supervisorSerialDrv;
+
     /** Settings */
     Settings m_settings;
 
@@ -311,6 +314,16 @@ private:
     WebotsSerialDrv* getSimSerial()
     {
         return &m_serialDrv;
+    }
+
+    /**
+     * Get the simulation supervisor serial driver, which is connected within Webots.
+     *
+     * @return If serial driver is available, it will return a pointer to it, otherwise nullptr.
+     */
+    WebotsSerialDrv* getSimSupervisorSerial()
+    {
+        return &m_supervisorSerialDrv;
     }
 
     /**

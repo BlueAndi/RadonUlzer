@@ -10,6 +10,8 @@
     }],
     "license": "MIT",
     "dependencies": [{
+        "name": "Supervisor"
+    },{
         "name": "Webots"
     }],
     "frameworks": "*",
