@@ -1,4 +1,4 @@
-# Radon Ulzer - Firmware for Zumo32U4 <!-- omit in toc -->
+# Radon Ulzer - Firmware for Zumo32U4 and Zumo2040<!-- omit in toc -->
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](http://choosealicense.com/licenses/mit/)
 [![Repo Status](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
@@ -45,7 +45,7 @@ Several kind of exclusive applications are available:
 
 ## The robot
 
-The main target of the firmware is the Pololu Zumo32U4 robot (see <https://www.pololu.com/category/129/zumo-robots-and-accessories>) from Pololu.
+The main target of the firmware are the [Pololu Zumo32U4 robot](https://www.pololu.com/category/170/zumo-32u4-oled-robot) and the [Pololu Zumo2040 robot](https://www.pololu.com/category/308/zumo-2040-robot) from Pololu.
 
 ![deployment](http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/BlueAndi/RadonUlzer/master/doc/architecture/uml/PhysicalView/Deployment.plantuml)
 
@@ -53,8 +53,8 @@ The main target of the firmware is the Pololu Zumo32U4 robot (see <https://www.p
 
 The simulation is based on the open source robot simulator *Webots*. The application and the services are equal to the target firmware. Only the HAL is different in the simulation.
 
-- Website: <https://cyberbotics.com/#cyberbotics>
-- Github: <https://github.com/cyberbotics/webots>
+- Website: [https://cyberbotics.com/#cyberbotics](https://cyberbotics.com/#cyberbotics)
+- Github: [https://github.com/cyberbotics/webots](https://github.com/cyberbotics/webots)
 - Compatible webots versions:
   - v2025a
 
@@ -110,9 +110,22 @@ There are 3 ways how to run now the application. Choose according to your needs.
 
 #### Run with Webots launcher (recommended)
 
-Choose this one in case the simulation waits for more than one robot. Adapt the robot name in the *platformio.ini*.
+The Webots launcher is recommended to connect to the simulation.
 
-See (Single Simulation and Multiple Local Extern Robot Controllers)[https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-os=windows#single-simulation-and-multiple-local-extern-robot-controllers] for details.
+It is mandatory if the simulation contains more than one robot. The robot is identified by its name. Adapt the robot name in the [platformio_override.ini](./platformio_override.ini), see *webots_robot_name*.
+
+The Webots documentation has more details about [Single Simulation and Multiple Local Extern Robot Controllers](https://cyberbotics.com/doc/guide/running-extern-robot-controllers?tab-os=windows#single-simulation-and-multiple-local-extern-robot-controllers).
+
+It is mandatory too if the simulation runs not locally (e.g. Webots run on windows host and RadonUlzer in WSL).
+Set the ip-address and the port in [platformio_override.ini](./platformio_override.ini), see *webots_ip_address* and *webots_protocol*.
+
+Use *ipc* as *webots_protocol* for local connections and *tcp* for remote connections.
+
+| Key | Description |
+| --- | ----------- |
+| webots\_ip\_address | The IP address of the Webots simulation, which is used for TCP communication. |
+| webots\_protocol | \[ipc\|tcp\] - ipc is faster but only works on the same machine, tcp works also over network. |
+| webots\_robot\_name | The robot name used to identify the robot in the Webots world. See Webots world robot prototype. |
 
 PlatformIO project tasks --> &lt;APP-NAME&gt; --> Custom --> WebotsLauncher
 
@@ -182,11 +195,13 @@ To increase the performance, the robot model can be simplified by enabling the p
 
 ### Build and flash procedure
 
-1. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Build
+1. Update the ```platformio_override.ini``` to your needs, especially the robot you have. Optional the robot can be selected by the following custom tasks that automatically modifies the ```platformio_override.ini``` file:\
+  ![SelectTarget](./doc/images/select_target.jpg)
+2. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Build
     - For the target use only the applications with "Target" as postfix, e.g. LineFollowerTarget.
-2. Start the bootloader by triggering twice the reset button. The yellow led will start blinking for 10s. Note, after 10s the target will leave the bootloader!
-3. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Upload
-4. Ready.
+3. Start the bootloader by triggering twice the reset button. The yellow led will start blinking for 10s. Note, after 10s the target will leave the bootloader!
+4. PlatformIO project tasks --> &lt;APP-NAME&gt; --> General --> Upload
+5. Ready.
 
 Example for the **LineFollowerTarget** application:
 

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   LineSensorsCalibrationState.cpp
  * @brief  Line sensors calibration state
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -67,15 +68,19 @@
 
 void LineSensorsCalibrationState::entry()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display     = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
     Odometry&          odometry    = Odometry::getInstance();
     ILineSensors&      lineSensors = Board::getInstance().getLineSensors();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Calib");
     display.gotoXY(0, 1);
     display.print("Lines");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     /* Prepare calibration drive. */
     m_calibrationSpeed = diffDrive.getMaxMotorSpeed() / 3;
@@ -139,14 +144,18 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 
 void LineSensorsCalibrationState::exit()
 {
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     IDisplay&          display   = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
     m_timer.stop();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Idle");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 /******************************************************************************

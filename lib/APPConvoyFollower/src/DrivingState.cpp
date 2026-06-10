@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   DrivingState.cpp
  * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -35,6 +36,7 @@
 #include "DrivingState.h"
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -72,7 +74,7 @@ void DrivingState::entry()
 void DrivingState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void DrivingState::exit()

@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   ErrorState.cpp
  * @brief  Error state
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -36,6 +37,7 @@
 #include <Board.h>
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -63,21 +65,25 @@
 
 void ErrorState::entry()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+    IDisplay& display = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
     diffDrive.disable();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Error");
     display.gotoXY(0, 1);
     display.print(m_errorMsg);
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 void ErrorState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void ErrorState::exit()

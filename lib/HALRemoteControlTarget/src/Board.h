@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   Board.h
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
  *
@@ -43,12 +44,24 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <Config.h>
 #include <IBoard.h>
 #include <ButtonA.h>
 #include <ButtonB.h>
 #include <ButtonC.h>
+
+#if CONFIG_BUZZER == CONFIG_ENABLE
 #include <Buzzer.h>
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
 #include <Display.h>
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+#include <IMU.h>
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
+
 #include <Encoders.h>
 #include <LineSensors.h>
 #include <Motors.h>
@@ -119,6 +132,8 @@ public:
         return m_buttonC;
     }
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /**
      * Get buzzer driver.
      *
@@ -129,6 +144,10 @@ public:
         return m_buzzer;
     }
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /**
      * Get LCD driver.
      *
@@ -138,6 +157,22 @@ public:
     {
         return m_display;
     }
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /**
+     * Get IMU driver.
+     *
+     * @return IMU driver.
+     */
+    IIMU& getIMU() final
+    {
+        return m_imu;
+    }
+
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /**
      * Get encoders.
@@ -224,7 +259,9 @@ public:
      */
     void process() final
     {
+#if CONFIG_BUZZER == CONFIG_ENABLE
         m_buzzer.process();
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
     }
 
 private:
@@ -237,11 +274,26 @@ private:
     /** Button C driver */
     ButtonC m_buttonC;
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /** Buzzer driver */
     Buzzer m_buzzer;
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /** Display driver */
     Display m_display;
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /** IMU driver */
+    IMU m_imu;
+
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /** Encoders driver */
     Encoders m_encoders;

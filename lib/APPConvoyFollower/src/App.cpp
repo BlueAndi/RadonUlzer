@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   App.cpp
  * @brief  RemoteControl application
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -274,10 +275,12 @@ void App::systemStatusCallback(SMPChannelPayload::Status status)
 
 void App::reportVehicleData()
 {
-    IProximitySensors& proximitySensors = Board::getInstance().getProximitySensors();
+    Board&             board            = Board::getInstance();
+    IProximitySensors& proximitySensors = board.getProximitySensors();
     Odometry&          odometry         = Odometry::getInstance();
     Speedometer&       speedometer      = Speedometer::getInstance();
     VehicleData        payload;
+    uint32_t           timestamp     = millis();
     int32_t            xPos          = 0;
     int32_t            yPos          = 0;
     uint8_t            maxCounts     = 0U;
@@ -297,13 +300,16 @@ void App::reportVehicleData()
     averageCounts = m_movAvgProximitySensor.write(maxCounts);
 
     odometry.getPosition(xPos, yPos);
-    payload.xPos        = xPos;
-    payload.yPos        = yPos;
-    payload.orientation = odometry.getOrientation();
-    payload.left        = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
-    payload.right       = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
-    payload.center      = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
-    payload.proximity   = static_cast<SMPChannelPayload::Range>(averageCounts);
+    payload.timestamp     = timestamp;
+    payload.xPos          = xPos;
+    payload.yPos          = yPos;
+    payload.orientation   = odometry.getOrientation();
+    payload.left          = Util::stepsPerSecondToMillimetersPerSecond(leftSpeed);
+    payload.right         = Util::stepsPerSecondToMillimetersPerSecond(rightSpeed);
+    payload.center        = Util::stepsPerSecondToMillimetersPerSecond(centerSpeed);
+    payload.proximity     = static_cast<SMPChannelPayload::Range>(averageCounts);
+    payload.accelerationX = 0;
+    payload.turnRateZ     = 0;
 
     /* Ignoring return value, as error handling is not available. */
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdCurrentVehicleData, &payload, sizeof(VehicleData));
@@ -391,7 +397,8 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
  */
 void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
 {
-    (void)userData;
+    UTIL_NOT_USED(userData);
+
     if ((nullptr != payload) && (SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const SpeedData* motorSpeedData = reinterpret_cast<const SpeedData*>(payload);

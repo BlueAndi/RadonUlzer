@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2019 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   Board.cpp
  * @brief  The simulation robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -62,6 +63,14 @@
 
 void Board::init()
 {
+#if CONFIG_IMU == CONFIG_ENABLE
+    if (true == m_imu.init())
+    {
+        m_imu.enableDefault();
+        m_imu.configureForTurnSensing();
+        m_imu.calibrate();
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
@@ -85,8 +94,16 @@ Board::Board() :
     m_buttonA(m_keyboard),
     m_buttonB(m_keyboard),
     m_buttonC(m_keyboard),
+#if CONFIG_BUZZER == CONFIG_ENABLE
     m_buzzer(m_robot.getSpeaker(RobotDeviceNames::SPEAKER_NAME)),
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(m_robot.getDisplay(RobotDeviceNames::DISPLAY_NAME)),
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+#if CONFIG_IMU == CONFIG_ENABLE
+    m_imu(m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME), m_robot.getGyro(RobotDeviceNames::GYRO_NAME),
+          m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME)),
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders(m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME),
                m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME)),
     m_lineSensors(
@@ -129,6 +146,11 @@ void Board::enableSimulationDevices()
         m_robot.getDistanceSensor(RobotDeviceNames::PROXIMITY_SENSOR_FRONT_RIGHT_NAME);
     webots::Receiver* receiver           = m_robot.getReceiver(RobotDeviceNames::RECEIVER_NAME_SERIAL);
     webots::Receiver* supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
+#if CONFIG_IMU == CONFIG_ENABLE
+    webots::Accelerometer* accelerometer = m_robot.getAccelerometer(RobotDeviceNames::ACCELEROMETER_NAME);
+    webots::Gyro*          gyro          = m_robot.getGyro(RobotDeviceNames::GYRO_NAME);
+    webots::Compass*       magnetometer  = m_robot.getCompass(RobotDeviceNames::MAGNETOMETER_NAME);
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     if (nullptr != keyboard)
     {
@@ -189,6 +211,24 @@ void Board::enableSimulationDevices()
     {
         supervisorReceiver->enable(timeStep);
     }
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    if (nullptr != accelerometer)
+    {
+        accelerometer->enable(timeStep);
+    }
+
+    if (nullptr != gyro)
+    {
+        gyro->enable(timeStep);
+    }
+
+    if (nullptr != magnetometer)
+    {
+        magnetometer->enable(timeStep);
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 }
 
 /******************************************************************************

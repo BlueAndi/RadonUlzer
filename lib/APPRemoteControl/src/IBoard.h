@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   IBoard.h
  * @brief  Board interface, which abstracts the physical board
  * @author Andreas Merkle <web@blue-andi.de>
  *
@@ -44,9 +45,21 @@
  * Includes
  *****************************************************************************/
 #include <stdint.h>
+#include <Config.h>
 #include <IButton.h>
+
+#if CONFIG_BUZZER == CONFIG_ENABLE
 #include <IBuzzer.h>
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
 #include <IDisplay.h>
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+#include <IIMU.h>
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
+
 #include <IEncoders.h>
 #include <ILineSensors.h>
 #include <IMotors.h>
@@ -105,6 +118,8 @@ public:
      */
     virtual IButton& getButtonC() = 0;
 
+#if CONFIG_BUZZER == CONFIG_ENABLE
+
     /**
      * Get buzzer driver.
      *
@@ -112,12 +127,28 @@ public:
      */
     virtual IBuzzer& getBuzzer() = 0;
 
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+
     /**
      * Get LCD driver.
      *
      * @return LCD driver.
      */
     virtual IDisplay& getDisplay() = 0;
+
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+
+#if CONFIG_IMU == CONFIG_ENABLE
+
+    /**
+     * Get IMU driver.
+     *
+     * @return IMU driver.
+     */
+    virtual IIMU& getIMU() = 0;
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
 
     /**
      * Get encoders driver.

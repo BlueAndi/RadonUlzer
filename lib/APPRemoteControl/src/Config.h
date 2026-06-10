@@ -25,17 +25,46 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- * @file   main.cpp
- * @brief  Main entry point
+ * @file   Config.h
+ * @brief  Compile time configuration for the Remote Control application
  * @author Andreas Merkle <web@blue-andi.de>
+ *
+ * @addtogroup HALInterfaces
+ *
+ * @{
  */
+
+#ifndef CONFIG_H
+#define CONFIG_H
+
+/******************************************************************************
+ * Compile Switches
+ *****************************************************************************/
+
+/** Used to disable a feature at compile time. */
+#define CONFIG_DISABLE 0
+
+/** Used to enable a feature at compile time. */
+#define CONFIG_ENABLE 1
+
+#ifndef CONFIG_BUZZER
+/** Configuration for buzzer usage. */
+#define CONFIG_BUZZER CONFIG_ENABLE
+#endif /* CONFIG_BUZZER */
+
+#ifndef CONFIG_DISPLAY
+/** Configuration for display usage. */
+#define CONFIG_DISPLAY CONFIG_ENABLE
+#endif /* CONFIG_DISPLAY */
+
+#ifndef CONFIG_IMU
+/** Configuration for IMU usage. */
+#define CONFIG_IMU CONFIG_ENABLE
+#endif /* CONFIG_IMU */
 
 /******************************************************************************
  * Includes
  *****************************************************************************/
-#include <stdio.h>
-#include <Arduino.h>
-#include <time.h>
 
 /******************************************************************************
  * Macros
@@ -46,63 +75,8 @@
  *****************************************************************************/
 
 /******************************************************************************
- * Prototypes
+ * Functions
  *****************************************************************************/
 
-static unsigned long getSystemTick();
-static void          systemDelay(unsigned long ms);
-
-/******************************************************************************
- * Variables
- *****************************************************************************/
-
-/******************************************************************************
- * External functions
- *****************************************************************************/
-
-/**
- * Main program entry point.
- *
- * @param[in] argc  Number of arguments
- * @param[in] argv  Array of arguments
- *
- * @return Status
- */
-extern int main(int argc, char** argv)
-{
-    Arduino::setup(getSystemTick, systemDelay);
-    Arduino::loop();
-
-    return 0;
-}
-
-/******************************************************************************
- * Local functions
- *****************************************************************************/
-
-/**
- * Get the system tick in ms.
- *
- * @return Timestamp (system tick) in ms
- */
-static unsigned long getSystemTick()
-{
-    clock_t now = clock();
-
-    return (now * 1000UL) / CLOCKS_PER_SEC;
-}
-
-/**
- * Delay for a specific time in ms.
- *
- * @param[in] ms    Time in ms.
- */
-static void systemDelay(unsigned long ms)
-{
-    unsigned long timestamp = millis();
-
-    while ((millis() - timestamp) < ms)
-    {
-        ;
-    }
-}
+#endif /* CONFIG_H */
+/** @} */

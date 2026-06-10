@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   App.cpp
  * @brief  SensorFusion application
  * @author Juliane Kerpe <juliane.kerpe@web.de>
  */
@@ -141,7 +142,8 @@ void App::loop()
 void App::sendSensorData()
 {
     SensorData payload;
-    IIMU&      imu      = Board::getInstance().getIMU();
+    Board&     board    = Board::getInstance();
+    IIMU&      imu      = board.getIMU();
     Odometry&  odometry = Odometry::getInstance();
     int32_t    positionOdometryX;
     int32_t    positionOdometryY;

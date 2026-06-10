@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2019 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2019 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   Board.cpp
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -60,6 +61,14 @@
 
 void Board::init()
 {
+#if CONFIG_IMU == CONFIG_ENABLE
+    if (true == m_imu.init())
+    {
+        m_imu.enableDefault();
+        m_imu.configureForTurnSensing();
+        m_imu.calibrate();
+    }
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders.init();
     m_lineSensors.init();
     m_motors.init();
@@ -80,8 +89,15 @@ Board::Board() :
     m_buttonA(),
     m_buttonB(),
     m_buttonC(),
+#if CONFIG_BUZZER == CONFIG_ENABLE
     m_buzzer(),
+#endif /* CONFIG_BUZZER == CONFIG_ENABLE */
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     m_display(),
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
+#if CONFIG_IMU == CONFIG_ENABLE
+    m_imu(),
+#endif /* CONFIG_IMU == CONFIG_ENABLE */
     m_encoders(),
     m_lineSensors(),
     m_motors(),

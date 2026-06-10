@@ -1,6 +1,6 @@
 /* MIT License
  *
- * Copyright (c) 2023 - 2025 Andreas Merkle <web@blue-andi.de>
+ * Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
     DESCRIPTION
 *******************************************************************************/
 /**
+ * @file   DrivingState.cpp
  * @brief  Driving state
  * @author Andreas Merkle <web@blue-andi.de>
  */
@@ -36,6 +37,7 @@
 #include <StateMachine.h>
 #include <DifferentialDrive.h>
 #include <Board.h>
+#include <Util.h>
 
 /******************************************************************************
  * Compiler Switches
@@ -63,11 +65,15 @@
 
 void DrivingState::entry()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+    IDisplay& display = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Drv");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 
     m_isActive = true;
     diffDrive.setLinearSpeed(0, 0);
@@ -77,22 +83,26 @@ void DrivingState::entry()
 void DrivingState::process(StateMachine& sm)
 {
     /* Nothing to do. */
-    (void)sm;
+    UTIL_NOT_USED(sm);
 }
 
 void DrivingState::exit()
 {
-    IDisplay&          display   = Board::getInstance().getDisplay();
+#if CONFIG_DISPLAY == CONFIG_ENABLE
+    IDisplay& display = Board::getInstance().getDisplay();
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
-    
+
     m_isActive = false;
 
     /* Stop motors. */
     diffDrive.setLinearSpeed(0, 0);
     diffDrive.disable();
 
+#if CONFIG_DISPLAY == CONFIG_ENABLE
     display.clear();
     display.print("Idle");
+#endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
 }
 
 void DrivingState::setMotorSpeeds(int16_t leftMotor, int16_t rightMotor)

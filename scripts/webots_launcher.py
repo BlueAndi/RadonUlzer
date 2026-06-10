@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (c) 2022 - 2025 Andreas Merkle (web@blue-andi.de)
+# Copyright (c) 2022 - 2026 Andreas Merkle (web@blue-andi.de)
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,15 +40,18 @@ OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
 
-ROBOT_NAME = env.GetProjectOption("webots_robot_name") # pylint: disable=undefined-variable
+WEBOTS_IP_ADDRESS = env.GetProjectOption("custom_webots_ip_address") # pylint: disable=undefined-variable
+WEBOTS_PROTOCOL = env.GetProjectOption("custom_webots_protocol") # pylint: disable=undefined-variable
 
-SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
-SUPERVISOR_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_supervisor_serial_tx_channel") # pylint: disable=undefined-variable
+ROBOT_NAME = env.GetProjectOption("custom_webots_robot_name") # pylint: disable=undefined-variable
 
-ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
-ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
+SUPERVISOR_SERIAL_RX_CHANNEL = env.GetProjectOption("custom_webots_supervisor_serial_rx_channel") # pylint: disable=undefined-variable
+SUPERVISOR_SERIAL_TX_CHANNEL = env.GetProjectOption("custom_webots_supervisor_serial_tx_channel") # pylint: disable=undefined-variable
 
-SETTINGS_PATH = env.GetProjectOption("settings_path") # pylint: disable=undefined-variable
+ROBOT_SERIAL_RX_CHANNEL = env.GetProjectOption("custom_webots_robot_serial_rx_channel") # pylint: disable=undefined-variable
+ROBOT_SERIAL_TX_CHANNEL = env.GetProjectOption("custom_webots_robot_serial_tx_channel") # pylint: disable=undefined-variable
+
+SETTINGS_PATH = env.GetProjectOption("custom_settings_path") # pylint: disable=undefined-variable
 
 PROJECT_PATH = env["PROJECT_DIR"]  # pylint: disable=undefined-variable
 ABS_SETTINGS_PATH = os.path.join(PROJECT_PATH, SETTINGS_PATH)
@@ -64,8 +67,16 @@ PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--serialTxCh ' + ROBOT_SERIAL_TX_CHANNEL + ' ' \
                                 + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \
                                 + '-v'
-WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
+WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' ' \
+                            '--stdout-redirect' + ' ' \
+                            '--ip-address=' + WEBOTS_IP_ADDRESS + ' ' \
+                            '--protocol=' + WEBOTS_PROTOCOL
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')
+
+if WEBOTS_HOME is None:
+    print("WEBOTS_HOME environment variable is not set. "
+          "Please set it to the Webots installation directory.")
+    sys.exit(1)
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
 
