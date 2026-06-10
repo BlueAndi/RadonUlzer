@@ -40,8 +40,8 @@ OS_PLATFORM_TYPE_LINUX = "Linux"
 OS_PLATFORM_TYPE_MACOS = "Darwin"
 OS_PLATFORM_TYPE = platform.system()
 
-WEBOTS_IP_ADDRESS = env.GetProjectOption("custom_webots_ip_address")  # pylint: disable=undefined-variable
-WEBOTS_PROTOCOL = env.GetProjectOption("custom_webots_protocol")  # pylint: disable=undefined-variable
+WEBOTS_IP_ADDRESS = env.GetProjectOption("custom_webots_ip_address") # pylint: disable=undefined-variable
+WEBOTS_PROTOCOL = env.GetProjectOption("custom_webots_protocol") # pylint: disable=undefined-variable
 
 ROBOT_NAME = env.GetProjectOption("custom_webots_robot_name") # pylint: disable=undefined-variable
 
