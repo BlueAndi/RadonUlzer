@@ -178,6 +178,44 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__chkpt_dir + "critic.keras", compile=False
         )
 
+     
+    @tf.function(
+            input_signature=[
+                tf.TensorSpec(shape=(1, 5), dtype=tf.float32),
+                tf.TensorSpec(shape=(), dtype=tf.float32)
+            ]
+    )
+    def _predict_train_graph(self, state_tensor, std_dev):
+        """ Graph for the training branch in predict_action() """
+
+        # Forward pass through the actor network to get the action mean
+        action_mean = self.__neural_network.actor_network(state_tensor)
+
+        # Create a normal distribution
+        dist = tfp.distributions.Normal(action_mean, std_dev)
+
+        # Sampling an action from the normal distribution
+        sampled_action = dist.sample()
+
+        # Apply the Tanh transformation to the sampled action
+        transformed_action = tf.tanh(sampled_action)
+
+        # Calculation of the logarithm of the probability density of the sampled action
+        log_prob = dist.log_prob(sampled_action)
+
+        # Calculation of the Jacobian determinant for the Tanh transformation
+        jacobian_log_det = tf.math.log(
+            1.0 - tf.square(transformed_action) + 1e-6)
+
+        # Calculation of Adjusted probabilities by the neural network
+        adjusted_log_prob = log_prob - jacobian_log_det
+
+        # calculate the estimated value of a state, which is determined by the Critic network
+        value = self.__neural_network.critic_network(state_tensor)
+
+        return transformed_action, value, adjusted_log_prob
+
+
     def predict_action(self, state):
         """
         Predicts an action based on the current state.
@@ -194,35 +232,13 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         m_state = self.normalize_sensor_data(state)
 
         # Conversion of the state into a tensor
-        state = tf.convert_to_tensor([m_state], dtype=tf.float32)
-
-        # Forward pass through the actor network to get the action mean
-        action_mean = self.__neural_network.actor_network(state)
+        state_tensor = tf.convert_to_tensor([m_state], dtype=tf.float32)
 
         # Training mode is set.
         if self.train_mode is True:
 
-            # Create a normal distribution
-            dist = tfp.distributions.Normal(action_mean, self.__std_dev)
-
-            # Sampling an action from the normal distribution
-            sampled_action = dist.sample()
-
-            # Apply the Tanh transformation to the sampled action
-            transformed_action = tf.tanh(sampled_action)
-
-            # Calculation of the logarithm of the probability density of the sampled action
-            log_prob = dist.log_prob(sampled_action)
-
-            # Calculation of the Jacobian determinant for the Tanh transformation
-            jacobian_log_det = tf.math.log(
-                1 - tf.square(transformed_action) + 1e-6)
-
-            # Calculation of Adjusted probabilities by the neural network
-            adjusted_log_prob = log_prob - jacobian_log_det
-
-            # calculate the estimated value of a state, which is determined by the Critic network
-            value = self.__neural_network.critic_network(state)
+            std_dev = tf.convert_to_tensor(self.__std_dev, dtype=tf.float32)
+            transformed_action, value, adjusted_log_prob = self._predict_train_graph(state_tensor, std_dev)
 
             self.action = transformed_action.numpy()[0]
             self.value = value.numpy()[0]
@@ -230,6 +246,10 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         # Driving mode is set
         else:
+            
+            # Forward pass through the actor network to get the action mean
+            action_mean = self.__neural_network.actor_network(state_tensor)
+
             self.action = action_mean.numpy()[0]
 
         return self.action
