@@ -49,12 +49,11 @@ NUM_SENSORS = 5  # Assuming 5 sensor inputs
 class Models:  # pylint: disable=too-many-instance-attributes
     """Class for building networks of actors and critics."""
 
-    def __init__(self, actor_alpha, critic_alpha, std_dev, policy_clip):
+    def __init__(self, actor_alpha, critic_alpha, policy_clip):
         self.__actor_learning_rate = actor_alpha
         self.__critic_learning_rate = critic_alpha
         self.actor_network = self.build_actor_network()
         self.critic_network = self.build_critic_network()
-        self.std_dev = std_dev
         self.policy_clip = policy_clip
         self.actor_optimizer = keras.optimizers.Adam(self.__actor_learning_rate)
         self.critic_optimizer = keras.optimizers.Adam(self.__critic_learning_rate)
@@ -157,7 +156,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
             # save the critic Loss
             self.critic_loss_history.append(critic_loss.numpy())
 
-    def calculate_adjusted_log_probability(self, states, actions):
+    def calculate_adjusted_log_probability(self, states, actions, std_dev):
         """ The function computes the logarithmic probability of a given action.
 
         Parameters
@@ -175,7 +174,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
         predict_mean =  self.actor_network(states)
 
         # Create the normal distribution with the predicted mean
-        new_dist = tfp.distributions.Normal(predict_mean, self.std_dev)
+        new_dist = tfp.distributions.Normal(predict_mean, std_dev)
 
         # Invert the tanh transformation to recover the original actions before tanh
         untransformed_actions = tf.atanh(actions)
@@ -191,7 +190,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         return adjusted_log_prob
 
-    def compute_actor_gradient(self, states, actions, old_probs, advantages):
+    def compute_actor_gradient(self, states, actions, old_probs, advantages, std_dev):
         """ optimize Actor Network weights.
 
         Parameters
@@ -205,7 +204,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         with tf.GradientTape() as tape:
 
-            adjusted_new_log_prob = self.calculate_adjusted_log_probability(states, actions)
+            adjusted_new_log_prob = self.calculate_adjusted_log_probability(states, actions, std_dev)
 
             # The ratio between the new model and the old model’s action log probabilities
             prob_ratio = tf.exp(adjusted_new_log_prob - old_probs)

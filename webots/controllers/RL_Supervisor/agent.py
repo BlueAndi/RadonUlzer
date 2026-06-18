@@ -119,7 +119,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__memory = Memory(
             batch_size, max_buffer_length, gamma, gae_lambda)
         self.__neural_network = Models(
-            actor_alpha, critic_alpha, self.__std_dev, policy_clip)
+            actor_alpha, critic_alpha, policy_clip)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
         self.n_epochs = 3
@@ -391,13 +391,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         for _ in range(self.n_epochs):
 
-            states = tf.convert_to_tensor(m_states)
-            actions = tf.convert_to_tensor(actions)
-            old_probs = tf.convert_to_tensor(old_probs)
+            states = tf.convert_to_tensor(m_states, dtype=tf.float32)
+            actions = tf.convert_to_tensor(actions, dtype=tf.float32)
+            old_probs = tf.convert_to_tensor(old_probs, dtype=tf.float32)
+            std_dev = tf.convert_to_tensor(self.__std_dev, dtype=tf.float32)
 
             # optimize Actor Network weights
             self.__neural_network.compute_actor_gradient(
-                states, actions, old_probs, advantages)
+                states, actions, old_probs, advantages, self.__std_dev)
 
             # optimize Critic Network weights
             self.__neural_network.compute_critic_gradient(
