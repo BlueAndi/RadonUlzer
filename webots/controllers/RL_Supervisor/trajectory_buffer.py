@@ -82,6 +82,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         # Create indices for the states and mix them randomly
         indices = np.arange(n_states, dtype=np.int64)
+        np.random.shuffle(indices)
 
         # Create batches by dividing the indices into groups of the batch_size
         batches = [indices[indx : indx + self.__batch_size] for indx in batch_start]
