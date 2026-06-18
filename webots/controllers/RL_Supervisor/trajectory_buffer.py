@@ -89,13 +89,14 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         # the computed advantage values for each state in a given Data size.
         self.__advatages = self.calculate_advantages(self.__rewards,
                                                     self.__vals, self.__dones)
+
         return (
-            np.array(self.__states),
-            np.array(self.__actions),
-            np.array(self.__probs),
-            np.array(self.__vals),
-            np.array(self.__rewards),
-            np.array(self.__advatages),
+            np.array(self.__states, dtype=np.float32),
+            np.array(self.__actions, dtype=np.float32),
+            np.array(self.__probs, dtype=np.float32),
+            np.array(self.__vals, dtype=np.float32),
+            np.array(self.__rewards, dtype=np.float32),
+            np.array(self.__advatages, dtype=np.float32).reshape(-1, 1),
             batches,
 
         )
