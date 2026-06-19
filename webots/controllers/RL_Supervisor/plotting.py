@@ -1,52 +1,57 @@
-""" Plotting script  with Matplotlib """
+"""Plot episode-level reinforcement learning training metrics."""
 
-# Description: This script generates three separate plots using Matplotlib to visualize
-# the Actor Loss, Critic Loss, and Reward over time based on data collected during the
-# training process. Each plot represents the respective metric as a function of
-# mini-batch steps.
-
-# Imports
+from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# Define the path to the CSV file
-LOG_FILE = "logs/training_logs.csv"
+SCRIPT_DIR = Path(__file__).resolve().parent
+LOG_DIR = SCRIPT_DIR / "logs"
+LOG_FILE = LOG_DIR / "training_logs.csv"
 
-# Read the CSV file
 data = pd.read_csv(LOG_FILE)
 
-# Define length
-data["Mini Batch"] = range(1, len(data) + 1)
+required_columns = {"Episode", "Actor Loss", "Critic Loss", "Reward"}
+missing_columns = required_columns.difference(data.columns)
+if missing_columns:
+    raise ValueError(
+        f"Missing columns in {LOG_FILE}: {', '.join(sorted(missing_columns))}"
+    )
+
+if data.empty:
+    raise ValueError(f"No training data found in {LOG_FILE}.")
 
 # Plotting Actor Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Mini Batch"], data["Actor Loss"], label="Actor Loss")
-plt.xlabel("Mini Batch")
+plt.plot(data["Episode"], data["Actor Loss"], label="Mean Actor Loss")
+plt.xlabel("Episode")
 plt.ylabel("Loss")
-plt.title("Actor Loss Over Mini Batches")
+plt.title("Mean Actor Loss per Episode")
 plt.legend()
 plt.grid(True)
-plt.savefig("logs/actor_loss_plot.png")
-plt.show()
+plt.tight_layout()
+plt.savefig(LOG_DIR / "actor_loss_plot.png")
 
 # Plotting Critic Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Mini Batch"], data["Critic Loss"], label="Critic Loss")
-plt.xlabel("Mini Batch")
+plt.plot(data["Episode"], data["Critic Loss"], label="Mean Critic Loss")
+plt.xlabel("Episode")
 plt.ylabel("Loss")
-plt.title("Critic Loss Over Mini Batches")
+plt.title("Mean Critic Loss per Episode")
 plt.legend()
 plt.grid(True)
-plt.savefig("logs/critic_loss_plot.png")
-plt.show()
+plt.tight_layout()
+plt.savefig(LOG_DIR / "critic_loss_plot.png")
 
 # Plotting Total Rewards
 plt.figure(figsize=(10, 5))
-plt.plot(data["Mini Batch"], data["Reward"], label="Reward")
-plt.xlabel("Mini Batch")
+plt.plot(data["Episode"], data["Reward"], label="Total Reward")
+plt.xlabel("Episode")
 plt.ylabel("Total Reward")
-plt.title("Total Rewards Over Mini Batches")
+plt.title("Total Reward per Episode")
 plt.legend()
 plt.grid(True)
-plt.savefig("logs/total_rewards_plot.png")
+plt.tight_layout()
+plt.savefig(LOG_DIR / "total_rewards_plot.png")
+
+print(f"Plots saved to: {LOG_DIR}")
 plt.show()

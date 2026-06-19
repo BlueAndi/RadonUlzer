@@ -132,6 +132,10 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.data_sent = True
         self.unsent_data = []
         self.reward_history = []
+        self.training_history = []
+        self.__trajectory_reward = 0.0
+        self.__actor_loss_start_index = 0
+        self.__critic_loss_start_index = 0
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -404,31 +408,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__neural_network.compute_critic_gradient(
                 states, values, advantages)
 
-            # Save the rewards received
-            self.reward_history.append(sum(rewards))
-
-        # saving logs in a CSV file
-        self.save_logs_to_csv()
-
     def save_logs_to_csv(self):
-        """Function for saving logs in a CSV file"""
-
-        # Ensure the directory exists
-        log_dir = DIRECTORY
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, FILE_DIRECTORY)
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
 
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["Actor Loss", "Critic Loss", "Reward"])
-            for indx, reward in enumerate(self.reward_history):
-                writer.writerow(
-                    [
-                        self.__neural_network.actor_loss_history[indx],
-                        self.__neural_network.critic_loss_history[indx],
-                        reward,
-                    ]
-                )
+            writer.writerow(
+                ["Episode", "Actor Loss", "Critic Loss", "Reward"]
+            )
+            writer.writerows(self.training_history)
 
     def perform_training(self):
         """Runs the training process."""
@@ -437,6 +426,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
             # Grab sample from memory
             self.__current_batch = self.__memory.generate_batches()
+
+            self.__trajectory_reward = self.__memory.get_sum_rewards()
+            self.__actor_loss_start_index = len(
+                self.__neural_network.actor_loss_history
+            )
+            self.__critic_loss_start_index = len(
+                self.__neural_network.critic_loss_history
+            )
+
 
         # Perform training with mini batches.
         if self.__training_index < len(self.__current_batch[-1]):
@@ -467,6 +465,29 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__training_index = 0
             self.__current_batch = None
             self.done = False
+
+            actor_losses = self.__neural_network.actor_loss_history[
+                self.__actor_loss_start_index:
+            ]
+
+            critic_losses = self.__neural_network.critic_loss_history[
+                self.__critic_loss_start_index:
+            ]
+
+            mean_actor_loss = float(np.mean(actor_losses))
+            mean_critic_loss = float(np.mean(critic_losses))
+
+            self.training_history.append(
+                (
+                    self.num_episodes + 1,
+                    mean_actor_loss,
+                    mean_critic_loss,
+                    self.__trajectory_reward,
+                )
+            )
+
+            self.save_logs_to_csv()
+
             self.__memory.clear_memory()
             self.num_episodes += 1
 
