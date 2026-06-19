@@ -127,6 +127,8 @@ class RobotController:
         self.steps += 1
 
         is_start_stop_line_detected = False
+        is_ignored_start_stop_line = False
+
         # Determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
@@ -140,6 +142,7 @@ class RobotController:
 
         # Detect Start/Stop Line before Finish Trajectories
         if (is_start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+            is_ignored_start_stop_line = True
             sensor_data = list(sensor_data)
             sensor_data[SENSOR_ID_MOST_LEFT] = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
@@ -158,6 +161,9 @@ class RobotController:
             # receive a -1 punishment if the robot leaves the line
             if self.__no_line_detection_count > 0:
                 reward = -1
+            # Do not reward driving in circles over the start line.
+            elif is_ignored_start_stop_line is True:
+                reward = 0
             else:
                 reward = self.__agent.determine_reward(sensor_data)
 

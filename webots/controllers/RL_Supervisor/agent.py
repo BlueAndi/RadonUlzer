@@ -73,7 +73,7 @@ ORIENTATION_DATA = [
 ]
 MAX_SENSOR_VALUE = 1000
 MIN_STD_DEV = 0.01  # Minimum standard deviation
-STD_DEV_FACTOR = 0.995  # Discounter standard deviation factor
+STD_DEV_FACTOR = 0.995  # Standard deviation decay factor
 
 TRANSLATION_FIELD = "translation"
 ROTATION_FIELD = "rotation"
@@ -114,8 +114,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__std_dev = 0.05   # When training without an existing model this should be
-        # set to 0.9 manually
+        self.__std_dev = 0.9
         self.__memory = Memory(
             batch_size, max_buffer_length, gamma, gae_lambda)
         self.__neural_network = Models(
@@ -167,6 +166,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
     def save_models(self):
         """Saves the models in the specified file."""
 
+        os.makedirs(self.__chkpt_dir, exist_ok=True)
         self.__neural_network.actor_network.save(
             self.__chkpt_dir + "actor.keras")
         self.__neural_network.critic_network.save(
@@ -377,7 +377,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         reward = self.__memory.calculate_reward(sensor_data)
         return reward
 
-    def learn(self, states, actions, old_probs, values, rewards, advantages):
+    def learn(
+        self,
+        states,
+        actions,
+        old_probs,
+        values,
+        rewards,
+        advantages,
+        normalized_advantages,
+    ):
         """
         Perform training to optimize model weights.
 
@@ -388,7 +397,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             old_probs:  The saved probabilities of the actions taken, based on the previous policy.
             values:     The saved estimated values of the observed states.
             rewards:    The saved rewards received for taking the actions.
-            advantages: the computed advantage values for each state in a given Data size.
+            advantages: The original advantage values used to train the critic.
+            normalized_advantages: The normalized advantage values used to train the actor.
         """
         # scales the sensor data to a range between 0 and 1
         m_states = self.normalize_sensor_data(states)
@@ -402,7 +412,12 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
             # optimize Actor Network weights
             self.__neural_network.compute_actor_gradient(
-                states, actions, old_probs, advantages, self.__std_dev)
+                states,
+                actions,
+                old_probs,
+                normalized_advantages,
+                self.__std_dev
+            )
 
             # optimize Critic Network weights
             self.__neural_network.compute_critic_gradient(
@@ -445,6 +460,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 vals_arr,
                 reward_arr,
                 advatage_arr,
+                normalized_advatage_arr,
                 batches,
             ) = self.__current_batch
             batch = batches[self.__training_index]
@@ -456,7 +472,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 old_prob_arr[batch],
                 vals_arr[batch],
                 reward_arr[batch],
-                advatage_arr[batch]
+                advatage_arr[batch],
+                normalized_advatage_arr[batch]
             )
             self.__training_index += 1
 

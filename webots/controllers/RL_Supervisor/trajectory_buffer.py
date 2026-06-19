@@ -70,7 +70,8 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         Numpy-Array: Probs
         Numpy-Array: Vals
         Numpy-Array: Rewards
-        Numpy-Array: Advantages
+        Numpy-Array: Raw advantages
+        Numpy-Array: Normalized advantages
         List: Batches
         """
 
@@ -91,6 +92,16 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         self.__advatages = self.calculate_advantages(self.__rewards,
                                                     self.__vals, self.__dones)
 
+        # Normalize advantages over the complete trajectory before splitting
+        # them into mini-batches. This keeps the scale of the policy updates
+        # stable while preserving whether an advantage is above or below the
+        # trajectory average.
+        advantage_mean = np.mean(self.__advatages)
+        advantage_std = np.std(self.__advatages)
+        normalized_advantages = (
+            self.__advatages - advantage_mean
+        ) / (advantage_std + 1e-8)
+
         return (
             np.array(self.__states, dtype=np.float32),
             np.array(self.__actions, dtype=np.float32),
@@ -98,6 +109,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
             np.array(self.__vals, dtype=np.float32),
             np.array(self.__rewards, dtype=np.float32),
             np.array(self.__advatages, dtype=np.float32).reshape(-1, 1),
+            np.array(normalized_advantages, dtype=np.float32).reshape(-1, 1),
             batches,
 
         )
