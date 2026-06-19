@@ -166,52 +166,66 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
     def calculate_advantages(self, rewards, values, dones):
         """
-        The function measures how much better or worse an action 
-        performed in a given state compared to the average action 
-        the policy would take in that state.
+        Calculate the generalized advantage estimate (GAE) for every
+        transition.
+
+        The advantage describes how much better or worse the received result
+        was compared with the value predicted by the critic. The calculation
+        runs backwards because each advantage depends on the already
+        calculated advantage of its successor.
 
         Parameters
         ----------
             rewards: The rewards received.
             values: The estimated values of the states.
-            dones: Indicating whether the target sequence has been reached.
+            dones: Indicates whether an episode ended after a transition.
 
         Returns
         ----------
-            NumPy array of float32: the computed advantage values for each 
-            state in a given Data size.
+            NumPy array of float32: The advantage for every transition.
         """
+        # Critic outputs are stored as one-element arrays. Flatten them
+        # so every value used in the calculation is a scalar.
+        values = np.asarray(values, dtype=np.float32).reshape(-1)
 
         data_size = len(rewards)
-
-        # Create empty advantages array
         advantages = np.zeros(data_size, dtype=np.float32)
 
-        for start_index in range(data_size-1):
-            discount = 1
-            advantage = 0
+        # Accumulated advantage of the transitions following the current one.
+        gae = 0.0
 
-            for future_index in range(start_index, data_size - 1):
+        if not (len(rewards) == len(values) == len(dones)):
+            raise ValueError("rewards, values and dones must have the same length")
 
-                # Calculate the temporal difference (TD)
-                delta = (
-                    rewards[future_index]
-                    + (
-                        self.__gamma
-                        * values[future_index + 1]
-                        * (1 - int(dones[future_index]))
-                    )
-                    - values[future_index]
-                )
+        # A backwards pass calculates all advantages in O(n).
+        for index in reversed(range(data_size)):
+            # The mask is 0 at an episode end and 1 while the episode
+            # continues. It prevents future values from crossing that limit.
+            is_not_terminal = 1.0 - dones[index]
 
-                # Accumulate the advantage using the discount factor
-                advantage += discount * delta
+            # The final stored transition has no stored successor. At a
+            # regular episode end, its expected future value is zero.
+            if index == data_size - 1:
+                next_value = 0.0
+            else:
+                next_value = values[index + 1]
 
-                # Update the discount factor for the next step
-                discount *= self.__gamma * self.__gae_lambda
+            # One-step temporal-difference error:
+            delta = (
+                rewards[index]
+                + self.__gamma * next_value * is_not_terminal
+                - values[index]
+            )
 
-            # Save the calculated advantage for the current state
-            advantages[start_index] = advantage
+            # Include the discounted advantage of following transitions.
+            gae = (
+                delta
+                + self.__gamma
+                * self.__gae_lambda
+                * is_not_terminal
+                * gae
+            )
+            advantages[index] = gae
 
         return advantages
 
