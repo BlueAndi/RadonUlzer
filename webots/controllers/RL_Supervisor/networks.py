@@ -88,7 +88,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
         mean = layers.Dense(
             1,
             activation="tanh",
-            kernel_initializer="glorot_uniform",
+            kernel_initializer="zeros",
             bias_initializer="zeros",
         )(fc3)
 
