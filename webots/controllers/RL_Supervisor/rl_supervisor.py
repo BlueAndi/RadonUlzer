@@ -47,6 +47,7 @@ from agent import Agent
 
 # Constants
 ROBOT_NAME = "ROBOT"
+NO_LINE_TERMINATION_STEPS = 8
 
 # Supervisor PROTO device names (supervisorComRx / supervisorComTx).
 # The rl_supervisor is launched via webots_launcher_zumo_com_system so the robot
@@ -148,19 +149,27 @@ class RobotController:
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
             is_start_stop_line_detected = False
 
+        is_first_no_line_sample = self.__no_line_detection_count == 1
+        is_no_line_sample = self.__no_line_detection_count > 0
+        is_no_line_terminal = self.__no_line_detection_count >= NO_LINE_TERMINATION_STEPS
+
         # sequence stop criterion: debounce no-line and start/stop-line detection
-        if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
-                                                       and (self.steps >= MIN_NUMBER_OF_STEPS))):
+        if (is_no_line_terminal
+                or ((is_start_stop_line_detected is True)
+                    and (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
-            self.__no_line_detection_count = 0
             self.steps = 0
+            self.__no_line_detection_count = 0
 
         # The sequence of states and actions is stored in memory for the training phase.
         if self.__agent.train_mode:
 
-            # receive a -1 punishment if the robot leaves the line
-            if self.__no_line_detection_count > 0:
+            # Penalize only the action that first caused the robot to lose the
+            # line. Further no-line samples carry no additional information.
+            if is_first_no_line_sample:
                 reward = -1
+            elif is_no_line_sample:
+                reward = 0
             # Do not reward driving in circles over the start line.
             elif is_ignored_start_stop_line is True:
                 reward = 0
