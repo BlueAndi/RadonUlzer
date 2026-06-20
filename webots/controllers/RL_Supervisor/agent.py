@@ -84,6 +84,8 @@ TRAINING = "TRAINING_STATE"
 
 DIRECTORY = "logs"
 FILE_DIRECTORY = "training_logs.csv"
+ACTION_DIAGNOSTICS_FILE = "action_diagnostics.csv"
+ACTION_DIAGNOSTICS_STEPS = 20
 
 ################################################################################
 # Classes
@@ -124,6 +126,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.n_epochs = 3
         self.done = False
         self.action = None
+        self.actor_mean = None
         self.value = None
         self.adjusted_log_prob = None
         self.num_episodes = 0
@@ -135,6 +138,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__trajectory_reward = 0.0
         self.__actor_loss_start_index = 0
         self.__critic_loss_start_index = 0
+        self.__diagnostic_step = 0
+        self.__initialize_action_diagnostics()
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -182,7 +187,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__chkpt_dir + "critic.keras", compile=False
         )
 
-     
+
     @tf.function(
             input_signature=[
                 tf.TensorSpec(shape=(1, 5), dtype=tf.float32),
@@ -217,7 +222,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # calculate the estimated value of a state, which is determined by the Critic network
         value = self.__neural_network.critic_network(state_tensor)
 
-        return transformed_action, value, adjusted_log_prob
+        return action_mean, transformed_action, value, adjusted_log_prob
 
 
     def predict_action(self, state):
@@ -242,18 +247,25 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         if self.train_mode is True:
 
             std_dev = tf.convert_to_tensor(self.__std_dev, dtype=tf.float32)
-            transformed_action, value, adjusted_log_prob = self._predict_train_graph(state_tensor, std_dev)
+            (
+                action_mean,
+                transformed_action,
+                value,
+                adjusted_log_prob,
+            ) = self._predict_train_graph(state_tensor, std_dev)
 
+            self.actor_mean = action_mean.numpy()[0]
             self.action = transformed_action.numpy()[0]
             self.value = value.numpy()[0]
             self.adjusted_log_prob = adjusted_log_prob.numpy()[0]
 
         # Driving mode is set
         else:
-            
+
             # Forward pass through the actor network to get the action mean
             action_mean = self.__neural_network.actor_network(state_tensor)
 
+            self.actor_mean = action_mean.numpy()[0]
             self.action = action_mean.numpy()[0]
 
         return self.action
@@ -269,6 +281,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # pre_action contains the predicted action for the given state, calculated based
         # on the Actor model output.
         pre_action = self.predict_action(state)
+        self.__log_action_diagnostics(state)
 
         # Get motor speed difference
         speed_difference = self.__top_speed * pre_action
@@ -286,6 +299,49 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # Failed to send data. Appends the data to unsent_data List.
         if self.data_sent is False:
             self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, control_data))
+
+    def __initialize_action_diagnostics(self):
+        """Create a fresh action diagnostics log for this training run."""
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+
+        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    "Episode",
+                    "Step",
+                    "Sensor0",
+                    "Sensor1",
+                    "Sensor2",
+                    "Sensor3",
+                    "Sensor4",
+                    "Actor Mean",
+                    "Sampled Action",
+                    "Std Dev",
+                ]
+            )
+
+    def __log_action_diagnostics(self, sensor_data):
+        """Log the first actions of each episode for policy analysis."""
+        self.__diagnostic_step += 1
+
+        if self.__diagnostic_step > ACTION_DIAGNOSTICS_STEPS:
+            return
+
+        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+        with open(log_file, mode="a", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    self.num_episodes + 1,
+                    self.__diagnostic_step,
+                    *sensor_data,
+                    float(self.actor_mean[0]),
+                    float(self.action[0]),
+                    self.__std_dev,
+                ]
+            )
 
     def update(self, robot_node):
         """
@@ -507,6 +563,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
             self.__memory.clear_memory()
             self.num_episodes += 1
+            self.__diagnostic_step = 0
 
             # Minimize standard deviation until the minimum standard deviation is reached
             self.__std_dev = self.__std_dev * STD_DEV_FACTOR

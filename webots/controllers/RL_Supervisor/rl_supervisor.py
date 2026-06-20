@@ -194,10 +194,13 @@ class RobotController:
 
     def load_models(self, path) -> None:
         """Load Model if exist"""
-        if os.path.exists(path):
+        actor_path = os.path.join(path, "actor.keras")
+        critic_path = os.path.join(path, "critic.keras")
+
+        if os.path.exists(actor_path) and os.path.exists(critic_path):
             self.__agent.load_models()
         else:
-            print("No model available")
+            print("No complete model checkpoint available. Starting fresh training.")
 
     def retry_unsent_data(self, unsent_data: list) -> bool:
         """Resent any unsent Data"""
