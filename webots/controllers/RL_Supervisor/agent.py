@@ -63,17 +63,32 @@ CMD_ID_IDLE = 0
 # stops motors and re-inits board; required after supervisor position reset
 CMD_ID_REINIT_BOARD = 3
 
-POSITION_DATA = [-0.24713614078815466, -
-                 0.04863962992854465, 0.013994298332013683]
-ORIENTATION_DATA = [
+FORWARD_POSITION_DATA = [
+    -0.24713614078815466,
+    -0.04863962992854465,
+    0.013994298332013683,
+]
+FORWARD_ORIENTATION_DATA = [
     -1.0564747468923541e-06,
     8.746699709178704e-07,
     0.9999999999990595,
     1.5880805820884731
 ]
+REVERSE_POSITION_DATA = [-0.247145, 0.16, 0.0139943]
+REVERSE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, -1.55]
+FORWARD_CURVE_POSITION_DATA = [-0.247145, 0.4, 0.0139943]
+FORWARD_CURVE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, 0.584]
+REVERSE_CURVE_POSITION_DATA = [-0.247145, -0.36, 0.0139943]
+REVERSE_CURVE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, -0.584]
+START_POSES = (
+    (FORWARD_POSITION_DATA, FORWARD_ORIENTATION_DATA),
+    (REVERSE_POSITION_DATA, REVERSE_ORIENTATION_DATA),
+    (FORWARD_CURVE_POSITION_DATA, FORWARD_CURVE_ORIENTATION_DATA),
+    (REVERSE_CURVE_POSITION_DATA, REVERSE_CURVE_ORIENTATION_DATA),
+)
 MAX_SENSOR_VALUE = 1000
-MIN_STD_DEV = 0.01  # Minimum standard deviation
-STD_DEV_FACTOR = 0.995  # Standard deviation decay factor
+MIN_STD_DEV = 0.03  # Minimum standard deviation
+STD_DEV_FACTOR = 0.9975  # Reaches about 0.1 after 650 episodes
 
 TRANSLATION_FIELD = "translation"
 ROTATION_FIELD = "rotation"
@@ -116,7 +131,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__std_dev = 0.9
+        self.__std_dev = 0.5
         self.__memory = Memory(
             batch_size, max_buffer_length, gamma, gae_lambda)
         self.__neural_network = Models(
@@ -139,6 +154,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__actor_loss_start_index = 0
         self.__critic_loss_start_index = 0
         self.__diagnostic_step = 0
+        # The initial world pose is START_POSES[0], so the first reset uses
+        # the next pose in the cycle.
+        self.__start_pose_index = 1
         self.__initialize_action_diagnostics()
 
     def set_train_mode(self):
@@ -584,10 +602,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         """
         trans_field = robot_node.getField(TRANSLATION_FIELD)
         rot_field = robot_node.getField(ROTATION_FIELD)
-        initial_position = POSITION_DATA
-        initial_orientation = ORIENTATION_DATA
+        initial_position, initial_orientation = START_POSES[
+            self.__start_pose_index
+        ]
+
         trans_field.setSFVec3f(initial_position)
         rot_field.setSFRotation(initial_orientation)
+        self.__start_pose_index = (
+            self.__start_pose_index + 1
+        ) % len(START_POSES)
 
 
 ################################################################################
