@@ -25,14 +25,14 @@ PROTO FlagShip [
             }
             Lidar {
               name "lidar"
-              horizontalResolution 360
+              horizontalResolution 1440
               fieldOfView 6.28318530718
               numberOfLayers 1
-              minRange 0.02
-              maxRange 4
+              minRange 0.15
+              maxRange 12
               defaultFrequency 8
               minFrequency 5
-              maxFrequency 10
+              maxFrequency 20
             }
           ]
         }
