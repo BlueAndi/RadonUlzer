@@ -482,7 +482,6 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             states = tf.convert_to_tensor(m_states, dtype=tf.float32)
             actions = tf.convert_to_tensor(actions, dtype=tf.float32)
             old_probs = tf.convert_to_tensor(old_probs, dtype=tf.float32)
-            std_dev = tf.convert_to_tensor(self.__std_dev, dtype=tf.float32)
 
             # optimize Actor Network weights
             self.__neural_network.compute_actor_gradient(
@@ -523,7 +522,6 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__critic_loss_start_index = len(
                 self.__neural_network.critic_loss_history
             )
-
 
         # Perform training with mini batches.
         if self.__training_index < len(self.__current_batch[-1]):
