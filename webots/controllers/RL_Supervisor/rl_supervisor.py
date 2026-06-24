@@ -47,6 +47,7 @@ from agent import Agent
 
 # Constants
 ROBOT_NAME = "ROBOT"
+NO_LINE_TERMINATION_STEPS = 8
 
 # Supervisor PROTO device names (supervisorComRx / supervisorComTx).
 # The rl_supervisor is launched via webots_launcher_zumo_com_system so the robot
@@ -127,6 +128,8 @@ class RobotController:
         self.steps += 1
 
         is_start_stop_line_detected = False
+        is_ignored_start_stop_line = False
+
         # Determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
@@ -140,24 +143,36 @@ class RobotController:
 
         # Detect Start/Stop Line before Finish Trajectories
         if (is_start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+            is_ignored_start_stop_line = True
             sensor_data = list(sensor_data)
             sensor_data[SENSOR_ID_MOST_LEFT] = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
             is_start_stop_line_detected = False
 
+        is_first_no_line_sample = self.__no_line_detection_count == 1
+        is_no_line_sample = self.__no_line_detection_count > 0
+        is_no_line_terminal = self.__no_line_detection_count >= NO_LINE_TERMINATION_STEPS
+
         # sequence stop criterion: debounce no-line and start/stop-line detection
-        if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
-                                                       and (self.steps >= MIN_NUMBER_OF_STEPS))):
+        if (is_no_line_terminal
+                or ((is_start_stop_line_detected is True)
+                    and (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
-            self.__no_line_detection_count = 0
             self.steps = 0
+            self.__no_line_detection_count = 0
 
         # The sequence of states and actions is stored in memory for the training phase.
         if self.__agent.train_mode:
 
-            # receive a -1 punishment if the robot leaves the line
-            if self.__no_line_detection_count > 0:
+            # Penalize only the action that first caused the robot to lose the
+            # line. Further no-line samples carry no additional information.
+            if is_first_no_line_sample:
                 reward = -1
+            elif is_no_line_sample:
+                reward = 0
+            # Do not reward driving in circles over the start line.
+            elif is_ignored_start_stop_line is True:
+                reward = 0
             else:
                 reward = self.__agent.determine_reward(sensor_data)
 
@@ -179,10 +194,13 @@ class RobotController:
 
     def load_models(self, path) -> None:
         """Load Model if exist"""
-        if os.path.exists(path + "actor.weights.h5"):
+        actor_path = os.path.join(path, "actor.weights.h5")
+        critic_path = os.path.join(path, "critic.weights.h5")
+
+        if os.path.exists(actor_path) and os.path.exists(critic_path):
             self.__agent.load_models()
         else:
-            print("No model available")
+            print("No complete model checkpoint available. Starting fresh training.")
 
     def retry_unsent_data(self, unsent_data: list) -> bool:
         """Resent any unsent Data"""

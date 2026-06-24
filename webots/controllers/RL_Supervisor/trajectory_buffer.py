@@ -70,7 +70,8 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         Numpy-Array: Probs
         Numpy-Array: Vals
         Numpy-Array: Rewards
-        Numpy-Array: Advantages
+        Numpy-Array: Raw advantages
+        Numpy-Array: Normalized advantages
         List: Batches
         """
 
@@ -82,6 +83,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         # Create indices for the states and mix them randomly
         indices = np.arange(n_states, dtype=np.int64)
+        np.random.shuffle(indices)
 
         # Create batches by dividing the indices into groups of the batch_size
         batches = [indices[indx : indx + self.__batch_size] for indx in batch_start]
@@ -89,13 +91,25 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         # the computed advantage values for each state in a given Data size.
         self.__advatages = self.calculate_advantages(self.__rewards,
                                                     self.__vals, self.__dones)
+
+        # Normalize advantages over the complete trajectory before splitting
+        # them into mini-batches. This keeps the scale of the policy updates
+        # stable while preserving whether an advantage is above or below the
+        # trajectory average.
+        advantage_mean = np.mean(self.__advatages)
+        advantage_std = np.std(self.__advatages)
+        normalized_advantages = (
+            self.__advatages - advantage_mean
+        ) / (advantage_std + 1e-8)
+
         return (
-            np.array(self.__states),
-            np.array(self.__actions),
-            np.array(self.__probs),
-            np.array(self.__vals),
-            np.array(self.__rewards),
-            np.array(self.__advatages),
+            np.array(self.__states, dtype=np.float32),
+            np.array(self.__actions, dtype=np.float32),
+            np.array(self.__probs, dtype=np.float32),
+            np.array(self.__vals, dtype=np.float32),
+            np.array(self.__rewards, dtype=np.float32),
+            np.array(self.__advatages, dtype=np.float32).reshape(-1, 1),
+            np.array(normalized_advantages, dtype=np.float32).reshape(-1, 1),
             batches,
 
         )
@@ -169,34 +183,66 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
     def calculate_advantages(self, rewards, values, dones):
         """
-        The function measures how much better or worse an action
-        performed in a given state compared to the average action
-        the policy would take in that state.
+        Calculate the generalized advantage estimate (GAE) for every
+        transition.
+
+        The advantage describes how much better or worse the received result
+        was compared with the value predicted by the critic. The calculation
+        runs backwards because each advantage depends on the already
+        calculated advantage of its successor.
 
         Parameters
         ----------
             rewards: The rewards received.
             values: The estimated values of the states.
-            dones: Indicating whether the target sequence has been reached.
+            dones: Indicates whether an episode ended after a transition.
 
         Returns
         ----------
-            NumPy array of float32: the computed advantage values for each
-            state in a given Data size.
+            NumPy array of float32: The advantage for every transition.
         """
-        n = len(rewards)
-        advantages = np.zeros(n, dtype=np.float32)
+        # Critic outputs are stored as one-element arrays. Flatten them
+        # so every value used in the calculation is a scalar.
+        values = np.asarray(values, dtype=np.float32).reshape(-1)
+
+        data_size = len(rewards)
+        advantages = np.zeros(data_size, dtype=np.float32)
+
+        # Accumulated advantage of the transitions following the current one.
         gae = 0.0
 
-        # Reverse scan: O(n). Episode boundaries (done=True) zero out the
-        # carry so advantages do not bleed across resets.
-        for t in reversed(range(n - 1)):
-            not_done = 1 - int(dones[t])
-            delta = (rewards[t]
-                     + self.__gamma * values[t + 1] * not_done
-                     - values[t])
-            gae = delta + self.__gamma * self.__gae_lambda * not_done * gae
-            advantages[t] = gae
+        if not (len(rewards) == len(values) == len(dones)):
+            raise ValueError("rewards, values and dones must have the same length")
+
+        # A backwards pass calculates all advantages in O(n).
+        for index in reversed(range(data_size)):
+            # The mask is 0 at an episode end and 1 while the episode
+            # continues. It prevents future values from crossing that limit.
+            is_not_terminal = 1.0 - dones[index]
+
+            # The final stored transition has no stored successor. At a
+            # regular episode end, its expected future value is zero.
+            if index == data_size - 1:
+                next_value = 0.0
+            else:
+                next_value = values[index + 1]
+
+            # One-step temporal-difference error:
+            delta = (
+                rewards[index]
+                + self.__gamma * next_value * is_not_terminal
+                - values[index]
+            )
+
+            # Include the discounted advantage of following transitions.
+            gae = (
+                delta
+                + self.__gamma
+                * self.__gae_lambda
+                * is_not_terminal
+                * gae
+            )
+            advantages[index] = gae
 
         return advantages
 

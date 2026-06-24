@@ -63,26 +63,29 @@ CMD_ID_IDLE = 0
 # stops motors and re-inits board; required after supervisor position reset
 CMD_ID_REINIT_BOARD = 3
 
-# Waypoints distributed around the rounded-rectangle loop track.
-# Each entry is ([x, y, z], z_rotation_angle_rad) for a Z-axis rotation.
-WAYPOINTS = [
-    ([-0.247, -0.048, 0.014],  1.551),  # top start line
-    ([-0.247, -0.140, 0.014], -1.571),  # top start line facing backwards
-    ([ 0.286, -0.094, 0.014],  1.551),  # opposite to start
-    ([-0.100, -0.280, 0.014], -1.551),  # opposite to start facing backwards
-    ([ 0.046,  0.437, 0.014],  3.190),  # right side
-    ([ 0.046,  0.437, 0.014],  3.190),  # right side
-    ([ 0.027, -0.405, 0.014], 0.01),  # left side
-    ([ 0.027, -0.405, 0.014], -3.14),  # left side
-    
-]
-# ±15° heading perturbation applied to every waypoint so the policy learns
-# to recover from misalignment rather than memorising an exact heading.
-MAX_HEADING_PERTURB = 0.26  # radians
+# Robot start poses used cyclically after each episode reset.
+# Each entry consists of a Webots translation vector and rotation field value.
+FORWARD_POSITION_DATA = [-0.24713614078815466, -0.04863962992854465, 0.013994298332013683]
+FORWARD_ORIENTATION_DATA = [-1.0564747468923541e-06, 8.746699709178704e-07, 1.0, 1.5880805820884731]
+
+REVERSE_POSITION_DATA = [-0.247145, 0.16, 0.0139943]
+REVERSE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, -1.55]
+
+FORWARD_CURVE_POSITION_DATA = [-0.247145, 0.4, 0.0139943]
+FORWARD_CURVE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, 0.584]
+
+REVERSE_CURVE_POSITION_DATA = [-0.247145, -0.36, 0.0139943]
+REVERSE_CURVE_ORIENTATION_DATA = [-1.06e-06, 8.75e-07, 1.0, -0.584]
+START_POSES = (
+    (FORWARD_POSITION_DATA, FORWARD_ORIENTATION_DATA),
+    (REVERSE_POSITION_DATA, REVERSE_ORIENTATION_DATA),
+    (FORWARD_CURVE_POSITION_DATA, FORWARD_CURVE_ORIENTATION_DATA),
+    (REVERSE_CURVE_POSITION_DATA, REVERSE_CURVE_ORIENTATION_DATA),
+)
 
 MAX_SENSOR_VALUE = 1000
-MIN_STD_DEV = 0.01  # Minimum standard deviation
-STD_DEV_FACTOR = 0.995  # Discounter standard deviation factor
+MIN_STD_DEV = 0.03  # Minimum standard deviation
+STD_DEV_FACTOR = 0.9975  # Reaches about 0.1 after 650 episodes
 
 TRANSLATION_FIELD = "translation"
 ROTATION_FIELD = "rotation"
@@ -93,6 +96,8 @@ TRAINING = "TRAINING_STATE"
 
 DIRECTORY = "logs"
 FILE_DIRECTORY = "training_logs.csv"
+ACTION_DIAGNOSTICS_FILE = "action_diagnostics.csv"
+ACTION_DIAGNOSTICS_STEPS = 20
 
 ################################################################################
 # Classes
@@ -128,12 +133,13 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             batch_size, max_buffer_length, gamma, gae_lambda,
             min_buffer_length=max(batch_size * 8, 512))
         self.__neural_network = Models(
-            actor_alpha, critic_alpha, self.__std_dev, policy_clip)
+            actor_alpha, critic_alpha, policy_clip)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
         self.n_epochs = 3
         self.done = False
         self.action = None
+        self.actor_mean = None
         self.value = None
         self.adjusted_log_prob = None
         self.num_episodes = 0
@@ -142,6 +148,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.unsent_data = []
         self.reward_history = []
         self.reinitialized = False
+        self.training_history = []
+        self.__trajectory_reward = 0.0
+        self.__actor_loss_start_index = 0
+        self.__critic_loss_start_index = 0
+        self.__diagnostic_step = 0
+        # The initial world pose is START_POSES[0], so the first reset uses
+        # the next pose in the cycle.
+        self.__start_pose_index = 1
+        self.__initialize_training_log()
+        self.__initialize_action_diagnostics()
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -191,6 +207,44 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__chkpt_dir + "critic.weights.h5"
         )
 
+
+    @tf.function(
+            input_signature=[
+                tf.TensorSpec(shape=(1, 5), dtype=tf.float32),
+                tf.TensorSpec(shape=(), dtype=tf.float32)
+            ]
+    )
+    def _predict_train_graph(self, state_tensor, std_dev):
+        """ Graph for the training branch in predict_action() """
+
+        # Forward pass through the actor network to get the action mean
+        action_mean = self.__neural_network.actor_network(state_tensor)
+
+        # Create a normal distribution
+        dist = tfp.distributions.Normal(action_mean, std_dev)
+
+        # Sampling an action from the normal distribution
+        sampled_action = dist.sample()
+
+        # Apply the Tanh transformation to the sampled action
+        transformed_action = tf.tanh(sampled_action)
+
+        # Calculation of the logarithm of the probability density of the sampled action
+        log_prob = dist.log_prob(sampled_action)
+
+        # Calculation of the Jacobian determinant for the Tanh transformation
+        jacobian_log_det = tf.math.log(
+            1.0 - tf.square(transformed_action) + 1e-6)
+
+        # Calculation of Adjusted probabilities by the neural network
+        adjusted_log_prob = log_prob - jacobian_log_det
+
+        # calculate the estimated value of a state, which is determined by the Critic network
+        value = self.__neural_network.critic_network(state_tensor)
+
+        return action_mean, transformed_action, value, adjusted_log_prob
+
+
     def predict_action(self, state):
         """
         Predicts an action based on the current state.
@@ -207,42 +261,31 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         m_state = self.normalize_sensor_data(state)
 
         # Conversion of the state into a tensor
-        state = tf.convert_to_tensor([m_state], dtype=tf.float32)
-
-        # Forward pass through the actor network to get the action mean
-        action_mean = self.__neural_network.actor_network(state)
+        state_tensor = tf.convert_to_tensor([m_state], dtype=tf.float32)
 
         # Training mode is set.
         if self.train_mode is True:
 
-            # Create a normal distribution
-            dist = tfp.distributions.Normal(action_mean, self.__std_dev)
+            std_dev = tf.convert_to_tensor(self.__std_dev, dtype=tf.float32)
+            (
+                action_mean,
+                transformed_action,
+                value,
+                adjusted_log_prob,
+            ) = self._predict_train_graph(state_tensor, std_dev)
 
-            # Sampling an action from the normal distribution
-            sampled_action = dist.sample()
-
-            # Apply the Tanh transformation to the sampled action
-            transformed_action = tf.tanh(sampled_action)
-
-            # Calculation of the logarithm of the probability density of the sampled action
-            log_prob = dist.log_prob(sampled_action)
-
-            # Calculation of the Jacobian determinant for the Tanh transformation
-            jacobian_log_det = tf.math.log(
-                1 - tf.square(transformed_action) + 1e-6)
-
-            # Calculation of Adjusted probabilities by the neural network
-            adjusted_log_prob = log_prob - jacobian_log_det
-
-            # calculate the estimated value of a state, which is determined by the Critic network
-            value = self.__neural_network.critic_network(state)
-
+            self.actor_mean = action_mean.numpy()[0]
             self.action = transformed_action.numpy()[0]
             self.value = value.numpy()[0]
             self.adjusted_log_prob = adjusted_log_prob.numpy()[0]
 
         # Driving mode is set
         else:
+
+            # Forward pass through the actor network to get the action mean
+            action_mean = self.__neural_network.actor_network(state_tensor)
+
+            self.actor_mean = action_mean.numpy()[0]
             self.action = action_mean.numpy()[0]
 
         return self.action
@@ -258,6 +301,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # pre_action contains the predicted action for the given state, calculated based
         # on the Actor model output.
         pre_action = self.predict_action(state)
+        self.__log_action_diagnostics(state)
 
         # Get motor speed difference
         speed_difference = self.__top_speed * pre_action
@@ -275,6 +319,60 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # Failed to send data. Appends the data to unsent_data List.
         if self.data_sent is False:
             self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, control_data))
+
+    def __initialize_action_diagnostics(self):
+        """Create a fresh action diagnostics log for this training run."""
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+
+        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    "Episode",
+                    "Step",
+                    "Sensor0",
+                    "Sensor1",
+                    "Sensor2",
+                    "Sensor3",
+                    "Sensor4",
+                    "Actor Mean",
+                    "Sampled Action",
+                    "Std Dev",
+                ]
+            )
+
+    def __initialize_training_log(self):
+        """Create a fresh training log for this training run."""
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
+
+        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                ["Episode", "Actor Loss", "Critic Loss", "Reward"]
+            )
+
+    def __log_action_diagnostics(self, sensor_data):
+        """Log the first actions of each episode for policy analysis."""
+        self.__diagnostic_step += 1
+
+        if self.__diagnostic_step > ACTION_DIAGNOSTICS_STEPS:
+            return
+
+        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+        with open(log_file, mode="a", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                [
+                    self.num_episodes + 1,
+                    self.__diagnostic_step,
+                    *sensor_data,
+                    float(self.actor_mean[0]),
+                    float(self.action[0]),
+                    self.__std_dev,
+                ]
+            )
 
     def update(self, robot_node):
         """
@@ -372,7 +470,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         reward = self.__memory.calculate_reward(sensor_data)
         return reward
 
-    def learn(self, states, actions, old_probs, values, rewards, advantages):
+    def learn(
+        self,
+        states,
+        actions,
+        old_probs,
+        values,
+        advantages,
+        normalized_advantages,
+    ):
         """
         Perform training to optimize model weights.
 
@@ -382,51 +488,41 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             actions:    The saved actions taken in response to the observed states.
             old_probs:  The saved probabilities of the actions taken, based on the previous policy.
             values:     The saved estimated values of the observed states.
-            rewards:    The saved rewards received for taking the actions.
-            advantages: the computed advantage values for each state in a given Data size.
+            advantages: The original advantage values used to train the critic.
+            normalized_advantages: The normalized advantage values used to train the actor.
         """
         # scales the sensor data to a range between 0 and 1
         m_states = self.normalize_sensor_data(states)
 
         for _ in range(self.n_epochs):
 
-            states = tf.convert_to_tensor(m_states)
-            actions = tf.convert_to_tensor(actions)
-            old_probs = tf.convert_to_tensor(old_probs)
+            states = tf.convert_to_tensor(m_states, dtype=tf.float32)
+            actions = tf.convert_to_tensor(actions, dtype=tf.float32)
+            old_probs = tf.convert_to_tensor(old_probs, dtype=tf.float32)
 
             # optimize Actor Network weights
             self.__neural_network.compute_actor_gradient(
-                states, actions, old_probs, advantages)
+                states,
+                actions,
+                old_probs,
+                normalized_advantages,
+                self.__std_dev
+            )
 
             # optimize Critic Network weights
             self.__neural_network.compute_critic_gradient(
                 states, values, advantages)
 
-            # Save the rewards received
-            self.reward_history.append(sum(rewards))
-
-        # saving logs in a CSV file
-        self.save_logs_to_csv()
-
     def save_logs_to_csv(self):
-        """Function for saving logs in a CSV file"""
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
 
-        # Ensure the directory exists
-        log_dir = DIRECTORY
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, FILE_DIRECTORY)
+        if not self.training_history:
+            return
 
-        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+        with open(log_file, mode="a", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(["Actor Loss", "Critic Loss", "Reward"])
-            for indx, reward in enumerate(self.reward_history):
-                writer.writerow(
-                    [
-                        self.__neural_network.actor_loss_history[indx],
-                        self.__neural_network.critic_loss_history[indx],
-                        reward,
-                    ]
-                )
+            writer.writerow(self.training_history[-1])
 
     def perform_training(self):
         """Runs the training process."""
@@ -436,6 +532,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             # Grab sample from memory
             self.__current_batch = self.__memory.generate_batches()
 
+            self.__trajectory_reward = self.__memory.get_sum_rewards()
+            self.__actor_loss_start_index = len(
+                self.__neural_network.actor_loss_history
+            )
+            self.__critic_loss_start_index = len(
+                self.__neural_network.critic_loss_history
+            )
+
         # Perform training with mini batches.
         if self.__training_index < len(self.__current_batch[-1]):
             (
@@ -443,8 +547,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 action_arr,
                 old_prob_arr,
                 vals_arr,
-                reward_arr,
+                _reward_arr,
                 advatage_arr,
+                normalized_advatage_arr,
                 batches,
             ) = self.__current_batch
             batch = batches[self.__training_index]
@@ -455,8 +560,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 action_arr[batch],
                 old_prob_arr[batch],
                 vals_arr[batch],
-                reward_arr[batch],
-                advatage_arr[batch]
+                advatage_arr[batch],
+                normalized_advatage_arr[batch]
             )
             self.__training_index += 1
 
@@ -465,13 +570,36 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__training_index = 0
             self.__current_batch = None
             self.done = False
+
+            actor_losses = self.__neural_network.actor_loss_history[
+                self.__actor_loss_start_index:
+            ]
+
+            critic_losses = self.__neural_network.critic_loss_history[
+                self.__critic_loss_start_index:
+            ]
+
+            mean_actor_loss = float(np.mean(actor_losses))
+            mean_critic_loss = float(np.mean(critic_losses))
+
+            self.training_history.append(
+                (
+                    self.num_episodes + 1,
+                    mean_actor_loss,
+                    mean_critic_loss,
+                    self.__trajectory_reward,
+                )
+            )
+
+            self.save_logs_to_csv()
+
             self.__memory.clear_memory()
             self.num_episodes += 1
+            self.__diagnostic_step = 0
 
-            self.__std_dev = max(self.__std_dev * STD_DEV_FACTOR, MIN_STD_DEV)
-            # Sync annealed std_dev to the network so the new-policy distribution
-            # in compute_actor_gradient uses the same value as data collection.
-            self.__neural_network.std_dev = self.__std_dev
+            # Minimize standard deviation until the minimum standard deviation is reached
+            self.__std_dev = self.__std_dev * STD_DEV_FACTOR
+            self.__std_dev = max(self.__std_dev, MIN_STD_DEV)
 
             # APPRemoteControl stays in DrivingState — no command needed to restart.
             # Transition directly back to READY so motor speeds resume on the next
@@ -486,15 +614,18 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         ----------
             robot_node: The Robot interface
         """
-        idx = np.random.randint(len(WAYPOINTS))
-        position, base_angle = WAYPOINTS[idx]
-        perturb = np.random.uniform(-MAX_HEADING_PERTURB, MAX_HEADING_PERTURB)
-        angle = base_angle + perturb
 
         trans_field = robot_node.getField(TRANSLATION_FIELD)
         rot_field = robot_node.getField(ROTATION_FIELD)
-        trans_field.setSFVec3f(position)
-        rot_field.setSFRotation([0.0, 0.0, 1.0, angle])
+        initial_position, initial_orientation = START_POSES[
+            self.__start_pose_index
+        ]
+
+        trans_field.setSFVec3f(initial_position)
+        rot_field.setSFRotation(initial_orientation)
+        self.__start_pose_index = (
+            self.__start_pose_index + 1
+        ) % len(START_POSES)
 
 
 ################################################################################
