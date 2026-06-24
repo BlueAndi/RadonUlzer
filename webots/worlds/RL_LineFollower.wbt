@@ -12,7 +12,6 @@ WorldInfo {
   ]
   title "Track"
   basicTimeStep 8
-  optimalThreadCount 4
   contactProperties [
     ContactProperties {
       material1 "rubber"
