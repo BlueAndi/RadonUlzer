@@ -157,6 +157,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # The initial world pose is START_POSES[0], so the first reset uses
         # the next pose in the cycle.
         self.__start_pose_index = 1
+        self.__initialize_training_log()
         self.__initialize_action_diagnostics()
 
     def set_train_mode(self):
@@ -340,6 +341,17 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 ]
             )
 
+    def __initialize_training_log(self):
+        """Create a fresh training log for this training run."""
+        os.makedirs(DIRECTORY, exist_ok=True)
+        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
+
+        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                ["Episode", "Actor Loss", "Critic Loss", "Reward"]
+            )
+
     def __log_action_diagnostics(self, sensor_data):
         """Log the first actions of each episode for policy analysis."""
         self.__diagnostic_step += 1
@@ -500,12 +512,12 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         os.makedirs(DIRECTORY, exist_ok=True)
         log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
 
-        with open(log_file, mode="w", encoding="utf-8", newline="") as file:
+        if not self.training_history:
+            return
+
+        with open(log_file, mode="a", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
-            writer.writerow(
-                ["Episode", "Actor Loss", "Critic Loss", "Reward"]
-            )
-            writer.writerows(self.training_history)
+            writer.writerow(self.training_history[-1])
 
     def perform_training(self):
         """Runs the training process."""
