@@ -111,31 +111,57 @@ Base equations:
 
 - $distanceLeft [mm] = \frac{encoderStepsLeft [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
 - $distanceRight [mm] = \frac{encoderStepsRight [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
-- $stepsCenter [steps] = \frac{encoderStepsLeft - encoderStepsRight}{2}$
+- $stepsCenter [steps] = \frac{encoderStepsLeft + encoderStepsRight}{2}$
 - $distanceCenter [mm] = \frac{stepsCenter [steps]}{encoderStepsPerMM [\frac{steps}{mm}]}$
 
 Orientation:
 
 - $alpha [rad] = \frac{distanceRight [mm] - distanceLeft [mm]}{wheelBase [mm]}$
-- $orientation' [rad] = orientation [rad] + alpha [rad]$
-- $orientation' [rad] = orientation [rad]~\%~2\pi$
-- $-2\pi < Orientation < 2\pi$
+- $orientation_{new} [rad] = orientation_{old} [rad] + alpha [rad]$
+- $orientation_{new} [rad] = orientation_{new} [rad]~%~2\pi$
+- $-2\pi < orientation < 2\pi$
 - After wrapping on the positive limit $2\pi$, the orientation remains positive and starts from 0 again.
 - After wrapping on the negative limit $2\pi$, the orientation remains negative and starts from 0 again.
 
 Position:
 
-- $dX [mm] = -distanceCenter [mm] \cdot sin(orientation' [rad])$ <- Approximation for performance reason
-- $dY [mm] = distanceCenter [mm] \cdot cos(orientation' [rad])$ <- Approximation for performance reason
-- $x' [mm] = x [mm] + dX [mm]$
-- $y' [mm] = y [mm] + dY [mm]$
+To reduce the integration error during curved movement, the position is calculated using the orientation in the middle of the movement interval.
 
-Improvement for better accuracy:
+- $orientation_{mid} [rad] = orientation_{old} [rad] + \frac{alpha [rad]}{2}$
+
+Position update:
+
+- $dX [mm] = -distanceCenter [mm] \cdot sin(orientation_{mid} [rad])$
+- $dY [mm] = distanceCenter [mm] \cdot cos(orientation_{mid} [rad])$
+- $x_{new} [mm] = x_{old} [mm] + dX [mm]$
+- $y_{new} [mm] = y_{old} [mm] + dY [mm]$
+
+Fixed-point implementation:
+
+For better precision and to avoid unnecessary floating-point conversions, the implementation internally uses milliradians (mrad).
+
+Orientation:
 
 - $alpha [mrad] = \frac{1000 \cdot (encoderStepsRight [steps] - encoderStepsLeft [steps])}{encoderStepsPerMM [\frac{steps}{mm}] \cdot wheelBase [mm]}$
-- $orientation' [mrad] = orientation [mrad] + alpha [mrad]$
-- $dX [mm] = -distanceCenter [mm] \cdot sin(\frac{orientation' [mrad]}{1000})$
-- $dY [mm] = distanceCenter [mm] \cdot cos(\frac{orientation' [mrad]}{1000})$
+- $orientation_{new} [mrad] = orientation_{old} [mrad] + alpha [mrad]$
+- $orientation_{mid} [mrad] = orientation_{old} [mrad] + \frac{alpha [mrad]}{2}$
+
+Position:
+
+- $dX [steps] = -stepsCenter [steps] \cdot sin(\frac{orientation_{mid} [mrad]}{1000})$
+- $dY [steps] = stepsCenter [steps] \cdot cos(\frac{orientation_{mid} [mrad]}{1000})$
+
+To preserve sub-step precision, the calculated position increments are accumulated in units of $\frac{1}{1000}$ encoder steps before conversion to millimetres:
+
+- $dX_{1000} = 1000 \cdot dX [steps]$
+- $dY_{1000} = 1000 \cdot dY [steps]$
+
+The accumulated values are continuously converted to millimetres using the encoder resolution:
+
+- $x [mm] = \frac{\sum dX_{1000}}{encoderStepsPerMM \cdot 1000}$
+- $y [mm] = \frac{\sum dY_{1000}}{encoderStepsPerMM \cdot 1000}$
+
+This preserves fractional encoder-step contributions and significantly reduces long-term position drift caused by rounding.
 
 ##### Speedometer
 
