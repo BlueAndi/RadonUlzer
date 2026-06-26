@@ -5,7 +5,7 @@ PROTO ZumoComSystem [
   field SFString name             "ZumoComSystem"
   field SFBool   performanceMode  FALSE           # Use basic blocks for the robot instead of meshes. Increases performance.
   field SFBool   synchronization  TRUE            # Set to FALSE when used alongside another extern controller.
-  field SFNode   flagshipSlot     NULL            # Slot for the FlagShip
+  field SFNode   flagShipSlot     NULL            # Slot for the FlagShip
 ]
 {
   Slot {
@@ -57,7 +57,7 @@ PROTO ZumoComSystem [
         }
         Slot {
           type "FlagShip"
-          endPoint IS flagshipSlot
+          endPoint IS flagShipSlot
         }
       ]
       name IS name
