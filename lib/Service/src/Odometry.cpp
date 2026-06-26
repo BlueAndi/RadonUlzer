@@ -186,12 +186,13 @@ void Odometry::clearMileage()
 
 bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
 {
-    bool isStandStill = false;
+    const uint16_t STANDSTILL_DETECTION_THRESHOLD = 1U; /* [steps] */
+    bool           isStandStill                   = false;
 
     /* No encoder (left/right) change detected? */
-    if (absStepsLeft == m_lastAbsRelEncStepsLeft)
+    if (abs(absStepsLeft - m_lastAbsRelEncStepsLeft) <= STANDSTILL_DETECTION_THRESHOLD)
     {
-        if (absStepsRight == m_lastAbsRelEncStepsRight)
+        if (abs(absStepsRight - m_lastAbsRelEncStepsRight) <= STANDSTILL_DETECTION_THRESHOLD)
         {
             isStandStill = true;
         }
