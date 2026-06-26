@@ -155,6 +155,11 @@ public:
     void clearPosition();
 
     /**
+     * Clear the orientation by setting it to 90°.
+     */
+    void clearOrientation();
+
+    /**
      * Clear mileage by setting it to 0 mm.
      */
     void clearMileage();
@@ -186,6 +191,12 @@ private:
      * the robot stopped.
      */
     static const uint32_t STANDSTILL_DETECTION_PERIOD = 10;
+
+    /**
+     * Initial orientation in mrad.
+     * 90° - heading to north
+     */
+    static const int32_t ORIENTATION_INITIAL = FP_PI() / 2;
 
     /**
      * Last number of relative encoder steps left. Its used to avoid permanent
@@ -234,7 +245,7 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_mileage(0),
         m_relEncoders(Board::getInstance().getEncoders()),
-        m_orientation(FP_PI() / 2), /* 90° - heading to north */
+        m_orientation(ORIENTATION_INITIAL),
         m_posX(0),
         m_posY(0),
         m_countingXSteps(0),

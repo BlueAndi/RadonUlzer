@@ -171,6 +171,11 @@ void Odometry::clearPosition()
     m_countingYSteps          = 0;
 }
 
+void Odometry::clearOrientation()
+{
+    m_orientation = ORIENTATION_INITIAL;
+}
+
 void Odometry::clearMileage()
 {
     m_mileage = 0;
