@@ -153,13 +153,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.actor_mean = None
         self.value = None
         self.adjusted_log_prob = None
-        self.num_episodes = 0
+        self.num_training_updates = 0
+        self.num_episodes = 1
         self.state = IDLE
         self.data_sent = True
         self.unsent_data = []
         self.reward_history = []
         self.reinitialized = False
         self.training_history = []
+        self.__episode_steps = []
         self.__trajectory_reward = 0.0
         self.__actor_loss_start_index = 0
         self.__critic_loss_start_index = 0
@@ -182,7 +184,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         """Set the Agent mode to drive mode."""
         self.train_mode = False
         self.state = READY
-        self.num_episodes = 0
+        self.num_training_updates = 0
+        self.num_episodes = 1
 
     def store_transition(
         self, state, action, probs, value, reward, done
@@ -350,6 +353,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             writer = csv.writer(file)
             writer.writerow(
                 [
+                    "Training Update",
                     "Episode",
                     "Step",
                     "Sensor0",
@@ -371,8 +375,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(
-                ["Episode", "Actor Loss", "Critic Loss", "Reward"]
+                ["Training Update", "Actor Loss", "Critic Loss", "Reward", "Mean Episode Steps"]
             )
+
+    def complete_episode(self, steps):
+        """Record a completed episode and reset per-episode diagnostics."""
+        self.__episode_steps.append(steps)
+        self.__diagnostic_step = 0
+        self.num_episodes += 1
 
     def __initialize_run_config(self):
         """Create a fresh configuration file for this training run."""
@@ -428,7 +438,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             writer = csv.writer(file)
             writer.writerow(
                 [
-                    self.num_episodes + 1,
+                    self.num_training_updates + 1,
+                    self.num_episodes,
                     self.__diagnostic_step,
                     *sensor_data,
                     float(self.actor_mean[0]),
@@ -644,21 +655,23 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
             mean_actor_loss = float(np.mean(actor_losses))
             mean_critic_loss = float(np.mean(critic_losses))
+            mean_episode_steps = float(np.mean(self.__episode_steps))
 
             self.training_history.append(
                 (
-                    self.num_episodes + 1,
+                    self.num_training_updates + 1,
                     mean_actor_loss,
                     mean_critic_loss,
                     self.__trajectory_reward,
+                    mean_episode_steps,
                 )
             )
 
             self.save_logs_to_csv()
 
             self.__memory.clear_memory()
-            self.num_episodes += 1
-            self.__diagnostic_step = 0
+            self.__episode_steps = []
+            self.num_training_updates += 1
 
             # Minimize standard deviation until the minimum standard deviation is reached
             self.__std_dev = self.__std_dev * STD_DEV_FACTOR

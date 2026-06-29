@@ -54,6 +54,7 @@ def main():
     data = pd.read_csv(LOG_FILE)
 
     required_columns = {
+        "Training Update",
         "Episode",
         "Actor Mean",
         "Sampled Action",
@@ -71,7 +72,7 @@ def main():
     reference = calculate_reference_correction(sensor_values)
     line_visible = np.isfinite(reference)
 
-    evaluated_data = data.loc[line_visible, ["Episode"]].copy()
+    evaluated_data = data.loc[line_visible, ["Training Update", "Episode"]].copy()
     evaluated_data["Actor Mean Score"] = calculate_action_score(
         data.loc[line_visible, "Actor Mean"].to_numpy(dtype=float),
         reference[line_visible],
@@ -84,15 +85,23 @@ def main():
     if evaluated_data.empty:
         raise ValueError("No samples with a visible line found in the diagnostics log.")
 
-    episode_scores = (
-        evaluated_data.groupby("Episode", as_index=False)
+    episode_scores = evaluated_data.groupby(
+        ["Training Update", "Episode"], as_index=False
+    ).agg(
+        {
+            "Actor Mean Score": "mean",
+            "Sampled Action Score": "mean",
+        }
+    )
+    training_update_scores = (
+        episode_scores.groupby("Training Update", as_index=False)
         .agg(
             {
                 "Actor Mean Score": "mean",
                 "Sampled Action Score": "mean",
             }
         )
-        .sort_values("Episode")
+        .sort_values("Training Update")
     )
 
     figure, axis = plt.subplots(figsize=(12, 6))
@@ -100,24 +109,24 @@ def main():
     axis.axhline(0.0, color="black", linewidth=0.8)
     axis.axhline(-1.0, color="tab:red", linewidth=1, alpha=0.5)
     axis.plot(
-        episode_scores["Episode"],
-        episode_scores["Actor Mean Score"],
+        training_update_scores["Training Update"],
+        training_update_scores["Actor Mean Score"],
         label="Actor mean score",
         color="tab:blue",
         linewidth=1.5,
     )
     axis.plot(
-        episode_scores["Episode"],
-        episode_scores["Sampled Action Score"],
+        training_update_scores["Training Update"],
+        training_update_scores["Sampled Action Score"],
         label="Sampled action score",
         color="tab:orange",
         linewidth=1.2,
         alpha=0.85,
     )
     axis.set_ylim(-1.05, 1.05)
-    axis.set_xlabel("Episode")
+    axis.set_xlabel("Training Update")
     axis.set_ylabel("Mean action score")
-    axis.set_title("Steering quality per episode")
+    axis.set_title("Steering quality per training update")
     axis.grid(True, alpha=0.3)
     axis.legend(loc="best")
     axis.text(
@@ -131,7 +140,7 @@ def main():
     )
     figure.tight_layout()
 
-    output_file = LOG_FILE.parent / "action_diagnostics_episode_scores.png"
+    output_file = LOG_FILE.parent / "action_diagnostics_training_update_scores.png"
     figure.savefig(output_file, dpi=160)
     print(f"Plot saved to: {output_file}")
     plt.show()

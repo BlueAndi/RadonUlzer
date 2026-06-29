@@ -112,6 +112,11 @@ class RobotController:
         if payload[0] == STATUS_CHANNEL_ERROR_VAL:
             print("robot has reached error-state (max. lap time passed in robot)")
             self.__agent.done = True
+            # Status errors also end the current episode, but bypass the
+            # line-sensor termination path where episode steps are recorded.
+            self.__agent.complete_episode(self.steps)
+            self.steps = 0
+            self.__no_line_detection_count = 0
 
     def callback_line_sensors(self, payload: bytearray) -> None:
         """Callback LINE_SENS Channel."""
@@ -158,6 +163,8 @@ class RobotController:
                 or ((is_start_stop_line_detected is True)
                     and (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
+            # Record episode-level diagnostics before resetting the step counter.
+            self.__agent.complete_episode(self.steps)
             self.steps = 0
             self.__no_line_detection_count = 0
 
@@ -239,7 +246,7 @@ class RobotController:
             self.__agent.perform_training()
 
             # save model
-            if (self.__agent.num_episodes > 1) and (self.__agent.num_episodes % 50 == 0):
+            if (self.__agent.num_training_updates > 1) and (self.__agent.num_training_updates % 50 == 0):
                 self.__agent.save_models()
 
 

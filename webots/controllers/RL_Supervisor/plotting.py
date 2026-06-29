@@ -27,7 +27,7 @@ LOG_FILE = LOG_DIR / "training_logs.csv"
 
 data = pd.read_csv(LOG_FILE)
 
-required_columns = {"Episode", "Actor Loss", "Critic Loss", "Reward"}
+required_columns = {"Training Update", "Actor Loss", "Critic Loss", "Reward", "Mean Episode Steps"}
 missing_columns = required_columns.difference(data.columns)
 if missing_columns:
     raise ValueError(
@@ -39,10 +39,10 @@ if data.empty:
 
 # Plotting Actor Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Episode"], data["Actor Loss"], label="Mean Actor Loss")
-plt.xlabel("Episode")
+plt.plot(data["Training Update"], data["Actor Loss"], label="Mean Actor Loss")
+plt.xlabel("Training Update")
 plt.ylabel("Loss")
-plt.title("Mean Actor Loss per Episode")
+plt.title("Mean Actor Loss per Training Update")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
@@ -50,10 +50,10 @@ plt.savefig(LOG_DIR / "actor_loss_plot.png")
 
 # Plotting Critic Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Episode"], data["Critic Loss"], label="Mean Critic Loss")
-plt.xlabel("Episode")
+plt.plot(data["Training Update"], data["Critic Loss"], label="Mean Critic Loss")
+plt.xlabel("Training Update")
 plt.ylabel("Loss")
-plt.title("Mean Critic Loss per Episode")
+plt.title("Mean Critic Loss per Training Update")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
@@ -61,14 +61,25 @@ plt.savefig(LOG_DIR / "critic_loss_plot.png")
 
 # Plotting Total Rewards
 plt.figure(figsize=(10, 5))
-plt.plot(data["Episode"], data["Reward"], label="Total Reward")
-plt.xlabel("Episode")
+plt.plot(data["Training Update"], data["Reward"], label="Total Reward")
+plt.xlabel("Training Update")
 plt.ylabel("Total Reward")
-plt.title("Total Reward per Episode")
+plt.title("Total Reward per Training Update")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.savefig(LOG_DIR / "total_rewards_plot.png")
+
+# Plotting Mean Episode Steps
+plt.figure(figsize=(10, 5))
+plt.plot(data["Training Update"], data["Mean Episode Steps"], label="Mean Episode Steps")
+plt.xlabel("Training Update")
+plt.ylabel("Steps")
+plt.title("Mean Episode Steps per Training Update")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig(LOG_DIR / "mean_episode_steps_plot.png")
 
 print(f"Plots saved to: {LOG_DIR}")
 plt.show()
