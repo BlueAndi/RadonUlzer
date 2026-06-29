@@ -29,6 +29,7 @@
 ################################################################################
 
 import csv
+import json
 import os
 import struct
 import numpy as np
@@ -36,6 +37,7 @@ import tensorflow as tf
 import tensorflow_probability as tfp
 from trajectory_buffer import Memory
 from networks import Models
+from datetime import datetime
 
 ################################################################################
 # Variables
@@ -97,6 +99,7 @@ TRAINING = "TRAINING_STATE"
 DIRECTORY = "logs"
 FILE_DIRECTORY = "training_logs.csv"
 ACTION_DIAGNOSTICS_FILE = "action_diagnostics.csv"
+RUN_CONFIG_FILE = "run_configuration.json"
 ACTION_DIAGNOSTICS_STEPS = 20
 
 ################################################################################
@@ -125,13 +128,21 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         max_buffer_length=65536,
     ):
         self.__serialmux = smp_server
+        self.__gamma = gamma
+        self.__actor_alpha = actor_alpha
+        self.__critic_alpha = critic_alpha
+        self.__gae_lambda = gae_lambda
+        self.__policy_clip = policy_clip
+        self.__batch_size = batch_size
+        self.__min_buffer_length = max(batch_size * 8, 512)
+        self.__max_buffer_length = max_buffer_length
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
         self.__std_dev = 0.5
         self.__memory = Memory(
             batch_size, max_buffer_length, gamma, gae_lambda,
-            min_buffer_length=max(batch_size * 8, 512))
+            self.__min_buffer_length)
         self.__neural_network = Models(
             actor_alpha, critic_alpha, policy_clip)
         self.__training_index = 0  # Track batch index during training
@@ -156,8 +167,11 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         # The initial world pose is START_POSES[0], so the first reset uses
         # the next pose in the cycle.
         self.__start_pose_index = 1
+        self.__timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        self.__initialize_training_directory()
         self.__initialize_training_log()
         self.__initialize_action_diagnostics()
+        self.__initialize_run_config()
 
     def set_train_mode(self):
         """Set the Agent mode to train mode."""
@@ -320,10 +334,17 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         if self.data_sent is False:
             self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, control_data))
 
+    def __initialize_training_directory(self):
+        """Create a fresh directory for this training run."""
+
+        self.__training_directory = os.path.join(DIRECTORY, self.__timestamp)
+        os.makedirs(self.__training_directory, exist_ok=True)
+
+
     def __initialize_action_diagnostics(self):
         """Create a fresh action diagnostics log for this training run."""
-        os.makedirs(DIRECTORY, exist_ok=True)
-        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+
+        log_file = os.path.join(self.__training_directory, ACTION_DIAGNOSTICS_FILE)
 
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
@@ -344,14 +365,56 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
     def __initialize_training_log(self):
         """Create a fresh training log for this training run."""
-        os.makedirs(DIRECTORY, exist_ok=True)
-        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
+
+        log_file = os.path.join(self.__training_directory, FILE_DIRECTORY)
 
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(
                 ["Episode", "Actor Loss", "Critic Loss", "Reward"]
             )
+
+    def __initialize_run_config(self):
+        """Create a fresh configuration file for this training run."""
+
+        log_file = os.path.join(self.__training_directory, RUN_CONFIG_FILE)
+
+        # Capture parameters that affect run comparability.
+        run_config = {
+            "training": {"gamma" : self.__gamma,
+                         "actor_alpha" : self.__actor_alpha,
+                         "critic_alpha" : self.__critic_alpha,
+                         "gae_lambda" : self.__gae_lambda,
+                         "policy_clip" : self.__policy_clip,
+                         "batch_size" : self.__batch_size,
+                         "n_epochs" : self.n_epochs},
+            "exploration": {"std_dev" : self.__std_dev,
+                            "min_std_dev" : MIN_STD_DEV,
+                            "std_dev_factor" : STD_DEV_FACTOR},
+            "diagnostics": {"action_diagnostics_steps" : ACTION_DIAGNOSTICS_STEPS},
+            "buffer": {"min_buffer_length" : self.__min_buffer_length,
+                       "max_buffer_length" : self.__max_buffer_length},
+            "environment": {"top_speed" : self.__top_speed,
+                           "max_sensor_value" : MAX_SENSOR_VALUE,
+                           "forward_position_data" : FORWARD_POSITION_DATA,
+                           "forward_orientation_data" : FORWARD_ORIENTATION_DATA,
+                           "reverse_position_data" : REVERSE_POSITION_DATA,
+                           "reverse_orientation_data" : REVERSE_ORIENTATION_DATA,
+                           "forward_curve_position_data" : FORWARD_CURVE_POSITION_DATA,
+                           "forward_curve_orientation_data" : FORWARD_CURVE_ORIENTATION_DATA,
+                           "reverse_curve_position_data" : REVERSE_CURVE_POSITION_DATA,
+                           "reverse_curve_orientation_data" : REVERSE_CURVE_ORIENTATION_DATA },
+            "reward": {"function": "triangle",
+                       "max" : 1,
+                       "min" : 0,
+                       "min_position" : 500,
+                       "center_position" : 2000,
+                       "max_position" : 3500,
+                       "scale" : 1500}
+        }
+
+        with open(log_file, mode="w", encoding="utf-8") as file:
+            json.dump(run_config, file, indent=4)
 
     def __log_action_diagnostics(self, sensor_data):
         """Log the first actions of each episode for policy analysis."""
@@ -360,7 +423,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         if self.__diagnostic_step > ACTION_DIAGNOSTICS_STEPS:
             return
 
-        log_file = os.path.join(DIRECTORY, ACTION_DIAGNOSTICS_FILE)
+        log_file = os.path.join(self.__training_directory, ACTION_DIAGNOSTICS_FILE)
         with open(log_file, mode="a", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(
@@ -514,8 +577,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 states, values, advantages)
 
     def save_logs_to_csv(self):
-        os.makedirs(DIRECTORY, exist_ok=True)
-        log_file = os.path.join(DIRECTORY, FILE_DIRECTORY)
+
+        log_file = os.path.join(self.__training_directory, FILE_DIRECTORY)
 
         if not self.training_history:
             return

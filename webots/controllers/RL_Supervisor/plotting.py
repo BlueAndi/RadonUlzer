@@ -3,9 +3,26 @@
 from pathlib import Path
 import matplotlib.pyplot as plt
 import pandas as pd
+import argparse
+
+def parse_arguments():
+    """Parse command-line options."""
+    parser = argparse.ArgumentParser(
+        description="Plot episode-level reinforcement learning training metrics."
+    )
+    parser.add_argument(
+        "--run",
+        type=Path,
+        required = True,
+        help="Name of the run directory below logs.",
+    )
+
+    return parser.parse_args()
+
+args = parse_arguments()
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-LOG_DIR = SCRIPT_DIR / "logs"
+LOG_DIR = SCRIPT_DIR / "logs" / args.run
 LOG_FILE = LOG_DIR / "training_logs.csv"
 
 data = pd.read_csv(LOG_FILE)

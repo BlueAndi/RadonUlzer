@@ -125,12 +125,12 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
     def compute_critic_gradient(self, states, values, advantages):
         """ optimize Critic Network weights.
-        
+
         Parameters
         ----------
             states:     The saved states observed during interactions with the environment.
             values:     The saved estimated values of the observed states.
-            advantages: the computed advantage values for each state in a given Data size. 
+            advantages: the computed advantage values for each state in a given Data size.
         """
 
         with tf.GradientTape() as tape:
@@ -165,8 +165,8 @@ class Models:  # pylint: disable=too-many-instance-attributes
             values:  The saved estimated values of the observed states.
 
         Returns
-        ---------- 
-            A TensorFlow tensor with the data type float32: The logarithmic probability 
+        ----------
+            A TensorFlow tensor with the data type float32: The logarithmic probability
                                                             of a given action
 
         """
@@ -199,7 +199,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
             actions:    The saved actions taken in response to the observed states.
             old_probs:  The saved probabilities of the actions taken, based on the previous policy.
             values:     The saved estimated values of the observed states.
-            advantages: the computed advantage values for each state in a given Data size. 
+            advantages: the computed advantage values for each state in a given Data size.
         """
 
         with tf.GradientTape() as tape:

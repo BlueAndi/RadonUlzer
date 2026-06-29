@@ -2,17 +2,9 @@
 
 import argparse
 from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_LOG_FILE = SCRIPT_DIR / "logs" / "action_diagnostics.csv"
-SENSOR_COLUMNS = [f"Sensor{index}" for index in range(5)]
-LINE_CENTER = 2.0
-
 
 def parse_arguments():
     """Parse command-line options."""
@@ -20,13 +12,20 @@ def parse_arguments():
         description="Plot mean steering quality per training episode."
     )
     parser.add_argument(
-        "--input",
+        "--run",
         type=Path,
-        default=DEFAULT_LOG_FILE,
-        help="Path to action_diagnostics.csv.",
+        required = True,
+        help="Name of the run directory below logs.",
     )
+
     return parser.parse_args()
 
+args = parse_arguments()
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+LOG_FILE = SCRIPT_DIR / "logs" / args.run / "action_diagnostics.csv"
+SENSOR_COLUMNS = [f"Sensor{index}" for index in range(5)]
+LINE_CENTER = 2.0
 
 def calculate_reference_correction(sensor_values):
     """Calculate the steering reference from the detected line position.
@@ -52,8 +51,7 @@ def calculate_action_score(actions, reference):
 
 def main():
     """Aggregate diagnostic samples per episode and create the plot."""
-    args = parse_arguments()
-    data = pd.read_csv(args.input)
+    data = pd.read_csv(LOG_FILE)
 
     required_columns = {
         "Episode",
@@ -64,10 +62,10 @@ def main():
     missing_columns = required_columns.difference(data.columns)
     if missing_columns:
         raise ValueError(
-            f"Missing columns in {args.input}: {', '.join(sorted(missing_columns))}"
+            f"Missing columns in {LOG_FILE}: {', '.join(sorted(missing_columns))}"
         )
     if data.empty:
-        raise ValueError(f"No diagnostic data found in {args.input}.")
+        raise ValueError(f"No diagnostic data found in {LOG_FILE}.")
 
     sensor_values = data[SENSOR_COLUMNS].to_numpy(dtype=float)
     reference = calculate_reference_correction(sensor_values)
@@ -133,7 +131,7 @@ def main():
     )
     figure.tight_layout()
 
-    output_file = args.input.parent / "action_diagnostics_episode_scores.png"
+    output_file = LOG_FILE.parent / "action_diagnostics_episode_scores.png"
     figure.savefig(output_file, dpi=160)
     print(f"Plot saved to: {output_file}")
     plt.show()
