@@ -155,6 +155,11 @@ public:
     void clearPosition();
 
     /**
+     * Clear the orientation by setting it to 90°.
+     */
+    void clearOrientation();
+
+    /**
      * Clear mileage by setting it to 0 mm.
      */
     void clearMileage();
@@ -186,6 +191,12 @@ private:
      * the robot stopped.
      */
     static const uint32_t STANDSTILL_DETECTION_PERIOD = 10;
+
+    /**
+     * Initial orientation in mrad.
+     * 90° - heading to north
+     */
+    static const int32_t ORIENTATION_INITIAL = FP_PI() / 2;
 
     /**
      * Last number of relative encoder steps left. Its used to avoid permanent
@@ -234,7 +245,7 @@ private:
         m_lastAbsRelEncStepsRight(0),
         m_mileage(0),
         m_relEncoders(Board::getInstance().getEncoders()),
-        m_orientation(FP_PI() / 2), /* 90° - heading to north */
+        m_orientation(ORIENTATION_INITIAL),
         m_posX(0),
         m_posY(0),
         m_countingXSteps(0),
@@ -305,10 +316,10 @@ private:
      *
      * @param[in]   stepsCenter Number of steps center
      * @param[in]   orientation Orientation in mrad
-     * @param[out]  dXSteps     Delta x-position on x-axis in steps
-     * @param[out]  dYSteps     Delta y-position on y-axis in steps
+     * @param[out]  dXSteps1000 Delta x-position on x-axis in 1/1000 steps
+     * @param[out]  dYSteps1000 Delta y-position on y-axis in 1/1000 steps
      */
-    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dXSteps, int16_t& dYSteps) const;
+    void calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int32_t& dXSteps1000, int32_t& dYSteps1000) const;
 };
 
 /******************************************************************************

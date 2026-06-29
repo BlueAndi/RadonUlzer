@@ -84,20 +84,35 @@ void Odometry::process()
         if ((STEPS_THRESHOLD <= absStepsLeft) || (STEPS_THRESHOLD <= absStepsRight))
         {
             int16_t stepsCenter = static_cast<int16_t>((relStepsLeft + relStepsRight) / 2); /* [steps] */
-            int16_t dXSteps     = 0;                                                        /* [steps] */
-            int16_t dYSteps     = 0;                                                        /* [steps] */
+            int32_t dXSteps1000 = 0;                                                        /* [1/1000 steps] */
+            int32_t dYSteps1000 = 0;                                                        /* [1/1000 steps] */
             int32_t deltaPosX   = 0;                                                        /* [mm] */
             int32_t deltaPosY   = 0;                                                        /* [mm] */
+
+            /* Save orientation before update. */
+            int32_t oldOrientation = m_orientation;
+
+            /* Calculate orientation delta only. */
+            int32_t deltaOrientation = calculateOrientation(0, relStepsLeft, relStepsRight);
+
+            /* Use the orientation in the middle of the movement.
+             * This avoids the systematic position error caused by
+             * projecting the whole movement using the final heading.
+             */
+            int32_t orientationMid = oldOrientation + (deltaOrientation / 2);
 
             /* Calculate mileage in steps to avoid loosing precision by division. */
             m_mileage = calculateMileage(m_mileage, stepsCenter);
 
-            m_orientation = calculateOrientation(m_orientation, relStepsLeft, relStepsRight);
+            /* Calculate delta position in 1/1000 steps to avoid loosing precision by divison. */
+            calculateDeltaPos(stepsCenter, orientationMid, dXSteps1000, dYSteps1000);
 
-            /* Calculate delta position in steps to avoid loosing precision by divison. */
-            calculateDeltaPos(stepsCenter, m_orientation, dXSteps, dYSteps);
-            m_countingXSteps += dXSteps * 1000; /* Multiply with 1000 for higher precision. */
-            m_countingYSteps += dYSteps * 1000; /* Multiply with 1000 for higher precision. */
+            m_countingXSteps += dXSteps1000;
+            m_countingYSteps += dYSteps1000;
+
+            /* Update orientation afterwards. */
+            m_orientation = oldOrientation + deltaOrientation;
+            m_orientation %= FP_2PI();
 
             /* For large areas, its important to have the position in mm and not in steps.
              * Therefore the position in mm is continously calculated from the counted steps
@@ -156,6 +171,11 @@ void Odometry::clearPosition()
     m_countingYSteps          = 0;
 }
 
+void Odometry::clearOrientation()
+{
+    m_orientation = ORIENTATION_INITIAL;
+}
+
 void Odometry::clearMileage()
 {
     m_mileage = 0;
@@ -171,12 +191,13 @@ void Odometry::clearMileage()
 
 bool Odometry::detectStandStill(uint16_t absStepsLeft, uint16_t absStepsRight)
 {
-    bool isStandStill = false;
+    const uint16_t STANDSTILL_DETECTION_THRESHOLD = 1U; /* [steps] */
+    bool           isStandStill                   = false;
 
     /* No encoder (left/right) change detected? */
-    if (absStepsLeft == m_lastAbsRelEncStepsLeft)
+    if (abs(absStepsLeft - m_lastAbsRelEncStepsLeft) <= STANDSTILL_DETECTION_THRESHOLD)
     {
-        if (absStepsRight == m_lastAbsRelEncStepsRight)
+        if (abs(absStepsRight - m_lastAbsRelEncStepsRight) <= STANDSTILL_DETECTION_THRESHOLD)
         {
             isStandStill = true;
         }
@@ -235,12 +256,13 @@ int32_t Odometry::calculateOrientation(int32_t orientation, int16_t stepsLeft, i
     return orientation;
 }
 
-void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16_t& dXSteps, int16_t& dYSteps) const
+void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int32_t& dXSteps1000,
+                                 int32_t& dYSteps1000) const
 {
-    float fDistCenter  = static_cast<float>(stepsCenter);           /* [steps] */
-    float fOrientation = static_cast<float>(orientation) / 1000.0F; /* [rad] */
-    float fDeltaPosX   = fDistCenter * cosf(fOrientation);          /* [steps] */
-    float fDeltaPosY   = fDistCenter * sinf(fOrientation);          /* [steps] */
+    float fDistCenter  = static_cast<float>(stepsCenter);            /* [steps] */
+    float fOrientation = static_cast<float>(orientation) / 1000.0F;  /* [rad] */
+    float fDeltaPosX   = fDistCenter * cosf(fOrientation) * 1000.0F; /* [1/1000 steps] */
+    float fDeltaPosY   = fDistCenter * sinf(fOrientation) * 1000.0F; /* [1/1000 steps] */
 
     /* Round because the cast will just cut the fractional part. */
     if (0.0F <= fDeltaPosX)
@@ -262,8 +284,8 @@ void Odometry::calculateDeltaPos(int16_t stepsCenter, int32_t orientation, int16
         fDeltaPosY -= 0.5F;
     }
 
-    dXSteps = static_cast<int16_t>(fDeltaPosX); /* [steps] */
-    dYSteps = static_cast<int16_t>(fDeltaPosY); /* [steps] */
+    dXSteps1000 = static_cast<int32_t>(fDeltaPosX); /* [1/1000 steps]*/
+    dYSteps1000 = static_cast<int32_t>(fDeltaPosY); /* [1/1000 steps]*/
 }
 
 /******************************************************************************
