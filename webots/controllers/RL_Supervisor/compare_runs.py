@@ -5,12 +5,15 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+import matplotlib
 import pandas as pd
 
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOGS_DIR = SCRIPT_DIR / "logs"
+TRAINING_RUNS_DIR = SCRIPT_DIR / "training_runs"
 COMPARISONS_DIR = LOGS_DIR / "comparisons"
 REQUIRED_COLUMNS = {
     "Training Update",
@@ -76,6 +79,10 @@ def parse_arguments():
             "training_logs.csv and run_configuration.json."
         ),
     )
+    parser.add_argument(
+        "--training-experiment",
+        help="Experiment directory name below training_runs/ for parallel runs.",
+    )
     args = parser.parse_args()
 
     if len(args.runs) < 2:
@@ -84,9 +91,12 @@ def parse_arguments():
     return args
 
 
-def load_run(run_name):
+def load_run(run_name, training_experiment=None):
     """Load metrics and configuration for one run."""
-    run_dir = LOGS_DIR / run_name
+    if training_experiment:
+        run_dir = TRAINING_RUNS_DIR / training_experiment / run_name / "logs"
+    else:
+        run_dir = LOGS_DIR / run_name
     if not run_dir.is_dir():
         raise FileNotFoundError(f"Run directory not found: {run_dir}")
 
@@ -112,6 +122,15 @@ def load_run(run_name):
         raise ValueError(f"No run configuration found in {config_file}.")
 
     return {"name": run_name, "training_data": data, "config": config}
+
+
+def build_output_dir(training_experiment=None):
+    """Build the comparison output directory."""
+    if training_experiment:
+        return TRAINING_RUNS_DIR / training_experiment / "comparisons"
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    return COMPARISONS_DIR / timestamp
 
 
 def flatten_config(config, prefix=""):
@@ -193,9 +212,8 @@ def plot_metric_comparisons(runs, output_dir):
 def main():
     """Run the comparison."""
     args = parse_arguments()
-    runs = [load_run(run_name) for run_name in args.runs]
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    output_dir = COMPARISONS_DIR / timestamp
+    runs = [load_run(run_name, args.training_experiment) for run_name in args.runs]
+    output_dir = build_output_dir(args.training_experiment)
     output_dir.mkdir(parents=True, exist_ok=True)
     write_parameter_differences(runs, output_dir)
     plot_metric_comparisons(runs, output_dir)

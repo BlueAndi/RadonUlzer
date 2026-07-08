@@ -85,8 +85,19 @@ IDLE = "IDLE_STATE"
 READY = "READY_STATE"
 TRAINING = "TRAINING_STATE"
 
-# Path of saved models
-PATH = "models/"
+# Optional environment variables used by parallel_runs.py to configure each training run.
+MAX_TRAINING_UPDATES_ENV = "RL_MAX_TRAINING_UPDATES"
+RUN_DIRECTORY_ENV = "RL_RUN_DIRECTORY"
+ACTOR_LEARNING_RATE_ENV = "RL_ACTOR_LEARNING_RATE"
+CRITIC_LEARNING_RATE_ENV = "RL_CRITIC_LEARNING_RATE"
+GAMMA_ENV = "RL_GAMMA"
+GAE_LAMBDA_ENV = "RL_GAE_LAMBDA"
+POLICY_CLIP_ENV = "RL_POLICY_CLIP"
+BATCH_SIZE_ENV = "RL_BATCH_SIZE"
+N_EPOCHS_ENV = "RL_N_EPOCHS"
+STD_DEV_ENV = "RL_STD_DEV"
+MIN_STD_DEV_ENV = "RL_MIN_STD_DEV"
+STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 
 ################################################################################
 # Classes
@@ -199,15 +210,9 @@ class RobotController:
         if self.__agent.done is False and self.__agent.state == READY:
             self.__agent.send_motor_speeds(sensor_data)
 
-    def load_models(self, path) -> None:
+    def load_models(self) -> None:
         """Load Model if exist"""
-        actor_path = os.path.join(path, "actor.weights.h5")
-        critic_path = os.path.join(path, "critic.weights.h5")
-
-        if os.path.exists(actor_path) and os.path.exists(critic_path):
-            self.__agent.load_models()
-        else:
-            print("No complete model checkpoint available. Starting fresh training.")
+        self.__agent.load_models_if_available()
 
     def retry_unsent_data(self, unsent_data: list) -> bool:
         """Resent any unsent Data"""
@@ -253,6 +258,59 @@ class RobotController:
 ################################################################################
 # Functions
 ################################################################################
+
+def read_optional_env_value(name):
+    """Read an optional environment variable."""
+    value = os.getenv(name)
+    if value is None or value == "":
+        return None
+    return value
+
+
+def read_optional_positive_int_env(name):
+    """Read an optional positive integer environment variable."""
+    value = read_optional_env_value(name)
+    if value is None:
+        return None
+    try:
+        parsed_value = int(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive integer.") from exc
+    if parsed_value <= 0:
+        raise ValueError(f"{name} must be a positive integer.")
+    return parsed_value
+
+
+def read_optional_positive_float_env(name):
+    """Read an optional positive float environment variable."""
+    value = read_optional_env_value(name)
+    if value is None:
+        return None
+    try:
+        parsed_value = float(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive float.") from exc
+    if parsed_value <= 0:
+        raise ValueError(f"{name} must be a positive float.")
+    return parsed_value
+
+
+def read_runtime_config():
+    """Read wrapper-controlled runtime configuration from the environment."""
+    return {
+        MAX_TRAINING_UPDATES_ENV: read_optional_positive_int_env(MAX_TRAINING_UPDATES_ENV),
+        RUN_DIRECTORY_ENV: read_optional_env_value(RUN_DIRECTORY_ENV),
+        ACTOR_LEARNING_RATE_ENV: read_optional_positive_float_env(ACTOR_LEARNING_RATE_ENV),
+        CRITIC_LEARNING_RATE_ENV: read_optional_positive_float_env(CRITIC_LEARNING_RATE_ENV),
+        GAMMA_ENV: read_optional_positive_float_env(GAMMA_ENV),
+        GAE_LAMBDA_ENV: read_optional_positive_float_env(GAE_LAMBDA_ENV),
+        POLICY_CLIP_ENV: read_optional_positive_float_env(POLICY_CLIP_ENV),
+        BATCH_SIZE_ENV: read_optional_positive_int_env(BATCH_SIZE_ENV),
+        N_EPOCHS_ENV: read_optional_positive_int_env(N_EPOCHS_ENV),
+        STD_DEV_ENV: read_optional_positive_float_env(STD_DEV_ENV),
+        MIN_STD_DEV_ENV: read_optional_positive_float_env(MIN_STD_DEV_ENV),
+        STD_DEV_FACTOR_ENV: read_optional_positive_float_env(STD_DEV_FACTOR_ENV),
+    }
 
 
 # pylint: disable=duplicate-code
@@ -311,7 +369,28 @@ def main_loop():
         status = -1
 
     # create instance of intelligence Agent
-    agent = Agent(smp_server)
+    runtime_config = read_runtime_config()
+    agent_kwargs = {
+        "max_training_updates": runtime_config[MAX_TRAINING_UPDATES_ENV],
+        "run_directory": runtime_config[RUN_DIRECTORY_ENV],
+    }
+    runtime_to_agent_kwargs = {
+        ACTOR_LEARNING_RATE_ENV: "actor_alpha",
+        CRITIC_LEARNING_RATE_ENV: "critic_alpha",
+        GAMMA_ENV: "gamma",
+        GAE_LAMBDA_ENV: "gae_lambda",
+        POLICY_CLIP_ENV: "policy_clip",
+        BATCH_SIZE_ENV: "batch_size",
+        N_EPOCHS_ENV: "n_epochs",
+        STD_DEV_ENV: "std_dev",
+        MIN_STD_DEV_ENV: "min_std_dev",
+        STD_DEV_FACTOR_ENV: "std_dev_factor",
+    }
+    for env_name, agent_kwarg in runtime_to_agent_kwargs.items():
+        if runtime_config[env_name] is not None:
+            agent_kwargs[agent_kwarg] = runtime_config[env_name]
+
+    agent = Agent(smp_server, **agent_kwargs)
 
     # create instance of robot logic class
     controller = RobotController(smp_server, timestep, agent)
@@ -326,7 +405,7 @@ def main_loop():
     # setup successful
     if status != -1:
 
-        controller.load_models(PATH)
+        controller.load_models()
 
         supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_FAST)
 
@@ -338,6 +417,9 @@ def main_loop():
             controller.process()
 
             controller.manage_agent_cycle(robot_node)
+            if agent.training_finished:
+                supervisor.simulationQuit(0)
+                break
 
             # Resent any unsent Data
             if agent.unsent_data:

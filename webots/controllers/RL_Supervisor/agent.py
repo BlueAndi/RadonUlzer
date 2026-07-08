@@ -123,9 +123,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         gae_lambda=0.95,
         policy_clip=0.2,
         batch_size=64,
+        n_epochs=3,
+        std_dev=0.5,
+        min_std_dev=MIN_STD_DEV,
+        std_dev_factor=STD_DEV_FACTOR,
         chkpt_dir="models/",
         top_speed=250,  # mm/s (~2000 encoder steps/s on Zumo32U4)
         max_buffer_length=65536,
+        max_training_updates=None,
+        run_directory=None,
     ):
         self.__serialmux = smp_server
         self.__gamma = gamma
@@ -136,10 +142,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__batch_size = batch_size
         self.__min_buffer_length = max(batch_size * 8, 512)
         self.__max_buffer_length = max_buffer_length
+        self.__max_training_updates = max_training_updates
+        self.__run_directory = run_directory
         self.__chkpt_dir = chkpt_dir
         self.train_mode = False
         self.__top_speed = top_speed
-        self.__std_dev = 0.5
+        self.__std_dev = std_dev
+        self.__min_std_dev = min_std_dev
+        self.__std_dev_factor = std_dev_factor
         self.__memory = Memory(
             batch_size, max_buffer_length, gamma, gae_lambda,
             self.__min_buffer_length)
@@ -147,7 +157,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             actor_alpha, critic_alpha, policy_clip)
         self.__training_index = 0  # Track batch index during training
         self.__current_batch = None  # Saving of the current batch which is in process
-        self.n_epochs = 3
+        self.n_epochs = n_epochs
         self.done = False
         self.action = None
         self.actor_mean = None
@@ -160,6 +170,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.unsent_data = []
         self.reward_history = []
         self.reinitialized = False
+        self.training_finished = False
         self.training_history = []
         self.__episode_steps = []
         self.__trajectory_reward = 0.0
@@ -223,6 +234,16 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__neural_network.critic_network.load_weights(
             self.__chkpt_dir + "critic.weights.h5"
         )
+
+    def load_models_if_available(self):
+        """Load models if a complete checkpoint exists."""
+        actor_path = self.__chkpt_dir + "actor.weights.h5"
+        critic_path = self.__chkpt_dir + "critic.weights.h5"
+
+        if os.path.exists(actor_path) and os.path.exists(critic_path):
+            self.load_models()
+        else:
+            print("No complete model checkpoint available. Starting fresh training.")
 
 
     @tf.function(
@@ -340,8 +361,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
     def __initialize_training_directory(self):
         """Create a fresh directory for this training run."""
 
-        self.__training_directory = os.path.join(DIRECTORY, self.__timestamp)
+        if self.__run_directory is None:
+            self.__training_directory = os.path.join(DIRECTORY, self.__timestamp)
+        else:
+            self.__training_directory = os.path.join(self.__run_directory, DIRECTORY)
+            self.__chkpt_dir = os.path.join(self.__run_directory, "models", "")
+
         os.makedirs(self.__training_directory, exist_ok=True)
+        os.makedirs(self.__chkpt_dir, exist_ok=True)
 
 
     def __initialize_action_diagnostics(self):
@@ -399,8 +426,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                          "batch_size" : self.__batch_size,
                          "n_epochs" : self.n_epochs},
             "exploration": {"std_dev" : self.__std_dev,
-                            "min_std_dev" : MIN_STD_DEV,
-                            "std_dev_factor" : STD_DEV_FACTOR},
+                            "min_std_dev" : self.__min_std_dev,
+                            "std_dev_factor" : self.__std_dev_factor},
             "diagnostics": {"action_diagnostics_steps" : ACTION_DIAGNOSTICS_STEPS},
             "buffer": {"min_buffer_length" : self.__min_buffer_length,
                        "max_buffer_length" : self.__max_buffer_length},
@@ -672,10 +699,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__memory.clear_memory()
             self.__episode_steps = []
             self.num_training_updates += 1
+            if (
+                self.__max_training_updates is not None
+                and self.num_training_updates >= self.__max_training_updates
+            ):
+                self.training_finished = True
 
             # Minimize standard deviation until the minimum standard deviation is reached
-            self.__std_dev = self.__std_dev * STD_DEV_FACTOR
-            self.__std_dev = max(self.__std_dev, MIN_STD_DEV)
+            self.__std_dev = self.__std_dev * self.__std_dev_factor
+            self.__std_dev = max(self.__std_dev, self.__min_std_dev)
 
             # APPRemoteControl stays in DrivingState — no command needed to restart.
             # Transition directly back to READY so motor speeds resume on the next

@@ -65,6 +65,12 @@ PROGRAM_OPTIONS_ZUMO_COM_SYSTEM = '-c ' \
                                 + '--settingsPath "' + ABS_SETTINGS_PATH + '" ' \
                                 + '-v'
 WEBOTS_CONTROLLER_OPTIONS = '--robot-name=' + ROBOT_NAME + ' --stdout-redirect'
+
+# Parallel Webots instances need matching controller ports
+WEBOTS_PORT = os.getenv("WEBOTS_PORT")
+if WEBOTS_PORT:
+    WEBOTS_CONTROLLER_OPTIONS += ' --port=' + WEBOTS_PORT
+
 WEBOTS_HOME = os.getenv('WEBOTS_HOME')
 
 if OS_PLATFORM_TYPE == OS_PLATFORM_TYPE_WIN:
