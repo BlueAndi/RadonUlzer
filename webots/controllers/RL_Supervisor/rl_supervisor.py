@@ -115,6 +115,7 @@ class RobotController:
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
         self.steps = 0
+        self.__waiting_for_valid_sensor_data = False
 
     def callback_status(self, payload: bytearray) -> None:
         """Callback Status Channel."""
@@ -140,6 +141,14 @@ class RobotController:
             self.__agent.done = False
             self.__agent.set_train_mode()
             return
+
+        # The robot controller may still send LINE_SENS frames while the board and
+        # Webots pose are being reinitialized. Ignore all-zero samples until the
+        # first non-zero sensor frame starts the new episode.
+        if self.__waiting_for_valid_sensor_data:
+            if all(value == 0 for value in sensor_data):
+                return
+            self.__waiting_for_valid_sensor_data = False
 
         self.steps += 1
 
@@ -243,6 +252,7 @@ class RobotController:
             # observation rather than a transition from the previous episode.
             if self.__agent.reinitialized:
                 self.last_sensor_data = None
+                self.__waiting_for_valid_sensor_data = True
                 self.__agent.reinitialized = False
 
         # Start the training
