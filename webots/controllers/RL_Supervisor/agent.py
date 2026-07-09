@@ -173,7 +173,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.training_finished = False
         self.training_history = []
         self.__episode_steps = []
-        self.__trajectory_reward = 0.0
+        self.__episode_rewards = []
         self.__actor_loss_start_index = 0
         self.__critic_loss_start_index = 0
         self.__diagnostic_step = 0
@@ -402,11 +402,12 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(
-                ["Training Update", "Actor Loss", "Critic Loss", "Reward", "Mean Episode Steps"]
+                ["Training Update", "Mean Actor Loss", "Mean Critic Loss", "Mean Episode Reward", "Mean Episode Steps"]
             )
 
     def complete_episode(self, steps):
         """Record a completed episode and reset per-episode diagnostics."""
+
         self.__episode_steps.append(steps)
         self.__diagnostic_step = 0
         self.num_episodes += 1
@@ -633,7 +634,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             # Grab sample from memory
             self.__current_batch = self.__memory.generate_batches()
 
-            self.__trajectory_reward = self.__memory.get_sum_rewards()
+            self.__episode_rewards = self.__memory.get_episode_rewards()
+
             self.__actor_loss_start_index = len(
                 self.__neural_network.actor_loss_history
             )
@@ -683,13 +685,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             mean_actor_loss = float(np.mean(actor_losses))
             mean_critic_loss = float(np.mean(critic_losses))
             mean_episode_steps = float(np.mean(self.__episode_steps))
+            mean_episode_rewards = float(np.mean(self.__episode_rewards))
 
             self.training_history.append(
                 (
                     self.num_training_updates + 1,
                     mean_actor_loss,
                     mean_critic_loss,
-                    self.__trajectory_reward,
+                    mean_episode_rewards,
                     mean_episode_steps,
                 )
             )

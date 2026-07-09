@@ -27,7 +27,7 @@ LOG_FILE = LOG_DIR / "training_logs.csv"
 
 data = pd.read_csv(LOG_FILE)
 
-required_columns = {"Training Update", "Actor Loss", "Critic Loss", "Reward", "Mean Episode Steps"}
+required_columns = {"Training Update", "Mean Actor Loss", "Mean Critic Loss", "Mean Episode Reward", "Mean Episode Steps"}
 missing_columns = required_columns.difference(data.columns)
 if missing_columns:
     raise ValueError(
@@ -39,7 +39,7 @@ if data.empty:
 
 # Plotting Actor Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Training Update"], data["Actor Loss"], label="Mean Actor Loss")
+plt.plot(data["Training Update"], data["Mean Actor Loss"], label="Mean Actor Loss")
 plt.xlabel("Training Update")
 plt.ylabel("Loss")
 plt.title("Mean Actor Loss per Training Update")
@@ -50,7 +50,7 @@ plt.savefig(LOG_DIR / "actor_loss_plot.png")
 
 # Plotting Critic Loss
 plt.figure(figsize=(10, 5))
-plt.plot(data["Training Update"], data["Critic Loss"], label="Mean Critic Loss")
+plt.plot(data["Training Update"], data["Mean Critic Loss"], label="Mean Critic Loss")
 plt.xlabel("Training Update")
 plt.ylabel("Loss")
 plt.title("Mean Critic Loss per Training Update")
@@ -61,10 +61,10 @@ plt.savefig(LOG_DIR / "critic_loss_plot.png")
 
 # Plotting Total Rewards
 plt.figure(figsize=(10, 5))
-plt.plot(data["Training Update"], data["Reward"], label="Total Reward")
+plt.plot(data["Training Update"], data["Mean Episode Reward"], label="Mean Episode Reward")
 plt.xlabel("Training Update")
-plt.ylabel("Total Reward")
-plt.title("Total Reward per Training Update")
+plt.ylabel("Mean Episode Reward")
+plt.title("Mean Episode Reward per Training Update")
 plt.legend()
 plt.grid(True)
 plt.tight_layout()

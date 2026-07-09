@@ -17,19 +17,19 @@ TRAINING_RUNS_DIR = SCRIPT_DIR / "training_runs"
 COMPARISONS_DIR = LOGS_DIR / "comparisons"
 REQUIRED_COLUMNS = {
     "Training Update",
-    "Actor Loss",
-    "Critic Loss",
-    "Reward",
+    "Mean Actor Loss",
+    "Mean Critic Loss",
+    "Mean Episode Reward",
     "Mean Episode Steps",
 }
 METRICS = {
     "reward": {
         "x_column": "Training Update",
-        "y_column": "Reward",
+        "y_column": "Mean Episode Reward",
         "filename": "reward_comparison.png",
         "title": "Reward Comparison",
         "xlabel": "Training Update",
-        "ylabel": "Reward",
+        "ylabel": "Mean Episode Reward",
     },
     "mean_episode_steps": {
         "x_column": "Training Update",
@@ -41,7 +41,7 @@ METRICS = {
     },
     "actor_loss": {
         "x_column": "Training Update",
-        "y_column": "Actor Loss",
+        "y_column": "Mean Actor Loss",
         "filename": "actor_loss_comparison.png",
         "title": "Actor Loss Comparison",
         "xlabel": "Training Update",
@@ -49,11 +49,11 @@ METRICS = {
     },
     "critic_loss": {
         "x_column": "Training Update",
-        "y_column": "Critic Loss",
+        "y_column": "Mean Critic Loss",
         "filename": "critic_loss_comparison.png",
         "title": "Critic Loss Comparison",
         "xlabel": "Training Update",
-        "ylabel": "Critic Loss",
+        "ylabel": "Mean Critic Loss",
     },
 }
 

@@ -126,6 +126,25 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         return sum_rewards
 
+    def get_episode_rewards(self) -> list[float]:
+        """
+        Calculate total rewards per completed episode.
+
+        Returns
+        ----------
+            list[float]: Total rewards for completed episodes.
+        """
+        episode_rewards = []
+        current_reward = 0.0
+
+        for reward, done in zip(self.__rewards, self.__dones):
+            current_reward += reward
+            if done:
+                episode_rewards.append(current_reward)
+                current_reward = 0.0
+
+        return episode_rewards
+
     def store_memory(
         self, state, action, probs, vals, reward, done
     ):  # pylint: disable=too-many-arguments
