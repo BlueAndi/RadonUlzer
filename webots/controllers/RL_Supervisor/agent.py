@@ -132,7 +132,34 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         max_buffer_length=65536,
         max_training_updates=None,
         run_directory=None,
-    ):
+    ) -> None:
+        """
+        Initialize the reinforcement learning agent.
+
+        Parameters
+        ----------
+            smp_server: Serial communication server used to control the robot.
+            gamma: Discount factor for future rewards.
+            actor_alpha: Learning rate of the actor network.
+            critic_alpha: Learning rate of the critic network.
+            gae_lambda: Decay factor for generalized advantage estimation.
+            policy_clip: PPO policy clipping range.
+            batch_size: Number of samples in each mini batch.
+            n_epochs: Number of training epochs per trajectory batch.
+            std_dev: Initial action sampling standard deviation.
+            min_std_dev: Lower bound for the sampling standard deviation.
+            std_dev_factor: Multiplicative decay factor for the standard deviation.
+            chkpt_dir: Directory used for model checkpoints.
+            top_speed: Maximum motor speed in millimeters per second.
+            max_buffer_length: Maximum number of stored trajectory samples.
+            max_training_updates: Optional limit for completed training updates.
+            run_directory: Optional directory managed by a training wrapper.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__serialmux = smp_server
         self.__gamma = gamma
         self.__actor_alpha = actor_alpha
@@ -186,13 +213,27 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__initialize_action_diagnostics()
         self.__initialize_run_config()
 
-    def set_train_mode(self):
-        """Set the Agent mode to train mode."""
+    def set_train_mode(self) -> None:
+        """
+        Set the agent to training mode.
+
+        Returns
+        ----------
+            None
+        """
+
         self.train_mode = True
         self.state = READY
 
-    def set_drive_mode(self):
-        """Set the Agent mode to drive mode."""
+    def set_drive_mode(self) -> None:
+        """
+        Set the agent to driving mode.
+
+        Returns
+        ----------
+            None
+        """
+
         self.train_mode = False
         self.state = READY
         self.num_training_updates = 0
@@ -200,22 +241,33 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
     def store_transition(
         self, state, action, probs, value, reward, done
-    ):  # pylint: disable=too-many-arguments
+    ) -> None:  # pylint: disable=too-many-arguments
         """Store transitions in the replay buffer.
 
         Parameters
         ----------
             state: The state observed.
             action: The action taken.
-            prob: The probability of taking the action.
+            probs: The probability of taking the action.
             value: The estimated value of the state.
             reward: The reward received.
             done: Indicating whether the target sequence has been reached.
+
+        Returns
+        ----------
+            None
         """
+
         self.__memory.store_memory(state, action, probs, value, reward, done)
 
-    def save_models(self):
-        """Saves the models in the specified file."""
+    def save_models(self) -> None:
+        """
+        Save the current model weights to the checkpoint directory.
+
+        Returns
+        ----------
+            None
+        """
 
         os.makedirs(self.__chkpt_dir, exist_ok=True)
         self.__neural_network.actor_network.save_weights(
@@ -225,8 +277,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__chkpt_dir + "critic.weights.h5"
         )
 
-    def load_models(self):
-        """Loads the models in the specified file."""
+    def load_models(self) -> None:
+        """
+        Load model weights from the checkpoint directory.
+
+        Returns
+        ----------
+            None
+        """
 
         self.__neural_network.actor_network.load_weights(
             self.__chkpt_dir + "actor.weights.h5"
@@ -235,8 +293,15 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__chkpt_dir + "critic.weights.h5"
         )
 
-    def load_models_if_available(self):
-        """Load models if a complete checkpoint exists."""
+    def load_models_if_available(self) -> None:
+        """
+        Load model weights when a complete checkpoint exists.
+
+        Returns
+        ----------
+            None
+        """
+
         actor_path = self.__chkpt_dir + "actor.weights.h5"
         critic_path = self.__chkpt_dir + "critic.weights.h5"
 
@@ -252,8 +317,21 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 tf.TensorSpec(shape=(), dtype=tf.float32)
             ]
     )
-    def _predict_train_graph(self, state_tensor, std_dev):
-        """ Graph for the training branch in predict_action() """
+    def _predict_train_graph(
+        self, state_tensor, std_dev
+    ) -> tuple[tf.Tensor, tf.Tensor, tf.Tensor, tf.Tensor]:
+        """
+        Predict training outputs with the TensorFlow graph.
+
+        Parameters
+        ----------
+            state_tensor: Normalized state tensor for one observation.
+            std_dev: Standard deviation used for exploration sampling.
+
+        Returns
+        ----------
+            tuple: Actor mean, transformed sampled action, critic value, and adjusted log probability.
+        """
 
         # Forward pass through the actor network to get the action mean
         action_mean = self.__neural_network.actor_network(state_tensor)
@@ -283,9 +361,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         return action_mean, transformed_action, value, adjusted_log_prob
 
 
-    def predict_action(self, state):
+    def predict_action(self, state) -> np.ndarray:
         """
-        Predicts an action based on the current state.
+        Predict an action based on the current state.
 
         Parameters
         ----------
@@ -293,8 +371,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            float32: The action taken.
+            np.ndarray: Predicted action.
         """
+
         # scales the sensor data to a range between 0 and 1
         m_state = self.normalize_sensor_data(state)
 
@@ -328,14 +407,19 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         return self.action
 
-    def send_motor_speeds(self, state):
+    def send_motor_speeds(self, state) -> None:
         """
-        Sends the motor speeds to the robot.
+        Send motor speeds to the robot.
 
         Parameters
         ----------
             state: The state observed.
+
+        Returns
+        ----------
+            None
         """
+
         # pre_action contains the predicted action for the given state, calculated based
         # on the Actor model output.
         pre_action = self.predict_action(state)
@@ -358,8 +442,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         if self.data_sent is False:
             self.unsent_data.append((MOTOR_SPEED_CHANNEL_NAME, control_data))
 
-    def __initialize_training_directory(self):
-        """Create a fresh directory for this training run."""
+    def __initialize_training_directory(self) -> None:
+        """
+        Create directories for logs and model checkpoints.
+
+        Returns
+        ----------
+            None
+        """
 
         if self.__run_directory is None:
             self.__training_directory = os.path.join(DIRECTORY, self.__timestamp)
@@ -371,8 +461,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         os.makedirs(self.__chkpt_dir, exist_ok=True)
 
 
-    def __initialize_action_diagnostics(self):
-        """Create a fresh action diagnostics log for this training run."""
+    def __initialize_action_diagnostics(self) -> None:
+        """
+        Create the action diagnostics log for this training run.
+
+        Returns
+        ----------
+            None
+        """
 
         log_file = os.path.join(self.__training_directory, ACTION_DIAGNOSTICS_FILE)
 
@@ -394,8 +490,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 ]
             )
 
-    def __initialize_training_log(self):
-        """Create a fresh training log for this training run."""
+    def __initialize_training_log(self) -> None:
+        """
+        Create the training log for this training run.
+
+        Returns
+        ----------
+            None
+        """
 
         log_file = os.path.join(self.__training_directory, FILE_DIRECTORY)
 
@@ -405,15 +507,31 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 ["Training Update", "Mean Actor Loss", "Mean Critic Loss", "Mean Episode Reward", "Mean Episode Steps"]
             )
 
-    def complete_episode(self, steps):
-        """Record a completed episode and reset per-episode diagnostics."""
+    def complete_episode(self, steps) -> None:
+        """
+        Record a completed episode and reset its diagnostics counter.
+
+        Parameters
+        ----------
+            steps: Number of simulation steps in the completed episode.
+
+        Returns
+        ----------
+            None
+        """
 
         self.__episode_steps.append(steps)
         self.__diagnostic_step = 0
         self.num_episodes += 1
 
-    def __initialize_run_config(self):
-        """Create a fresh configuration file for this training run."""
+    def __initialize_run_config(self) -> None:
+        """
+        Create the configuration file for this training run.
+
+        Returns
+        ----------
+            None
+        """
 
         log_file = os.path.join(self.__training_directory, RUN_CONFIG_FILE)
 
@@ -454,8 +572,19 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         with open(log_file, mode="w", encoding="utf-8") as file:
             json.dump(run_config, file, indent=4)
 
-    def __log_action_diagnostics(self, sensor_data):
-        """Log the first actions of each episode for policy analysis."""
+    def __log_action_diagnostics(self, sensor_data) -> None:
+        """
+        Log the first actions of each episode for policy analysis.
+
+        Parameters
+        ----------
+            sensor_data: Raw line sensor values for the current action.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__diagnostic_step += 1
 
         if self.__diagnostic_step > ACTION_DIAGNOSTICS_STEPS:
@@ -476,13 +605,17 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 ]
             )
 
-    def update(self, robot_node):
+    def update(self, robot_node) -> None:
         """
-        Checks if the sequence has ended and performs updates.
+        Check whether an episode ended and update the agent state.
 
         Parameters
         ----------
             robot_node: The Robot interface
+
+        Returns
+        ----------
+            None
         """
 
         # Checks whether the sequence has ended if it is set to Training mode.
@@ -538,9 +671,9 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             # Return directly to READY — APPRemoteControl stays in DrivingState
             self.set_drive_mode()
 
-    def normalize_sensor_data(self, sensor_data):
+    def normalize_sensor_data(self, sensor_data) -> np.ndarray:
         """
-        The normalize_sensor_data function scales the sensor data to a range between 0 and 1.
+        Scale sensor data to a range between 0 and 1.
 
         Parameters
         ----------
@@ -548,27 +681,25 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            NumPy array of float32: Normalized Sensor Data
+            np.ndarray: Normalized sensor data.
         """
 
         normalized_sensor_data = np.array(sensor_data) / MAX_SENSOR_VALUE
         return normalized_sensor_data
 
-    def determine_reward(self, sensor_data):
+    def determine_reward(self, sensor_data) -> float:
         """
-        The function evaluates the consequences of a certain
-        action performed in a certain state by calculating the resulting reward.
-        A reward of 1 means that the robot is in the center of the Line.
+        Calculate the reward for the current sensor data.
 
         Parameters
         ----------
-            sensor_data : The state observed.
+            sensor_data: The state observed.
 
         Returns
         ----------
-            float: The Resulting Reward.
-
+            float: Calculated reward.
         """
+
         reward = self.__memory.calculate_reward(sensor_data)
         return reward
 
@@ -580,7 +711,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         values,
         advantages,
         normalized_advantages,
-    ):
+    ) -> None:
         """
         Perform training to optimize model weights.
 
@@ -592,7 +723,12 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             values:     The saved estimated values of the observed states.
             advantages: The original advantage values used to train the critic.
             normalized_advantages: The normalized advantage values used to train the actor.
+
+        Returns
+        ----------
+            None
         """
+
         # scales the sensor data to a range between 0 and 1
         m_states = self.normalize_sensor_data(states)
 
@@ -615,7 +751,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             self.__neural_network.compute_critic_gradient(
                 states, values, advantages)
 
-    def save_logs_to_csv(self):
+    def save_logs_to_csv(self) -> None:
+        """
+        Append the latest training metrics to the training log.
+
+        Returns
+        ----------
+            None
+        """
 
         log_file = os.path.join(self.__training_directory, FILE_DIRECTORY)
 
@@ -626,8 +769,14 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             writer = csv.writer(file)
             writer.writerow(self.training_history[-1])
 
-    def perform_training(self):
-        """Runs the training process."""
+    def perform_training(self) -> None:
+        """
+        Run training for the current trajectory batch.
+
+        Returns
+        ----------
+            None
+        """
 
         if self.__current_batch is None:
 
@@ -717,13 +866,17 @@ class Agent:  # pylint: disable=too-many-instance-attributes
             # LINE_SENS callback.
             self.set_train_mode()
 
-    def reinitialize(self, robot_node):
+    def reinitialize(self, robot_node) -> None:
         """
-        Re-initialization of position and orientation of The ROBOT.
+        Reset the robot position and orientation to the next start pose.
 
         Parameters
         ----------
             robot_node: The Robot interface
+
+        Returns
+        ----------
+            None
         """
 
         trans_field = robot_node.getField(TRANSLATION_FIELD)

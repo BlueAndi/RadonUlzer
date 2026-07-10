@@ -25,6 +25,10 @@ STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 WEBOTS_PORT_ENV = "WEBOTS_PORT"
 PLATFORMIO_BUILD_DIR_ENV = "PLATFORMIO_BUILD_DIR"
 
+# Defaults and validation limits for parallel run planning.
+DEFAULT_BASE_PORT = 1234
+MINIMUM_RUN_COUNT = 2
+
 # Maps JSON run parameters to the environment variables read by rl_supervisor.py.
 PARAMETER_TO_ENV = {
     "actor_learning_rate": ACTOR_LEARNING_RATE_ENV,
@@ -56,8 +60,19 @@ PLATFORMIO_COMMAND = [
 ]
 
 
-def get_webots_command(webots_port):
-    """Build the Webots command for one isolated simulator instance."""
+def get_webots_command(webots_port) -> list[str]:
+    """
+    Build the Webots command for one isolated simulator instance.
+
+    Parameters
+    ----------
+        webots_port: Webots port for this simulator instance.
+
+    Returns
+    ----------
+        list[str]: Webots command and arguments.
+    """
+
     webots_home = Path(os.environ["WEBOTS_HOME"])
     webots_executable = webots_home / "msys64" / "mingw64" / "bin" / "webots.exe"
     return [
@@ -71,16 +86,34 @@ def get_webots_command(webots_port):
     ]
 
 
-def positive_int(value):
-    """Parse a positive integer command-line value."""
+def positive_int(value) -> int:
+    """
+    Parse a positive integer command-line value.
+
+    Parameters
+    ----------
+        value: Command-line value to parse.
+
+    Returns
+    ----------
+        int: Parsed positive integer value.
+    """
+
     parsed_value = int(value)
     if parsed_value <= 0:
         raise argparse.ArgumentTypeError("value must be a positive integer")
     return parsed_value
 
 
-def parse_arguments():
-    """Parse command-line options."""
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line options.
+
+    Returns
+    ----------
+        argparse.Namespace: Parsed command-line arguments.
+    """
+
     parser = argparse.ArgumentParser(description="Start parallel RL training runs.")
     parser.add_argument(
         "--max-training-updates",
@@ -99,7 +132,7 @@ def parse_arguments():
     parser.add_argument(
         "--base-port",
         type=positive_int,
-        default=1234,
+        default=DEFAULT_BASE_PORT,
         help="First Webots port used for parallel run planning.",
     )
     parser.add_argument(
@@ -119,8 +152,19 @@ def parse_arguments():
     return args
 
 
-def load_training_config(config_path):
-    """Load a config file from a path or from training_configs/."""
+def load_training_config(config_path) -> dict:
+    """
+    Load a config file from a path or from training_configs/.
+
+    Parameters
+    ----------
+        config_path: Absolute config path or file name below training_configs/.
+
+    Returns
+    ----------
+        dict: Loaded training configuration.
+    """
+
     resolved_config_path = (
         config_path
         if config_path.is_file()
@@ -131,15 +175,26 @@ def load_training_config(config_path):
         return json.load(config_file)
 
 
-def build_training_config(args):
-    """Load a JSON config or build a simple config from CLI arguments."""
+def build_training_config(args) -> dict:
+    """
+    Load a JSON config or build a simple config from CLI arguments.
+
+    Parameters
+    ----------
+        args: Parsed command-line arguments.
+
+    Returns
+    ----------
+        dict: Training configuration used to start the runs.
+    """
+
     if args.config:
         training_config = load_training_config(args.config)
-        if len(training_config["runs"]) < 2:
+        if len(training_config["runs"]) < MINIMUM_RUN_COUNT:
             raise ValueError("At least two runs are required.")
         return training_config
 
-    if args.num_runs < 2:
+    if args.num_runs < MINIMUM_RUN_COUNT:
         raise ValueError("At least two runs are required.")
 
     return {
@@ -153,18 +208,52 @@ def build_training_config(args):
     }
 
 
-def build_experiment_directory(experiment_name):
-    """Build the wrapper-controlled experiment directory."""
+def build_experiment_directory(experiment_name) -> Path:
+    """
+    Build the wrapper-controlled experiment directory.
+
+    Parameters
+    ----------
+        experiment_name: Name of the experiment directory.
+
+    Returns
+    ----------
+        Path: Experiment directory below training_runs/.
+    """
+
     return RL_SUPERVISOR_DIR / "training_runs" / experiment_name
 
 
-def build_run_directory(experiment_directory, run_name):
-    """Build the wrapper-controlled run directory."""
+def build_run_directory(experiment_directory, run_name) -> Path:
+    """
+    Build the wrapper-controlled run directory.
+
+    Parameters
+    ----------
+        experiment_directory: Directory of the parent experiment.
+        run_name: Name of the run directory.
+
+    Returns
+    ----------
+        Path: Run directory below the experiment directory.
+    """
+
     return experiment_directory / run_name
 
 
-def cleanup_build_directory(run_directory):
-    """Remove the temporary PlatformIO build directory of a run."""
+def cleanup_build_directory(run_directory) -> None:
+    """
+    Remove the temporary PlatformIO build directory of a run.
+
+    Parameters
+    ----------
+        run_directory: Directory of the finished run.
+
+    Returns
+    ----------
+        None
+    """
+
     build_directory = run_directory / ".pio_build"
     try:
         shutil.rmtree(build_directory)
@@ -174,8 +263,22 @@ def cleanup_build_directory(run_directory):
         print(f"Warning: failed to remove {build_directory}: {error}")
 
 
-def run_training(max_training_updates, experiment_directory, run_config, webots_port):
-    """Start one run with isolated paths, port, and runtime parameters."""
+def run_training(max_training_updates, experiment_directory, run_config, webots_port) -> tuple:
+    """
+    Start one run with isolated paths, port, and runtime parameters.
+
+    Parameters
+    ----------
+        max_training_updates: Number of completed training updates before stopping.
+        experiment_directory: Directory of the parent experiment.
+        run_config: Configuration of the run to start.
+        webots_port: Webots port for this simulator instance.
+
+    Returns
+    ----------
+        tuple: Started processes, process log, run directory, run name, and port.
+    """
+
     env = os.environ.copy()
     run_name = run_config["name"]
     run_directory = build_run_directory(experiment_directory, run_name)
@@ -220,8 +323,15 @@ def run_training(max_training_updates, experiment_directory, run_config, webots_
     )
 
 
-def main():
-    """Start all configured runs and compare successful experiments."""
+def main() -> int:
+    """
+    Start all configured runs and compare successful experiments.
+
+    Returns
+    ----------
+        int: Highest exit code returned by the started processes.
+    """
+
     args = parse_arguments()
     training_config = build_training_config(args)
     experiment_name = training_config["experiment_name"]

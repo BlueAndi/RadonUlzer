@@ -11,10 +11,16 @@ import pandas as pd
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# Directories used to read training runs and write comparisons.
 SCRIPT_DIR = Path(__file__).resolve().parent
 LOGS_DIR = SCRIPT_DIR / "logs"
 TRAINING_RUNS_DIR = SCRIPT_DIR / "training_runs"
 COMPARISONS_DIR = LOGS_DIR / "comparisons"
+
+# Minimum number of runs required for a meaningful comparison.
+MINIMUM_RUN_COUNT = 2
+
+# Columns required in every training log before metrics can be compared.
 REQUIRED_COLUMNS = {
     "Training Update",
     "Mean Actor Loss",
@@ -22,6 +28,8 @@ REQUIRED_COLUMNS = {
     "Mean Episode Reward",
     "Mean Episode Steps",
 }
+
+# Plot definitions keyed by comparison metric.
 METRICS = {
     "reward": {
         "x_column": "Training Update",
@@ -58,8 +66,15 @@ METRICS = {
 }
 
 
-def parse_arguments():
-    """Parse command-line options."""
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line options.
+
+    Returns
+    ----------
+        argparse.Namespace: Parsed command-line arguments.
+    """
+
     parser = argparse.ArgumentParser(
         description=(
             "Compare reinforcement learning training metrics across two or more "
@@ -85,14 +100,26 @@ def parse_arguments():
     )
     args = parser.parse_args()
 
-    if len(args.runs) < 2:
+    if len(args.runs) < MINIMUM_RUN_COUNT:
         parser.error("At least two runs are required.")
 
     return args
 
 
-def load_run(run_name, training_experiment=None):
-    """Load metrics and configuration for one run."""
+def load_run(run_name, training_experiment=None) -> dict:
+    """
+    Load metrics and configuration for one run.
+
+    Parameters
+    ----------
+        run_name: Name of the run directory.
+        training_experiment: Optional parallel training experiment name.
+
+    Returns
+    ----------
+        dict: Run name, training data, and run configuration.
+    """
+
     if training_experiment:
         run_dir = TRAINING_RUNS_DIR / training_experiment / run_name / "logs"
     else:
@@ -124,8 +151,19 @@ def load_run(run_name, training_experiment=None):
     return {"name": run_name, "training_data": data, "config": config}
 
 
-def build_output_dir(training_experiment=None):
-    """Build the comparison output directory."""
+def build_output_dir(training_experiment=None) -> Path:
+    """
+    Build the comparison output directory.
+
+    Parameters
+    ----------
+        training_experiment: Optional parallel training experiment name.
+
+    Returns
+    ----------
+        Path: Directory where comparison outputs should be written.
+    """
+
     if training_experiment:
         return TRAINING_RUNS_DIR / training_experiment / "comparisons"
 
@@ -133,8 +171,20 @@ def build_output_dir(training_experiment=None):
     return COMPARISONS_DIR / timestamp
 
 
-def flatten_config(config, prefix=""):
-    """Flatten nested dictionaries into dotted parameter names."""
+def flatten_config(config, prefix="") -> dict:
+    """
+    Flatten nested dictionaries into dotted parameter names.
+
+    Parameters
+    ----------
+        config: Configuration dictionary to flatten.
+        prefix: Prefix prepended to nested parameter names.
+
+    Returns
+    ----------
+        dict: Flattened configuration values indexed by dotted parameter names.
+    """
+
     flattened = {}
     for key, value in config.items():
         parameter_name = f"{prefix}.{key}" if prefix else key
@@ -145,8 +195,19 @@ def flatten_config(config, prefix=""):
     return flattened
 
 
-def find_parameter_differences(runs):
-    """Find configuration values that differ between runs."""
+def find_parameter_differences(runs) -> dict:
+    """
+    Find configuration values that differ between runs.
+
+    Parameters
+    ----------
+        runs: Loaded run data containing name, training data, and configuration.
+
+    Returns
+    ----------
+        dict: Differing configuration values indexed by parameter name.
+    """
+
     flattened_configs = {
         run["name"]: flatten_config(run["config"]) for run in runs
     }
@@ -165,8 +226,20 @@ def find_parameter_differences(runs):
     return differences
 
 
-def write_parameter_differences(runs, output_dir):
-    """Write differing run configuration values to a text file."""
+def write_parameter_differences(runs, output_dir) -> None:
+    """
+    Write differing run configuration values to a text file.
+
+    Parameters
+    ----------
+        runs: Loaded run data containing name, training data, and configuration.
+        output_dir: Directory where the text file should be written.
+
+    Returns
+    ----------
+        None
+    """
+
     differences = find_parameter_differences(runs)
     output_file = output_dir / "parameter_differences.txt"
 
@@ -187,8 +260,20 @@ def write_parameter_differences(runs, output_dir):
             file.write("\n")
 
 
-def plot_metric_comparisons(runs, output_dir):
-    """Create one comparison plot for each configured metric."""
+def plot_metric_comparisons(runs, output_dir) -> None:
+    """
+    Create one comparison plot for each configured metric.
+
+    Parameters
+    ----------
+        runs: Loaded run data containing name, training data, and configuration.
+        output_dir: Directory where plot files should be written.
+
+    Returns
+    ----------
+        None
+    """
+
     for metric in METRICS.values():
         plt.figure(figsize=(10, 6))
         for run in runs:
@@ -209,8 +294,15 @@ def plot_metric_comparisons(runs, output_dir):
         plt.close()
 
 
-def main():
-    """Run the comparison."""
+def main() -> None:
+    """
+    Run the comparison.
+
+    Returns
+    ----------
+        None
+    """
+
     args = parse_arguments()
     runs = [load_run(run_name, args.training_experiment) for run_name in args.runs]
     output_dir = build_output_dir(args.training_experiment)

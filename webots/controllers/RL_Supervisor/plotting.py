@@ -5,8 +5,15 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
 
-def parse_arguments():
-    """Parse command-line options."""
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line options.
+
+    Returns
+    ----------
+        argparse.Namespace: Parsed command-line options.
+    """
+
     parser = argparse.ArgumentParser(
         description="Plot episode-level reinforcement learning training metrics."
     )

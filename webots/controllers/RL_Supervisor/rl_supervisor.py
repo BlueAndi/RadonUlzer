@@ -132,6 +132,7 @@ class RobotController:
 
     def callback_line_sensors(self, payload: bytearray) -> None:
         """Callback LINE_SENS Channel."""
+
         sensor_data = struct.unpack("5H", payload)
 
         # First LINE_SENS proves SMP is synced and the robot is in DrivingState.
@@ -221,10 +222,12 @@ class RobotController:
 
     def load_models(self) -> None:
         """Load Model if exist"""
+
         self.__agent.load_models_if_available()
 
     def retry_unsent_data(self, unsent_data: list) -> bool:
         """Resent any unsent Data"""
+
         retry_succesful = True
 
         # Resent the unsent Data.
@@ -238,6 +241,7 @@ class RobotController:
 
     def process(self):
         """function performing controller step"""
+
         self.__timestamp += self.__tick_size
 
         # process new data (callbacks will be executed)
@@ -245,6 +249,7 @@ class RobotController:
 
     def manage_agent_cycle(self, robot_node):
         """The function controls agent behavior"""
+
         if self.__agent.state == READY:
             self.__agent.update(robot_node)
             # Clear stale sensor context whenever the robot is teleported so
@@ -269,16 +274,38 @@ class RobotController:
 # Functions
 ################################################################################
 
-def read_optional_env_value(name):
-    """Read an optional environment variable."""
+def read_optional_env_value(name) -> str | None:
+    """
+    Read an optional environment variable.
+
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        str | None: Environment variable value, or None if unset.
+    """
+
     value = os.getenv(name)
     if value is None or value == "":
         return None
     return value
 
 
-def read_optional_positive_int_env(name):
-    """Read an optional positive integer environment variable."""
+def read_optional_positive_int_env(name) -> int | None:
+    """
+    Read an optional positive integer environment variable.
+
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        int | None: Parsed positive integer value, or None if unset.
+    """
+
     value = read_optional_env_value(name)
     if value is None:
         return None
@@ -291,8 +318,19 @@ def read_optional_positive_int_env(name):
     return parsed_value
 
 
-def read_optional_positive_float_env(name):
-    """Read an optional positive float environment variable."""
+def read_optional_positive_float_env(name) -> float | None:
+    """
+    Read an optional positive float environment variable.
+
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        float | None: Parsed positive float value, or None if unset.
+    """
+
     value = read_optional_env_value(name)
     if value is None:
         return None
@@ -305,8 +343,15 @@ def read_optional_positive_float_env(name):
     return parsed_value
 
 
-def read_runtime_config():
-    """Read wrapper-controlled runtime configuration from the environment."""
+def read_runtime_config() -> dict:
+    """
+    Read wrapper-controlled runtime configuration from the environment.
+
+    Returns
+    ----------
+        dict: Runtime configuration values indexed by environment variable name.
+    """
+
     return {
         MAX_TRAINING_UPDATES_ENV: read_optional_positive_int_env(MAX_TRAINING_UPDATES_ENV),
         RUN_DIRECTORY_ENV: read_optional_env_value(RUN_DIRECTORY_ENV),

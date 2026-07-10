@@ -1,4 +1,4 @@
-""" Implementation of a Serial Webots for Serial Communication """
+"""Serial communication adapter for Webots."""
 
 # MIT License
 #
@@ -37,50 +37,51 @@ from SerialMuxProt import Stream
 
 
 class SerialWebots(Stream):
-    """
-    Serial Webots Communication Class
-    """
+    """Provide serial communication through Webots devices."""
 
     def __init__(self, emitter: device, receiver: device) -> None:
         """
-        SerialWebots Constructor.
+        Initialize serial communication with Webots devices.
 
         Parameters
         ----------
-        emitter : device
-            Name of Emitter Device
-        receiver : device
-            Name of Receiver Device
+            emitter: Webots emitter device used for outgoing payloads.
+            receiver: Webots receiver device used for incoming payloads.
+
+        Returns
+        ----------
+            None
         """
+
         self.__emitter = emitter
         self.__receiver = receiver
         self.__buffer = bytearray()
 
     def write(self, payload: bytearray) -> int:
         """
-        Sends Data to the Server.
+        Send a payload through the Webots emitter.
 
         Parameters
         ----------
-        payload : bytearray
-            Payload to send.
+            payload: Payload to send.
 
         Returns
         ----------
-        int
-            Number of bytes sent
+            int: Number of bytes sent.
         """
+
         self.__emitter.send(bytes(payload))
         bytes_sent = len(payload)
 
         return bytes_sent
 
     def available(self) -> int:
-        """Check if there is anything available for reading.
+        """
+        Check whether bytes are available for reading.
 
         Returns
         ----------
-        Number of bytes that are available for reading.
+            int: Number of bytes available for reading.
         """
 
         if len(self.__buffer) > 0:
@@ -92,18 +93,16 @@ class SerialWebots(Stream):
         return 0
 
     def read_bytes(self, length: int) -> tuple[int, bytearray]:
-        """Read a given number of Bytes from Serial.
+        """
+        Read up to a given number of bytes from the serial stream.
 
         Parameters
         ----------
-        lenght : int
-            Number of bytes to read.
+            length: Maximum number of bytes to read.
 
         Returns
         ----------
-        Tuple:
-        - int: Number of bytes received.
-        - bytearray: Received data.
+            tuple[int, bytearray]: Number of bytes received and received data.
         """
 
         read = 0

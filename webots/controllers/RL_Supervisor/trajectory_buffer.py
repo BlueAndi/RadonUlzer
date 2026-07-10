@@ -41,10 +41,28 @@ import numpy as np
 
 
 class Memory:  # pylint: disable=too-many-instance-attributes
-    """Class for store and manage experience tuples during Reinforcement learning."""
+    """Class for storing and managing experience tuples during reinforcement learning."""
 
     # pylint: disable=too-many-arguments
-    def __init__(self, batch_size, max_length, gamma, gae_lambda, min_buffer_length=512):
+    def __init__(
+        self, batch_size, max_length, gamma, gae_lambda, min_buffer_length=512
+    ) -> None:
+        """
+        Initialize the trajectory buffer.
+
+        Parameters
+        ----------
+            batch_size: Number of samples in each mini batch.
+            max_length: Maximum number of stored transitions.
+            gamma: Discount factor for future rewards.
+            gae_lambda: Decay factor for generalized advantage estimation.
+            min_buffer_length: Minimum number of transitions before training.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__states = []
         self.__probs = []
         self.__vals = []
@@ -59,20 +77,23 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         self.__gae_lambda = gae_lambda
         self.__current_index = 0
 
-    def generate_batches(self):
+    def generate_batches(self) -> tuple[
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        np.ndarray,
+        list[np.ndarray],
+    ]:
         """
-        Generates batches of data for training.
+        Generate shuffled mini batches and training data from stored transitions.
 
         Returns
         ----------
-        Numpy-Array: States
-        Numpy-Array: Actions
-        Numpy-Array: Probs
-        Numpy-Array: Vals
-        Numpy-Array: Rewards
-        Numpy-Array: Raw advantages
-        Numpy-Array: Normalized advantages
-        List: Batches
+            tuple: States, actions, log probabilities, values, rewards, raw
+                advantages, normalized advantages, and shuffled mini batches.
         """
 
         # Determine the number of states
@@ -122,6 +143,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         ----------
             float: Total rewards received.
         """
+
         sum_rewards = sum(self.__rewards)
 
         return sum_rewards
@@ -134,6 +156,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         ----------
             list[float]: Total rewards for completed episodes.
         """
+
         episode_rewards = []
         current_reward = 0.0
 
@@ -147,7 +170,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
     def store_memory(
         self, state, action, probs, vals, reward, done
-    ):  # pylint: disable=too-many-arguments
+    ) -> None:  # pylint: disable=too-many-arguments
         """
         Store transitions in the replay buffer.
 
@@ -159,7 +182,12 @@ class Memory:  # pylint: disable=too-many-instance-attributes
             vals: The estimated value of the state.
             reward: The reward received.
             done: Whether the episode is done.
+
+        Returns
+        ----------
+            None
         """
+
         self.__states.append(state)
         self.__actions.append(action)
         self.__probs.append(probs)
@@ -168,8 +196,14 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         self.__dones.append(done)
         self.__current_index += 1
 
-    def clear_memory(self):
-        """Remove transitions from the trajektories buffer."""
+    def clear_memory(self) -> None:
+        """
+        Remove all stored transitions from the trajectory buffer.
+
+        Returns
+        ----------
+            None
+        """
 
         self.__states = []
         self.__probs = []
@@ -180,27 +214,29 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         self.__advatages = []
         self.__current_index = 0
 
-    def is_memory_full(self):
+    def is_memory_full(self) -> bool:
         """
-        Checks whether Memory has reached its maximum capacity.
+        Check whether the buffer reached its maximum capacity.
 
         Returns
         ----------
-        - Bool: Memory is full or not
+            bool: Whether the buffer is full.
         """
+
         return self.__current_index >= self.__max_length
 
-    def is_ready_for_training(self):
+    def is_ready_for_training(self) -> bool:
         """
-        Checks whether enough transitions have been collected to run a training update.
+        Check whether enough transitions were collected for a training update.
 
         Returns
         ----------
-        - Bool: Buffer has at least min_buffer_length transitions
+            bool: Whether the buffer has at least the minimum number of transitions.
         """
+
         return self.__current_index >= self.__min_buffer_length
 
-    def calculate_advantages(self, rewards, values, dones):
+    def calculate_advantages(self, rewards, values, dones) -> np.ndarray:
         """
         Calculate the generalized advantage estimate (GAE) for every
         transition.
@@ -218,8 +254,9 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            NumPy array of float32: The advantage for every transition.
+            np.ndarray: Generalized advantage estimate for every transition.
         """
+
         # Critic outputs are stored as one-element arrays. Flatten them
         # so every value used in the calculation is a scalar.
         values = np.asarray(values, dtype=np.float32).reshape(-1)
@@ -265,14 +302,14 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         return advantages
 
-    def calculate_position(self, sensor_data):
+    def calculate_position(self, sensor_data) -> float:
         """
-        Determines the deviation and returns an estimated position of the robot
+        Determine the estimated position of the robot
         with respect to a line. The estimate is made using a weighted average of
         the sensor indices multiplied by 1000, so that a return value of 0
         indicates that the line is directly below sensor 0, a return value of
         1000 indicates that the line is directly below sensor 1, 2000
-        indicates that it's below sensor 2000, etc.  Intermediate values
+        indicates that it's below sensor 2, etc. Intermediate values
         indicate that the line is between two sensors. The formula is:
 
                 0*value0 + 1000*value1 + 2000*value2 + ...
@@ -284,12 +321,13 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-            sensor_data : The state observed.
+            sensor_data: The state observed.
 
         Returns
         ----------
-            float: Estimated position with respect to track.
+            float: Estimated position with respect to the track.
         """
+
         estimated_pos = 0.0
         numerator = 0.0
         denominator = 0.0
@@ -304,20 +342,21 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         return estimated_pos
 
-    def calculate_reward(self, sensor_data):
+    def calculate_reward(self, sensor_data) -> float:
         """
-        The calculate_reward function evaluates the consequences of a certain
-        action performed in a certain state by calculating the resulting reward.
-        A reward of 1 means that the robot is in the center of the Line.
+        Calculate the reward for the current sensor data.
+
+        A reward of 1 means that the robot is centered on the line.
 
         Parameters
         ----------
-            sensor_data : The state observed.
+            sensor_data: The state observed.
 
         Returns
         ----------
-            float: the Resulting Reward
+            float: Calculated reward.
         """
+
         reward = 0.0
         estimated_pos = self.calculate_position(sensor_data)
 

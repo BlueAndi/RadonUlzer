@@ -6,8 +6,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-def parse_arguments():
-    """Parse command-line options."""
+def parse_arguments() -> argparse.Namespace:
+    """
+    Parse command-line options.
+
+    Returns
+    ----------
+        argparse.Namespace: Parsed command-line options.
+    """
+
     parser = argparse.ArgumentParser(
         description="Plot mean steering quality per training episode."
     )
@@ -27,12 +34,19 @@ LOG_FILE = SCRIPT_DIR / "logs" / args.run / "action_diagnostics.csv"
 SENSOR_COLUMNS = [f"Sensor{index}" for index in range(5)]
 LINE_CENTER = 2.0
 
-def calculate_reference_correction(sensor_values):
-    """Calculate the steering reference from the detected line position.
-
-    Sensor 0 is on the left and sensor 4 is on the right. Positive steering
-    means left and negative steering means right.
+def calculate_reference_correction(sensor_values) -> np.ndarray:
     """
+    Calculate steering references from detected line positions.
+
+    Parameters
+    ----------
+        sensor_values: Line sensor values for each diagnostic sample.
+
+    Returns
+    ----------
+        np.ndarray: Normalized steering reference for each diagnostic sample.
+    """
+
     sensor_sum = sensor_values.sum(axis=1)
     weighted_position = sensor_values @ np.arange(len(SENSOR_COLUMNS))
     line_position = np.divide(
@@ -44,13 +58,32 @@ def calculate_reference_correction(sensor_values):
     return (LINE_CENTER - line_position) / LINE_CENTER
 
 
-def calculate_action_score(actions, reference):
-    """Return action agreement from -1 (opposite) to 1 (exact match)."""
+def calculate_action_score(actions, reference) -> np.ndarray:
+    """
+    Calculate agreement between sampled actions and steering references.
+
+    Parameters
+    ----------
+        actions: Sampled steering actions for each diagnostic sample.
+        reference: Steering references for each diagnostic sample.
+
+    Returns
+    ----------
+        np.ndarray: Agreement score for each diagnostic sample.
+    """
+
     return 1.0 - np.abs(actions - reference)
 
 
-def main():
-    """Aggregate diagnostic samples per episode and create the plot."""
+def main() -> None:
+    """
+    Aggregate diagnostic samples per episode and create the plot.
+
+    Returns
+    ----------
+        None
+    """
+
     data = pd.read_csv(LOG_FILE)
 
     required_columns = {

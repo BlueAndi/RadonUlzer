@@ -49,7 +49,21 @@ NUM_SENSORS = 5  # Assuming 5 sensor inputs
 class Models:  # pylint: disable=too-many-instance-attributes
     """Class for building networks of actors and critics."""
 
-    def __init__(self, actor_alpha, critic_alpha, policy_clip):
+    def __init__(self, actor_alpha, critic_alpha, policy_clip) -> None:
+        """
+        Initialize actor and critic networks with their optimizers.
+
+        Parameters
+        ----------
+            actor_alpha: Learning rate of the actor optimizer.
+            critic_alpha: Learning rate of the critic optimizer.
+            policy_clip: PPO policy clipping range.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__actor_learning_rate = actor_alpha
         self.__critic_learning_rate = critic_alpha
         self.actor_network = self.build_actor_network()
@@ -60,8 +74,14 @@ class Models:  # pylint: disable=too-many-instance-attributes
         self.critic_loss_history = []
         self.actor_loss_history = []
 
-    def build_actor_network(self):
-        """Build Actor Network."""
+    def build_actor_network(self) -> keras.Model:
+        """
+        Build the actor network.
+
+        Returns
+        ----------
+            keras.Model: Actor network that predicts the action mean.
+        """
 
         state_input = layers.Input(shape=(NUM_SENSORS,))
         fc1 = layers.Dense(
@@ -94,8 +114,14 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         return keras.models.Model(inputs=state_input, outputs=mean)
 
-    def build_critic_network(self):
-        """Build Critic Network"""
+    def build_critic_network(self) -> keras.Model:
+        """
+        Build the critic network.
+
+        Returns
+        ----------
+            keras.Model: Critic network that predicts state values.
+        """
 
         state_input = layers.Input(shape=(NUM_SENSORS,))
         fc1 = layers.Dense(
@@ -123,14 +149,19 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         return keras.models.Model(inputs=state_input, outputs=value)
 
-    def compute_critic_gradient(self, states, values, advantages):
-        """ optimize Critic Network weights.
+    def compute_critic_gradient(self, states, values, advantages) -> None:
+        """
+        Optimize critic network weights.
 
         Parameters
         ----------
             states:     The saved states observed during interactions with the environment.
             values:     The saved estimated values of the observed states.
-            advantages: the computed advantage values for each state in a given Data size.
+            advantages: Computed advantage values for each state.
+
+        Returns
+        ----------
+            None
         """
 
         with tf.GradientTape() as tape:
@@ -156,20 +187,23 @@ class Models:  # pylint: disable=too-many-instance-attributes
             # save the critic Loss
             self.critic_loss_history.append(critic_loss.numpy())
 
-    def calculate_adjusted_log_probability(self, states, actions, std_dev):
-        """ The function computes the logarithmic probability of a given action.
+    def calculate_adjusted_log_probability(
+        self, states, actions, std_dev
+    ) -> tf.Tensor:
+        """
+        Calculate adjusted log probabilities for sampled actions.
 
         Parameters
         ----------
-            states:  The saved states observed during interactions with the environment.
-            values:  The saved estimated values of the observed states.
+            states: Saved states observed during environment interactions.
+            actions: Saved actions evaluated under the current policy.
+            std_dev: Standard deviation used for the action distribution.
 
         Returns
         ----------
-            A TensorFlow tensor with the data type float32: The logarithmic probability
-                                                            of a given action
-
+            tf.Tensor: Adjusted log probability for each action.
         """
+
         # Forward pass through the actor network to get the action mean
         predict_mean =  self.actor_network(states)
 
@@ -190,16 +224,23 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         return adjusted_log_prob
 
-    def compute_actor_gradient(self, states, actions, old_probs, advantages, std_dev):
-        """ optimize Actor Network weights.
+    def compute_actor_gradient(
+        self, states, actions, old_probs, advantages, std_dev
+    ) -> None:
+        """
+        Optimize actor network weights.
 
         Parameters
         ----------
-            states:     The saved states observed during interactions with the environment.
-            actions:    The saved actions taken in response to the observed states.
-            old_probs:  The saved probabilities of the actions taken, based on the previous policy.
-            values:     The saved estimated values of the observed states.
-            advantages: the computed advantage values for each state in a given Data size.
+            states: Saved states observed during environment interactions.
+            actions: Actions sampled from the previous policy.
+            old_probs: Log probabilities of the sampled actions under the previous policy.
+            advantages: Normalized advantage values used for the policy update.
+            std_dev: Standard deviation used for the current action distribution.
+
+        Returns
+        ----------
+            None
         """
 
         with tf.GradientTape() as tape:
