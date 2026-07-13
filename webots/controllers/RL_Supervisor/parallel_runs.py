@@ -263,6 +263,7 @@ def cleanup_build_directory(run_directory) -> None:
         print(f"Warning: failed to remove {build_directory}: {error}")
 
 
+# pylint: disable=consider-using-with
 def run_training(max_training_updates, experiment_directory, run_config, webots_port) -> tuple:
     """
     Start one run with isolated paths, port, and runtime parameters.
@@ -297,6 +298,8 @@ def run_training(max_training_updates, experiment_directory, run_config, webots_
             env[env_name] = str(parameters[parameter_name])
 
     run_directory.mkdir(parents=True, exist_ok=True)
+
+    # These resources remain open until main() waits for both child processes.
     process_log = open(run_directory / "process.log", "w", encoding="utf-8")
 
     webots_process = subprocess.Popen(
@@ -322,7 +325,7 @@ def run_training(max_training_updates, experiment_directory, run_config, webots_
         webots_port,
     )
 
-
+# pylint: disable=too-many-locals
 def main() -> int:
     """
     Start all configured runs and compare successful experiments.

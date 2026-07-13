@@ -9,6 +9,7 @@ import matplotlib
 import pandas as pd
 
 matplotlib.use("Agg")
+# pylint: disable=wrong-import-position,ungrouped-imports
 import matplotlib.pyplot as plt
 
 # Directories used to read training runs and write comparisons.

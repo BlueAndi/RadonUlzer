@@ -224,6 +224,7 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         return adjusted_log_prob
 
+    # pylint: disable=too-many-arguments
     def compute_actor_gradient(
         self, states, actions, old_probs, advantages, std_dev
     ) -> None:
@@ -245,7 +246,9 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         with tf.GradientTape() as tape:
 
-            adjusted_new_log_prob = self.calculate_adjusted_log_probability(states, actions, std_dev)
+            adjusted_new_log_prob = self.calculate_adjusted_log_probability(
+                states, actions, std_dev
+            )
 
             # The ratio between the new model and the old model’s action log probabilities
             prob_ratio = tf.exp(adjusted_new_log_prob - old_probs)

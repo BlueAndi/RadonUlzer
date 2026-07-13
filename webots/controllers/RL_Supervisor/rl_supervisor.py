@@ -104,6 +104,7 @@ STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 ################################################################################
 
 
+# pylint: disable=too-many-instance-attributes
 class RobotController:
     """Class for data flow control logic."""
 
@@ -154,6 +155,7 @@ class RobotController:
             self.steps = 0
             self.__no_line_detection_count = 0
 
+    # pylint: disable=too-many-branches
     def callback_line_sensors(self, payload: bytearray) -> None:
         """
         Callback LINE_SENS Channel.
@@ -332,7 +334,10 @@ class RobotController:
             self.__agent.perform_training()
 
             # save model
-            if (self.__agent.num_training_updates > 1) and (self.__agent.num_training_updates % 50 == 0):
+            if (
+                (self.__agent.num_training_updates > 1)
+                and (self.__agent.num_training_updates % 50 == 0)
+            ):
                 self.__agent.save_models()
 
 
@@ -434,8 +439,7 @@ def read_runtime_config() -> dict:
     }
 
 
-# pylint: disable=duplicate-code
-# pylint: disable=too-many-statements
+# pylint: disable=duplicate-code, too-many-statements, too-many-locals, too-many-branches
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller.

@@ -1,9 +1,11 @@
 """Plot episode-level reinforcement learning training metrics."""
 
+# pylint: disable=duplicate-code
+
 from pathlib import Path
+import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
-import argparse
 
 def parse_arguments() -> argparse.Namespace:
     """
@@ -34,7 +36,8 @@ LOG_FILE = LOG_DIR / "training_logs.csv"
 
 data = pd.read_csv(LOG_FILE)
 
-required_columns = {"Training Update", "Mean Actor Loss", "Mean Critic Loss", "Mean Episode Reward", "Mean Episode Steps"}
+required_columns = {"Training Update", "Mean Actor Loss", "Mean Critic Loss",
+                    "Mean Episode Reward", "Mean Episode Steps"}
 missing_columns = required_columns.difference(data.columns)
 if missing_columns:
     raise ValueError(

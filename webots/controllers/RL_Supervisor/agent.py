@@ -32,12 +32,12 @@ import csv
 import json
 import os
 import struct
+from datetime import datetime
 import numpy as np
 import tensorflow as tf
 import tensorflow_probability as tfp
 from trajectory_buffer import Memory
 from networks import Models
-from datetime import datetime
 
 ################################################################################
 # Variables
@@ -113,7 +113,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
     control motors based on the position of the robot.
     """
 
-    # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-arguments,too-many-locals
     def __init__(
         self,
         smp_server,
@@ -330,7 +330,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            tuple: Actor mean, transformed sampled action, critic value, and adjusted log probability.
+            tuple: Actor mean, transformed sampled action, critic value,
+                   and adjusted log probability.
         """
 
         # Forward pass through the actor network to get the action mean
@@ -504,7 +505,8 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         with open(log_file, mode="w", encoding="utf-8", newline="") as file:
             writer = csv.writer(file)
             writer.writerow(
-                ["Training Update", "Mean Actor Loss", "Mean Critic Loss", "Mean Episode Reward", "Mean Episode Steps"]
+                ["Training Update", "Mean Actor Loss", "Mean Critic Loss",
+                 "Mean Episode Reward", "Mean Episode Steps"]
             )
 
     def complete_episode(self, steps) -> None:
@@ -799,7 +801,6 @@ class Agent:  # pylint: disable=too-many-instance-attributes
                 action_arr,
                 old_prob_arr,
                 vals_arr,
-                _reward_arr,
                 advatage_arr,
                 normalized_advatage_arr,
                 batches,

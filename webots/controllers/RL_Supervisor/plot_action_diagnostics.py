@@ -1,5 +1,7 @@
 """Plot episode-level action quality from the diagnostics log."""
 
+# pylint: disable=duplicate-code
+
 import argparse
 from pathlib import Path
 import matplotlib.pyplot as plt

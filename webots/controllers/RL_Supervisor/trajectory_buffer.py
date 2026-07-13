@@ -84,7 +84,6 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         np.ndarray,
         np.ndarray,
         np.ndarray,
-        np.ndarray,
         list[np.ndarray],
     ]:
         """
@@ -92,8 +91,8 @@ class Memory:  # pylint: disable=too-many-instance-attributes
 
         Returns
         ----------
-            tuple: States, actions, log probabilities, values, rewards, raw
-                advantages, normalized advantages, and shuffled mini batches.
+            tuple: States, actions, log probabilities, values, raw advantages,
+                normalized advantages, and shuffled mini batches.
         """
 
         # Determine the number of states
@@ -128,7 +127,6 @@ class Memory:  # pylint: disable=too-many-instance-attributes
             np.array(self.__actions, dtype=np.float32),
             np.array(self.__probs, dtype=np.float32),
             np.array(self.__vals, dtype=np.float32),
-            np.array(self.__rewards, dtype=np.float32),
             np.array(self.__advatages, dtype=np.float32).reshape(-1, 1),
             np.array(normalized_advantages, dtype=np.float32).reshape(-1, 1),
             batches,
@@ -267,7 +265,7 @@ class Memory:  # pylint: disable=too-many-instance-attributes
         # Accumulated advantage of the transitions following the current one.
         gae = 0.0
 
-        if not (len(rewards) == len(values) == len(dones)):
+        if not len(rewards) == len(values) == len(dones):
             raise ValueError("rewards, values and dones must have the same length")
 
         # A backwards pass calculates all advantages in O(n).
