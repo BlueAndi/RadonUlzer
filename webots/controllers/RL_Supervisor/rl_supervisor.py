@@ -35,9 +35,10 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 import sys
 import struct
 import os
+from typing import Optional
 from controller import Node, Supervisor  # pylint: disable=import-error
-from serial_webots import SerialWebots
 from SerialMuxProt import Server
+from serial_webots import SerialWebots
 from agent import Agent
 
 ################################################################################
@@ -345,7 +346,7 @@ class RobotController:
 # Functions
 ################################################################################
 
-def read_optional_env_value(name) -> str | None:
+def read_optional_env_value(name) -> Optional[str]:
     """
     Read an optional environment variable.
 
@@ -355,7 +356,7 @@ def read_optional_env_value(name) -> str | None:
 
     Returns
     ----------
-        str | None: Environment variable value, or None if unset.
+        Optional[str]: Environment variable value, or None if unset.
     """
 
     value = os.getenv(name)
@@ -364,7 +365,7 @@ def read_optional_env_value(name) -> str | None:
     return value
 
 
-def read_optional_positive_int_env(name) -> int | None:
+def read_optional_positive_int_env(name) -> Optional[int]:
     """
     Read an optional positive integer environment variable.
 
@@ -374,7 +375,7 @@ def read_optional_positive_int_env(name) -> int | None:
 
     Returns
     ----------
-        int | None: Parsed positive integer value, or None if unset.
+        Optional[int]: Parsed positive integer value, or None if unset.
     """
 
     value = read_optional_env_value(name)
@@ -389,7 +390,7 @@ def read_optional_positive_int_env(name) -> int | None:
     return parsed_value
 
 
-def read_optional_positive_float_env(name) -> float | None:
+def read_optional_positive_float_env(name) -> Optional[float]:
     """
     Read an optional positive float environment variable.
 
@@ -399,7 +400,7 @@ def read_optional_positive_float_env(name) -> float | None:
 
     Returns
     ----------
-        float | None: Parsed positive float value, or None if unset.
+        Optional[float]: Parsed positive float value, or None if unset.
     """
 
     value = read_optional_env_value(name)
