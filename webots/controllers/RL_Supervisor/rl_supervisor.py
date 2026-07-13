@@ -35,7 +35,7 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 import sys
 import struct
 import os
-from controller import Supervisor  # pylint: disable=import-error
+from controller import Node, Supervisor  # pylint: disable=import-error
 from serial_webots import SerialWebots
 from SerialMuxProt import Server
 from agent import Agent
@@ -107,7 +107,21 @@ STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 class RobotController:
     """Class for data flow control logic."""
 
-    def __init__(self, smp_server, tick_size, agent):
+    def __init__(self, smp_server: Server, tick_size: int, agent: Agent) -> None:
+        """
+        Initialize the robot controller.
+
+        Parameters
+        ----------
+            smp_server: SerialMuxProt server used for communication.
+            tick_size: Webots simulation step size in milliseconds.
+            agent: Reinforcement learning agent controlled by this instance.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__smp_server = smp_server
         self.__agent = agent
         self.__tick_size = tick_size
@@ -118,7 +132,17 @@ class RobotController:
         self.__waiting_for_valid_sensor_data = False
 
     def callback_status(self, payload: bytearray) -> None:
-        """Callback Status Channel."""
+        """
+        Callback Status Channel.
+
+        Parameters
+        ----------
+            payload: Status channel payload.
+
+        Returns
+        ----------
+            None
+        """
 
         # perform action on robot status feedback
         if payload[0] == STATUS_CHANNEL_ERROR_VAL:
@@ -131,7 +155,17 @@ class RobotController:
             self.__no_line_detection_count = 0
 
     def callback_line_sensors(self, payload: bytearray) -> None:
-        """Callback LINE_SENS Channel."""
+        """
+        Callback LINE_SENS Channel.
+
+        Parameters
+        ----------
+            payload: Line sensor channel payload.
+
+        Returns
+        ----------
+            None
+        """
 
         sensor_data = struct.unpack("5H", payload)
 
@@ -221,12 +255,28 @@ class RobotController:
             self.__agent.send_motor_speeds(sensor_data)
 
     def load_models(self) -> None:
-        """Load Model if exist"""
+        """
+        Load Model if exist
+
+        Returns
+        ----------
+            None
+        """
 
         self.__agent.load_models_if_available()
 
-    def retry_unsent_data(self, unsent_data: list) -> bool:
-        """Resent any unsent Data"""
+    def retry_unsent_data(self, unsent_data: list[tuple[str, bytes]]) -> bool:
+        """
+        Resent any unsent Data
+
+        Parameters
+        ----------
+            unsent_data: Channel names and payloads that could not be sent.
+
+        Returns
+        ----------
+            bool: True if all data was sent successfully, otherwise False.
+        """
 
         retry_succesful = True
 
@@ -239,16 +289,32 @@ class RobotController:
 
         return retry_succesful
 
-    def process(self):
-        """function performing controller step"""
+    def process(self) -> None:
+        """
+        function performing controller step
+
+        Returns
+        ----------
+            None
+        """
 
         self.__timestamp += self.__tick_size
 
         # process new data (callbacks will be executed)
         self.__smp_server.process(self.__timestamp)
 
-    def manage_agent_cycle(self, robot_node):
-        """The function controls agent behavior"""
+    def manage_agent_cycle(self, robot_node: Node) -> None:
+        """
+        The function controls agent behavior
+
+        Parameters
+        ----------
+            robot_node: Webots node for the controlled robot.
+
+        Returns
+        ----------
+            None
+        """
 
         if self.__agent.state == READY:
             self.__agent.update(robot_node)
