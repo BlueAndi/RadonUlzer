@@ -312,6 +312,7 @@ class Agent:  # pylint: disable=too-many-instance-attributes
 
 
     @tf.function(
+            autograph=False,
             input_signature=[
                 tf.TensorSpec(shape=(1, 5), dtype=tf.float32),
                 tf.TensorSpec(shape=(), dtype=tf.float32)
