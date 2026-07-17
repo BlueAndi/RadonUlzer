@@ -35,9 +35,10 @@ Details: https://github.com/cyberbotics/webots/blob/master/docs/guide/supervisor
 import sys
 import struct
 import os
-from controller import Supervisor  # pylint: disable=import-error
-from serial_webots import SerialWebots
+from typing import Optional
+from controller import Node, Supervisor  # pylint: disable=import-error
 from SerialMuxProt import Server
+from serial_webots import SerialWebots
 from agent import Agent
 
 ################################################################################
@@ -47,6 +48,7 @@ from agent import Agent
 
 # Constants
 ROBOT_NAME = "ROBOT"
+NO_LINE_TERMINATION_STEPS = 8
 
 # Supervisor PROTO device names (supervisorComRx / supervisorComTx).
 # The rl_supervisor is launched via webots_launcher_zumo_com_system so the robot
@@ -84,18 +86,43 @@ IDLE = "IDLE_STATE"
 READY = "READY_STATE"
 TRAINING = "TRAINING_STATE"
 
-# Path of saved models
-PATH = "models/"
+# Optional environment variables used by parallel_runs.py to configure each training run.
+MAX_TRAINING_UPDATES_ENV = "RL_MAX_TRAINING_UPDATES"
+RUN_DIRECTORY_ENV = "RL_RUN_DIRECTORY"
+ACTOR_LEARNING_RATE_ENV = "RL_ACTOR_LEARNING_RATE"
+CRITIC_LEARNING_RATE_ENV = "RL_CRITIC_LEARNING_RATE"
+GAMMA_ENV = "RL_GAMMA"
+GAE_LAMBDA_ENV = "RL_GAE_LAMBDA"
+POLICY_CLIP_ENV = "RL_POLICY_CLIP"
+BATCH_SIZE_ENV = "RL_BATCH_SIZE"
+N_EPOCHS_ENV = "RL_N_EPOCHS"
+STD_DEV_ENV = "RL_STD_DEV"
+MIN_STD_DEV_ENV = "RL_MIN_STD_DEV"
+STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 
 ################################################################################
 # Classes
 ################################################################################
 
-
+# pylint: disable=too-many-instance-attributes
 class RobotController:
     """Class for data flow control logic."""
 
-    def __init__(self, smp_server, tick_size, agent):
+    def __init__(self, smp_server: Server, tick_size: int, agent: Agent) -> None:
+        """
+        Initialize the robot controller.
+
+        Parameters
+        ----------
+            smp_server: SerialMuxProt server used for communication.
+            tick_size: Webots simulation step size in milliseconds.
+            agent: Reinforcement learning agent controlled by this instance.
+
+        Returns
+        ----------
+            None
+        """
+
         self.__smp_server = smp_server
         self.__agent = agent
         self.__tick_size = tick_size
@@ -103,17 +130,45 @@ class RobotController:
         self.__timestamp = 0  # Elapsed time since reset [ms]
         self.last_sensor_data = None
         self.steps = 0
+        self.__waiting_for_valid_sensor_data = False
 
     def callback_status(self, payload: bytearray) -> None:
-        """Callback Status Channel."""
+        """
+        Callback Status Channel.
+
+        Parameters
+        ----------
+            payload: Status channel payload.
+
+        Returns
+        ----------
+            None
+        """
 
         # perform action on robot status feedback
         if payload[0] == STATUS_CHANNEL_ERROR_VAL:
             print("robot has reached error-state (max. lap time passed in robot)")
             self.__agent.done = True
+            # Status errors also end the current episode, but bypass the
+            # line-sensor termination path where episode steps are recorded.
+            self.__agent.complete_episode(self.steps)
+            self.steps = 0
+            self.__no_line_detection_count = 0
 
+    # pylint: disable=too-many-branches
     def callback_line_sensors(self, payload: bytearray) -> None:
-        """Callback LINE_SENS Channel."""
+        """
+        Callback LINE_SENS Channel.
+
+        Parameters
+        ----------
+            payload: Line sensor channel payload.
+
+        Returns
+        ----------
+            None
+        """
+
         sensor_data = struct.unpack("5H", payload)
 
         # First LINE_SENS proves SMP is synced and the robot is in DrivingState.
@@ -124,9 +179,19 @@ class RobotController:
             self.__agent.set_train_mode()
             return
 
+        # The robot controller may still send LINE_SENS frames while the board and
+        # Webots pose are being reinitialized. Ignore all-zero samples until the
+        # first non-zero sensor frame starts the new episode.
+        if self.__waiting_for_valid_sensor_data:
+            if all(value == 0 for value in sensor_data):
+                return
+            self.__waiting_for_valid_sensor_data = False
+
         self.steps += 1
 
         is_start_stop_line_detected = False
+        is_ignored_start_stop_line = False
+
         # Determine lost line condition
         if all(value == 0 for value in sensor_data):
             self.__no_line_detection_count += 1
@@ -140,24 +205,38 @@ class RobotController:
 
         # Detect Start/Stop Line before Finish Trajectories
         if (is_start_stop_line_detected is True) and (self.steps < MIN_NUMBER_OF_STEPS):
+            is_ignored_start_stop_line = True
             sensor_data = list(sensor_data)
             sensor_data[SENSOR_ID_MOST_LEFT] = 0
             sensor_data[SENSOR_ID_MOST_RIGHT] = 0
             is_start_stop_line_detected = False
 
+        is_first_no_line_sample = self.__no_line_detection_count == 1
+        is_no_line_sample = self.__no_line_detection_count > 0
+        is_no_line_terminal = self.__no_line_detection_count >= NO_LINE_TERMINATION_STEPS
+
         # sequence stop criterion: debounce no-line and start/stop-line detection
-        if ((self.__no_line_detection_count >= 30) or ((is_start_stop_line_detected is True)
-                                                       and (self.steps >= MIN_NUMBER_OF_STEPS))):
+        if (is_no_line_terminal
+                or ((is_start_stop_line_detected is True)
+                    and (self.steps >= MIN_NUMBER_OF_STEPS))):
             self.__agent.done = True
-            self.__no_line_detection_count = 0
+            # Record episode-level diagnostics before resetting the step counter.
+            self.__agent.complete_episode(self.steps)
             self.steps = 0
+            self.__no_line_detection_count = 0
 
         # The sequence of states and actions is stored in memory for the training phase.
         if self.__agent.train_mode:
 
-            # receive a -1 punishment if the robot leaves the line
-            if self.__no_line_detection_count > 0:
+            # Penalize only the action that first caused the robot to lose the
+            # line. Further no-line samples carry no additional information.
+            if is_first_no_line_sample:
                 reward = -1
+            elif is_no_line_sample:
+                reward = 0
+            # Do not reward driving in circles over the start line.
+            elif is_ignored_start_stop_line is True:
+                reward = 0
             else:
                 reward = self.__agent.determine_reward(sensor_data)
 
@@ -177,15 +256,30 @@ class RobotController:
         if self.__agent.done is False and self.__agent.state == READY:
             self.__agent.send_motor_speeds(sensor_data)
 
-    def load_models(self, path) -> None:
-        """Load Model if exist"""
-        if os.path.exists(path):
-            self.__agent.load_models()
-        else:
-            print("No model available")
+    def load_models(self) -> None:
+        """
+        Load Model if exist
 
-    def retry_unsent_data(self, unsent_data: list) -> bool:
-        """Resent any unsent Data"""
+        Returns
+        ----------
+            None
+        """
+
+        self.__agent.load_models_if_available()
+
+    def retry_unsent_data(self, unsent_data: list[tuple[str, bytes]]) -> bool:
+        """
+        Resent any unsent Data
+
+        Parameters
+        ----------
+            unsent_data: Channel names and payloads that could not be sent.
+
+        Returns
+        ----------
+            bool: True if all data was sent successfully, otherwise False.
+        """
+
         retry_succesful = True
 
         # Resent the unsent Data.
@@ -197,17 +291,42 @@ class RobotController:
 
         return retry_succesful
 
-    def process(self):
-        """function performing controller step"""
+    def process(self) -> None:
+        """
+        function performing controller step
+
+        Returns
+        ----------
+            None
+        """
+
         self.__timestamp += self.__tick_size
 
         # process new data (callbacks will be executed)
         self.__smp_server.process(self.__timestamp)
 
-    def manage_agent_cycle(self, robot_node):
-        """The function controls agent behavior"""
+    def manage_agent_cycle(self, robot_node: Node) -> None:
+        """
+        The function controls agent behavior
+
+        Parameters
+        ----------
+            robot_node: Webots node for the controlled robot.
+
+        Returns
+        ----------
+            None
+        """
+
         if self.__agent.state == READY:
             self.__agent.update(robot_node)
+            # Clear stale sensor context whenever the robot is teleported so
+            # the first LINE_SENS of the new episode is treated as an initial
+            # observation rather than a transition from the previous episode.
+            if self.__agent.reinitialized:
+                self.last_sensor_data = None
+                self.__waiting_for_valid_sensor_data = True
+                self.__agent.reinitialized = False
 
         # Start the training
         elif self.__agent.state == TRAINING:
@@ -215,17 +334,111 @@ class RobotController:
             self.__agent.perform_training()
 
             # save model
-            if (self.__agent.num_episodes > 1) and (self.__agent.num_episodes % 50 == 0):
+            if (
+                (self.__agent.num_training_updates > 1)
+                and (self.__agent.num_training_updates % 50 == 0)
+            ):
                 self.__agent.save_models()
-
 
 ################################################################################
 # Functions
 ################################################################################
 
+def read_optional_env_value(name) -> Optional[str]:
+    """
+    Read an optional environment variable.
 
-# pylint: disable=duplicate-code
-# pylint: disable=too-many-statements
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        Optional[str]: Environment variable value, or None if unset.
+    """
+
+    value = os.getenv(name)
+    if value is None or value == "":
+        return None
+    return value
+
+
+def read_optional_positive_int_env(name) -> Optional[int]:
+    """
+    Read an optional positive integer environment variable.
+
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        Optional[int]: Parsed positive integer value, or None if unset.
+    """
+
+    value = read_optional_env_value(name)
+    if value is None:
+        return None
+    try:
+        parsed_value = int(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive integer.") from exc
+    if parsed_value <= 0:
+        raise ValueError(f"{name} must be a positive integer.")
+    return parsed_value
+
+
+def read_optional_positive_float_env(name) -> Optional[float]:
+    """
+    Read an optional positive float environment variable.
+
+    Parameters
+    ----------
+        name: Name of the environment variable.
+
+    Returns
+    ----------
+        Optional[float]: Parsed positive float value, or None if unset.
+    """
+
+    value = read_optional_env_value(name)
+    if value is None:
+        return None
+    try:
+        parsed_value = float(value)
+    except ValueError as exc:
+        raise ValueError(f"{name} must be a positive float.") from exc
+    if parsed_value <= 0:
+        raise ValueError(f"{name} must be a positive float.")
+    return parsed_value
+
+
+def read_runtime_config() -> dict:
+    """
+    Read wrapper-controlled runtime configuration from the environment.
+
+    Returns
+    ----------
+        dict: Runtime configuration values indexed by environment variable name.
+    """
+
+    return {
+        MAX_TRAINING_UPDATES_ENV: read_optional_positive_int_env(MAX_TRAINING_UPDATES_ENV),
+        RUN_DIRECTORY_ENV: read_optional_env_value(RUN_DIRECTORY_ENV),
+        ACTOR_LEARNING_RATE_ENV: read_optional_positive_float_env(ACTOR_LEARNING_RATE_ENV),
+        CRITIC_LEARNING_RATE_ENV: read_optional_positive_float_env(CRITIC_LEARNING_RATE_ENV),
+        GAMMA_ENV: read_optional_positive_float_env(GAMMA_ENV),
+        GAE_LAMBDA_ENV: read_optional_positive_float_env(GAE_LAMBDA_ENV),
+        POLICY_CLIP_ENV: read_optional_positive_float_env(POLICY_CLIP_ENV),
+        BATCH_SIZE_ENV: read_optional_positive_int_env(BATCH_SIZE_ENV),
+        N_EPOCHS_ENV: read_optional_positive_int_env(N_EPOCHS_ENV),
+        STD_DEV_ENV: read_optional_positive_float_env(STD_DEV_ENV),
+        MIN_STD_DEV_ENV: read_optional_positive_float_env(MIN_STD_DEV_ENV),
+        STD_DEV_FACTOR_ENV: read_optional_positive_float_env(STD_DEV_FACTOR_ENV),
+    }
+
+
+# pylint: disable=duplicate-code, too-many-statements, too-many-locals, too-many-branches
 def main_loop():
     """Main loop:
         - Perform simulation steps until Webots is stopping the controller.
@@ -280,7 +493,28 @@ def main_loop():
         status = -1
 
     # create instance of intelligence Agent
-    agent = Agent(smp_server)
+    runtime_config = read_runtime_config()
+    agent_kwargs = {
+        "max_training_updates": runtime_config[MAX_TRAINING_UPDATES_ENV],
+        "run_directory": runtime_config[RUN_DIRECTORY_ENV],
+    }
+    runtime_to_agent_kwargs = {
+        ACTOR_LEARNING_RATE_ENV: "actor_alpha",
+        CRITIC_LEARNING_RATE_ENV: "critic_alpha",
+        GAMMA_ENV: "gamma",
+        GAE_LAMBDA_ENV: "gae_lambda",
+        POLICY_CLIP_ENV: "policy_clip",
+        BATCH_SIZE_ENV: "batch_size",
+        N_EPOCHS_ENV: "n_epochs",
+        STD_DEV_ENV: "std_dev",
+        MIN_STD_DEV_ENV: "min_std_dev",
+        STD_DEV_FACTOR_ENV: "std_dev_factor",
+    }
+    for env_name, agent_kwarg in runtime_to_agent_kwargs.items():
+        if runtime_config[env_name] is not None:
+            agent_kwargs[agent_kwarg] = runtime_config[env_name]
+
+    agent = Agent(smp_server, **agent_kwargs)
 
     # create instance of robot logic class
     controller = RobotController(smp_server, timestep, agent)
@@ -295,7 +529,9 @@ def main_loop():
     # setup successful
     if status != -1:
 
-        controller.load_models(PATH)
+        controller.load_models()
+
+        supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_FAST)
 
         # Training mode is entered on the first LINE_SENS callback (SMP synced,
         # robot already in DrivingState from startup).
@@ -305,6 +541,9 @@ def main_loop():
             controller.process()
 
             controller.manage_agent_cycle(robot_node)
+            if agent.training_finished:
+                supervisor.simulationQuit(0)
+                break
 
             # Resent any unsent Data
             if agent.unsent_data:
@@ -312,10 +551,9 @@ def main_loop():
                 # Stop The Simulation. Handle unsent Data
                 supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_PAUSE)
 
-                # Set simulation mode to real time when unsent data is resent
+                # Restore fast mode when unsent data is resent
                 if controller.retry_unsent_data(agent.unsent_data) is True:
-                    supervisor.simulationSetMode(
-                        Supervisor.SIMULATION_MODE_REAL_TIME)
+                    supervisor.simulationSetMode(Supervisor.SIMULATION_MODE_FAST)
 
                 # Reset The Simulation
                 else:
@@ -325,7 +563,6 @@ def main_loop():
 
 
 sys.exit(main_loop())
-
 
 ################################################################################
 # Main
