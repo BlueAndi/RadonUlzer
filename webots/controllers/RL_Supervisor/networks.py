@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+# Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,6 @@ NUM_SENSORS = 5  # Assuming 5 sensor inputs
 ################################################################################
 # Classes
 ################################################################################
-
 
 class Models:  # pylint: disable=too-many-instance-attributes
     """Class for building networks of actors and critics."""
@@ -275,7 +274,6 @@ class Models:  # pylint: disable=too-many-instance-attributes
 
         # save the Actor Loss
         self.actor_loss_history.append(actor_loss.numpy())
-
 
 ################################################################################
 # Functions

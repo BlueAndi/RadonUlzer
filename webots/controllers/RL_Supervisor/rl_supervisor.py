@@ -104,7 +104,6 @@ STD_DEV_FACTOR_ENV = "RL_STD_DEV_FACTOR"
 # Classes
 ################################################################################
 
-
 # pylint: disable=too-many-instance-attributes
 class RobotController:
     """Class for data flow control logic."""
@@ -341,7 +340,6 @@ class RobotController:
             ):
                 self.__agent.save_models()
 
-
 ################################################################################
 # Functions
 ################################################################################
@@ -565,7 +563,6 @@ def main_loop():
 
 
 sys.exit(main_loop())
-
 
 ################################################################################
 # Main

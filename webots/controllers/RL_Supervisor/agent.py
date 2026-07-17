@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (c) 2023 - 2024 Andreas Merkle <web@blue-andi.de>
+# Copyright (c) 2023 - 2026 Andreas Merkle <web@blue-andi.de>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,7 @@ from networks import Models
 ################################################################################
 # Variables
 ################################################################################
+
 # pylint: disable=duplicate-code
 
 # Constants
@@ -105,7 +106,6 @@ ACTION_DIAGNOSTICS_STEPS = 20
 ################################################################################
 # Classes
 ################################################################################
-
 
 class Agent:  # pylint: disable=too-many-instance-attributes
     """
@@ -892,7 +892,6 @@ class Agent:  # pylint: disable=too-many-instance-attributes
         self.__start_pose_index = (
             self.__start_pose_index + 1
         ) % len(START_POSES)
-
 
 ################################################################################
 # Functions

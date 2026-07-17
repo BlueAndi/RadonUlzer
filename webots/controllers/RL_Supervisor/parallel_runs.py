@@ -1,5 +1,33 @@
 """Start parallel RL training runs through the PlatformIO Webots launcher."""
 
+# MIT License
+#
+# Copyright (c) 2026 Andreas Merkle <web@blue-andi.de>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+
+################################################################################
+# Imports
+################################################################################
+
 import argparse
 import json
 import os
@@ -8,6 +36,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+################################################################################
+# Variables
+################################################################################
 
 # Environment variables passed to Webots and the RL supervisor.
 MAX_TRAINING_UPDATES_ENV = "RL_MAX_TRAINING_UPDATES"
@@ -59,6 +90,13 @@ PLATFORMIO_COMMAND = [
     "RemoteControlSim",
 ]
 
+################################################################################
+# Classes
+################################################################################
+
+################################################################################
+# Functions
+################################################################################
 
 def get_webots_command(webots_port) -> list[str]:
     """
@@ -410,6 +448,9 @@ def main() -> int:
 
     return max(return_codes, default=1)
 
+################################################################################
+# Main
+################################################################################
 
 if __name__ == "__main__":
     raise SystemExit(main())

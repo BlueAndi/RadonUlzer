@@ -32,9 +32,12 @@ from controller import device  # pylint: disable=import-error
 from SerialMuxProt import Stream
 
 ################################################################################
-# Classes
+# Variables
 ################################################################################
 
+################################################################################
+# Classes
+################################################################################
 
 class SerialWebots(Stream):
     """Provide serial communication through Webots devices."""
@@ -129,7 +132,6 @@ class SerialWebots(Stream):
                 read = received_data_size
 
         return read, data
-
 
 ################################################################################
 # Functions

@@ -1,12 +1,56 @@
 """Plot episode-level action quality from the diagnostics log."""
 
-# pylint: disable=duplicate-code
+# MIT License
+#
+# Copyright (c) 2026 Andreas Merkle <web@blue-andi.de>
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+# OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
+
+################################################################################
+# Imports
+################################################################################
 
 import argparse
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+################################################################################
+# Variables
+################################################################################
+
+# pylint: disable=duplicate-code
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+SENSOR_COLUMNS = [f"Sensor{index}" for index in range(5)]
+LINE_CENTER = 2.0
+
+################################################################################
+# Classes
+################################################################################
+
+################################################################################
+# Functions
+################################################################################
 
 def parse_arguments() -> argparse.Namespace:
     """
@@ -29,12 +73,6 @@ def parse_arguments() -> argparse.Namespace:
 
     return parser.parse_args()
 
-args = parse_arguments()
-
-SCRIPT_DIR = Path(__file__).resolve().parent
-LOG_FILE = SCRIPT_DIR / "logs" / args.run / "action_diagnostics.csv"
-SENSOR_COLUMNS = [f"Sensor{index}" for index in range(5)]
-LINE_CENTER = 2.0
 
 def calculate_reference_correction(sensor_values) -> np.ndarray:
     """
@@ -86,7 +124,9 @@ def main() -> None:
         None
     """
 
-    data = pd.read_csv(LOG_FILE)
+    args = parse_arguments()
+    log_file = SCRIPT_DIR / "logs" / args.run / "action_diagnostics.csv"
+    data = pd.read_csv(log_file)
 
     required_columns = {
         "Training Update",
@@ -98,10 +138,10 @@ def main() -> None:
     missing_columns = required_columns.difference(data.columns)
     if missing_columns:
         raise ValueError(
-            f"Missing columns in {LOG_FILE}: {', '.join(sorted(missing_columns))}"
+            f"Missing columns in {log_file}: {', '.join(sorted(missing_columns))}"
         )
     if data.empty:
-        raise ValueError(f"No diagnostic data found in {LOG_FILE}.")
+        raise ValueError(f"No diagnostic data found in {log_file}.")
 
     sensor_values = data[SENSOR_COLUMNS].to_numpy(dtype=float)
     reference = calculate_reference_correction(sensor_values)
@@ -175,11 +215,14 @@ def main() -> None:
     )
     figure.tight_layout()
 
-    output_file = LOG_FILE.parent / "action_diagnostics_training_update_scores.png"
+    output_file = log_file.parent / "action_diagnostics_training_update_scores.png"
     figure.savefig(output_file, dpi=160)
     print(f"Plot saved to: {output_file}")
     plt.show()
 
+################################################################################
+# Main
+################################################################################
 
 if __name__ == "__main__":
     main()
