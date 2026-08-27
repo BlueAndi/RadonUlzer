@@ -13,7 +13,6 @@ WorldInfo {
   ]
   title "DCS Demo Track LiDAR Example"
   basicTimeStep 8
-  synchronization FALSE
 }
 
 Viewpoint {
