@@ -114,6 +114,9 @@ private:
     /** Status timeout timer interval in ms. */
     static const uint32_t STATUS_TIMEOUT_TIMER_INTERVAL = 2U * SEND_STATUS_TIMER_INTERVAL;
 
+    /** Status timeout timer interval on startup in ms. Covers DCS boot, WiFi connect and SMP sync. */
+    static const uint32_t STATUS_STARTUP_TIMEOUT_TIMER_INTERVAL = 30U * SEND_STATUS_TIMER_INTERVAL;
+
     /** Sending Data period in ms. */
     static const uint32_t SEND_LINE_SENSORS_DATA_PERIOD = 20U;
 

@@ -1,0 +1,47 @@
+#VRML_SIM R2025a utf8
+
+# FlagShip is an extension that is mounted on top of the ZumoComSystem (DroidControlShip).
+# It provides 360-degree lidar scanning capabilities for the Zumo robot platform.
+PROTO FlagShip [
+  field SFString name             "FlagShip"
+  field SFBool   synchronization  TRUE
+]
+{
+  Slot {
+    type "FlagShip"
+    endPoint Robot {
+      children [
+        Transform {
+          translation 0 0 0.03
+          children [
+            Shape {
+              appearance PBRAppearance {
+                baseColor 0.9 0.15 0.15
+                roughness 0.4
+                metalness 0
+              }
+              geometry Cylinder {
+                height 0.01
+                radius 0.03
+              }
+            }
+            Lidar {
+              name "lidar"
+              horizontalResolution 1440
+              fieldOfView 6.28318530718
+              numberOfLayers 1
+              minRange 0.15
+              maxRange 12
+              defaultFrequency 8
+              minFrequency 5
+              maxFrequency 20
+            }
+          ]
+        }
+      ]
+      name IS name
+      controller "<extern>"
+      synchronization IS synchronization
+    }
+  }
+}

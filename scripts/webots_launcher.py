@@ -118,6 +118,85 @@ WEBOTS_LAUNCHER_ZUMO_COM_SYSTEM_ACTION = WEBOTS_CONTROLLER + ' ' \
 # Functions
 ################################################################################
 
+def _check_extern_slot(protocol, ip, robot_name):
+    """Return True if the named robot has a free extern controller slot in Webots."""
+    import getpass
+    import socket
+
+    if protocol == "ipc":
+        ipc_socket = f"/tmp/webots/{getpass.getuser()}/1234/ipc/{robot_name}/extern"
+        if not os.path.exists(ipc_socket):
+            return False
+        # The socket file exists even when already claimed — try connecting to confirm it's free.
+        try:
+            s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            s.settimeout(1)
+            s.connect(ipc_socket)
+            s.close()
+            return True
+        except OSError:
+            return False
+    elif protocol == "tcp":
+        try:
+            s = socket.create_connection((ip, 1234), timeout=2)
+            s.close()
+            # TCP only confirms Webots is reachable; robot slot presence cannot be verified remotely.
+            print(f"Warning: Cannot verify extern slot for '{robot_name}' over TCP — proceeding.")
+            return True
+        except OSError as exc:
+            raise SystemExit(1) from exc
+    return False
+
+def _get_available_ipc_slots():
+    """Return list of robot names with extern slots currently registered via IPC."""
+    import getpass
+    ipc_dir = f"/tmp/webots/{getpass.getuser()}/1234/ipc"
+    if not os.path.isdir(ipc_dir):
+        return None  # Webots not running
+    return [name for name in os.listdir(ipc_dir)
+            if os.path.exists(os.path.join(ipc_dir, name, "extern"))]
+
+def _abort_missing_slot(protocol, ip, *robot_names):
+    """Check all robot names have extern slots, print a clear error and exit if not."""
+    import socket
+
+    if protocol == "tcp":
+        try:
+            s = socket.create_connection((ip, 1234), timeout=2)
+            s.close()
+        except OSError:
+            print(f"Error: Cannot reach Webots at {ip}:1234 via TCP. Is Webots running?")
+            raise SystemExit(1)
+        print(f"Warning: Cannot verify extern slots over TCP — make sure the correct world is loaded.")
+        return
+
+    available = _get_available_ipc_slots()
+    if available is None:
+        print("Error: Webots is not running or no world is loaded.")
+        raise SystemExit(1)
+    missing = [n for n in robot_names if not _check_extern_slot(protocol, ip, n)]
+    if missing:
+        for name in missing:
+            print(f"Error: Robot '{name}' has no extern controller slot in the loaded world.")
+        slots = ", ".join(available) if available else "(none)"
+        print(f"       Available extern slots: {slots}")
+        print("       Load a world where the missing robot(s) have controller \"<extern>\".")
+        raise SystemExit(1)
+
+def check_webots_ready(source, target, env):  # pylint: disable=unused-argument
+    """Check that Webots is running and the robot has an extern controller slot."""
+    protocol = env.GetProjectOption("custom_webots_protocol")
+    ip = env.GetProjectOption("custom_webots_ip_address")
+    robot_name = env.GetProjectOption("custom_webots_robot_name")
+    _abort_missing_slot(protocol, ip, robot_name)
+
+def check_webots_ready_zumo_com_system(source, target, env):  # pylint: disable=unused-argument
+    """Check extern slots for both the Zumo robot and the ZumoComSystem robot."""
+    protocol = env.GetProjectOption("custom_webots_protocol")
+    ip = env.GetProjectOption("custom_webots_ip_address")
+    robot_name = env.GetProjectOption("custom_webots_robot_name")
+    _abort_missing_slot(protocol, ip, robot_name, "ZumoComSystem")
+
 ################################################################################
 # Main
 ################################################################################
@@ -127,6 +206,7 @@ env.AddCustomTarget(
     name="webots_launcher",
     dependencies=PROGRAM_PATH + PROGRAM_NAME,
     actions=[
+        check_webots_ready,
         WEBOTS_LAUNCHER_ACTION
     ],
     title="Launch alone",
@@ -138,6 +218,7 @@ env.AddCustomTarget(
     name="webots_launcher_zumo_com_system",
     dependencies=PROGRAM_PATH + PROGRAM_NAME,
     actions=[
+        check_webots_ready_zumo_com_system,
         WEBOTS_LAUNCHER_ZUMO_COM_SYSTEM_ACTION
     ],
     title="Launch with ZumoComSystem",

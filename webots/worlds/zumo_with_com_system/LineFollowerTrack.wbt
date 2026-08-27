@@ -41,6 +41,7 @@ DEF ROBOT Zumo32U4 {
   contactMaterial "rubber"
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystem"
+    synchronization FALSE
   }
 }
 Supervisor {
