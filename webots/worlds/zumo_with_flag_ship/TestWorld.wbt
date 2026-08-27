@@ -29,6 +29,7 @@ WorldInfo {
   ]
   title "ROS2 simulation of the Zumo robot setup"
   basicTimeStep 8
+  synchronization FALSE
 }
 Viewpoint {
   orientation -0.2878951570967451 -0.16506369377382343 0.9433293992651676 4.177335774513749
@@ -43,9 +44,11 @@ Zumo32U4 {
   performanceMode TRUE
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystem"
+    synchronization FALSE
     performanceMode TRUE
     flagShipSlot FlagShip {
       name "FlagShip"
+      synchronization FALSE
     }
   }
 }

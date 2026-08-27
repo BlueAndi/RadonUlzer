@@ -13,6 +13,7 @@ WorldInfo {
   ]
   title "DCS Demo Track LiDAR Example"
   basicTimeStep 8
+  synchronization FALSE
 }
 
 Viewpoint {
@@ -34,9 +35,11 @@ Zumo32U4 {
   performanceMode TRUE
   zumoComSystemSlot ZumoComSystem {
     name "ZumoComSystem"
+    synchronization FALSE
     performanceMode TRUE
     flagShipSlot FlagShip {
       name "FlagShip"
+      synchronization FALSE
     }
   }
 }
