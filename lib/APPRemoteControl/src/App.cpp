@@ -45,6 +45,7 @@
 #include <Odometry.h>
 #include <Speedometer.h>
 #include <Util.h>
+#include <Sound.h>
 
 #if CONFIG_IMU == CONFIG_ENABLE
 #include <IMU.h>
@@ -90,7 +91,7 @@ App::App() :
     m_statusTimer(),
     m_statusTimeoutTimer(),
     m_sendLineSensorsDataInterval(),
-    m_smpServer(Serial, this),
+    m_smpServer(Serial1, this),
     m_isLineSensorCalibPending(false),
     m_movAvgProximitySensor()
 {
@@ -99,11 +100,15 @@ App::App() :
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
-    Logging::disable();
+    Serial.println("RemoteControl Application");
+    Serial1.setPinout(28, 29);
+    Serial1.begin(SERIAL_BAUDRATE);
+    // Logging::disable();
     Board::getInstance().init();
 
     if (false == setupSerialMuxProt())
     {
+        Board::getInstance().getRedLed().enable(true);
         ErrorState::getInstance().setErrorMsg("SMP=0");
         m_systemStateMachine.setState(&ErrorState::getInstance());
     }
@@ -114,6 +119,7 @@ void App::setup()
         m_statusTimer.start(SEND_STATUS_TIMER_INTERVAL);
         m_sendLineSensorsDataInterval.start(SEND_LINE_SENSORS_DATA_PERIOD);
         m_systemStateMachine.setState(&StartupState::getInstance());
+        Board::getInstance().getGreenLed().enable(true);
 
 #if CONFIG_SUPERVISOR != 0
 #if CONFIG_ODOMETRY_TO_SUPERVISOR != 0
@@ -126,6 +132,7 @@ void App::setup()
 
 void App::loop()
 {
+    Board::getInstance().getYellowLed().enable(true);
     Board::getInstance().process();
     Speedometer::getInstance().process();
 
