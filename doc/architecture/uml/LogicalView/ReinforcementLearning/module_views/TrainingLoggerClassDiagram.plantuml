@@ -1,0 +1,20 @@
+@startuml
+
+title RL Supervisor - Training Logger Module Class Diagram
+
+left to right direction
+
+package "training_orchestrator.py" as TrainingOrchestratorModule <<Python module>> {
+    class TrainingOrchestrator
+}
+
+package "training_logger.py" as TrainingLoggerModule <<Python module>> {
+    class TrainingLogger
+    class ActionDiagnostics <<dataclass>>
+    class TrainingMetrics <<dataclass>>
+    class CheckpointReference <<dataclass>>
+}
+
+TrainingOrchestrator o--> TrainingLogger
+
+@enduml

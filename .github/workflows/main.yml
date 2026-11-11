@@ -17,7 +17,7 @@ jobs:
   # The introduction just shows some useful informations.
   intro:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Steps represent a sequence of tasks that will be executed as part of the job.
     steps:
     - run: echo "The job was automatically triggered by a ${{ github.event_name }} event."
@@ -26,7 +26,7 @@ jobs:
   # Build all targets
   build:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: intro
     strategy:
       matrix:
@@ -55,19 +55,19 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-    
+
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
         pip install --upgrade platformio
-    
+
     - name: Compile ${{ matrix.environment }} firmware
       run: platformio run --environment ${{ matrix.environment }}
-    
+
   # Perform static checks and test
   check:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: intro
     strategy:
       matrix:
@@ -95,7 +95,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-    
+
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
@@ -107,7 +107,7 @@ jobs:
   # Perform tests
   test:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: intro
 
     steps:
@@ -132,7 +132,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-    
+
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
@@ -144,7 +144,7 @@ jobs:
   # Build documentation
   doc:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: intro
     strategy:
       matrix:
@@ -172,7 +172,7 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.9'
-  
+
     - name: Install PlatformIO
       run: |
         python -m pip install --upgrade pip
@@ -194,7 +194,7 @@ jobs:
   # Lint Python code
   lint:
     # The type of runner that the job will run on.
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: intro
     strategy:
       matrix:

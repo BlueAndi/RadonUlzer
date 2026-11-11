@@ -1,0 +1,28 @@
+@startuml
+
+title RL Supervisor - Training Orchestrator Module Class Diagram
+
+left to right direction
+
+package "environment.py" as EnvironmentModule <<Python module>> {
+    interface IEnvironment <<interface>>
+}
+
+package "training_orchestrator.py" as TrainingOrchestratorModule <<Python module>> {
+    class TrainingOrchestrator
+    class PendingAction <<dataclass>>
+}
+
+package "agent.py" as AgentModule <<Python module>> {
+    class PPOAgent
+}
+
+package "training_logger.py" as TrainingLoggerModule <<Python module>> {
+    class TrainingLogger
+}
+
+TrainingOrchestrator o--> IEnvironment
+TrainingOrchestrator o--> PPOAgent
+TrainingOrchestrator o--> TrainingLogger
+
+@enduml

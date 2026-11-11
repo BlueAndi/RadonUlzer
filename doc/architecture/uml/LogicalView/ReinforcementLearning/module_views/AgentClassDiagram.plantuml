@@ -1,0 +1,33 @@
+@startuml
+
+title RL Supervisor - Agent Module Class Diagram
+
+left to right direction
+
+package "training_orchestrator.py" as TrainingOrchestratorModule <<Python module>> {
+    class TrainingOrchestrator
+}
+
+package "evaluation_orchestrator.py" as EvaluationOrchestratorModule <<Python module>> {
+    class EvaluationOrchestrator
+}
+
+package "agent.py" as AgentModule <<Python module>> {
+    class PPOAgent
+    class AgentUpdateResult <<dataclass>>
+}
+
+package "trajectory_buffer.py" as TrajectoryBufferModule <<Python module>> {
+    class Memory
+}
+
+package "networks.py" as NetworksModule <<Python module>> {
+    class Models
+}
+
+TrainingOrchestrator o--> PPOAgent
+EvaluationOrchestrator o--> PPOAgent
+PPOAgent *--> Memory
+PPOAgent *--> Models
+
+@enduml

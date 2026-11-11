@@ -1,0 +1,27 @@
+@startuml
+
+title RL Supervisor - Evaluation Orchestrator Module Class Diagram
+
+left to right direction
+
+package "environment.py" as EnvironmentModule <<Python module>> {
+    interface IEnvironment <<interface>>
+}
+
+package "evaluation_orchestrator.py" as EvaluationOrchestratorModule <<Python module>> {
+    class EvaluationOrchestrator
+}
+
+package "agent.py" as AgentModule <<Python module>> {
+    class PPOAgent
+}
+
+package "evaluation_logger.py" as EvaluationLoggerModule <<Python module>> {
+    class EvaluationLogger
+}
+
+EvaluationOrchestrator o--> IEnvironment
+EvaluationOrchestrator o--> PPOAgent
+EvaluationOrchestrator o--> EvaluationLogger
+
+@enduml

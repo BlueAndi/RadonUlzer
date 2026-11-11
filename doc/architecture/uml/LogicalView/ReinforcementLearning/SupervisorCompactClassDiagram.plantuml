@@ -1,0 +1,63 @@
+@startuml
+
+title RL Supervisor - Compact Class Diagram
+
+package "Supervisor" as SupervisorPackage {
+    class TrainingOrchestrator
+    class EvaluationOrchestrator
+}
+
+package "Environment" as EnvironmentPackage {
+    interface IEnvironment <<interface>>
+}
+
+package "Webots Environment" as WebotsEnvironmentPackage {
+    class WebotsEnv
+    class ZumoRobot
+}
+
+package "Reward" as RewardPackage {
+    class RewardCalculator
+}
+
+package "Transport" as TransportPackage {
+    class ZumoSerial
+}
+
+package "Agent" as AgentPackage {
+    class PPOAgent
+}
+
+package "Trajectory Buffer" as TrajectoryBufferPackage {
+    class Memory
+}
+
+package "Networks" as NetworksPackage {
+    class Models
+}
+
+package "Training Logger" as TrainingLoggerPackage {
+    class TrainingLogger
+}
+
+package "Evaluation Logger" as EvaluationLoggerPackage {
+    class EvaluationLogger
+}
+
+TrainingOrchestrator o--> IEnvironment
+TrainingOrchestrator o--> PPOAgent
+TrainingOrchestrator o--> TrainingLogger
+EvaluationOrchestrator o--> IEnvironment
+EvaluationOrchestrator o--> PPOAgent
+EvaluationOrchestrator o--> EvaluationLogger
+
+IEnvironment <|.. WebotsEnv
+
+WebotsEnv "1" *--> "1..*" ZumoRobot
+ZumoRobot *--> ZumoSerial
+ZumoRobot *--> RewardCalculator
+
+PPOAgent *--> Memory
+PPOAgent *--> Models
+
+@enduml

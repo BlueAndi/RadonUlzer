@@ -1,0 +1,23 @@
+@startuml
+
+title RL Supervisor - Reward Module Class Diagram
+
+left to right direction
+
+package "webots_environment.py" as WebotsEnvironmentModule <<Python module>> {
+    class ZumoRobot
+}
+
+package "reward.py" as RewardModule <<Python module>> {
+    class RewardCalculator
+    class RewardContext <<dataclass>>
+    enum EpisodeTerminationReason {
+        FINISH_LINE
+        LOST_LINE
+    }
+}
+
+ZumoRobot *--> RewardCalculator
+RewardCalculator ..> EpisodeTerminationReason
+
+@enduml

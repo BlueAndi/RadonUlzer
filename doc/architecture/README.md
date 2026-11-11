@@ -51,6 +51,7 @@ The following applications are supported:
 - [ConvoyLeader application](CONVOYLEADER.md)
 - [LineFollower application](LINEFOLLOWER.md)
 - [RemoteControl application](REMOTECONTROL.md)
+- [Reinforcement Learning Supervisor](REINFORCEMENTLEARNING.md)
 - [SensorFusion application](SENSORFUSION.md)
 
 #### Service

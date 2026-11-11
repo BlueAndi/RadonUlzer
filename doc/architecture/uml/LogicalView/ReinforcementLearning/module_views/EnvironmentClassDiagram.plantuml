@@ -1,0 +1,28 @@
+@startuml
+
+title RL Supervisor - Environment Module Class Diagram
+
+left to right direction
+
+package "training_orchestrator.py" as TrainingOrchestratorModule <<Python module>> {
+    class TrainingOrchestrator
+}
+
+package "evaluation_orchestrator.py" as EvaluationOrchestratorModule <<Python module>> {
+    class EvaluationOrchestrator
+}
+
+package "environment.py" as EnvironmentModule <<Python module>> {
+    interface IEnvironment <<interface>>
+    class EnvironmentStep <<dataclass>>
+}
+
+package "webots_environment.py" as WebotsEnvironmentModule <<Python module>> {
+    class WebotsEnv
+}
+
+TrainingOrchestrator o--> IEnvironment
+EvaluationOrchestrator o--> IEnvironment
+IEnvironment <|.. WebotsEnv
+
+@enduml

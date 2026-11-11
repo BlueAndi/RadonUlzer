@@ -1,0 +1,22 @@
+@startuml
+
+title RL Supervisor - Networks Module Class Diagram
+
+left to right direction
+
+package "agent.py" as AgentModule <<Python module>> {
+    class PPOAgent
+}
+
+package "networks.py" as NetworksModule <<Python module>> {
+    class Models
+    class TrainableStdDev
+    class ActionResult <<dataclass>>
+    class PolicyOptimizationMetrics <<dataclass>>
+    class CriticOptimizationMetrics <<dataclass>>
+}
+
+PPOAgent *--> Models
+Models *--> TrainableStdDev
+
+@enduml

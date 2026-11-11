@@ -1,0 +1,324 @@
+@startuml
+
+title RL Supervisor - Class Diagram
+
+package "Supervisor" as SupervisorPackage {
+    class TrainingOrchestrator
+    class EvaluationOrchestrator
+    class PendingAction <<dataType>>
+
+    note as TrainingOrchestratorNote
+        Coordinates accepted actions and completed transitions across independent interaction streams.
+        Triggers run-relative training updates when the learning agent reports that enough experience is available.
+        Coordinates periodic and final checkpoint persistence for the current training run.
+        Controls the main loop and reliable environment shutdown.
+    end note
+    TrainingOrchestrator .. TrainingOrchestratorNote
+
+    note as EvaluationOrchestratorNote
+        Selects deterministic actions for independent environment streams using a loaded checkpoint.
+        Accumulates rewards for accepted actions and records statistics when an episode completes.
+        Resets terminal streams and optionally stops after the completed-episode threshold is reached.
+        Performs no PPO training and reliably stops the environment when the run ends.
+    end note
+    EvaluationOrchestrator .. EvaluationOrchestratorNote
+
+    note as PendingActionNote
+        Represents an action whose environment result is still pending.
+        Preserves the context required to create a complete Transition when that result becomes available.
+    end note
+    PendingAction .. PendingActionNote
+}
+
+package "Environment" as EnvironmentPackage {
+    interface IEnvironment <<interface>>
+    class EnvironmentStep <<dataType>>
+
+    note as IEnvironmentNote
+        Defines the simulation-independent contract used by the supervisor.
+        Accepts actions for independent interaction streams and advances the environment.
+        Returns step results and resets individual streams.
+        Reports whether the environment is running and allows it to be stopped.
+    end note
+    IEnvironment .. IEnvironmentNote
+
+    note as EnvironmentStepNote
+        Carries the result of one environment interaction.
+        Provides an implementation-independent result format shared between the environment and the supervisor.
+        May include an opaque identifier describing why an episode ended.
+    end note
+    EnvironmentStep .. EnvironmentStepNote
+}
+
+package "Webots Environment" as WebotsEnvironmentPackage {
+    class WebotsEnv
+    class ZumoRobot
+    class StartPose <<dataType>>
+    class StartPoseSelector
+    enum _RobotInteractionState
+
+    note as WebotsEnvNote
+        Adapts the Webots simulation to the environment contract.
+        Manages the simulation clock and the collection of robots.
+        Routes actions and resets to the correct robot.
+        Collects completed step results and reports when the simulation ends.
+    end note
+    WebotsEnv .. WebotsEnvNote
+
+    note as ZumoRobotNote
+        Represents one robot and its current episode state.
+        Receives observations and status updates through callbacks.
+        Applies actions through the transport layer.
+        Uses the RewardCalculator to calculate rewards and determine whether an episode is complete.
+        Combines previous and current normalized sensor values into each observation.
+        Resets its robot and episode state when requested.
+    end note
+    ZumoRobot .. ZumoRobotNote
+
+    note as StartPoseNote
+        Defines one configured Webots reset pose.
+        Carries translation, axis-angle rotation, and optional relative lateral and rotational offset ranges used when repositioning a robot.
+    end note
+    StartPose .. StartPoseNote
+
+    note as StartPoseSelectorNote
+        Selects the next configured robot reset pose.
+        Supports sequential, random, and randomized-offset strategies without coupling selection policy to ZumoRobot.
+        Optional seeds make both random strategies reproducible.
+    end note
+    StartPoseSelector .. StartPoseSelectorNote
+
+    note as RobotInteractionStateNote
+        Identifies the asynchronous interaction phase of one robot stream.
+    end note
+    _RobotInteractionState .. RobotInteractionStateNote
+}
+
+package "Reward" as RewardPackage {
+    class RewardCalculator
+    class RewardContext <<dataType>>
+    enum EpisodeTerminationReason
+
+    note as RewardCalculatorNote
+        Selects a configured reward function by its stable identifier.
+        Calculates the learning reward from the current RewardContext.
+        Applies the fixed configured thresholds that determine whether the episode is terminal.
+        Reports the reason when a terminal condition is reached.
+    end note
+    RewardCalculator .. RewardCalculatorNote
+
+    note as RewardContextNote
+        Carries the raw sensor values and current episode information required for one reward and terminal evaluation.
+        Provides one immutable input for reward calculation and terminal-condition evaluation.
+    end note
+    RewardContext .. RewardContextNote
+
+    note as EpisodeTerminationReasonNote
+        Names the finish-line and lost-line causes of a completed robot episode.
+        These identifiers are passed through the generic environment contract as strings.
+    end note
+    EpisodeTerminationReason .. EpisodeTerminationReasonNote
+}
+
+package "Transport" as TransportPackage {
+    class ZumoSerial
+
+    enum CommandId
+    enum RobotStatus
+
+    note as ZumoSerialNote
+        Provides the transport connection used by ZumoRobot.
+        Processes incoming messages and forwards sensor and status data through callbacks.
+        Sends motor-speed updates and other control commands.
+        Keeps communication details separate from robot behavior.
+    end note
+    ZumoSerial .. ZumoSerialNote
+
+    note as CommandIdNote
+        Identifies a control command accepted by the transport connection.
+        Provides named values for command selection.
+    end note
+    CommandId .. CommandIdNote
+
+    note as RobotStatusNote
+        Represents the status reported through the transport connection.
+        Distinguishes normal operation from an error state.
+    end note
+    RobotStatus .. RobotStatusNote
+}
+
+package "Agent" as AgentPackage {
+    class PPOAgent
+    class AgentUpdateResult <<dataType>>
+
+    note as PPOAgentNote
+        Selects an action for each observation and returns it together with the information required for learning.
+        Provides deterministic action selection for checkpoint evaluation.
+        Passes transitions to Memory and checks whether enough experience is available.
+        Coordinates training using rollout data prepared by Memory and updates Models.
+        Reports training results and can save or restore the learned models.
+    end note
+    PPOAgent .. PPOAgentNote
+
+    note as AgentUpdateResultNote
+        Represents the result of a completed training update.
+        Provides aggregate policy and Critic losses, PPO diagnostics, final rollout KL, policy early-stop and adaptation information, explained variance, the current exploration level, and the transition count required to create TrainingMetrics.
+    end note
+    AgentUpdateResult .. AgentUpdateResultNote
+}
+
+package "Trajectory Buffer" as TrajectoryBufferPackage {
+    class Memory
+    class Transition <<dataType>>
+    class EpisodeStatistics <<dataType>>
+    class TrainingBatch <<dataType>>
+
+    note as MemoryNote
+        Stores transitions separately for each interaction stream.
+        Validates their order and determines when enough experience is available for training.
+        Calculates returns and advantages from the stored rollout data.
+        Combines, shuffles, and batches the prepared training data.
+        Provides statistics for completed episodes and allows collected experience to be cleared explicitly.
+    end note
+    Memory .. MemoryNote
+
+    note as TransitionNote
+        Represents one completed interaction used for learning.
+        Combines the observation and selected action with the associated learning information and resulting environment feedback.
+        Preserves the episode and step context so that Memory can order experiences and derive the episode statistics used for logging.
+    end note
+    Transition .. TransitionNote
+
+    note as EpisodeStatisticsNote
+        Summarizes rewards and lengths for completed episodes in the collected learning experience.
+    end note
+    EpisodeStatistics .. EpisodeStatisticsNote
+
+    note as TrainingBatchNote
+        Represents a prepared batch of learning data consumed during model training.
+    end note
+    TrainingBatch .. TrainingBatchNote
+}
+
+package "Networks" as NetworksPackage {
+    class Models
+    class TrainableStdDev
+    class ActionResult <<dataType>>
+    class PolicyOptimizationMetrics <<dataType>>
+    class CriticOptimizationMetrics <<dataType>>
+
+    note as ActionResultNote
+        Represents the model output produced when selecting an action for one observation.
+        Carries the selected action and the additional information needed to create a Transition.
+        Provides the information used to create action diagnostics.
+    end note
+    ActionResult .. ActionResultNote
+
+    note as ModelsNote
+        Owns the actor and critic neural networks and the trainable exploration variability.
+        Provides the model calculations used to select actions and estimate observation values.
+        Guards policy updates by a KL limit, completes Critic updates, and evaluates final rollout KL.
+        Adapts the shared policy learning rates and reports the resulting optimization diagnostics.
+    end note
+    Models .. ModelsNote
+
+    note as TrainableStdDevNote
+        Maintains and constrains the trainable standard deviation used for exploration during action selection.
+    end note
+    TrainableStdDev .. TrainableStdDevNote
+
+    note as PolicyOptimizationMetricsNote
+        Reports actor loss, approximate KL, clip fraction, and sample count for one checked policy batch.
+        Records whether that batch's policy gradients were applied.
+    end note
+    PolicyOptimizationMetrics .. PolicyOptimizationMetricsNote
+
+    note as CriticOptimizationMetricsNote
+        Reports critic loss and sample count for one applied Critic batch.
+    end note
+    CriticOptimizationMetrics .. CriticOptimizationMetricsNote
+}
+
+package "Training Logger" as TrainingLoggerPackage {
+    class ActionDiagnostics <<dataType>>
+    class TrainingLogger
+    class TrainingMetrics <<dataType>>
+    class CheckpointReference <<dataType>>
+
+    note as ActionDiagnosticsNote
+        Represents diagnostic information for one selected action.
+    end note
+    ActionDiagnostics .. ActionDiagnosticsNote
+
+    note as TrainingLoggerNote
+        Defines training metrics and action diagnostics, records checkpoint provenance, and persists them together with the run configuration.
+    end note
+    TrainingLogger .. TrainingLoggerNote
+
+    note as TrainingMetricsNote
+        Combines the model-update results with available completed-episode statistics.
+        Represents the learning progress and exploration state after one training update.
+        Provides the complete information required by TrainingLogger to record the update.
+    end note
+    TrainingMetrics .. TrainingMetricsNote
+
+    note as CheckpointReferenceNote
+        Identifies one checkpoint and the earlier training-run lineage from which it was derived.
+    end note
+    CheckpointReference .. CheckpointReferenceNote
+}
+
+package "Evaluation Logger" as EvaluationLoggerPackage {
+    class EvaluationLogger
+    class EpisodeEvaluation <<dataType>>
+
+    note as EvaluationLoggerNote
+        Writes one CSV record for each completed evaluation episode.
+        Persists the effective run configuration and source checkpoint path.
+        Writes overall and per-stream reward, action-count, and termination-reason statistics when closed.
+    end note
+    EvaluationLogger .. EvaluationLoggerNote
+
+    note as EpisodeEvaluationNote
+        Contains the results of one completed episode in one environment stream.
+        Combines total reward, action count, per-action reward statistics, and an optional termination reason.
+    end note
+    EpisodeEvaluation .. EpisodeEvaluationNote
+}
+
+SupervisorPackage -[hidden]down-> AgentPackage
+
+EnvironmentPackage -[hidden]right-> AgentPackage
+AgentPackage -[hidden]right-> TrainingLoggerPackage
+TrainingLoggerPackage -[hidden]down-> EvaluationLoggerPackage
+
+EnvironmentPackage -[hidden]down-> WebotsEnvironmentPackage
+AgentPackage -[hidden]down-> TrajectoryBufferPackage
+TrainingLoggerPackage -[hidden]down-> NetworksPackage
+
+WebotsEnvironmentPackage -[hidden]right-> TrajectoryBufferPackage
+TrajectoryBufferPackage -[hidden]right-> NetworksPackage
+
+WebotsEnvironmentPackage -[hidden]down-> RewardPackage
+TrajectoryBufferPackage -[hidden]down-> TransportPackage
+RewardPackage -[hidden]right-> TransportPackage
+
+TrainingOrchestrator o--> IEnvironment
+TrainingOrchestrator o--> PPOAgent
+TrainingOrchestrator o--> TrainingLogger
+EvaluationOrchestrator o--> IEnvironment
+EvaluationOrchestrator o--> PPOAgent
+EvaluationOrchestrator o--> EvaluationLogger
+
+IEnvironment <|.. WebotsEnv
+
+WebotsEnv "1" *--> "1..*" ZumoRobot
+ZumoRobot *--> ZumoSerial
+ZumoRobot *--> RewardCalculator
+ZumoRobot *--> StartPoseSelector
+
+PPOAgent *--> Memory
+PPOAgent *--> Models
+Models *--> TrainableStdDev
+
+@enduml

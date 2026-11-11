@@ -1,0 +1,29 @@
+@startuml
+
+title RL Supervisor - State Machine Diagram
+
+[*] --> Initializing
+
+state Initializing
+Initializing : entry / Prepare selected run mode
+
+state Running
+Running : do / Interact with the environment and record run results
+
+state Training
+Training : entry / Prepare collected trajectory
+Training : do / Perform training update
+Training : exit / Record training metrics
+
+state Stopping
+Stopping : entry / Stop simulation
+
+Initializing --> Running
+Running --> Training : environment cycle completed [training mode and sufficient trajectory data collected]
+Training --> Running : [training mode and further updates configured]
+Training --> Stopping : [training mode and configured run update count reached]
+Running --> Stopping : environment cycle completed [evaluation mode and configured episode limit reached]
+Running --> Stopping : environment cycle completed [environment termination detected]
+Stopping --> [*]
+
+@enduml
