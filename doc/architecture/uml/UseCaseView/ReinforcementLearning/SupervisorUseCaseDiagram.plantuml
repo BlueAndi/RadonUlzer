@@ -1,0 +1,33 @@
+@startuml
+
+title RL Supervisor - Use Case Diagram
+
+actor "Training Operator" as TrainingOperator
+actor "Environment" as EnvironmentActor
+
+rectangle "Environment-Independent RL Supervisor" as SupervisorSubject {
+    usecase "Run Training Session" as RunTrainingSession
+    usecase "Evaluate Checkpoint" as EvaluateCheckpoint
+    usecase "Interact with Environment" as InteractWithEnvironment
+    usecase "Manage Episode Lifecycle" as ManageEpisodeLifecycle
+    usecase "Train Models" as TrainModels
+    usecase "Record Training Run" as RecordTrainingRun
+    usecase "Record Evaluation Results" as RecordEvaluationResults
+}
+
+TrainingOperator -- RunTrainingSession
+TrainingOperator -- EvaluateCheckpoint
+EnvironmentActor -- InteractWithEnvironment
+EnvironmentActor -- ManageEpisodeLifecycle
+
+RunTrainingSession ..> InteractWithEnvironment : <<include>>
+RunTrainingSession ..> ManageEpisodeLifecycle : <<include>>
+RunTrainingSession ..> TrainModels : <<include>>
+RunTrainingSession ..> RecordTrainingRun : <<include>>
+EvaluateCheckpoint ..> InteractWithEnvironment : <<include>>
+EvaluateCheckpoint ..> ManageEpisodeLifecycle : <<include>>
+EvaluateCheckpoint ..> RecordEvaluationResults : <<include>>
+
+TrainingOperator -[hidden]right-> SupervisorSubject
+
+@enduml

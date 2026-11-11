@@ -1,0 +1,20 @@
+@startuml
+
+title RL Supervisor - Trajectory Buffer Module Class Diagram
+
+left to right direction
+
+package "agent.py" as AgentModule <<Python module>> {
+    class PPOAgent
+}
+
+package "trajectory_buffer.py" as TrajectoryBufferModule <<Python module>> {
+    class Memory
+    class Transition <<dataclass>>
+    class EpisodeStatistics <<dataclass>>
+    class TrainingBatch <<NamedTuple>>
+}
+
+PPOAgent *--> Memory
+
+@enduml

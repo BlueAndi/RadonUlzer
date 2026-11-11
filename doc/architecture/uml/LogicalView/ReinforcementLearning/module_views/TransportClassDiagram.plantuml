@@ -1,0 +1,19 @@
+@startuml
+
+title RL Supervisor - Transport Module Class Diagram
+
+left to right direction
+
+package "webots_environment.py" as WebotsEnvironmentModule <<Python module>> {
+    class ZumoRobot
+}
+
+package "transport.py" as TransportModule <<Python module>> {
+    class ZumoSerial
+    enum CommandId
+    enum RobotStatus
+}
+
+ZumoRobot *--> ZumoSerial
+
+@enduml

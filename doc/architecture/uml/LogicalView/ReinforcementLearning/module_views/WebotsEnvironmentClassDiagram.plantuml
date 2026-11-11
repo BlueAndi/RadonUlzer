@@ -1,0 +1,33 @@
+@startuml
+
+title RL Supervisor - Webots Environment Module Class Diagram
+
+left to right direction
+
+package "environment.py" as EnvironmentModule <<Python module>> {
+    interface IEnvironment <<interface>>
+}
+
+package "webots_environment.py" as WebotsEnvironmentModule <<Python module>> {
+    class WebotsEnv
+    class ZumoRobot
+    class StartPose <<dataclass>>
+    class StartPoseSelector
+    enum _RobotInteractionState
+}
+
+package "reward.py" as RewardModule <<Python module>> {
+    class RewardCalculator
+}
+
+package "transport.py" as TransportModule <<Python module>> {
+    class ZumoSerial
+}
+
+IEnvironment <|.. WebotsEnv
+WebotsEnv "1" *--> "1..*" ZumoRobot
+ZumoRobot *--> StartPoseSelector
+ZumoRobot *--> RewardCalculator
+ZumoRobot *--> ZumoSerial
+
+@enduml
