@@ -70,6 +70,7 @@ static void App_cmdChannelCallback(const uint8_t* payload, const uint8_t payload
 static void App_motorSpeedSetpointsChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_statusChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
+static void App_timeSyncReqChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData);
 
 /******************************************************************************
  * Local Variables
@@ -84,6 +85,7 @@ App::App() :
     m_serialMuxProtChannelIdCurrentVehicleData(0U),
     m_serialMuxProtChannelIdStatus(0U),
     m_serialMuxProtChannelIdLineSensors(0U),
+    m_serialMuxProtChannelIdTimeSyncRsp(0U),
     m_systemStateMachine(),
     m_controlInterval(),
     m_reportTimer(),
@@ -293,6 +295,22 @@ void App::handleRemoteCommand(const Command& cmd)
     (void)m_smpServer.sendData(m_serialMuxProtChannelIdRemoteCtrlRsp, &rsp, sizeof(rsp));
 }
 
+void App::handleTimeSyncRequest(const TimeSyncRequest& req, uint32_t t2)
+{
+    if (0U != m_serialMuxProtChannelIdTimeSyncRsp)
+    {
+        TimeSyncResponse rsp;
+
+        rsp.seq   = req.seq;
+        rsp.t1_ms = req.t1_ms;
+        rsp.t2_ms = t2;
+        rsp.t3_ms = millis();
+
+        /* Ignoring return value, as error handling is not available. */
+        (void)m_smpServer.sendData(m_serialMuxProtChannelIdTimeSyncRsp, &rsp, sizeof(rsp));
+    }
+}
+
 void App::systemStatusCallback(SMPChannelPayload::Status status)
 {
     switch (status)
@@ -385,6 +403,7 @@ bool App::setupSerialMuxProt()
     m_smpServer.subscribeToChannel(MOTOR_SPEED_SETPOINT_CHANNEL_NAME, App_motorSpeedSetpointsChannelCallback);
     m_smpServer.subscribeToChannel(STATUS_CHANNEL_NAME, App_statusChannelCallback);
     m_smpServer.subscribeToChannel(ROBOT_SPEED_SETPOINT_CHANNEL_NAME, App_robotSpeedSetpointChannelCallback);
+    m_smpServer.subscribeToChannel(TIME_SYNC_REQUEST_CHANNEL_NAME, App_timeSyncReqChannelCallback);
 
     /* Channel creation. */
     m_serialMuxProtChannelIdRemoteCtrlRsp =
@@ -393,10 +412,13 @@ bool App::setupSerialMuxProt()
         m_smpServer.createChannel(CURRENT_VEHICLE_DATA_CHANNEL_NAME, CURRENT_VEHICLE_DATA_CHANNEL_DLC);
     m_serialMuxProtChannelIdStatus      = m_smpServer.createChannel(STATUS_CHANNEL_NAME, STATUS_CHANNEL_DLC);
     m_serialMuxProtChannelIdLineSensors = m_smpServer.createChannel(LINE_SENSOR_CHANNEL_NAME, LINE_SENSOR_CHANNEL_DLC);
+    m_serialMuxProtChannelIdTimeSyncRsp =
+        m_smpServer.createChannel(TIME_SYNC_RESPONSE_CHANNEL_NAME, TIME_SYNC_RESPONSE_CHANNEL_DLC);
 
     /* Channels successfully created? */
     if ((0U != m_serialMuxProtChannelIdCurrentVehicleData) && (0U != m_serialMuxProtChannelIdRemoteCtrlRsp) &&
-        (0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors))
+        (0U != m_serialMuxProtChannelIdStatus) && (0U != m_serialMuxProtChannelIdLineSensors) &&
+        (0U != m_serialMuxProtChannelIdTimeSyncRsp))
     {
         isSuccessful = true;
     }
@@ -511,5 +533,25 @@ static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const 
 
         /* Set the robot speeds. */
         DrivingState::getInstance().setRobotSpeeds(centerSpeed, angularSpeed);
+    }
+}
+
+/**
+ * Receives time sync requests over SerialMuxProt channel.
+ *
+ * @param[in] payload       Time sync request in a TimeSyncRequest structure.
+ * @param[in] payloadSize   Size of the TimeSyncRequest structure.
+ * @param[in] userData      Instance of App class.
+ */
+static void App_timeSyncReqChannelCallback(const uint8_t* payload, const uint8_t payloadSize, void* userData)
+{
+    /* Take the receive timestamp first, to keep it as close as possible to the reception. */
+    const uint32_t t2 = millis();
+
+    if ((nullptr != payload) && (TIME_SYNC_REQUEST_CHANNEL_DLC == payloadSize) && (nullptr != userData))
+    {
+        App*                  application = reinterpret_cast<App*>(userData);
+        const TimeSyncRequest req         = *reinterpret_cast<const TimeSyncRequest*>(payload);
+        application->handleTimeSyncRequest(req, t2);
     }
 }
