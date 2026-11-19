@@ -98,6 +98,15 @@ public:
      */
     void systemStatusCallback(SMPChannelPayload::Status status);
 
+    /**
+     * Handle a time sync request received via SerialMuxProt and
+     * send the time sync response.
+     *
+     * @param[in] req   Time sync request to handle.
+     * @param[in] t2    Local timestamp at which the request was received [ms].
+     */
+    void handleTimeSyncRequest(const TimeSyncRequest& req, uint32_t t2);
+
 private:
     /** Differential drive control period in ms. */
     static const uint32_t DIFFERENTIAL_DRIVE_CONTROL_PERIOD = 5U;
@@ -136,6 +145,9 @@ private:
 
     /** SerialMuxProt Channel id for sending line sensors data. */
     uint8_t m_serialMuxProtChannelIdLineSensors;
+
+    /** SerialMuxProt Channel id for sending time sync responses. */
+    uint8_t m_serialMuxProtChannelIdTimeSyncRsp;
 
     /** The system state machine. */
     StateMachine m_systemStateMachine;

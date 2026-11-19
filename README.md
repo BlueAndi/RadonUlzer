@@ -121,10 +121,10 @@ Set the ip-address and the port in [platformio_override.ini](./platformio_overri
 
 Use *ipc* as *webots_protocol* for local connections and *tcp* for remote connections.
 
-| Key | Description |
-| --- | ----------- |
-| webots\_ip\_address | The IP address of the Webots simulation, which is used for TCP communication. |
-| webots\_protocol | \[ipc\|tcp\] - ipc is faster but only works on the same machine, tcp works also over network. |
+| Key                 | Description                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------ |
+| webots\_ip\_address | The IP address of the Webots simulation, which is used for TCP communication.                    |
+| webots\_protocol    | \[ipc\|tcp\] - ipc is faster but only works on the same machine, tcp works also over network.    |
 | webots\_robot\_name | The robot name used to identify the robot in the Webots world. See Webots world robot prototype. |
 
 PlatformIO project tasks --> &lt;APP-NAME&gt; --> Custom --> WebotsLauncher
@@ -217,16 +217,16 @@ To enable the OLED display support set the *CONFIG_USE_OLED_DISPLAY* in the *pla
 
 ## The Applications
 
-| Application | Description | Standalone | DroidControlShop Required | Webots World |
-| - | - | - | - | - |
-| Calib | Application used for motor speed calibration. | Yes | No | ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
-| ConvoyLeader | A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role. | No | Yes | ./webots/worlds/zumo_with_com_system/PlatoonTrack.wbt |
-| ConvoyFollower | Convoy follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) to drive to its target. | No | Yes | ./webots/worlds/zumo_with_com_system/PlatoonTrack.wbt |
-| LineFollower | Just a line follower, using a PID controller with differential drive and odometry. | Yes | No | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
-| LineFollowerSimple | Just a simple line follower, using a PID controller. | Yes | No | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
-| RemoteControl | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role. | No | Yes | ./webots/world/zumo_with_com_system/* |
-| SensorFusion | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No | Yes | ./webots/worlds/zumo_with_com_system/LineFollowerTrack.wbt |
-| Test | Only for testing purposes on native environment. | Yes | No | N/A |
+| Application        | Description                                                                                                                                                                           | Standalone | DroidControlShop Required | Webots World                                                                                      |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ------------------------- | ------------------------------------------------------------------------------------------------- |
+| Calib              | Application used for motor speed calibration.                                                                                                                                         | Yes        | No                        | ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt                             |
+| ConvoyLeader       | A line follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy leader role.                                               | No         | Yes                       | ./webots/worlds/zumo_with_com_system/PlatoonTrack.wbt                                             |
+| ConvoyFollower     | Convoy follower, providing information to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) to drive to its target.                                                | No         | Yes                       | ./webots/worlds/zumo_with_com_system/PlatoonTrack.wbt                                             |
+| LineFollower       | Just a line follower, using a PID controller with differential drive and odometry.                                                                                                    | Yes        | No                        | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
+| LineFollowerSimple | Just a simple line follower, using a PID controller.                                                                                                                                  | Yes        | No                        | ./webots/worlds/ETrack.wbt  ./webots/worlds/LargeTrack.wbt  ./webots/worlds/LineFollowerTrack.wbt |
+| RemoteControl      | The robot is remote controlled by e.g. the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip) in a convoy follower role.                                                | No         | Yes                       | ./webots/world/zumo_with_com_system/*                                                             |
+| SensorFusion       | The robot provides odometry and inertial data to the [DroidControlShip](https://github.com/BlueAndi/DroidControlShip), which calculates the sensor fusion based location information. | No         | Yes                       | ./webots/worlds/zumo_with_com_system/LineFollowerTrack.wbt                                        |
+| Test               | Only for testing purposes on native environment.                                                                                                                                      | Yes        | No                        | N/A                                                                                               |
 
 ## Documentation
 
@@ -235,13 +235,14 @@ To enable the OLED display support set the *CONFIG_USE_OLED_DISPLAY* in the *pla
 
 ## Used Libraries
 
-| Library                                                            | Description                                          | License |
-| ------------------------------------------------------------------ | ---------------------------------------------------- | ------- |
-| [ArduinoNative](https://github.com/BlueAndi/ArduinoNative)         | The Arduino for native environment.                  | MIT     |
-| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)     | Multiplexing Communication Protocol                  | MIT     |
-| [ZumoHALATmega32u4](https://github.com/BlueAndi/ZumoHALATmega32u4) | C++ HAL for ATmega32u4 on the Pololu Zumo32u4        | MIT     |
-| [ZumoHALInterfaces](https://github.com/BlueAndi/ZumoHALInterfaces) | Abstract C++ HAL interfaces                          | MIT     |
-| [ZumoHALWebots](https://github.com/BlueAndi/ZumoHALWebots)         | C++ HAL for Webots simulation of the Pololu Zumo32u4 | MIT     |
+| Library                                                            | Description                                                                                                                                                                                        | License    |
+| ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| [ArduinoNative](https://github.com/BlueAndi/ArduinoNative)         | The Arduino for native environment.                                                                                                                                                                | MIT        |
+| [PlatformIO](https://platformio.org)                               | PlatformIO is a cross-platform, cross-architecture, multiple framework, professional tool for embedded systems engineers and for software developers who write applications for embedded products. | Apache-2.0 |
+| [SerialMuxProt](https://github.com/gabryelreyes/SerialMuxProt)     | Multiplexing Communication Protocol                                                                                                                                                                | MIT        |
+| [ZumoHALATmega32u4](https://github.com/BlueAndi/ZumoHALATmega32u4) | C++ HAL for ATmega32u4 on the Pololu Zumo32u4                                                                                                                                                      | MIT        |
+| [ZumoHALInterfaces](https://github.com/BlueAndi/ZumoHALInterfaces) | Abstract C++ HAL interfaces                                                                                                                                                                        | MIT        |
+| [ZumoHALWebots](https://github.com/BlueAndi/ZumoHALWebots)         | C++ HAL for Webots simulation of the Pololu Zumo32u4                                                                                                                                               | MIT        |
 
 ## Issues, Ideas And Bugs
 

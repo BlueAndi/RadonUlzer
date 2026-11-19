@@ -6,6 +6,8 @@
   - [Tx channel "REMOTE\_RSP"](#tx-channel-remote_rsp)
   - [Rx channel "MOT\_SPEEDS"](#rx-channel-mot_speeds)
   - [Tx channel "LINE\_SENS"](#tx-channel-line_sens)
+  - [Rx channel "TIME\_SYNC\_REQ"](#rx-channel-time_sync_req)
+  - [Tx channel "TIME\_SYNC\_RSP"](#tx-channel-time_sync_rsp)
 - [SW Architecture](#sw-architecture)
   - [Logical View](#logical-view)
     - [Application](#application)
@@ -59,7 +61,7 @@ This channel is used to receive linear motor speed information for the left and 
 - Order:
   - The left motor speed.
   - The right motor speed.
-- Endianess: Big endian
+- Endianess: Little endian
 
 ### Tx channel "LINE_SENS"
 
@@ -68,7 +70,29 @@ This channel is used to send line sensor informations in digits.
 - The dataypes uint16_t is used.
 - Order:
   - From most left to right line sensor.
-- Endianess: Big endian
+- Endianess: Little endian
+
+### Rx channel "TIME_SYNC_REQ"
+
+This channel is used to receive time synchronization requests. Every request is answered once via the "TIME_SYNC_RSP" channel.
+
+- The dataypes uint32_t is used.
+- Order:
+  - The sequence number, used to match request and response.
+  - The timestamp t1 of the sender at which the request was sent in [ms].
+- Endianess: Little endian
+
+### Tx channel "TIME_SYNC_RSP"
+
+This channel is used to send the response to a time synchronization request. With the four timestamps the sender of the request can calculate the round trip delay and the offset between its own clock and the robot clock.
+
+- The dataypes uint32_t is used.
+- Order:
+  - The sequence number of the request.
+  - The timestamp t1 of the request.
+  - The robot timestamp t2 at which the request was received in [ms].
+  - The robot timestamp t3 at which the response was sent in [ms].
+- Endianess: Little endian
 
 ## SW Architecture
 

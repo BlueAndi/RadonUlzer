@@ -87,6 +87,18 @@
 /** DLC of Line Sensor Channel */
 #define LINE_SENSOR_CHANNEL_DLC (sizeof(LineSensorData))
 
+/** Name of the Channel to receive Time Sync Requests from. */
+#define TIME_SYNC_REQUEST_CHANNEL_NAME "TIME_SYNC_REQ"
+
+/** DLC of Time Sync Request Channel */
+#define TIME_SYNC_REQUEST_CHANNEL_DLC (sizeof(TimeSyncRequest))
+
+/** Name of the Channel to send Time Sync Responses to. */
+#define TIME_SYNC_RESPONSE_CHANNEL_NAME "TIME_SYNC_RSP"
+
+/** DLC of Time Sync Response Channel */
+#define TIME_SYNC_RESPONSE_CHANNEL_DLC (sizeof(TimeSyncResponse))
+
 /******************************************************************************
  * Types and Classes
  *****************************************************************************/
@@ -239,6 +251,28 @@ typedef struct _LineSensorData
 
 static_assert(sizeof(LineSensorData) <= MAX_DATA_LEN,
               "LineSensorData struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
+
+/** Struct of the "Time Sync Request" channel payload. */
+typedef struct _TimeSyncRequest
+{
+    uint32_t seq;   /**< Sequence number to match request/response. */
+    uint32_t t1_ms; /**< Timestamp at sender when request left [ms]. */
+} __attribute__((packed)) TimeSyncRequest;
+
+static_assert(sizeof(TimeSyncRequest) <= MAX_DATA_LEN,
+              "TimeSyncRequest struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
+
+/** Struct of the "Time Sync Response" channel payload. */
+typedef struct _TimeSyncResponse
+{
+    uint32_t seq;   /**< Sequence number to match request/response. */
+    uint32_t t1_ms; /**< Echo of request timestamp [ms]. */
+    uint32_t t2_ms; /**< Timestamp at receiver when request arrived [ms]. */
+    uint32_t t3_ms; /**< Timestamp at receiver when response sent [ms]. */
+} __attribute__((packed)) TimeSyncResponse;
+
+static_assert(sizeof(TimeSyncResponse) <= MAX_DATA_LEN,
+              "TimeSyncResponse struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
 
 /******************************************************************************
  * Functions
