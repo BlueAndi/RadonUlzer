@@ -210,6 +210,12 @@ void App::loop()
     /* Send periodically line sensor data. */
     if ((true == m_sendLineSensorsDataInterval.isTimeout()) && (true == m_smpServer.isSynced()))
     {
+        ILineSensors& lineSensors = Board::getInstance().getLineSensors();
+
+        /* The line sensor values are only updated by reading the line.
+         * The estimated line position itself is not used.
+         */
+        (void)lineSensors.readLine();
         sendLineSensorsData();
 
         m_sendLineSensorsDataInterval.restart();
@@ -523,10 +529,9 @@ static void App_robotSpeedSetpointChannelCallback(const uint8_t* payload, const 
     if ((nullptr != payload) && (ROBOT_SPEED_SETPOINT_CHANNEL_DLC == payloadSize))
     {
         const RobotSpeed* robotSpeedData = reinterpret_cast<const RobotSpeed*>(payload);
-        int32_t           angularRaw     = constrain(robotSpeedData->angular,
-                                                     static_cast<int32_t>(INT16_MIN),
-                                                     static_cast<int32_t>(INT16_MAX));
-        int16_t           angularSpeed   = static_cast<int16_t>(angularRaw);
+        int32_t           angularRaw =
+            constrain(robotSpeedData->angular, static_cast<int32_t>(INT16_MIN), static_cast<int32_t>(INT16_MAX));
+        int16_t angularSpeed = static_cast<int16_t>(angularRaw);
 
         /* Convert to [steps/s] */
         int16_t centerSpeed = Util::millimetersPerSecondToStepsPerSecond(robotSpeedData->linearCenter);
