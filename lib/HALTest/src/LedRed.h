@@ -28,7 +28,7 @@
  * @file   LedRed.h
  * @brief  Red LED realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{

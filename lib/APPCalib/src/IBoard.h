@@ -28,7 +28,7 @@
  * @file   IBoard.h
  * @brief  Board interface, which abstracts the physical board
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALInterfaces
  *
  * @{
@@ -70,7 +70,6 @@
 class IBoard
 {
 public:
-
     /**
      * Destroys the board interface.
      */
@@ -120,7 +119,7 @@ public:
 
     /**
      * Get encoders driver.
-     * 
+     *
      * @return Encoders driver.
      */
     virtual IEncoders& getEncoders() = 0;
@@ -162,21 +161,21 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     virtual IProximitySensors& getProximitySensors() = 0;
 
     /**
      * Get sender driver.
-     * 
+     *
      * @return Sender driver
      */
     virtual ISender& getSender() = 0;
 
     /**
      * Get settings instance.
-     * 
+     *
      * @return Settings
      */
     virtual ISettings& getSettings() = 0;
@@ -187,7 +186,6 @@ public:
     virtual void process() = 0;
 
 protected:
-
     /**
      * Constructs the board interface.
      */
@@ -196,7 +194,6 @@ protected:
     }
 
 private:
-
 };
 
 /******************************************************************************

@@ -110,16 +110,16 @@ Board::Board() :
 
 void Board::enableSimulationDevices()
 {
-    const int               timeStep       = m_simTime.getTimeStep();
-    webots::Keyboard*       keyboard       = m_robot.getKeyboard();
-    webots::PositionSensor* leftPosSensor  = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME);
-    webots::PositionSensor* rightPosSensor = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME);
-    webots::DistanceSensor* lightSensor0   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_0_NAME);
-    webots::DistanceSensor* lightSensor1   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_1_NAME);
-    webots::DistanceSensor* lightSensor2   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME);
-    webots::DistanceSensor* lightSensor3   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME);
-    webots::DistanceSensor* lightSensor4   = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME);
-    webots::Receiver* supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
+    const int               timeStep           = m_simTime.getTimeStep();
+    webots::Keyboard*       keyboard           = m_robot.getKeyboard();
+    webots::PositionSensor* leftPosSensor      = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_LEFT_NAME);
+    webots::PositionSensor* rightPosSensor     = m_robot.getPositionSensor(RobotDeviceNames::POS_SENSOR_RIGHT_NAME);
+    webots::DistanceSensor* lightSensor0       = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_0_NAME);
+    webots::DistanceSensor* lightSensor1       = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_1_NAME);
+    webots::DistanceSensor* lightSensor2       = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_2_NAME);
+    webots::DistanceSensor* lightSensor3       = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_3_NAME);
+    webots::DistanceSensor* lightSensor4       = m_robot.getDistanceSensor(RobotDeviceNames::LIGHT_SENSOR_4_NAME);
+    webots::Receiver*       supervisorReceiver = m_robot.getReceiver(SupervisorDeviceNames::SUPERVISOR_RECEIVER_NAME);
 
     if (nullptr != keyboard)
     {

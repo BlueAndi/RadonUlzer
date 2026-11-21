@@ -234,7 +234,6 @@ public:
     }
 
 private:
-
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 

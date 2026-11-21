@@ -180,8 +180,9 @@ typedef struct _CommandResponse
     };
 } __attribute__((packed)) CommandResponse;
 
-static_assert(sizeof(CommandResponse) <= MAX_DATA_LEN,
-              "CommandResponse struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
+static_assert(
+    sizeof(CommandResponse) <= MAX_DATA_LEN,
+    "CommandResponse struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
@@ -227,12 +228,13 @@ typedef struct _LineSensorData
     uint16_t lineSensorData[5U]; /**< Line sensor data [digits] normalized to max 1000 digits. */
 } __attribute__((packed)) LineSensorData;
 
-static_assert(sizeof(LineSensorData) <= MAX_DATA_LEN,
-              "LineSensorData struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
+static_assert(
+    sizeof(LineSensorData) <= MAX_DATA_LEN,
+    "LineSensorData struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
 
 /******************************************************************************
  * Functions
  *****************************************************************************/
 
 #endif /* SERIAL_MUX_CHANNELS_H_ */
-/** @} */
+       /** @} */

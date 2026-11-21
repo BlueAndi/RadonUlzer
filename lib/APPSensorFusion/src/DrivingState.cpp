@@ -172,7 +172,7 @@ void DrivingState::process(StateMachine& sm)
             /* Calculate lap time and show it. */
             ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
 
-            m_lineStatus    = LINE_STATUS_STOP_LINE_DETECTED;
+            m_lineStatus = LINE_STATUS_STOP_LINE_DETECTED;
 
             /* Overwrite track status. */
             nextTrackStatus = TRACK_STATUS_FINISHED;
@@ -574,7 +574,8 @@ bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, u
     return isDetected;
 }
 
-void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus,
+                                    int16_t position3)
 {
     switch (trackStatus)
     {
@@ -640,7 +641,7 @@ void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorS
         /* If the track is lost by a robot manoeuvre and not becase the track
          * has a gap, the last position given by most left or right sensor
          * will be automatically used to find the track again.
-         * 
+         *
          * See ILineSensors::readLine() description regarding the behaviour in
          * case the line is not detected anymore.
          */

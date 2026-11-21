@@ -69,7 +69,7 @@
 void LineSensorsCalibrationState::entry()
 {
 #if CONFIG_DISPLAY == CONFIG_ENABLE
-    IDisplay&          display     = Board::getInstance().getDisplay();
+    IDisplay& display = Board::getInstance().getDisplay();
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive   = DifferentialDrive::getInstance();
     Odometry&          odometry    = Odometry::getInstance();
@@ -145,7 +145,7 @@ void LineSensorsCalibrationState::process(StateMachine& sm)
 void LineSensorsCalibrationState::exit()
 {
 #if CONFIG_DISPLAY == CONFIG_ENABLE
-    IDisplay&          display   = Board::getInstance().getDisplay();
+    IDisplay& display = Board::getInstance().getDisplay();
 #endif /* CONFIG_DISPLAY == CONFIG_ENABLE */
     DifferentialDrive& diffDrive = DifferentialDrive::getInstance();
 

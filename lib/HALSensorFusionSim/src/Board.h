@@ -180,7 +180,6 @@ public:
     }
 
 private:
-
     /** Simulated roboter instance. */
     webots::Robot m_robot;
 
@@ -280,7 +279,7 @@ private:
 
     /**
      * Get the settings path.
-     * 
+     *
      * @return Settings path.
      */
     const char* getSettingsPath() const

@@ -100,4 +100,4 @@ static_assert(sizeof(SensorData) <= MAX_DATA_LEN,
  *****************************************************************************/
 
 #endif /* SERIAL_MUX_CHANNELS_H_ */
-/** @} */
+       /** @} */

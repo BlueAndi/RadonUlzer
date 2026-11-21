@@ -28,7 +28,7 @@
  * @file   LedGreen.h
  * @brief  Green LED realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{

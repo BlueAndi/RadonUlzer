@@ -28,7 +28,7 @@
  * @file   Board.h
  * @brief  The robot board realization for testing purposes.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALSim
  *
  * @{
@@ -201,7 +201,7 @@ public:
 
     /**
      * Get proximity sensors driver.
-     * 
+     *
      * @return Proximity sensors driver
      */
     IProximitySensors& getProximitySensors() final
@@ -238,7 +238,6 @@ public:
     }
 
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 

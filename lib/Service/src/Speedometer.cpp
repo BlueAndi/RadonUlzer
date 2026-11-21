@@ -157,7 +157,7 @@ void Speedometer::process()
     {
         ;
     }
-    }
+}
 
 int16_t Speedometer::getLinearSpeedCenter() const
 {

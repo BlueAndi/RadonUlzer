@@ -111,8 +111,8 @@ void StartupState::exit()
 
 void StartupState::showUserInfo(UserInfo next)
 {
-    Board&     board    = Board::getInstance();
-    IDisplay&  display  = board.getDisplay();
+    Board&    board   = Board::getInstance();
+    IDisplay& display = board.getDisplay();
 
     display.clear();
 
