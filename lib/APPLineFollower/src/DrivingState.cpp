@@ -83,8 +83,8 @@ const int16_t DrivingState::POSITION_SET_POINT =
     (SENSOR_VALUE_MAX * (Board::getInstance().getLineSensors().getNumLineSensors() - 1)) / 2;
 
 /* Initialize the required sensor IDs to be generic. */
-const uint8_t DrivingState::SENSOR_ID_MOST_LEFT  = 0U;
-const uint8_t DrivingState::SENSOR_ID_MIDDLE     = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
+const uint8_t DrivingState::SENSOR_ID_MOST_LEFT = 0U;
+const uint8_t DrivingState::SENSOR_ID_MIDDLE    = (Board::getInstance().getLineSensors().getNumLineSensors() - 1U) / 2U;
 const uint8_t DrivingState::SENSOR_ID_MOST_RIGHT = Board::getInstance().getLineSensors().getNumLineSensors() - 1U;
 
 /* Initialize the position values used by the algorithmic. */
@@ -198,7 +198,7 @@ void DrivingState::process(StateMachine& sm)
             /* Calculate lap time and show it. */
             ReadyState::getInstance().setLapTime(m_lapTime.getCurrentDuration());
 
-            m_lineStatus    = LINE_STATUS_STOP_LINE_DETECTED;
+            m_lineStatus = LINE_STATUS_STOP_LINE_DETECTED;
 
             /* Overwrite track status. */
             nextTrackStatus = TRACK_STATUS_FINISHED;
@@ -606,7 +606,8 @@ bool DrivingState::isSharpRightCurveDetected(const uint16_t* lineSensorValues, u
     return isDetected;
 }
 
-void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3)
+void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus,
+                                    int16_t position3)
 {
     switch (trackStatus)
     {
@@ -672,7 +673,7 @@ void DrivingState::processSituation(int16_t& position, bool& allowNegativeMotorS
         /* If the track is lost by a robot manoeuvre and not becase the track
          * has a gap, the last position given by most left or right sensor
          * will be automatically used to find the track again.
-         * 
+         *
          * See ILineSensors::readLine() description regarding the behaviour in
          * case the line is not detected anymore.
          */

@@ -28,7 +28,7 @@
  * @file   IMotorsTest.h
  * @brief  Abstract motors test interface
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALInterfaces
  *
  * @{
@@ -66,14 +66,14 @@ public:
 
     /**
      * Set speed of the left motor.
-     * 
+     *
      * @param[in] speed Speed in digits.
      */
     virtual void setLeftSpeed(int16_t speed) = 0;
 
     /**
      * Set speed of the right motor.
-     * 
+     *
      * @param[in] speed Speed in digits.
      */
     virtual void setRightSpeed(int16_t speed) = 0;

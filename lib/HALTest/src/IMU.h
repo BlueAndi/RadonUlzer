@@ -80,9 +80,7 @@ public:
     /**
      * Enables all of the inertial sensors with a default configuration.
      */
-    void enableDefault() final
-    {
-    };
+    void enableDefault() final {};
 
     /**
      * 	Configures the sensors with settings optimized for turn sensing.

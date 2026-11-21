@@ -68,7 +68,7 @@
 void App::setup()
 {
     Serial.begin(SERIAL_BAUDRATE);
-    
+
     /* Initialize HAL */
     Board::getInstance().init();
 

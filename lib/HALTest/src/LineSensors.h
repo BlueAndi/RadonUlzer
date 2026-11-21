@@ -28,7 +28,7 @@
  * @file   LineSensors.h
  * @brief  Line sensors array realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -124,7 +124,7 @@ public:
     /**
      * Checks whether the calibration was successful or not.
      * It assumes that the environment brightness compensation is active.
-     * 
+     *
      * @return If successful, it will return true otherwise false.
      */
     bool isCalibrationSuccessful() final;
@@ -133,7 +133,7 @@ public:
      * It will return the index of the sensor, which caused to fail the calibration.
      * If calibration was successful, it will return 0xFF.
      * If calibration was not not done yet, it will return 0xFE.
-     * 
+     *
      * @return Sensor index, starting with 0. Note the other cases in description.
      */
     uint8_t getCalibErrorInfo() const final
@@ -173,14 +173,14 @@ private:
     /**
      * Number of used line sensors. This depends on the Zumo hardware configuration.
      */
-    static const uint8_t    MAX_SENSORS         = 5;
+    static const uint8_t MAX_SENSORS = 5;
 
     /**
      * Max. value of a single line sensor in digits (calibration already considered).
      * It depends on the Zumo32U4LineSensors implementation.
      * See Zumo32U4\QTRSensors.cpp @ readCalibrated()
      */
-    static const int16_t    SENSOR_MAX_VALUE    = 1000;
+    static const int16_t SENSOR_MAX_VALUE = 1000;
 };
 
 /******************************************************************************

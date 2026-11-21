@@ -28,7 +28,7 @@
  * @file   Sound.h
  * @brief  Sound
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup Service
  *
  * @{
@@ -49,46 +49,46 @@
 namespace Sound
 {
 
-/******************************************************************************
- * Macros
- *****************************************************************************/
+    /******************************************************************************
+     * Macros
+     *****************************************************************************/
 
-/******************************************************************************
- * Types and Classes
- *****************************************************************************/
+    /******************************************************************************
+     * Types and Classes
+     *****************************************************************************/
 
-/**
- * Supported melodies.
- */
-typedef enum
-{
-    MELODY_WELCOME = 0, /**< Welcome theme */
-    MELODY_STAR_WARS    /**< Star Wars imperial march theme */
+    /**
+     * Supported melodies.
+     */
+    typedef enum
+    {
+        MELODY_WELCOME = 0, /**< Welcome theme */
+        MELODY_STAR_WARS    /**< Star Wars imperial march theme */
 
-} Melody;
+    } Melody;
 
-/******************************************************************************
- * Functions
- *****************************************************************************/
+    /******************************************************************************
+     * Functions
+     *****************************************************************************/
 
-/**
- * Play alarm tone.
- */
-void playAlarm();
+    /**
+     * Play alarm tone.
+     */
+    void playAlarm();
 
-/**
- * Play beep tone.
- */
-void playBeep();
+    /**
+     * Play beep tone.
+     */
+    void playBeep();
 
-/**
- * Play melody.
- * 
- * @param[in] melody Choose the melody which to play.
- */
-void playMelody(Melody melody);
+    /**
+     * Play melody.
+     *
+     * @param[in] melody Choose the melody which to play.
+     */
+    void playMelody(Melody melody);
 
-}
+} // namespace Sound
 
 #endif /* SOUND_H */
 /** @} */

@@ -28,7 +28,7 @@
  * @file   LedYellow.h
  * @brief  Yellow LED realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{

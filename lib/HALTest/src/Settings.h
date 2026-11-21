@@ -95,7 +95,6 @@ public:
     void setMaxSpeed(int16_t maxSpeed) final;
 
 private:
-
     /**
      * Max. speed default values in steps/s.
      */

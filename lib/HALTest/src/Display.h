@@ -28,7 +28,7 @@
  * @file   Display.h
  * @brief  Display realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{

@@ -498,7 +498,7 @@ public:
      * Set sample time (dT).
      * Note, internally the integral and derivative factors will be automatically
      * adjusted.
-     * 
+     *
      * Ensure that the calculate() method is called once in this period.
      *
      * @param[in]   sampleTime  Sample time in ms

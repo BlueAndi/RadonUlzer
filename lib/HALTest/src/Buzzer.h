@@ -28,7 +28,7 @@
  * @file   Buzzer.h
  * @brief  Buzzer realization
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -101,21 +101,21 @@ public:
 
     /**
      * Plays a melody sequence out of RAM.
-     * 
+     *
      * @param[in] sequence Melody sequence in RAM
      */
     void playMelody(const char* sequence) final;
 
     /**
      * Plays a melody sequence out of program space.
-     * 
+     *
      * @param[in] sequence Melody sequence in program space
      */
     void playMelodyPGM(const char* sequence) final;
 
     /**
      * Checks whether a note, frequency, or sequence is being played.
-     * 
+     *
      * Note: Avoid calling this method inside a loop without processing the
      * buzzer. On the simulation additional the simulation time needs to run!
      *
@@ -133,7 +133,6 @@ public:
     void process() final;
 
 private:
-
 };
 
 /******************************************************************************

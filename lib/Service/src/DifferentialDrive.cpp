@@ -251,8 +251,8 @@ void DifferentialDrive::calculateLinearSpeedLeftRight(int16_t linearSpeedCenter,
     int32_t              angularSpeed32                 = static_cast<int32_t>(angularSpeed);      /* [mrad/s] */
     int32_t              wheelBase32                    = static_cast<int32_t>(RobotConstants::WHEEL_BASE); /* [mm] */
     int32_t              encoderStepsPerM32 = static_cast<int32_t>(RobotConstants::ENCODER_STEPS_PER_M); /* [steps/m] */
-    int32_t              linearSpeedTurnInPlace32 = (angularSpeed32 * wheelBase32 * encoderStepsPerM32) /
-                                       static_cast<int32_t>(ANGULAR_TO_LINEAR_SPEED_FACTOR); /* [steps/s] */
+    int32_t linearSpeedTurnInPlace32        = (angularSpeed32 * wheelBase32 * encoderStepsPerM32) /
+                                              static_cast<int32_t>(ANGULAR_TO_LINEAR_SPEED_FACTOR); /* [steps/s] */
 
     linearSpeedLeft  = linearSpeedCenter32 - linearSpeedTurnInPlace32; /* [steps/s] */
     linearSpeedRight = linearSpeedCenter32 + linearSpeedTurnInPlace32; /* [steps/s] */

@@ -77,7 +77,7 @@ void ReadyState::entry()
     /* Clear the odometry position and orientation in favor of reproducibility. */
     Odometry::getInstance().clearPosition();
     Odometry::getInstance().clearOrientation();
-    
+
     /* The line sensor value shall be output on console cyclic. */
     m_timer.start(SENSOR_VALUE_OUT_PERIOD);
 }

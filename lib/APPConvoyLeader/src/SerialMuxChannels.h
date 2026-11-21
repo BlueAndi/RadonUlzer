@@ -25,8 +25,13 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- *  @brief  Channel structure definition for the SerialMuxProt.
- *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * @file   SerialMuxChannels.h
+ * @brief  Channel structure definition for the SerialMuxProt.
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *
+ * @addtogroup Application
+ *
+ * @{
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
@@ -169,8 +174,9 @@ typedef struct _CommandResponse
     };
 } __attribute__((packed)) CommandResponse;
 
-static_assert(sizeof(CommandResponse) <= MAX_DATA_LEN,
-              "CommandResponse struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
+static_assert(
+    sizeof(CommandResponse) <= MAX_DATA_LEN,
+    "CommandResponse struct size must be less than or equal to MAX_DATA_LEN to fit in the SerialMuxProt frame.");
 
 /** Struct of the "Speed" channel payload. */
 typedef struct _SpeedData
@@ -215,3 +221,4 @@ static_assert(sizeof(Status) <= MAX_DATA_LEN,
  *****************************************************************************/
 
 #endif /* SERIAL_MUX_CHANNELS_H_ */
+       /** @} */

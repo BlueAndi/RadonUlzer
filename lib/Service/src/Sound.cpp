@@ -204,9 +204,9 @@ void Sound::playMelody(Melody melody)
 {
 #if CONFIG_BUZZER == CONFIG_ENABLE
     IBuzzer&    buzzer = Board::getInstance().getBuzzer();
-    const char* song = nullptr;
+    const char* song   = nullptr;
 
-    switch(melody)
+    switch (melody)
     {
     case MELODY_WELCOME:
         song = gWelcomeMelody;

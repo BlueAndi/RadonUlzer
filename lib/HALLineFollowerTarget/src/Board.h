@@ -28,7 +28,7 @@
  * @file   Board.h
  * @brief  The physical robot board realization.
  * @author Andreas Merkle <web@blue-andi.de>
- * 
+ *
  * @addtogroup HALTarget
  *
  * @{
@@ -72,10 +72,9 @@
 class Board : public IBoard
 {
 public:
-
     /**
      * Get board instance.
-     * 
+     *
      * @return Board instance
      */
     static Board& getInstance()
@@ -202,7 +201,7 @@ public:
 
     /**
      * Get the settings.
-     * 
+     *
      * @return Settings
      */
     ISettings& getSettings() final
@@ -219,9 +218,7 @@ public:
     }
 
 protected:
-
 private:
-
     /** Button A driver */
     ButtonA m_buttonA;
 
@@ -269,7 +266,6 @@ private:
     ~Board()
     {
     }
-
 };
 
 /******************************************************************************

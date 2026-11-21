@@ -78,7 +78,6 @@ void ReleaseTrackState::process(StateMachine& sm)
 {
     IButton& buttonA = Board::getInstance().getButtonA();
 
-
     /* Change parameter set? */
     if (true == Util::isButtonTriggered(buttonA, m_isButtonAPressed))
     {

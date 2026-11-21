@@ -218,7 +218,6 @@ private:
      */
     bool calcPosition3(int16_t& position, const uint16_t* lineSensorValues, uint8_t length) const;
 
-
     /**
      * Evaluate the situation by line sensor values and position and determine
      * the track status. The result influences the measures to keep track on
@@ -265,7 +264,6 @@ private:
      * @param[in]       position3                   The position calculated with the inner sensors in digits.
      */
     void processSituation(int16_t& position, bool& allowNegativeMotorSpeed, TrackStatus trackStatus, int16_t position3);
-
 
     /**
      * Adapt driving by using a PID algorithm, depended on the position

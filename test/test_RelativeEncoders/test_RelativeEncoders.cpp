@@ -53,11 +53,11 @@
 /** Test vector element */
 typedef struct
 {
-    int16_t encoderStepsLeft;   /**< Absolute encoder steps left */
-    int16_t encoderStepsRight;  /**< Absolute encoder steps right */
-    bool    isTest;             /**< Test it or is it for test preparation? */
-    int16_t expectedDiffLeft;   /**< Expected step difference left */
-    int16_t expectedDiffRight;  /**< Expected step difference right */
+    int16_t encoderStepsLeft;  /**< Absolute encoder steps left */
+    int16_t encoderStepsRight; /**< Absolute encoder steps right */
+    bool    isTest;            /**< Test it or is it for test preparation? */
+    int16_t expectedDiffLeft;  /**< Expected step difference left */
+    int16_t expectedDiffRight; /**< Expected step difference right */
 
 } Elem;
 
@@ -144,27 +144,24 @@ extern void tearDown(void)
  */
 static void testRelativeEncoders()
 {
-    IEncoders&          absEncoders     = Board::getInstance().getEncoders();
-    IEncodersTest&      absEncodersTest = Board::getInstance().getEncodersTest();
-    RelativeEncoders    relEncoders(absEncoders);
-    Elem                testVector[]    =
-    {
-        { 0,            0,          true,   0,      0   },
-        { 10,           10,         true,   10,     10  },
-        { -10,          -10,        true,   -10,    -10 },
-        { INT16_MAX,    INT16_MAX,  false,  0,      0   }, /* Preparation for wrap-around */
-        { INT16_MIN,    INT16_MIN,  true,   1,      1   },
-        { INT16_MIN,    INT16_MIN,  false,  0,      0   }, /* Preparation for wrap-around */
-        { INT16_MAX,    INT16_MAX,  true,   -1,     -1  }
-    };
-    uint8_t             idx             = 0;
+    IEncoders&       absEncoders     = Board::getInstance().getEncoders();
+    IEncodersTest&   absEncodersTest = Board::getInstance().getEncodersTest();
+    RelativeEncoders relEncoders(absEncoders);
+    Elem             testVector[] = {{0, 0, true, 0, 0},
+                                     {10, 10, true, 10, 10},
+                                     {-10, -10, true, -10, -10},
+                                     {INT16_MAX, INT16_MAX, false, 0, 0}, /* Preparation for wrap-around */
+                                     {INT16_MIN, INT16_MIN, true, 1, 1},
+                                     {INT16_MIN, INT16_MIN, false, 0, 0}, /* Preparation for wrap-around */
+                                     {INT16_MAX, INT16_MAX, true, -1, -1}};
+    uint8_t          idx          = 0;
 
     idx = 0;
     while ((sizeof(testVector) / sizeof(testVector[0])) > idx)
     {
         absEncodersTest.setCountsLeft(testVector[idx].encoderStepsLeft);
         absEncodersTest.setCountsRight(testVector[idx].encoderStepsRight);
-        
+
         if (false == testVector[idx].isTest)
         {
             relEncoders.clearLeft();
