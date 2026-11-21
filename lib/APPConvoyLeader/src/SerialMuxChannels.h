@@ -25,8 +25,13 @@
     DESCRIPTION
 *******************************************************************************/
 /**
- *  @brief  Channel structure definition for the SerialMuxProt.
- *  @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ * @file   SerialMuxChannels.h
+ * @brief  Channel structure definition for the SerialMuxProt.
+ * @author Gabryel Reyes <gabryelrdiaz@gmail.com>
+ *
+ * @addtogroup Application
+ *
+ * @{
  */
 
 #ifndef SERIAL_MUX_CHANNELS_H_
@@ -215,3 +220,4 @@ static_assert(sizeof(Status) <= MAX_DATA_LEN,
  *****************************************************************************/
 
 #endif /* SERIAL_MUX_CHANNELS_H_ */
+/** @} */
